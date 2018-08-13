@@ -6,8 +6,8 @@
 !/LICENSE.txt
 !/README.md
 !build.gradle
-!.travis.yml
 !/textures/
 !/gradle.properties
 !.gitattributes
+!scripts
 !ASSETS_LICENSE.txt
