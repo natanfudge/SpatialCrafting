@@ -25,6 +25,8 @@ import static fudge.spatialcrafting.common.SCConstants.TICKS_PER_SECOND;
 
 
 @SideOnly(Side.CLIENT)
+//TODO: have the particles slam down at the end
+//TODO sound (also have a BANG when it slams down)
 public class ParticleItemDust extends Particle {
 
     public static final float PHASE_2_SPEED_BLOCKS_PER_TICK_UPWARDS = 0.5f / TICKS_PER_SECOND;

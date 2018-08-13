@@ -24,7 +24,7 @@ public class SpatialCrafting {
 
     public static final String MODID = "spatialcrafting";
     public static final String NAME = "Spatial Crafting";
-    public static final String VERSION = "0.0.0";
+    public static final String VERSION = "0.1.0";
     public static final SpatialCraftingTab SPATIAL_CRAFTING_TAB = new SpatialCraftingTab();
 
     public static final Logger LOGGER = LogManager.getLogger("Spatial Crafting");
