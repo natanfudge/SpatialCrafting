@@ -1,0 +1,34 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "cube_top",
+    "textures": {
+      "top": "spatialcrafting:block/x2crafter_block/top",
+      "side": "spatialcrafting:block/x2crafter_block/side"
+    }
+  },
+  "variants": {
+    "type": {
+      "unformed": {
+        "textures": {
+        }
+      },
+      "formed": {
+        "textures": {
+        }
+      },
+      "master":{}
+    },
+    "inventory": [
+      {
+        "model": "cube_top",
+        "textures": {
+          "top": "spatialcrafting:block/x2crafter_block/top",
+          "side": "spatialcrafting:block/x2crafter_block/side"
+        },
+        "transform": "forge:default-block"
+      }
+    ]
+  }
+}
+

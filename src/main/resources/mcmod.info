@@ -1,0 +1,10 @@
+[{
+  "modid": "spatialcrafting",
+  "name": "Spatial Crafting",
+  "description": "Supplies a 3 dimensional crafting table.",
+  "version": "0.0.0.0",
+  "mcversion": "1.12.2",
+  "logoFile": "assets/examplemod/textures/logo.jpg",
+  "authorList": ["Fudge"],
+  "credits": "Fudge"
+}]

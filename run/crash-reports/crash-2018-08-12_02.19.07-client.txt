@@ -1,0 +1,156 @@
+---- Minecraft Crash Report ----
+// Hey, that tickles! Hehehe!
+
+Time: 8/12/18 2:19 AM
+Description: Tesselating block model
+
+java.lang.NullPointerException: Tesselating block model
+	at net.minecraft.client.renderer.ItemModelMesher.getItemModel(ItemModelMesher.java:43)
+	at net.minecraft.client.renderer.RenderItem.getItemModelWithOverrides(RenderItem.java:244)
+	at fudge.spatialcrafting.client.model.BakedModelHologram.getBakedModel(BakedModelHologram.java:62)
+	at fudge.spatialcrafting.client.model.BakedModelHologram.getQuads(BakedModelHologram.java:43)
+	at net.minecraftforge.client.model.pipeline.ForgeBlockModelRenderer.render(ForgeBlockModelRenderer.java:99)
+	at net.minecraftforge.client.model.pipeline.ForgeBlockModelRenderer.renderModelSmooth(ForgeBlockModelRenderer.java:85)
+	at net.minecraft.client.renderer.BlockModelRenderer.renderModel(BlockModelRenderer.java:47)
+	at net.minecraft.client.renderer.BlockModelRenderer.renderModel(BlockModelRenderer.java:38)
+	at net.minecraft.client.renderer.BlockRendererDispatcher.renderBlock(BlockRendererDispatcher.java:80)
+	at net.minecraft.client.renderer.chunk.RenderChunk.rebuildChunk(RenderChunk.java:203)
+	at net.minecraft.client.renderer.chunk.ChunkRenderWorker.processTask(ChunkRenderWorker.java:122)
+	at net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.updateChunkNow(ChunkRenderDispatcher.java:172)
+	at net.minecraft.client.renderer.RenderGlobal.setupTerrain(RenderGlobal.java:1012)
+	at net.minecraft.client.renderer.EntityRenderer.renderWorldPass(EntityRenderer.java:1369)
+	at net.minecraft.client.renderer.EntityRenderer.renderWorld(EntityRenderer.java:1312)
+	at net.minecraft.client.renderer.EntityRenderer.updateCameraAndRender(EntityRenderer.java:1115)
+	at net.minecraft.client.Minecraft.runGameLoop(Minecraft.java:1207)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:441)
+	at net.minecraft.client.main.Main.main(Main.java:118)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135)
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at net.minecraftforge.gradle.GradleStartCommon.launch(GradleStartCommon.java:97)
+	at GradleStart.main(GradleStart.java:25)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Client thread
+Stacktrace:
+	at net.minecraft.client.renderer.ItemModelMesher.getItemModel(ItemModelMesher.java:43)
+	at net.minecraft.client.renderer.RenderItem.getItemModelWithOverrides(RenderItem.java:244)
+	at fudge.spatialcrafting.client.model.BakedModelHologram.getBakedModel(BakedModelHologram.java:62)
+	at fudge.spatialcrafting.client.model.BakedModelHologram.getQuads(BakedModelHologram.java:43)
+	at net.minecraftforge.client.model.pipeline.ForgeBlockModelRenderer.render(ForgeBlockModelRenderer.java:99)
+	at net.minecraftforge.client.model.pipeline.ForgeBlockModelRenderer.renderModelSmooth(ForgeBlockModelRenderer.java:85)
+
+-- Block model being tesselated --
+Details:
+	Block: spatialcrafting:hologram
+	Block location: World: (352,67,194), Chunk: (at 0,4,2 in 22,12; contains blocks 352,0,192 to 367,255,207), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,0,0 to 511,255,511)
+	Using AO: true
+Stacktrace:
+	at net.minecraft.client.renderer.BlockModelRenderer.renderModel(BlockModelRenderer.java:47)
+	at net.minecraft.client.renderer.BlockModelRenderer.renderModel(BlockModelRenderer.java:38)
+
+-- Block being tesselated --
+Details:
+	Block type: ID #254 (tile.spatialcrafting.hologram // fudge.spatialcrafting.common.block.BlockHologram)
+	Block data value: 0 / 0x0 / 0b0000
+	Block location: World: (352,67,194), Chunk: (at 0,4,2 in 22,12; contains blocks 352,0,192 to 367,255,207), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,0,0 to 511,255,511)
+Stacktrace:
+	at net.minecraft.client.renderer.BlockRendererDispatcher.renderBlock(BlockRendererDispatcher.java:80)
+	at net.minecraft.client.renderer.chunk.RenderChunk.rebuildChunk(RenderChunk.java:203)
+	at net.minecraft.client.renderer.chunk.ChunkRenderWorker.processTask(ChunkRenderWorker.java:122)
+	at net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.updateChunkNow(ChunkRenderDispatcher.java:172)
+	at net.minecraft.client.renderer.RenderGlobal.setupTerrain(RenderGlobal.java:1012)
+	at net.minecraft.client.renderer.EntityRenderer.renderWorldPass(EntityRenderer.java:1369)
+	at net.minecraft.client.renderer.EntityRenderer.renderWorld(EntityRenderer.java:1312)
+
+-- Affected level --
+Details:
+	Level name: MpServer
+	All players: 1 total; [EntityPlayerSP['Player178'/357, l='MpServer', x=355.25, y=67.05, z=195.44]]
+	Chunk stats: MultiplayerChunkCache: 574, 574
+	Level seed: 0
+	Level generator: ID 00 - default, ver 1. Features enabled: false
+	Level generator options: 
+	Level spawn location: World: (256,64,256), Chunk: (at 0,4,0 in 16,16; contains blocks 256,0,256 to 271,255,271), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,0,0 to 511,255,511)
+	Level time: 281389 game time, 281389 day time
+	Level dimension: 0
+	Level storage version: 0x00000 - Unknown?
+	Level weather: Rain time: 0 (now: false), thunder time: 0 (now: false)
+	Level game mode: Game mode: creative (ID 1). Hardcore: false. Cheats: false
+	Forced entities: 98 total; [EntityChicken['Chicken'/256, l='MpServer', x=333.93, y=72.00, z=165.50], EntityItem['item.item.egg'/257, l='MpServer', x=333.36, y=72.00, z=165.88], EntityEnderman['Enderman'/258, l='MpServer', x=329.50, y=29.00, z=187.50], EntityItem['item.item.egg'/259, l='MpServer', x=320.75, y=74.00, z=176.06], EntitySpider['Spider'/260, l='MpServer', x=332.50, y=30.00, z=197.50], EntityBat['Bat'/261, l='MpServer', x=329.30, y=23.46, z=212.38], EntityCreeper['Creeper'/262, l='MpServer', x=320.50, y=33.00, z=246.50], EntitySpider['Spider'/263, l='MpServer', x=324.50, y=33.00, z=248.50], EntityHorse['Horse'/269, l='MpServer', x=347.60, y=62.49, z=134.24], EntityChicken['Chicken'/270, l='MpServer', x=336.17, y=72.00, z=151.78], EntityChicken['Chicken'/271, l='MpServer', x=337.55, y=69.00, z=167.84], EntityItem['item.item.egg'/272, l='MpServer', x=337.60, y=70.00, z=170.88], EntityZombie['Zombie'/273, l='MpServer', x=344.50, y=50.00, z=178.50], EntityZombie['Zombie'/274, l='MpServer', x=346.50, y=50.00, z=178.50], EntityWitch['Witch'/275, l='MpServer', x=344.50, y=69.00, z=183.86], EntitySkeleton['Skeleton'/276, l='MpServer', x=341.33, y=71.00, z=178.79], EntityZombie['Zombie'/277, l='MpServer', x=341.47, y=69.00, z=191.52], EntityChicken['Chicken'/278, l='MpServer', x=340.85, y=63.00, z=259.79], EntityChicken['Chicken'/279, l='MpServer', x=345.83, y=63.00, z=259.26], EntityChicken['Chicken'/280, l='MpServer', x=346.87, y=63.00, z=259.33], EntityItem['item.item.egg'/281, l='MpServer', x=346.54, y=63.00, z=258.52], EntityCreeper['Creeper'/284, l='MpServer', x=351.50, y=43.00, z=272.50], EntityBat['Bat'/290, l='MpServer', x=367.48, y=37.94, z=152.52], EntitySpider['Spider'/291, l='MpServer', x=357.50, y=64.00, z=171.50], EntityBat['Bat'/292, l='MpServer', x=344.45, y=18.03, z=206.84], EntityZombie['Zombie'/293, l='MpServer', x=359.50, y=52.00, z=199.77], EntitySkeleton['Skeleton'/294, l='MpServer', x=358.45, y=54.00, z=212.50], EntityCreeper['Creeper'/295, l='MpServer', x=363.19, y=55.00, z=212.48], EntitySpider['Spider'/296, l='MpServer', x=353.01, y=70.00, z=229.00], EntityZombie['Zombie'/297, l='MpServer', x=352.50, y=24.00, z=270.50], EntityChicken['Chicken'/298, l='MpServer', x=362.30, y=63.00, z=265.10], EntityChicken['Chicken'/299, l='MpServer', x=361.91, y=63.00, z=261.21], EntitySkeleton['Skeleton'/301, l='MpServer', x=363.50, y=63.00, z=265.50], EntityBat['Bat'/307, l='MpServer', x=369.14, y=18.86, z=151.45], EntityBat['Bat'/308, l='MpServer', x=367.06, y=17.22, z=159.63], EntityBat['Bat'/309, l='MpServer', x=369.98, y=18.07, z=156.31], EntityChicken['Chicken'/310, l='MpServer', x=376.35, y=64.00, z=166.85], EntityItem['item.item.egg'/311, l='MpServer', x=376.58, y=64.00, z=166.62], EntityZombie['Zombie'/313, l='MpServer', x=396.50, y=67.00, z=123.50], EntitySkeleton['Skeleton'/314, l='MpServer', x=397.50, y=67.00, z=117.50], EntityChicken['Chicken'/315, l='MpServer', x=385.60, y=64.00, z=166.76], EntityItem['item.item.egg'/316, l='MpServer', x=385.05, y=64.00, z=167.52], EntitySquid['Squid'/317, l='MpServer', x=395.40, y=58.70, z=205.05], EntityBat['Bat'/318, l='MpServer', x=387.77, y=30.94, z=257.23], EntityChicken['Chicken'/325, l='MpServer', x=402.76, y=64.00, z=236.13], EntitySpider['Spider'/326, l='MpServer', x=400.00, y=64.00, z=230.02], EntityZombie['Zombie'/327, l='MpServer', x=413.50, y=64.00, z=269.50], EntityZombie['Zombie'/329, l='MpServer', x=418.50, y=67.00, z=120.51], EntitySkeleton['Skeleton'/330, l='MpServer', x=427.50, y=65.00, z=140.34], EntityCreeper['Creeper'/331, l='MpServer', x=431.50, y=66.00, z=130.50], EntitySkeleton['Skeleton'/332, l='MpServer', x=424.50, y=35.00, z=230.50], EntityCreeper['Creeper'/333, l='MpServer', x=426.50, y=35.00, z=233.50], EntityZombie['Zombie'/334, l='MpServer', x=417.50, y=63.00, z=233.50], EntityPlayerSP['Player178'/357, l='MpServer', x=355.25, y=67.05, z=195.44], EntityChicken['Chicken'/193, l='MpServer', x=284.40, y=82.00, z=207.23], EntitySpider['Spider'/195, l='MpServer', x=276.03, y=79.00, z=222.99], EntityCreeper['Creeper'/196, l='MpServer', x=286.50, y=81.00, z=217.38], EntityCreeper['Creeper'/197, l='MpServer', x=282.50, y=81.00, z=210.50], EntityCow['Cow'/198, l='MpServer', x=285.51, y=80.00, z=228.82], EntityCow['Cow'/199, l='MpServer', x=282.85, y=76.00, z=240.37], EntityZombie['Zombie'/201, l='MpServer', x=280.50, y=28.00, z=258.50], EntityBat['Bat'/202, l='MpServer', x=280.67, y=32.31, z=261.83], EntityChicken['Chicken'/208, l='MpServer', x=292.86, y=65.00, z=150.48], EntityChicken['Chicken'/209, l='MpServer', x=295.11, y=72.00, z=182.60], EntityItem['item.item.egg'/210, l='MpServer', x=295.51, y=72.00, z=182.42], EntityBat['Bat'/211, l='MpServer', x=304.64, y=26.03, z=242.25], EntityWitch['Witch'/212, l='MpServer', x=296.28, y=32.00, z=242.37], EntityCow['Cow'/213, l='MpServer', x=296.96, y=75.00, z=249.46], EntityCreeper['Creeper'/219, l='MpServer', x=307.50, y=64.00, z=125.50], EntitySpider['Spider'/220, l='MpServer', x=308.50, y=64.00, z=124.50], EntityChicken['Chicken'/221, l='MpServer', x=316.73, y=70.00, z=138.86], EntityItem['item.item.egg'/222, l='MpServer', x=316.95, y=70.00, z=139.27], EntityChicken['Chicken'/223, l='MpServer', x=319.91, y=74.00, z=158.78], EntityChicken['Chicken'/224, l='MpServer', x=319.62, y=74.00, z=157.42], EntityItem['item.item.egg'/225, l='MpServer', x=319.72, y=74.00, z=157.70], EntityChicken['Chicken'/226, l='MpServer', x=313.82, y=74.00, z=162.62], EntityChicken['Chicken'/227, l='MpServer', x=318.53, y=74.00, z=173.89], EntityItem['item.item.egg'/228, l='MpServer', x=312.87, y=74.00, z=162.92], EntityChicken['Chicken'/229, l='MpServer', x=313.10, y=75.00, z=179.29], EntityItem['item.item.egg'/230, l='MpServer', x=312.47, y=75.00, z=179.48], EntityCreeper['Creeper'/231, l='MpServer', x=309.50, y=75.00, z=178.50], EntityChicken['Chicken'/232, l='MpServer', x=311.13, y=74.00, z=202.49], EntityItem['item.item.egg'/233, l='MpServer', x=306.59, y=73.00, z=197.37], EntityCow['Cow'/234, l='MpServer', x=304.20, y=80.00, z=235.40], EntityCreeper['Creeper'/235, l='MpServer', x=314.80, y=34.00, z=247.50], EntityBat['Bat'/236, l='MpServer', x=306.89, y=57.21, z=243.02], EntitySkeleton['Skeleton'/237, l='MpServer', x=311.50, y=63.00, z=241.50], EntityHorse['Horse'/245, l='MpServer', x=327.18, y=72.00, z=138.53], EntityChicken['Chicken'/246, l='MpServer', x=326.05, y=68.00, z=129.58], EntityHorse['Horse'/247, l='MpServer', x=333.18, y=72.00, z=143.46], EntityChicken['Chicken'/248, l='MpServer', x=320.81, y=73.00, z=154.56], EntityChicken['Chicken'/249, l='MpServer', x=331.64, y=72.00, z=156.89], EntityHorse['Horse'/250, l='MpServer', x=325.84, y=72.00, z=144.48], EntityItem['item.item.egg'/251, l='MpServer', x=331.64, y=72.00, z=155.80], EntityItem['item.item.egg'/252, l='MpServer', x=320.57, y=73.00, z=154.02], EntityItem['item.item.egg'/253, l='MpServer', x=332.07, y=72.00, z=159.14], EntityItem['item.item.egg'/254, l='MpServer', x=320.71, y=74.00, z=159.05], EntityChicken['Chicken'/255, l='MpServer', x=320.34, y=74.00, z=175.19]]
+	Retry entities: 0 total; []
+	Server brand: fml,forge
+	Server type: Integrated singleplayer server
+Stacktrace:
+	at net.minecraft.client.multiplayer.WorldClient.addWorldInfoToCrashReport(WorldClient.java:461)
+	at net.minecraft.client.Minecraft.addGraphicsAndWorldToCrashReport(Minecraft.java:2887)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:462)
+	at net.minecraft.client.main.Main.main(Main.java:118)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135)
+	at net.minecraft.launchwrapper.Launch.main(Launch.java:28)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at net.minecraftforge.gradle.GradleStartCommon.launch(GradleStartCommon.java:97)
+	at GradleStart.main(GradleStart.java:25)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.12.2
+	Operating System: Windows 10 (amd64) version 10.0
+	Java Version: 1.8.0_181, Oracle Corporation
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode), Oracle Corporation
+	Memory: 514835400 bytes (490 MB) / 1033895936 bytes (986 MB) up to 3799515136 bytes (3623 MB)
+	JVM Flags: 0 total; 
+	IntCache: cache: 0, tcache: 0, allocated: 13, tallocated: 95
+	FML: MCP 9.42 Powered by Forge 14.23.4.2729 11 mods loaded, 11 mods active
+	States: 'U' = Unloaded 'L' = Loaded 'C' = Constructed 'H' = Pre-initialized 'I' = Initialized 'J' = Post-initialized 'A' = Available 'D' = Disabled 'E' = Errored
+
+	| State     | ID              | Version      | Source                           | Signature |
+	|:--------- |:--------------- |:------------ |:-------------------------------- |:--------- |
+	| UCHIJAAAA | minecraft       | 1.12.2       | minecraft.jar                    | None      |
+	| UCHIJAAAA | mcp             | 9.42         | minecraft.jar                    | None      |
+	| UCHIJAAAA | FML             | 8.0.99.99    | forgeSrc-1.12.2-14.23.4.2729.jar | None      |
+	| UCHIJAAAA | forge           | 14.23.4.2729 | forgeSrc-1.12.2-14.23.4.2729.jar | None      |
+	| UCHIJAAAA | crafttweaker    | 4.1.9        | CraftTweaker2-1.12-4.1.9.jar     | None      |
+	| UCHIJAAAA | spatialcrafting | 0.0.0        | Spatial_Crafting_main            | None      |
+	| UCHIJAAAA | jei             | 4.11.0.204   | jei_1.12.2-4.11.0.204.jar        | None      |
+	| UCHIJAAAA | ctgui           | 1.0.0        | CraftTweaker2-1.12-4.1.9.jar     | None      |
+	| UCHIJAAAA | crafttweakerjei | 2.0.2        | CraftTweaker2-1.12-4.1.9.jar     | None      |
+	| UCHIJAAAA | waila           | 1.8.26       | Hwyla-1.8.26-B41_1.12.2.jar      | None      |
+	| UCHIJAAAA | survivalist     | 2.1.5        | Survivalist-1.12.2-2.1.5.jar     | None      |
+
+	Loaded coremods (and transformers): 
+	GL info: ' Vendor: 'NVIDIA Corporation' Version: '4.5.0 NVIDIA 376.54' Renderer: 'GeForce GTX 860M/PCIe/SSE2'
+	Launched Version: 1.12.2
+	LWJGL: 2.9.4
+	OpenGL: GeForce GTX 860M/PCIe/SSE2 GL version 4.5.0 NVIDIA 376.54, NVIDIA Corporation
+	GL Caps: Using GL 1.3 multitexturing.
+Using GL 1.3 texture combiners.
+Using framebuffer objects because OpenGL 3.0 is supported and separate blending is supported.
+Shaders are available because OpenGL 2.1 is supported.
+VBOs are available because OpenGL 1.5 is supported.
+
+	Using VBOs: Yes
+	Is Modded: Definitely; Client brand changed to 'fml,forge'
+	Type: Client (map_client.txt)
+	Resource Packs: 
+	Current Language: English (US)
+	Profiler Position: N/A (disabled)
+	CPU: 8x Intel(R) Core(TM) i7-4700HQ CPU @ 2.40GHz

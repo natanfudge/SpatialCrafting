@@ -1,0 +1,14 @@
+{
+  "survivalist:recipes/sticks": {
+    "criteria": {
+      "has_sapling": "2018-08-12 01:11:27 +0300"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "plains": "2018-08-12 01:11:27 +0300"
+    },
+    "done": false
+  }
+}

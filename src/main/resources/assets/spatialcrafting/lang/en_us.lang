@@ -1,0 +1,38 @@
+
+#Blocks
+tile.spatialcrafting.sensor.name=Sensor
+tile.spatialcrafting.x2crafter_block.name=2x2x2 Crafter Block
+tile.spatialcrafting.x3crafter_block.name=3x3x3 Crafter Block
+tile.spatialcrafting.x4crafter_block.name=4x4x4 Crafter Block
+tile.spatialcrafting.x5crafter_block.name=5x5x5 Crafter Block
+
+
+
+#Messages
+tile.spatialcrafting.blockcrafter.no_space=Not enough space to form multiblock
+
+#Commands
+commands.spatialcrafting.no_permission=You don't have the required permission to invoke this command.
+commands.spatialcrafting.no_such_command=There is no such Spatial Crafting command.
+
+commands.spatialcrafting.add_recipe.no_crafters=There are no crafters in this dimension!
+commands.spatialcrafting.add_recipe.empty_crafter=You must supply the nearest crafter with inputs.
+commands.spatialcrafting.add_recipe.empty_hand=You must hold an item as an output.
+commands.spatialcrafting.add_recipe.dedis_only=What are you doing trying to add recipes in a server? You need the same script files for both the clients and the server. If you REALY want to do this anyway tell the mod author.
+commands.spatialcrafting.add_recipe.success=Spatial recipe for %s added successfully!
+commands.spatialcrafting.add_recipe.success_num=Spatial recipe for %d %s added successfully!
+commands.spatialcrafting.add_recipe.too_many_words=Add recipe only accepts one additional argument.
+commands.spatialcrafting.add_recipe.invalid_argument=Invalid Argument for adding a recipe. See CraftTweaker wiki (mods -> Spatial Crafting) for details.
+commands.spatialcrafting.add_recipe.too_many_oredicts=One of the given items have multiple matching ore dictionaries. You will have to add the ore dict you want manually.
+
+#Recipes
+recipes.spatialcrafting.add_recipe.recipe_exists=That spatial recipe already exists!
+recipes.spatialcrafting.add_recipe.output_conflict=Recipe conflict: An existing spatial recipe has the same input but a different output!
+
+#GUI
+itemGroup.spatialcrafting=Spatial Crafting
+
+#Should not appear at all in waila!
+tile.spatialcrafting.hologram.name=Hologram
+
+
