@@ -13,6 +13,8 @@ import net.minecraft.item.ItemStack;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
+import java.io.File;
+
 
 // ZenClass means that it literally exists in zenscript
 @ZenClass("mods." + SpatialCrafting.MODID)
@@ -23,6 +25,7 @@ public final class CraftTweakerIntegration {
     public static void init() {
         CraftTweakerAPI.registerClass(CraftTweakerIntegration.class);
     }
+
 
     // ZenMethod means you can call this method in zenscript to do wtf you want
     @ZenMethod

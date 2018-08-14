@@ -3,6 +3,7 @@ package fudge.spatialcrafting;
 
 import fudge.spatialcrafting.client.gui.SpatialCraftingTab;
 import fudge.spatialcrafting.common.command.Commands;
+import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.proxy.IProxy;
@@ -57,6 +58,7 @@ public class SpatialCrafting {
 
 
         proxy.preInit();
+        SpatialRecipe.preInit();
 
     }
 

@@ -34,11 +34,19 @@ public final class Util {
     }
 
     /**
-     * Returns the distance between 2 Vec3d. Counts diagonals as 3 distance (rather than just 1)
+     * Returns the distance between 2 Vec3d. Counts diagonals as the actual physical distance (rather than just 1)
      */
     public static double distanceOf(Vec3d pos1, Vec3d pos2) {
-        return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y) + Math.abs(pos1.z - pos2.z);
+        return norm(pos1.subtract(pos2));
     }
+
+    private static double norm(Vec3d vec3){
+        return Math.sqrt(vec3.x * vec3.x + vec3.y * vec3.y + vec3.z * vec3.z);
+    }
+
+    /*public static double distanceOf(Vec3d pos1, Vec3d pos2) {
+        return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y) + Math.abs(pos1.z - pos2.z);
+    }*/
 
     /**
      * Returns the position at the middle of the 2 BlockPoses.

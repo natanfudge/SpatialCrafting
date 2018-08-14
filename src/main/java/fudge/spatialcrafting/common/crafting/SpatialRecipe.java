@@ -9,16 +9,26 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.oredict.OreDictionary;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 
 import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static fudge.spatialcrafting.SpatialCrafting.MODID;
+import static fudge.spatialcrafting.common.command.CommandAddSRecipe.RECIPES_FILE_NAME;
+
 public class SpatialRecipe {
 
     //TODO: add unshaped crafting
+    private static final String EXAMPLE_SCRIPT_NAME = "SpatialRecipeExamples.zs";
     private static List<SpatialRecipe> recipeList = new ArrayList<>();
     private final IIngredient[][][] requiredInput;
     private final ItemStack output;
@@ -27,6 +37,7 @@ public class SpatialRecipe {
         this.requiredInput = recipeInput;
         this.output = recipeOutput;
     }
+
 
     @Nullable
     public static SpatialRecipe getRecipeFromItemStacks(ItemStack[][][] itemStackInput, ItemStack output, RecipeAddition recipeAddition) {
@@ -207,6 +218,55 @@ public class SpatialRecipe {
         outputBuilder.append("\n]");
 
         return outputBuilder.toString();
+    }
+
+    /**
+     * Copies the recipes in the compiled code to the run directory so they may be come with the mod jar but be used normally by pack makers.
+     */
+    public static void preInit() {
+
+        final String CT_SCRIPTS_FOLDER_PATH = System.getProperty("user.dir") + "/scripts";
+
+        // Create scripts folder if it doesn't exist.
+        File scriptsDir = new File(CT_SCRIPTS_FOLDER_PATH);
+        if (!scriptsDir.isDirectory()) {
+            scriptsDir.mkdir();
+        }
+
+        final String SCRIPTS_PATH_SOURCE = "/assets/" + MODID + "/scripts/" + EXAMPLE_SCRIPT_NAME;
+        final String SCRIPTS_PATH_DESTINATION = CT_SCRIPTS_FOLDER_PATH + "/" + MODID + "/" + EXAMPLE_SCRIPT_NAME;
+        URL sourceUrl = SpatialRecipe.class.getResource(SCRIPTS_PATH_SOURCE);
+
+        try {
+            File sourceFile = new File(sourceUrl.toURI());
+            File destFile = new File(SCRIPTS_PATH_DESTINATION);
+
+            try {
+                if (!destFile.exists() && !otherScriptExists(new File(CT_SCRIPTS_FOLDER_PATH + "/" + MODID))) {
+                    FileUtils.copyFile(sourceFile, destFile);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        //TODO write the script files into the scripts directory.
+    }
+
+    private static boolean otherScriptExists(File folder) {
+        for (File file : folder.listFiles()) {
+            if (FilenameUtils.getExtension(file.toString()).equals("zs") && !FilenameUtils.getName(file.toString()).equals(RECIPES_FILE_NAME) && !FilenameUtils.getName(
+                    file.toString()).equals(EXAMPLE_SCRIPT_NAME)) {
+                return true;
+            }
+        }
+
+        return false;
+
     }
 
 
