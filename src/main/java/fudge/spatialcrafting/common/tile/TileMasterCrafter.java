@@ -151,7 +151,7 @@ public class TileMasterCrafter extends TileCrafter {
                     // Due to the way Minecraft handles nulls in this case,
                     // if there is an empty space in the blockPos array it will just put in air(which is what we want).
                     TileEntity hologramTile = world.getTileEntity(getHolograms()[i][j][k]);
-                    IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP);
+                    IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
 
                     returning[i][j][k] = itemHandler.getStackInSlot(0);
                 }
@@ -165,7 +165,8 @@ public class TileMasterCrafter extends TileCrafter {
     /**
      * Converts the info in the TileMasterCrafter to an NBTTagCompound and adds it to the existing data.
      */
-    private NBTTagCompound serialized(NBTTagCompound existingData) {
+    @Override
+    protected NBTTagCompound serialized(NBTTagCompound existingData) {
 
         // Serialize holograms
         NBTTagList hologramsNBT = new NBTTagList();
@@ -181,14 +182,17 @@ public class TileMasterCrafter extends TileCrafter {
         existingData.setLong(PENDING_CRAFT_NBT, craftEndTime);
 
 
-        return existingData;
+        return super.serialized(existingData);
     }
 
 
     /**
      * Takes the serialized info from a NBTTagCompound and assigns the values to the TileMasterCrafter in normal data form.
      */
-    private void deserialize(NBTTagCompound serializedData) {
+    @Override
+    protected void deserialize(NBTTagCompound serializedData) {
+
+        super.deserialize(serializedData);
 
         // Deserialize holograms
         NBTTagList hologramNBT = serializedData.getTagList(HOLOGRAMS_NBT, Constants.NBT.TAG_LONG);
@@ -201,10 +205,9 @@ public class TileMasterCrafter extends TileCrafter {
         // Deserialize pending craft
         craftEndTime = serializedData.getLong(PENDING_CRAFT_NBT);
 
-
     }
 
-    @Nonnull
+   /* @Nonnull
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound existingData) {
         return super.writeToNBT(this.serialized(existingData));
@@ -217,7 +220,7 @@ public class TileMasterCrafter extends TileCrafter {
 
         deserialize(serializedData);
 
-    }
+    }*/
 
     @Override
     public void handleUpdateTag(NBTTagCompound data) {

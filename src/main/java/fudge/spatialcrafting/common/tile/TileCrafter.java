@@ -81,7 +81,7 @@ public class TileCrafter extends TileEntity {
     }
 
 
-    private NBTTagCompound serialized(NBTTagCompound existingData) {
+    protected NBTTagCompound serialized(NBTTagCompound existingData) {
 
         if (masterBlockPos != null) {
             existingData.setLong("masterBlock", masterBlockPos.toLong());
@@ -93,11 +93,7 @@ public class TileCrafter extends TileEntity {
 
     }
 
-    private NBTTagCompound serialized() {
-        return this.serialized(new NBTTagCompound());
-    }
-
-    private void deserialize(NBTTagCompound serializedData) {
+    protected void deserialize(NBTTagCompound serializedData) {
         long masterLong = serializedData.getLong("masterBlock");
         if (masterLong != 0) {
             masterBlockPos = BlockPos.fromLong(masterLong);

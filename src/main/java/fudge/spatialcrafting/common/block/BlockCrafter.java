@@ -241,8 +241,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
                 }
             });
 
-            // Go back to normal
-            worldIn.setTileEntity(crafter.getMasterPos(), new TileCrafter());
+
 
 
             // Notify the blocks they are no longer in a multiblock
@@ -252,6 +251,9 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
                     worldIn.setBlockState(crafterPos, blockState.withProperty(TYPE, UNFORMED), SCConstants.NOTIFY_CLIENT);
                 }
             }
+
+            // Go back to normal
+            worldIn.setTileEntity(crafter.getMasterPos(), new TileCrafter());
 
             SCWorldSavedData.removeMasterBlock(worldIn, crafter.getMasterPos());
 

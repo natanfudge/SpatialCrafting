@@ -23,6 +23,8 @@ import net.minecraftforge.items.IItemHandler;
 
 import static fudge.spatialcrafting.common.SCConstants.TICKS_PER_SECOND;
 import static fudge.spatialcrafting.common.block.BlockCrafter.CRAFT_DURATION_MULTIPLIER;
+import static fudge.spatialcrafting.common.util.Util.distanceOf;
+import static java.lang.Math.*;
 
 
 @SideOnly(Side.CLIENT)
@@ -31,7 +33,7 @@ import static fudge.spatialcrafting.common.block.BlockCrafter.CRAFT_DURATION_MUL
 public class ParticleItemDust extends Particle {
 
     public static final float PHASE_2_SPEED_BLOCKS_PER_TICK_UPWARDS = 0.5f / TICKS_PER_SECOND;
-    public static final int PHASE_2_START_TICKS = 0 * TICKS_PER_SECOND;
+    public static final int PHASE_2_START_TICKS = 5 * TICKS_PER_SECOND;
     private static final String TICKER_ID = "ticker_particle_item_dust";
     private static final float SPEED_BLOCKS_PER_TICK = 1.0f / TICKS_PER_SECOND;
     private static final int TICKS_BETWEEN_PARTICLES = (int) (0.1f * TICKS_PER_SECOND);
@@ -41,11 +43,42 @@ public class ParticleItemDust extends Particle {
         return (int)(1 * (distance * TICKS_PER_SECOND) / Math.sqrt(3));
     }
 
+    private static int posesToExtraTicks(Vec3d pos1, Vec3d pos2) {
+
+        int normalTicks = (int)(Util.distanceOf(pos1, pos2) / SPEED_BLOCKS_PER_TICK);
+
+        final Vec3d vecUp = new Vec3d(0, 1, 0);
+
+        double x = distanceOf(pos1, pos2);
+
+        pos1 = pos1.subtract(pos2);
+
+        Vec3d pos1Direction = pos1.normalize();
+
+        double angle = Math.atan2(vecUp.x, vecUp.y) - Math.atan2(pos1Direction.x, pos1Direction.y);
+
+        double det = sqrt((x * cos(angle) * (x * cos(angle)) + 3 * x * x));
+
+        double secsPlus = (-x * cos(angle) + det) * 2 / 3;
+        double secsMinus = (-x * cos(angle) - det) * 2 / 3;
+
+       // System.out.println("Plus: " + secsPlus);
+        //System.out.println("Minus: " + secsMinus);
+
+        int ticksPlus = (int)Math.round(secsPlus / 2 * TICKS_PER_SECOND);
+        int ticksMinus = (int)Math.round(secsMinus / 2 * TICKS_PER_SECOND);
+
+        int totalTicks = ticksPlus >= 0 ? ticksPlus /2 : ticksMinus /2;
+
+
+        return totalTicks/* - normalTicks*/;
+    }
+
     private static double preciseDistance(double distance){
         return 1 * (distance * TICKS_PER_SECOND) / Math.sqrt(3);
     }
 
-   /* private static double posesToTime(Vec3d pos1, Vec3d pos2){
+   /* private static double posesToExtraTicks(Vec3d pos1, Vec3d pos2){
         double degree = Math.asin((pos1.subtract(pos2)).normalize().x);
 
 
@@ -101,6 +134,7 @@ public class ParticleItemDust extends Particle {
         ClientTicker.addTicker(ticksPassed -> {
 
 
+            //TODO: still doesn't work...
                     Util.innerForEach(crafter.getHolograms(), hologramPos -> {
                         TileEntity hologramTile = Util.getTileEntity(world, hologramPos);
                         IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH);
@@ -111,19 +145,14 @@ public class ParticleItemDust extends Particle {
 
                             Vec3d endPos = crafter.centerOfHolograms();
 
-                            int extra = distanceToTime(Util.distanceOf(startPos, endPos));
+                            //int extra = distanceToTime(distanceOf(startPos, endPos));
+                            int extra = posesToExtraTicks(startPos, endPos);
                             int relativeTicksPassed = ticksPassed + extra;
 
-                            if (relativeTicksPassed >= PHASE_2_START_TICKS) {
-                                double ticksSincePhase2 = relativeTicksPassed - PHASE_2_START_TICKS;
-                                //double newY = endPos.y + (ticksSincePhase2) * PHASE_2_SPEED_BLOCKS_PER_TICK_UPWARDS;
+                            double ticksSincePhase2 = max(relativeTicksPassed - PHASE_2_START_TICKS, 0);
 
 
-
-                                double newY = endPos.y + preciseDistance(Util.distanceOf(startPos, endPos));
-
-                                endPos = new Vec3d(endPos.x, newY, endPos.z);
-                            }
+                            endPos = endPos.add(0, (ticksSincePhase2) * PHASE_2_SPEED_BLOCKS_PER_TICK_UPWARDS, 0);
 
                             if (durationTicks > relativeTicksPassed) {
 
@@ -201,7 +230,7 @@ public class ParticleItemDust extends Particle {
         this.prevPosZ = this.posZ;
 
 
-        if (Util.distanceOf(designation, new Vec3d(posX, posY, posZ)) < 0.1) {
+        if (distanceOf(designation, new Vec3d(posX, posY, posZ)) < 0.1) {
             this.setExpired();
         }
 

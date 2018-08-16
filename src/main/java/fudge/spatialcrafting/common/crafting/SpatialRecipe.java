@@ -225,16 +225,22 @@ public class SpatialRecipe {
      */
     public static void preInit() {
 
-        final String CT_SCRIPTS_FOLDER_PATH = System.getProperty("user.dir") + "/scripts";
+        final String CT_SCRIPTS_FOLDER_NAME = "scripts";
 
         // Create scripts folder if it doesn't exist.
-        File scriptsDir = new File(CT_SCRIPTS_FOLDER_PATH);
+        File scriptsDir = new File(CT_SCRIPTS_FOLDER_NAME);
         if (!scriptsDir.isDirectory()) {
             scriptsDir.mkdir();
         }
 
         final String SCRIPTS_PATH_SOURCE = "/assets/" + MODID + "/scripts/" + EXAMPLE_SCRIPT_NAME;
-        final String SCRIPTS_PATH_DESTINATION = CT_SCRIPTS_FOLDER_PATH + "/" + MODID + "/" + EXAMPLE_SCRIPT_NAME;
+
+        File spatialCraftingDir = new File(CT_SCRIPTS_FOLDER_NAME + "/" + MODID);
+        if(!spatialCraftingDir.exists()){
+            spatialCraftingDir.mkdir();
+        }
+
+        String SCRIPTS_PATH_DESTINATION = CT_SCRIPTS_FOLDER_NAME + "/" + MODID + "/" + EXAMPLE_SCRIPT_NAME;
         URL sourceUrl = SpatialRecipe.class.getResource(SCRIPTS_PATH_SOURCE);
 
         try {
@@ -242,7 +248,7 @@ public class SpatialRecipe {
             File destFile = new File(SCRIPTS_PATH_DESTINATION);
 
             try {
-                if (!destFile.exists() && !otherScriptExists(new File(CT_SCRIPTS_FOLDER_PATH + "/" + MODID))) {
+                if (!destFile.exists() && !otherScriptExists(new File(CT_SCRIPTS_FOLDER_NAME + "/" + MODID))) {
                     FileUtils.copyFile(sourceFile, destFile);
                 }
             } catch (IOException e) {
