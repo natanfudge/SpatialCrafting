@@ -1,31 +1,20 @@
 buildscript {
     repositories {
         jcenter()
-        maven { url = "http://files.minecraftforge.net/maven"
-
-        }
+        maven { url = "http://files.minecraftforge.net/maven" }
     }
     dependencies {
-
-
-
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-
     }
-
 }
-
 plugins {
     id "org.sonarqube" version "2.6"
 }
-
 apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-
-
-version = "1.12.2-0.1.1"
+version = "1.12.2-0.2.0"
 group = "com.fudge.spatialcrafting" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "SpatialCrafting"
 
@@ -35,7 +24,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.4.2729"
+    version = "1.12.2-14.23.4.2750"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.
@@ -43,7 +32,7 @@ minecraft {
     // stable_#            stables are built at the discretion of the MCP team.
     // Use non-default mappings at your own risk. they may not always work.
     // simply re-run your setup task after changing the mappings to update your workspace.
-    mappings = "snapshot_20180806"
+    mappings = "snapshot_20180814"
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
@@ -58,7 +47,7 @@ repositories{
         name = "ModMaven"
         url = "modmaven.k-4u.nl"
     }
-    maven { // CraftTweaker + MTLib
+    maven { // CraftTweaker
         name 'jared maven'
         url "http://maven.blamejared.com/"
     }
@@ -78,8 +67,7 @@ dependencies {
     // Compile only since crafttweaker is a faggot
     compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.8.468"
 
-    //deobfCompile "com.blamejared:MTLib:${MTLib_version}"
-
+    compile group: 'org.jetbrains', name: 'annotations', version: '13.0'
 
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..
@@ -121,7 +109,4 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
-
-
 }
-

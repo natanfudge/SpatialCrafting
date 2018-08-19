@@ -23,7 +23,7 @@ import net.minecraftforge.items.IItemHandler;
 
 import static fudge.spatialcrafting.common.SCConstants.TICKS_PER_SECOND;
 import static fudge.spatialcrafting.common.block.BlockCrafter.CRAFT_DURATION_MULTIPLIER;
-import static fudge.spatialcrafting.common.util.Util.distanceOf;
+import static fudge.spatialcrafting.common.util.Util.euclideanDistanceOf;
 import static java.lang.Math.*;
 
 
@@ -45,11 +45,11 @@ public class ParticleItemDust extends Particle {
 
     private static int posesToExtraTicks(Vec3d pos1, Vec3d pos2) {
 
-        int normalTicks = (int)(Util.distanceOf(pos1, pos2) / SPEED_BLOCKS_PER_TICK);
+        int normalTicks = (int)(Util.euclideanDistanceOf(pos1, pos2) / SPEED_BLOCKS_PER_TICK);
 
         final Vec3d vecUp = new Vec3d(0, 1, 0);
 
-        double x = distanceOf(pos1, pos2);
+        double x = euclideanDistanceOf(pos1, pos2);
 
         pos1 = pos1.subtract(pos2);
 
@@ -129,13 +129,13 @@ public class ParticleItemDust extends Particle {
         assert crafter != null;
 
 
-        int durationTicks = crafter.getCrafterSize() * CRAFT_DURATION_MULTIPLIER * SCConstants.TICKS_PER_SECOND;
+        int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * SCConstants.TICKS_PER_SECOND;
 
         ClientTicker.addTicker(ticksPassed -> {
 
 
             //TODO: still doesn't work...
-                    Util.innerForEach(crafter.getHolograms(), hologramPos -> {
+/*                    Util.innerForEach(crafter.getHolograms(), hologramPos -> {
                         TileEntity hologramTile = Util.getTileEntity(world, hologramPos);
                         IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH);
                         ItemStack itemStack = itemHandler.getStackInSlot(0);
@@ -145,7 +145,7 @@ public class ParticleItemDust extends Particle {
 
                             Vec3d endPos = crafter.centerOfHolograms();
 
-                            //int extra = distanceToTime(distanceOf(startPos, endPos));
+                            //int extra = distanceToTime(euclideanDistanceOf(startPos, endPos));
                             int extra = posesToExtraTicks(startPos, endPos);
                             int relativeTicksPassed = ticksPassed + extra;
 
@@ -160,10 +160,10 @@ public class ParticleItemDust extends Particle {
                                 shootDustParticle(world, startPos, endPos, itemStack);
 
                             }
-                        }
+                        }*/
 
-
-/*                        TileEntity hologramTile = Util.getTileEntity(world, hologramPos);
+                    Util.innerForEach(crafter.getHolograms(), hologramPos -> {
+                        TileEntity hologramTile = Util.getTileEntity(world, hologramPos);
                         IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH);
                         ItemStack itemStack = itemHandler.getStackInSlot(0);
 
@@ -199,11 +199,11 @@ public class ParticleItemDust extends Particle {
                                 startPos = new Vec3d(hologramPos.getX() + 0.8, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.8);
                                 shootDustParticle(world, startPos, endPos, itemStack);
                             }
-                        }*/
+                        }
                     });
                 }, TICKS_BETWEEN_PARTICLES,
                 durationTicks,
-                ParticleItemDust.TICKER_ID + Util.<TileCrafter>getTileEntity(world, crafterPos).getMasterPos());
+                ParticleItemDust.TICKER_ID + Util.<TileCrafter>getTileEntity(world, crafterPos).masterPos());
 
     }
 
@@ -213,7 +213,7 @@ public class ParticleItemDust extends Particle {
     }
 
     public static void stopParticles(TileCrafter tile) {
-        ClientTicker.stopTickers(TICKER_ID + tile.getMasterPos());
+        ClientTicker.stopTickers(TICKER_ID + tile.masterPos());
     }
 
     @Override
@@ -230,7 +230,7 @@ public class ParticleItemDust extends Particle {
         this.prevPosZ = this.posZ;
 
 
-        if (distanceOf(designation, new Vec3d(posX, posY, posZ)) < 0.1) {
+        if (euclideanDistanceOf(designation, new Vec3d(posX, posY, posZ)) < 0.1) {
             this.setExpired();
         }
 

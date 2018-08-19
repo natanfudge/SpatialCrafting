@@ -21,6 +21,7 @@ public class PacketHandler {
     public static void registerPackets() {
         network = NetworkRegistry.INSTANCE.newSimpleChannel(SpatialCrafting.MODID);
         network.registerMessage(new PacketUpdateHologram.Handler(), PacketUpdateHologram.class, nextID(), Side.CLIENT);
+        network.registerMessage(new PacketUpdateWorldSavedData.Handler(), PacketUpdateWorldSavedData.class, nextID(), Side.CLIENT);
 
     }
 

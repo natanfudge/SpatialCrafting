@@ -2,6 +2,7 @@ package fudge.spatialcrafting.common.util;
 
 
 import fudge.spatialcrafting.SpatialCrafting;
+import jdk.nashorn.internal.objects.annotations.Constructor;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -10,6 +11,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Contract;
 
 import javax.annotation.Nullable;
 import java.util.function.BiPredicate;
@@ -26,6 +28,7 @@ public final class Util {
         return Math.max(Math.abs(pos1.getX() - pos2.getX()), Math.max(Math.abs(pos1.getY() - pos2.getY()), Math.abs(pos1.getZ() - pos2.getZ())));
     }
 
+
     /**
      * Returns the distance between 2 positions. counts diagonals as 1 distance (rather than 2 or 3)
      */
@@ -36,7 +39,7 @@ public final class Util {
     /**
      * Returns the distance between 2 Vec3d. Counts diagonals as the actual physical distance (rather than just 1)
      */
-    public static double distanceOf(Vec3d pos1, Vec3d pos2) {
+    public static double euclideanDistanceOf(Vec3d pos1, Vec3d pos2) {
         return norm(pos1.subtract(pos2));
     }
 
@@ -44,7 +47,7 @@ public final class Util {
         return Math.sqrt(vec3.x * vec3.x + vec3.y * vec3.y + vec3.z * vec3.z);
     }
 
-    /*public static double distanceOf(Vec3d pos1, Vec3d pos2) {
+    /*public static double euclideanDistanceOf(Vec3d pos1, Vec3d pos2) {
         return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y) + Math.abs(pos1.z - pos2.z);
     }*/
 
@@ -261,21 +264,44 @@ public final class Util {
      */
     public static <T> void innerForEach(T[][][] arr, Consumer<T> function) {
         for (T[][] arr2D : arr) {
-            for (T[] arr1D : arr2D) {
-                for (T object : arr1D) {
-                    function.accept(object);
-                }
+            innerForEach2D(arr2D, function);
+
+        }
+    }
+
+    public static <T> void innerForEach2D(T[][] arr, Consumer<T> function) {
+        for (T[] arr1D : arr) {
+            for (T object : arr1D) {
+                function.accept(object);
             }
         }
     }
 
 
-    /**
-     * Gets the TileEntity at the given position in the world
-     * @param world The world to get the TileEntity from
-     * @param pos The position in the world to get the TileEntity from
-     */
+
+
+
+        /**
+         * Gets the TileEntity at the given position in the world
+         * @param world The world to get the TileEntity from
+         * @param pos The position in the world to get the TileEntity from
+         */
+    @Contract("_,null -> null; null,_ -> null; !null,!null -> !null")
     @Nullable
+    public static <TE extends TileEntity> TE getTileEntity(IBlockAccess world, BlockPos pos) {
+        if (world == null) return null;
+        if (pos == null) return null;
+
+        try {
+            return (TE) world.getTileEntity(pos);
+        } catch (ClassCastException e) {
+            SpatialCrafting.LOGGER.error("Invalid cast trying to cast between two different tile entities", e);
+            return null;
+        }
+
+    }
+
+    /*@Nullable
     public static <TE extends TileEntity> TE getTileEntity(IBlockAccess world, BlockPos pos) {
         if (world != null) {
             if (pos != null) {
@@ -298,7 +324,7 @@ public final class Util {
 
         // There was a problem along the way
         return null;
-    }
+    }*/
 
 
     /**

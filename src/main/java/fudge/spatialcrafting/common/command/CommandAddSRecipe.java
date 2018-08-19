@@ -5,7 +5,7 @@ import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.SCConstants;
 import fudge.spatialcrafting.common.crafting.RecipeAddition;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
-import fudge.spatialcrafting.common.tile.TileMasterCrafter;
+import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
 import net.minecraft.command.CommandBase;
@@ -135,7 +135,7 @@ public class CommandAddSRecipe extends CommandBase {
             return;
         }
 
-        TileMasterCrafter crafter = TileMasterCrafter.getClosestMasterBlock(sender.getEntityWorld(), sender.getPosition());
+        TileCrafter crafter = TileCrafter.getClosestMasterBlock(sender.getEntityWorld(), sender.getPosition());
 
         try {
             // Get output from player's hand

@@ -4,6 +4,7 @@ import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.SCConstants;
 import fudge.spatialcrafting.common.block.BlockCrafter;
 import fudge.spatialcrafting.common.block.SCBlocks;
+import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.block.PacketUpdateHologram;
 import net.minecraft.block.state.IBlockState;
@@ -56,12 +57,17 @@ public class TileHologram extends TileEntity {
         return masterBlockPos;
     }
 
-    public TileMasterCrafter getMasterCrafter() {
+    /*public TileMasterCrafter getMasterCrafter() {
         return (TileMasterCrafter) world.getTileEntity(getMasterPos());
+    }*/
+
+    public TileCrafter getMasterCrafter(){
+        return Util.getTileEntity(world,getMasterPos());
     }
 
+
     public int getCrafterSize() {
-        return ((BlockCrafter) world.getBlockState(this.getMasterPos()).getBlock()).getCrafterSize();
+        return ((BlockCrafter) world.getBlockState(this.getMasterPos()).getBlock()).size();
     }
 
     public void bindToMasterBlock(BlockPos pos) {
@@ -135,10 +141,11 @@ public class TileHologram extends TileEntity {
     }
 
     @Override
+    //todo: changed, might cause problems
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
         Minecraft.getMinecraft().world.notifyBlockUpdate(pos,
-                SCBlocks.X2CRAFTER_BLOCK.getDefaultState(),
-                SCBlocks.X2CRAFTER_BLOCK.getDefaultState(),
+                BlockCrafter.DEFAULT_STATE,
+                BlockCrafter.DEFAULT_STATE,
                 1);
     }
 

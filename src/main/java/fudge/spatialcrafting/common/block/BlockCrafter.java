@@ -4,10 +4,8 @@ import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.client.particle.ParticleItemDust;
 import fudge.spatialcrafting.common.SCConstants;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
-import fudge.spatialcrafting.common.data.SCWorldSavedData;
+import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.TileCrafter;
-import fudge.spatialcrafting.common.tile.TileHologram;
-import fudge.spatialcrafting.common.tile.TileMasterCrafter;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -33,16 +31,19 @@ import java.util.*;
 import static fudge.spatialcrafting.common.SCConstants.BLOCK_UPDATE;
 import static fudge.spatialcrafting.common.SCConstants.NOTIFY_CLIENT;
 import static fudge.spatialcrafting.common.block.BlockCrafter.CrafterType.*;
+import static fudge.spatialcrafting.common.tile.TileCrafter.createMultiblock;
 
 
 @SuppressWarnings("deprecation")
 public class BlockCrafter extends BlockTileEntity<TileCrafter> {
+
 
     public static final int CRAFT_DURATION_MULTIPLIER = 5;
     /**
      * Can be "UNFORMED, FORMED, and MASTER
      */
     public static final PropertyEnum<CrafterType> TYPE = PropertyEnum.create("type", CrafterType.class);
+    public static final IBlockState DEFAULT_STATE = new BlockCrafter(1).blockState.getBaseState().withProperty(TYPE, UNFORMED);
     private final int crafterSize;
 
 
@@ -56,7 +57,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
 
     }
 
-    public int getCrafterSize() {
+    public int size() {
         return crafterSize;
     }
 
@@ -100,16 +101,14 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     @Override
     public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
         // The master block is the last block placed before the multiblock was formed
-        List<BlockPos> multiBlock = checkForMultiBlock(world, pos);
-        if (multiBlock != null) {
+        List<BlockPos> crafterBlocks = getPossibleMultiblock(world, pos);
+        if (crafterBlocks != null) {
             // Searches for space above it
-            if (spaceExists(world, multiBlock)) {
+            if (spaceExists(world, crafterBlocks, size())) {
 
-                createMultiblock(world, multiBlock, pos, placer);
-                if (!world.isRemote) {
-                    // Stores the masterblock for the purposes of iterating through available crafters.
-                    SCWorldSavedData.addMasterBlock(world, pos);
-                }
+                BlockPos masterPos = createMultiblock(world, crafterBlocks, placer, crafterSize);
+                // Stores the masterblock for the purposes of iterating through available crafters.
+                WorldSavedDataCrafters.addMasterBlock(world, masterPos);
 
 
             } else if (placer instanceof EntityPlayer) {
@@ -163,7 +162,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
             ParticleItemDust.playCraftParticles(world, pos);
         }
 
-        int durationTicks = crafter.getCrafterSize() * CRAFT_DURATION_MULTIPLIER * SCConstants.TICKS_PER_SECOND;
+        int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * SCConstants.TICKS_PER_SECOND;
 
         crafter.scheduleCraft(world, this, durationTicks);
 
@@ -176,7 +175,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
 
         // Calculates the point at which the particle will end to decide where to drop the item.
         Vec3d center = crafter.centerOfHolograms();
-        int durationTicks = crafter.getCrafterSize() * CRAFT_DURATION_MULTIPLIER * SCConstants.TICKS_PER_SECOND;
+        int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * SCConstants.TICKS_PER_SECOND;
         double newY = center.y + (durationTicks - ParticleItemDust.PHASE_2_START_TICKS) * ParticleItemDust.PHASE_2_SPEED_BLOCKS_PER_TICK_UPWARDS;
         Vec3d endPos = new Vec3d(center.x, newY, center.z);
 
@@ -209,9 +208,9 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
             TileCrafter crafter = Util.getTileEntity(world, pos);
             assert crafter != null;
 
-            if (crafter.isCrafting() && crafter.craftTimePassed(world)) {
+            if (crafter.isCrafting() && crafter.craftTimeHasPassed()) {
                 completeCrafting(world, crafter);
-                world.notifyBlockUpdate(crafter.getMasterPos(), state, state, SCConstants.NOTIFY_CLIENT);
+                world.notifyBlockUpdate(crafter.masterPos(), state, state, SCConstants.NOTIFY_CLIENT);
             }
         }
     }
@@ -242,20 +241,17 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
             });
 
 
-
-
             // Notify the blocks they are no longer in a multiblock
-            for (BlockPos crafterPos : crafter.getCrafterBlocks()) {
+            Util.innerForEach2D(crafter.getCrafterBlocks(), crafterPos -> {
                 IBlockState blockState = worldIn.getBlockState(crafterPos);
                 if (blockState.getBlock() instanceof BlockCrafter) {
                     worldIn.setBlockState(crafterPos, blockState.withProperty(TYPE, UNFORMED), SCConstants.NOTIFY_CLIENT);
+                    worldIn.setTileEntity(crafterPos, null);
                 }
-            }
+            });
 
-            // Go back to normal
-            worldIn.setTileEntity(crafter.getMasterPos(), new TileCrafter());
 
-            SCWorldSavedData.removeMasterBlock(worldIn, crafter.getMasterPos());
+            WorldSavedDataCrafters.removeMasterBlock(worldIn, crafter.masterPos());
 
 
         }
@@ -264,9 +260,10 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         super.breakBlock(worldIn, pos, state);
     }
 
-    private List<BlockPos> checkForMultiBlock(World world, BlockPos originalPos) {
+    private static List<BlockPos> getPossibleMultiblock(World world, BlockPos originalPos) {
         List<BlockPos> nearbyCrafters = new LinkedList<>();
 
+        int crafterSize = ((BlockCrafter) (world.getBlockState(originalPos).getBlock())).size();
         BlockPos currentPos;
 
         // Put all nearby crafters in a list
@@ -294,11 +291,12 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
                     continue;
                 }
 
-                if (validateMultiblockList(list, nearbyCrafter2)) {
+                if (validateMultiblockList(list, nearbyCrafter2, crafterSize)) {
                     list.add(nearbyCrafter2);
                 }
                 if (list.size() == crafterSize * crafterSize) {
                     return list;
+                    // return craftersSorted(list);
                 }
             }
         }
@@ -307,61 +305,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
 
     }
 
-    private void createMultiblock(World world, List<BlockPos> crafterList, BlockPos masterBlockPos, EntityLivingBase placer) {
-
-        if (spaceExists(world, crafterList)) {
-
-            BlockPos hologramPos;
-            TileHologram hologramTile;
-            TileCrafter tileCrafter;
-
-
-            BlockPos[][][] holograms = new BlockPos[crafterSize][crafterSize][crafterSize];
-
-            int j = 0, k = 0;
-            for (BlockPos blockPos : crafterList) {
-
-                // Connect crafters to the multiblock
-                tileCrafter = Util.getTileEntity(world, blockPos);
-                tileCrafter.bindToMasterBlock(masterBlockPos);
-
-
-                // Change the crafters' blockstate
-                world.setBlockState(blockPos, world.getBlockState(blockPos).withProperty(TYPE, FORMED), NOTIFY_CLIENT);
-                for (int i = 1; i <= crafterSize; i++) {
-                    // Place hologram
-                    hologramPos = blockPos.add(0, i, 0);
-                    world.setBlockState(hologramPos, SCBlocks.HOLOGRAM.getDefaultState());
-                    holograms[i - 1][j][k] = hologramPos;
-
-                    // Connect holograms to the multiblock
-                    hologramTile = Util.getTileEntity(world, hologramPos);
-                    hologramTile.bindToMasterBlock(masterBlockPos);
-                }
-
-
-                k++;
-                if (k >= crafterSize) {
-                    j++;
-                    k = 0;
-                }
-            }
-
-            // Change the master block into a master tile entity
-            world.setBlockState(masterBlockPos, world.getBlockState(masterBlockPos).withProperty(TYPE, MASTER), NOTIFY_CLIENT);
-            world.setTileEntity(masterBlockPos, new TileMasterCrafter(holograms, crafterList));
-            Util.<TileMasterCrafter>getTileEntity(world, masterBlockPos).bindToMasterBlock(masterBlockPos);
-
-
-        } else if (placer instanceof EntityPlayer) {
-            if (world.isRemote) {
-                ((EntityPlayer) (placer)).sendStatusMessage(new TextComponentTranslation("tile.spatialcrafting.blockcrafter.no_space", 0), true);
-            }
-        }
-
-    }
-
-    private boolean validateMultiblockList(List<BlockPos> list, BlockPos newValue) {
+    private static boolean validateMultiblockList(List<BlockPos> list, BlockPos newValue, int crafterSize) {
         for (BlockPos oldValue : list) {
             if (Util.minimalDistanceOf(oldValue, newValue) > crafterSize - 1) {
                 return false;
@@ -370,7 +314,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         return true;
     }
 
-    private boolean spaceExists(World world, List<BlockPos> startingPoses) {
+    public static boolean spaceExists(World world, List<BlockPos> startingPoses, int crafterSize) {
 
         for (BlockPos blockPos : startingPoses) {
             for (int i = 1; i <= crafterSize; i++) {
@@ -392,15 +336,13 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     @Override
     public TileCrafter createTileEntity(World world, IBlockState state) {
 
-        if (state.getValue(TYPE).equals(FORMED) || state.getValue(TYPE).equals(UNFORMED)) {
+        //TODO: remove MASTER blockstate
+        if (state.getValue(TYPE).equals(FORMED)) {
             return new TileCrafter();
-        }
-        if (state.getValue(TYPE).equals(MASTER)) {
-            return new TileMasterCrafter();
+        } else {
+            return null;
         }
 
-        // Should never get here
-        return new TileCrafter();
     }
 
     @Override

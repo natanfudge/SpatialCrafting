@@ -5,7 +5,6 @@ import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.SCConstants;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.TileHologram;
-import fudge.spatialcrafting.common.tile.TileMasterCrafter;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -71,8 +70,8 @@ public final class SCBlocks {
     public static void registerTileEntities() {
         GameRegistry.registerTileEntity(TileHologram.class, HOLOGRAM.getRegistryName());
         GameRegistry.registerTileEntity(TileCrafter.class, X2CRAFTER_BLOCK.getRegistryName());
-        GameRegistry.registerTileEntity(TileMasterCrafter.class,
-                new ResourceLocation(SpatialCrafting.MODID + ":" + RegistryNames.MASTER_CRAFTER_TE));
+       /* GameRegistry.registerTileEntity(TileMasterCrafter.class,
+                new ResourceLocation(SpatialCrafting.MODID + ":" + RegistryNames.MASTER_CRAFTER_TE));*/
     }
 
     @SubscribeEvent

@@ -1,7 +1,8 @@
+/*
 package fudge.spatialcrafting.common.tile;
 
 import fudge.spatialcrafting.common.block.BlockCrafter;
-import fudge.spatialcrafting.common.data.SCWorldSavedData;
+import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -47,9 +48,11 @@ public class TileMasterCrafter extends TileCrafter {
         super();
     }
 
-    /**
+    */
+/**
      * All transformations from list to array and back are EXTREMELY SENSITIVE! Everything must be put back exactly where it was.
-     */
+     *//*
+
     private static BlockPos[][][] listToArray(NBTTagList list) {
 
         double sizeD = Math.cbrt(list.tagCount());
@@ -82,7 +85,7 @@ public class TileMasterCrafter extends TileCrafter {
 
     @Nullable
     public static TileMasterCrafter getClosestMasterBlock(World world, BlockPos pos) {
-        List<BlockPos> poses = SCWorldSavedData.getMasterBlocks(world);
+        List<BlockPos> poses = WorldSavedDataCrafters.getMasterBlocks(world);
 
         // There are no master blocks
         if (poses.size() == 0) {
@@ -119,7 +122,7 @@ public class TileMasterCrafter extends TileCrafter {
     }
 
     @Override
-    public boolean craftTimePassed(World world) {
+    public boolean craftTimeHasPassed(World world) {
         return world.getWorldTime() >= craftEndTime;
     }
 
@@ -140,7 +143,7 @@ public class TileMasterCrafter extends TileCrafter {
 
     @Override
     public ItemStack[][][] getHologramInvArr() {
-        int size = ((BlockCrafter) getBlockType()).getCrafterSize();
+        int size = ((BlockCrafter) getBlockType()).size();
 
         ItemStack[][][] returning = new ItemStack[size][size][size];
 
@@ -162,9 +165,11 @@ public class TileMasterCrafter extends TileCrafter {
     }
 
 
-    /**
+    */
+/**
      * Converts the info in the TileMasterCrafter to an NBTTagCompound and adds it to the existing data.
-     */
+     *//*
+
     @Override
     protected NBTTagCompound serialized(NBTTagCompound existingData) {
 
@@ -186,9 +191,11 @@ public class TileMasterCrafter extends TileCrafter {
     }
 
 
-    /**
+    */
+/**
      * Takes the serialized info from a NBTTagCompound and assigns the values to the TileMasterCrafter in normal data form.
-     */
+     *//*
+
     @Override
     protected void deserialize(NBTTagCompound serializedData) {
 
@@ -207,7 +214,8 @@ public class TileMasterCrafter extends TileCrafter {
 
     }
 
-   /* @Nonnull
+   */
+/* @Nonnull
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound existingData) {
         return super.writeToNBT(this.serialized(existingData));
@@ -220,7 +228,8 @@ public class TileMasterCrafter extends TileCrafter {
 
         deserialize(serializedData);
 
-    }*/
+    }*//*
+
 
     @Override
     public void handleUpdateTag(NBTTagCompound data) {
@@ -253,3 +262,4 @@ public class TileMasterCrafter extends TileCrafter {
     }
 }
 
+*/

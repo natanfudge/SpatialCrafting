@@ -4,7 +4,6 @@ import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.SCConstants;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.TileHologram;
-import fudge.spatialcrafting.common.tile.TileMasterCrafter;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
@@ -102,7 +101,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
         try {
             if (!world.isRemote) {
                 TileHologram tile = Util.getTileEntity(world, pos);
-                TileMasterCrafter masterCrafter = tile.getMasterCrafter();
+                TileCrafter masterCrafter = tile.getMasterCrafter();
                 IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP);
                 ItemStack heldItem = player.getHeldItem(hand);
 
@@ -128,7 +127,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
                 }
             } else if (!player.isSneaking()) {
 
-                TileMasterCrafter masterCrafter = Util.<TileHologram>getTileEntity(world, pos).getMasterCrafter();
+                TileCrafter masterCrafter = Util.<TileHologram>getTileEntity(world, pos).getMasterCrafter();
                 if (masterCrafter.isCrafting()) {
                     masterCrafter.stopCrafting();
                 }
