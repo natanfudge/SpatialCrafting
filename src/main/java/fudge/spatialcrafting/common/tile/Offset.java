@@ -19,33 +19,28 @@ public class Offset extends Vec3i {
         super(xIn, yIn, zIn);
     }
 
-    public Offset(BlockPos slavePos, BlockPos masterPos){
-        super( slavePos.getX() - masterPos.getX(), slavePos.getY() - masterPos.getY() ,slavePos.getZ() - masterPos.getZ() );
+    public Offset(BlockPos slavePos, BlockPos masterPos) {
+        super(slavePos.getX() - masterPos.getX(), slavePos.getY() - masterPos.getY(), slavePos.getZ() - masterPos.getZ());
     }
-
-
-    /**
-     * Serialize this Offset into a long value
-     */
-    public long toLong()
-    {
-        return ((long)this.getX() & X_MASK) << X_SHIFT | ((long)this.getY() & Y_MASK) << Y_SHIFT | ((long) this.getZ() & Z_MASK);
-    }
-
 
     /**
      * Create an Offset from a serialized long value (created by toLong)
      */
-    public static Offset fromLong(long serialized)
-    {
-        int x = (int)(serialized << 64 - X_SHIFT - NUM_X_BITS >> 64 - NUM_X_BITS);
-        int y = (int)(serialized << 64 - Y_SHIFT - NUM_Y_BITS >> 64 - NUM_Y_BITS);
-        int z = (int)(serialized << 64 - NUM_Z_BITS >> 64 - NUM_Z_BITS);
+    public static Offset fromLong(long serialized) {
+        int x = (int) (serialized << 64 - X_SHIFT - NUM_X_BITS >> 64 - NUM_X_BITS);
+        int y = (int) (serialized << 64 - Y_SHIFT - NUM_Y_BITS >> 64 - NUM_Y_BITS);
+        int z = (int) (serialized << 64 - NUM_Z_BITS >> 64 - NUM_Z_BITS);
         return new Offset(x, y, z);
     }
 
+    /**
+     * Serialize this Offset into a long value
+     */
+    public long toLong() {
+        return ((long) this.getX() & X_MASK) << X_SHIFT | ((long) this.getY() & Y_MASK) << Y_SHIFT | ((long) this.getZ() & Z_MASK);
+    }
 
-    public BlockPos adjustToMaster(Vec3i slavePos){
+    public BlockPos adjustToMaster(Vec3i slavePos) {
         return new BlockPos(slavePos.getX() - this.getX(), slavePos.getY() - this.getY(), slavePos.getZ() - this.getZ());
     }
 

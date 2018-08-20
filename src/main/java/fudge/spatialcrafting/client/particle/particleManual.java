@@ -197,7 +197,7 @@ public class ParticleItemDust extends Particle {
         Minecraft.getMinecraft().effectRenderer.addEffect(ParticleItemDust.create(world, startPos, endPos, SPEED_BLOCKS_PER_TICK, stack));
     }
 
-    public static void stopParticles(TileCrafter tile) {
+    public static void stopCraftingFromServer(TileCrafter tile) {
         ClientTicker.stopTickers(TICKER_ID + tile.getMasterPos());
     }
 

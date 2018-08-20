@@ -1,7 +1,6 @@
 package fudge.spatialcrafting.network;
 
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.network.block.PacketUpdateHologram;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
@@ -21,8 +20,8 @@ public class PacketHandler {
 
     public static void registerPackets() {
         network = NetworkRegistry.INSTANCE.newSimpleChannel(SpatialCrafting.MODID);
-        network.registerMessage(new PacketUpdateHologram.Handler(), PacketUpdateHologram.class, nextID(), Side.CLIENT);
-        network.registerMessage(new PacketUpdateWorldSavedData.Handler(), PacketUpdateWorldSavedData.class, nextID(), Side.CLIENT);
+        network.registerMessage(new PacketUpdateAllSharedData.Handler(), PacketUpdateAllSharedData.class, nextID(), Side.CLIENT);
+        network.registerMessage(new PacketStopParticles.Handler(), PacketStopParticles.class, nextID(), Side.CLIENT);
 
     }
 

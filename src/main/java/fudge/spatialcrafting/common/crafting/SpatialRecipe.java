@@ -145,6 +145,61 @@ public class SpatialRecipe {
         return stack1.getItem().equals(stack2.getItem()) && stack1.getCount() == stack2.getCount();
     }
 
+    /**
+     * Copies the recipes in the compiled code to the run directory so they may be come with the mod jar but be used normally by pack makers.
+     */
+    public static void preInit() {
+
+        final String CT_SCRIPTS_FOLDER_NAME = "scripts";
+
+        // Create scripts folder if it doesn't exist.
+        File scriptsDir = new File(CT_SCRIPTS_FOLDER_NAME);
+        if (!scriptsDir.isDirectory()) {
+            scriptsDir.mkdir();
+        }
+
+        final String SCRIPTS_PATH_SOURCE = "/assets/" + MODID + "/scripts/" + EXAMPLE_SCRIPT_NAME;
+
+        File spatialCraftingDir = new File(CT_SCRIPTS_FOLDER_NAME + "/" + MODID);
+        if (!spatialCraftingDir.exists()) {
+            spatialCraftingDir.mkdir();
+        }
+
+        final String SCRIPTS_PATH_DESTINATION = CT_SCRIPTS_FOLDER_NAME + "/" + MODID + "/" + EXAMPLE_SCRIPT_NAME;
+        InputStream sourceUrl = SpatialRecipe.class.getResourceAsStream(SCRIPTS_PATH_SOURCE);
+
+
+        File destFile = new File(SCRIPTS_PATH_DESTINATION);
+
+
+        copyScriptFile(CT_SCRIPTS_FOLDER_NAME, sourceUrl, destFile);
+
+
+        //TODO write the script files into the scripts directory.
+    }
+
+    private static void copyScriptFile(String CT_SCRIPTS_FOLDER_NAME, InputStream sourceUrl, File destFile) {
+        try {
+            if (!destFile.exists() && !otherScriptExists(new File(CT_SCRIPTS_FOLDER_NAME + "/" + MODID))) {
+                FileUtils.copyInputStreamToFile(sourceUrl, destFile);
+            }
+        } catch (IOException e) {
+            SpatialCrafting.LOGGER.error(e);
+        }
+    }
+
+    private static boolean otherScriptExists(File folder) {
+        for (File file : folder.listFiles()) {
+            if (FilenameUtils.getExtension(file.toString()).equals("zs") && !FilenameUtils.getName(file.toString()).equals(RECIPES_FILE_NAME) && !FilenameUtils.getName(
+                    file.toString()).equals(EXAMPLE_SCRIPT_NAME)) {
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
     public IIngredient[][][] getRequiredInput() {
         return requiredInput;
     }
@@ -218,61 +273,6 @@ public class SpatialRecipe {
         outputBuilder.append("\n]");
 
         return outputBuilder.toString();
-    }
-
-    /**
-     * Copies the recipes in the compiled code to the run directory so they may be come with the mod jar but be used normally by pack makers.
-     */
-    public static void preInit() {
-
-        final String CT_SCRIPTS_FOLDER_NAME = "scripts";
-
-        // Create scripts folder if it doesn't exist.
-        File scriptsDir = new File(CT_SCRIPTS_FOLDER_NAME);
-        if (!scriptsDir.isDirectory()) {
-            scriptsDir.mkdir();
-        }
-
-        final String SCRIPTS_PATH_SOURCE = "/assets/" + MODID + "/scripts/" + EXAMPLE_SCRIPT_NAME;
-
-        File spatialCraftingDir = new File(CT_SCRIPTS_FOLDER_NAME + "/" + MODID);
-        if (!spatialCraftingDir.exists()) {
-            spatialCraftingDir.mkdir();
-        }
-
-        final String SCRIPTS_PATH_DESTINATION = CT_SCRIPTS_FOLDER_NAME + "/" + MODID + "/" + EXAMPLE_SCRIPT_NAME;
-        InputStream sourceUrl = SpatialRecipe.class.getResourceAsStream(SCRIPTS_PATH_SOURCE);
-
-
-        File destFile = new File(SCRIPTS_PATH_DESTINATION);
-
-
-        copyScriptFile(CT_SCRIPTS_FOLDER_NAME, sourceUrl, destFile);
-
-
-        //TODO write the script files into the scripts directory.
-    }
-
-    private static void copyScriptFile(String CT_SCRIPTS_FOLDER_NAME, InputStream sourceUrl, File destFile) {
-        try {
-            if (!destFile.exists() && !otherScriptExists(new File(CT_SCRIPTS_FOLDER_NAME + "/" + MODID))) {
-                FileUtils.copyInputStreamToFile(sourceUrl, destFile);
-            }
-        } catch (IOException e) {
-            SpatialCrafting.LOGGER.error(e);
-        }
-    }
-
-    private static boolean otherScriptExists(File folder) {
-        for (File file : folder.listFiles()) {
-            if (FilenameUtils.getExtension(file.toString()).equals("zs") && !FilenameUtils.getName(file.toString()).equals(RECIPES_FILE_NAME) && !FilenameUtils.getName(
-                    file.toString()).equals(EXAMPLE_SCRIPT_NAME)) {
-                return true;
-            }
-        }
-
-        return false;
-
     }
 
 

@@ -1,7 +1,5 @@
 package fudge.spatialcrafting.client.tick;
 
-import net.minecraftforge.client.event.GuiScreenEvent;
-
 import java.util.Objects;
 import java.util.function.Consumer;
 

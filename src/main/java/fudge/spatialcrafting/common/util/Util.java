@@ -10,8 +10,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Contract;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -45,7 +45,6 @@ public final class Util {
     private static double norm(Vec3d vec3) {
         return Math.sqrt(vec3.x * vec3.x + vec3.y * vec3.y + vec3.z * vec3.z);
     }
-
 
 
     /**
@@ -285,11 +284,9 @@ public final class Util {
      * @param world The world to get the TileEntity from
      * @param pos   The position in the world to get the TileEntity from
      */
-    @Contract("_,null -> null; null,_ -> null; !null,!null -> !null")
     @Nullable
-    public static <T extends TileEntity> T getTileEntity(IBlockAccess world, BlockPos pos) {
-        if (world == null) return null;
-        if (pos == null) return null;
+    public static <T extends TileEntity> T getTileEntity(@Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
+
 
         try {
             return (T) world.getTileEntity(pos);
@@ -299,8 +296,6 @@ public final class Util {
         }
 
     }
-
-
 
 
     /**

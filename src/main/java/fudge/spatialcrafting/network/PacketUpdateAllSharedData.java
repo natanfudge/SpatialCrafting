@@ -21,18 +21,18 @@ import java.util.Set;
 
 
 // Packet from server to client
-public class PacketUpdateWorldSavedData implements IMessage {
+public class PacketUpdateAllSharedData implements IMessage {
 
     private Map<BlockPos, Long> craftEndTimes;
 
 
-    public PacketUpdateWorldSavedData(Map<BlockPos, Long> craftEndTimes) {
+    public PacketUpdateAllSharedData(Map<BlockPos, Long> craftEndTimes) {
         this.craftEndTimes = craftEndTimes;
     }
 
 
     // Necessary for reflection
-    public PacketUpdateWorldSavedData() {
+    public PacketUpdateAllSharedData() {
     }
 
     @Override
@@ -68,11 +68,11 @@ public class PacketUpdateWorldSavedData implements IMessage {
     }
 
 
-    public static class Handler implements IMessageHandler<PacketUpdateWorldSavedData, IMessage> {
+    public static class Handler implements IMessageHandler<PacketUpdateAllSharedData, IMessage> {
 
         @Override
         @SideOnly(Side.CLIENT)
-        public IMessage onMessage(PacketUpdateWorldSavedData message, MessageContext ctx) {
+        public IMessage onMessage(PacketUpdateAllSharedData message, MessageContext ctx) {
 
             Minecraft.getMinecraft().addScheduledTask((new Runnable() {
                 @Override

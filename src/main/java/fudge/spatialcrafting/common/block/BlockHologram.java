@@ -99,43 +99,37 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
     @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
         try {
-            if (!world.isRemote) {
-                TileHologram tile = Util.getTileEntity(world, pos);
-                TileCrafter masterCrafter = tile.getMasterCrafter();
-                IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP);
-                ItemStack heldItem = player.getHeldItem(hand);
-
-                if (!player.isSneaking()) {
-                    // Inputs the held item into the hologram / takes it out of the hologram and gives it back to the player
-                    if (!heldItem.isEmpty() && !masterCrafter.isCrafting()) {
+            TileHologram tile = Util.getTileEntity(world, pos);
+            TileCrafter crafter = tile.getCrafter();
+            IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP);
+            ItemStack heldItem = player.getHeldItem(hand);
+            if (!player.isSneaking()) {
+                // Inputs the held item into the hologram / takes it out of the hologram and gives it back to the player
+                if (!heldItem.isEmpty()) {
+                    if (!crafter.isCrafting()) {
                         // Put item into the hologram
                         ItemStack remainingItemStack = itemHandler.insertItem(0, heldItem, false);
                         if (!player.isCreative()) {
                             player.setHeldItem(hand, remainingItemStack);
                         }
-
-                    } else {
-                        // Take item out of the hologram
-                        ItemStack extractedItemStack = itemHandler.extractItem(0, SCConstants.NORMAL_ITEMSTACK_LIMIT, false);
-                        ItemHandlerHelper.giveItemToPlayer(player, extractedItemStack);
-
-                        if (masterCrafter.isCrafting()) {
-                            masterCrafter.stopCrafting();
-                        }
                     }
 
-                }
-            } else if (!player.isSneaking()) {
+                } else {
+                    // Take item out of the hologram
+                    ItemStack extractedItemStack = itemHandler.extractItem(0, SCConstants.NORMAL_ITEMSTACK_LIMIT, false);
+                    ItemHandlerHelper.giveItemToPlayer(player, extractedItemStack);
 
-                TileCrafter masterCrafter = Util.<TileHologram>getTileEntity(world, pos).getMasterCrafter();
-                if (masterCrafter.isCrafting()) {
-                    masterCrafter.stopCrafting();
+                    // If items were taken out during crafting then it must be stopped
+                    if (extractedItemStack.getCount() >= 1 && crafter.isCrafting()) {
+                        crafter.stopCrafting();
+                    }
+
                 }
 
             }
 
 
-        }catch(Exception e){
+        } catch (Exception e) {
             SpatialCrafting.LOGGER.error("Exception caught in BlockHologram::onBlockActivated", e);
         }
         return true;

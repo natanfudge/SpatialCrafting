@@ -8,16 +8,15 @@
     }
   },
   "variants": {
-    "type": {
-      "unformed": {
+    "formed": {
+      "false": {
         "textures": {
         }
       },
-      "formed": {
+      "true": {
         "textures": {
         }
-      },
-      "master":{}
+      }
     },
     "inventory": [
       {

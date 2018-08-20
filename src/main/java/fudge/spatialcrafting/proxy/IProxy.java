@@ -2,11 +2,11 @@ package fudge.spatialcrafting.proxy;
 
 public interface IProxy {
 
-     void preInit();
+    void preInit();
 
-     void init();
+    void init();
 
-     void postInit();
+    void postInit();
 
 
 }

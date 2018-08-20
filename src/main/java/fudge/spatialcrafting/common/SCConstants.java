@@ -2,8 +2,6 @@ package fudge.spatialcrafting.common;
 
 public final class SCConstants {
 
-    private SCConstants() {}
-
     // SetBlockState argument
     public static final int BLOCK_UPDATE = 1;
     public static final int NOTIFY_CLIENT = 2;
@@ -17,7 +15,7 @@ public final class SCConstants {
     public static final int LOWEST = 0;
     public static final int NORMAL_ITEMSTACK_LIMIT = 64;
     public static final int TICKS_PER_SECOND = 20;
-
+    private SCConstants() {}
 
 
 }

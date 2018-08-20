@@ -1,7 +1,7 @@
 package fudge.spatialcrafting.common.data;
 
 import fudge.spatialcrafting.network.PacketHandler;
-import fudge.spatialcrafting.network.PacketUpdateWorldSavedData;
+import fudge.spatialcrafting.network.PacketUpdateAllSharedData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
@@ -37,7 +37,7 @@ public final class WorldSaveDataSync {
         World world = player.world;
         if (!world.isRemote) {
             Map<BlockPos, Long> data = WorldSavedDataCrafters.getData(world);
-            PacketHandler.getNetwork().sendTo(new PacketUpdateWorldSavedData(data), (EntityPlayerMP) player);
+            PacketHandler.getNetwork().sendTo(new PacketUpdateAllSharedData(data), (EntityPlayerMP) player);
         }
     }
 

@@ -7,13 +7,16 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldSavedData;
 
-import java.util.*;
+import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class WorldSavedDataCrafters extends WorldSavedData {
 
-    private static final String DATA_NAME = SpatialCrafting.MODID + " worldSavedData";
     public static final String CRAFTERS_NBT = "crafters";
-    private Map<BlockPos,Long> craftEndTimes;
+    private static final String DATA_NAME = SpatialCrafting.MODID + " worldSavedData";
+    private Map<BlockPos, Long> craftEndTimes;
 
     // Required constructor
     public WorldSavedDataCrafters(String name) {
@@ -25,42 +28,28 @@ public class WorldSavedDataCrafters extends WorldSavedData {
         this(DATA_NAME);
     }
 
-    public NBTTagCompound serialized(NBTTagCompound existingData) {
-        NBTTagCompound craftersNBT = new NBTTagCompound();
-        craftEndTimes.forEach((pos,time) -> craftersNBT.setLong(Long.toString(pos.toLong()), time));
-
-        existingData.setTag(CRAFTERS_NBT, craftersNBT);
-        return existingData;
-    }
-
-    public void deserialize(NBTTagCompound serializedData) {
-        NBTTagCompound craftersNBT = serializedData.getCompoundTag(CRAFTERS_NBT);
-        Set<String> keys = craftersNBT.getKeySet();
-
-        keys.forEach(key -> craftEndTimes.put(BlockPos.fromLong(Long.parseLong(key)), Long.parseLong(key)));
-
-    }
-
     /**
      * For client-side syncing
+     *
      * @param world should be a client world
-     * @param data the data transferred from the packet (a map)
+     * @param data  the data transferred from the packet (a map)
      */
-    public static void setData(World world, Map<BlockPos,Long> data){
+    public static void setData(World world, Map<BlockPos, Long> data) {
         getInstance(world).craftEndTimes = data;
     }
 
     /**
      * For client-side syncing
+     *
      * @param world should be a server world
      */
-    public static Map<BlockPos, Long> getData(World world){
+    public static Map<BlockPos, Long> getData(World world) {
         return getInstance(world).craftEndTimes;
     }
 
-        /**
-         * Returns the WorldSavedDataCrafters instance of a world
-         */
+    /**
+     * Returns the WorldSavedDataCrafters instance of a world
+     */
     public static WorldSavedDataCrafters getInstance(World world) {
         //Every World object has a respective instance of this class (WorldSavedDataCrafters) stored inside it.
         MapStorage storage = world.getPerWorldStorage();
@@ -85,11 +74,44 @@ public class WorldSavedDataCrafters extends WorldSavedData {
         instance.markDirty();
     }
 
-
     public static void removeMasterBlock(World world, BlockPos pos) {
         WorldSavedDataCrafters instance = getInstance(world);
         instance.craftEndTimes.remove(pos);
         instance.markDirty();
+    }
+
+    // In the future might be better to return a "SharedData" object
+    public static long getDataForMasterPos(@Nonnull World world, @Nonnull BlockPos pos) {
+        Map<BlockPos, Long> times = getInstance(world).craftEndTimes;
+        if (times.containsKey(pos)) {
+            return times.get(pos);
+        } else {
+            return 0;
+        }
+
+    }
+
+    // In the future might be better to return a "SharedData" object
+    public static void setDataForMasterPos(World world, BlockPos pos, long craftEndTime) {
+        WorldSavedDataCrafters instance = getInstance(world);
+        instance.craftEndTimes.replace(pos, craftEndTime);
+        instance.markDirty();
+    }
+
+    public NBTTagCompound serialized(NBTTagCompound existingData) {
+        NBTTagCompound craftersNBT = new NBTTagCompound();
+        craftEndTimes.forEach((pos, time) -> craftersNBT.setLong(Long.toString(pos.toLong()), time));
+
+        existingData.setTag(CRAFTERS_NBT, craftersNBT);
+        return existingData;
+    }
+
+    public void deserialize(NBTTagCompound serializedData) {
+        NBTTagCompound craftersNBT = serializedData.getCompoundTag(CRAFTERS_NBT);
+        Set<String> keys = craftersNBT.getKeySet();
+
+        keys.forEach(key -> craftEndTimes.put(BlockPos.fromLong(Long.parseLong(key)), Long.parseLong(key)));
+
     }
 
     @Override
@@ -101,19 +123,6 @@ public class WorldSavedDataCrafters extends WorldSavedData {
     public void readFromNBT(NBTTagCompound serializedData) {
         deserialize(serializedData);
 
-    }
-
-    // In the future might be better to return a "SharedData" object
-    public static long getDataForMasterPos(World world, BlockPos pos){
-
-        return getInstance(world).craftEndTimes.get(pos);
-    }
-
-    // In the future might be better to return a "SharedData" object
-    public static void setDataForMasterPos(World world, BlockPos pos, long craftEndTime){
-        WorldSavedDataCrafters instance =  getInstance(world);
-        instance.craftEndTimes.replace(pos, craftEndTime);
-        instance.markDirty();
     }
 
 }

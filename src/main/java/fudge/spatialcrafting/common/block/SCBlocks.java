@@ -92,7 +92,7 @@ public final class SCBlocks {
         public static final String X4CRAFTER_BLOCK = "x4crafter_block";
         public static final String X5CRAFTER_BLOCK = "x5crafter_block";
 
-        private RegistryNames(){}
+        private RegistryNames() {}
 
     }
 

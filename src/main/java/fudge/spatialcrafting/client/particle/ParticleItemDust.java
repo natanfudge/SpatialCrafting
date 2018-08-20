@@ -24,7 +24,8 @@ import net.minecraftforge.items.IItemHandler;
 import static fudge.spatialcrafting.common.SCConstants.TICKS_PER_SECOND;
 import static fudge.spatialcrafting.common.block.BlockCrafter.CRAFT_DURATION_MULTIPLIER;
 import static fudge.spatialcrafting.common.util.Util.euclideanDistanceOf;
-import static java.lang.Math.*;
+import static java.lang.Math.cos;
+import static java.lang.Math.sqrt;
 
 
 @SideOnly(Side.CLIENT)
@@ -37,9 +38,30 @@ public class ParticleItemDust extends Particle {
     private static final String TICKER_ID = "ticker_particle_item_dust";
     private static final float SPEED_BLOCKS_PER_TICK = 1.0f / TICKS_PER_SECOND;
     private static final int TICKS_BETWEEN_PARTICLES = (int) (0.1f * TICKS_PER_SECOND);
+    private Vec3d sourcePos;
+    private Vec3d designation;
 
-    private static int distanceToTime(double distance){
-        return (int)(1 * (distance * TICKS_PER_SECOND) / Math.sqrt(3));
+
+    public ParticleItemDust(World worldIn, Vec3d startPos, Vec3d designationPos, double xSpeed, double ySpeed, double zSpeed, TextureAtlasSprite texture) {
+        super(worldIn, startPos.x, startPos.y, startPos.z, xSpeed, ySpeed, zSpeed);
+        this.setParticleTexture(texture);
+        this.particleRed = 0.6F;
+        this.particleGreen = 0.6F;
+        this.particleBlue = 0.6F;
+        this.particleScale /= 2.0F;
+
+        // The vanilla Particle constructor added random variation to our starting velocity.  Undo it!
+        this.motionX = xSpeed;
+        this.motionY = ySpeed;
+        this.motionZ = zSpeed;
+
+        this.sourcePos = startPos;
+        this.particleMaxAge = 500;
+        this.designation = designationPos;
+    }
+
+    private static int distanceToTime(double distance) {
+        return (int) (1 * (distance * TICKS_PER_SECOND) / Math.sqrt(3));
     }
 
     private static int posesToExtraTicks(Vec3d pos1, Vec3d pos2) {
@@ -61,37 +83,13 @@ public class ParticleItemDust extends Particle {
         double secsMinus = (-x * cos(angle) - det) * 2 / 3;
 
 
+        int ticksPlus = (int) Math.round(secsPlus / 2 * TICKS_PER_SECOND);
+        int ticksMinus = (int) Math.round(secsMinus / 2 * TICKS_PER_SECOND);
 
-        int ticksPlus = (int)Math.round(secsPlus / 2 * TICKS_PER_SECOND);
-        int ticksMinus = (int)Math.round(secsMinus / 2 * TICKS_PER_SECOND);
-
-        int totalTicks = ticksPlus >= 0 ? ticksPlus /2 : ticksMinus /2;
+        int totalTicks = ticksPlus >= 0 ? ticksPlus / 2 : ticksMinus / 2;
 
 
         return totalTicks/* - normalTicks*/;
-    }
-
-
-
-    private Vec3d sourcePos;
-    private Vec3d designation;
-
-    public ParticleItemDust(World worldIn, Vec3d startPos, Vec3d designationPos, double xSpeed, double ySpeed, double zSpeed, TextureAtlasSprite texture) {
-        super(worldIn, startPos.x, startPos.y, startPos.z, xSpeed, ySpeed, zSpeed);
-        this.setParticleTexture(texture);
-        this.particleRed = 0.6F;
-        this.particleGreen = 0.6F;
-        this.particleBlue = 0.6F;
-        this.particleScale /= 2.0F;
-
-        // The vanilla Particle constructor added random variation to our starting velocity.  Undo it!
-        this.motionX = xSpeed;
-        this.motionY = ySpeed;
-        this.motionZ = zSpeed;
-
-        this.sourcePos = startPos;
-        this.particleMaxAge = 500;
-        this.designation = designationPos;
     }
 
     public static ParticleItemDust create(World world, Vec3d startPos, Vec3d endPos, double blocksPerTick, ItemStack itemStack) {
@@ -149,48 +147,46 @@ public class ParticleItemDust extends Particle {
                             }
                         }*/
 
-                    Util.innerForEach(crafter.getHolograms(), hologramPos -> {
-                        TileEntity hologramTile = Util.getTileEntity(world, hologramPos);
-                        IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH);
-                        ItemStack itemStack = itemHandler.getStackInSlot(0);
+            Util.innerForEach(crafter.getHolograms(), hologramPos -> {
+                TileEntity hologramTile = Util.getTileEntity(world, hologramPos);
+                IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH);
+                ItemStack itemStack = itemHandler.getStackInSlot(0);
 
-                        if (!itemStack.getItem().equals(Items.AIR)) {
-                            Vec3d startPos = new Vec3d(hologramPos.getX() + 0.2, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.2);
+                if (!itemStack.getItem().equals(Items.AIR)) {
+                    Vec3d startPos = new Vec3d(hologramPos.getX() + 0.2, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.2);
 
-                            Vec3d endPos = crafter.centerOfHolograms();
+                    Vec3d endPos = crafter.centerOfHolograms();
 
-                            int extra = (int) (Util.minimalDistanceOf(startPos, endPos) / SPEED_BLOCKS_PER_TICK);
-                            int relativeTicksPassed = ticksPassed + extra;
+                    int extra = (int) (Util.minimalDistanceOf(startPos, endPos) / SPEED_BLOCKS_PER_TICK);
+                    int relativeTicksPassed = ticksPassed + extra;
 
-                            if (relativeTicksPassed >= PHASE_2_START_TICKS) {
-                                double ticksSincePhase2 = relativeTicksPassed - (double)PHASE_2_START_TICKS;
-                                double newY = endPos.y + (ticksSincePhase2) * PHASE_2_SPEED_BLOCKS_PER_TICK_UPWARDS;
-                                endPos = new Vec3d(endPos.x, newY, endPos.z);
-                            }
+                    if (relativeTicksPassed >= PHASE_2_START_TICKS) {
+                        double ticksSincePhase2 = relativeTicksPassed - (double) PHASE_2_START_TICKS;
+                        double newY = endPos.y + (ticksSincePhase2) * PHASE_2_SPEED_BLOCKS_PER_TICK_UPWARDS;
+                        endPos = new Vec3d(endPos.x, newY, endPos.z);
+                    }
 
-                            extra = (int) (Util.minimalDistanceOf(startPos, endPos) / SPEED_BLOCKS_PER_TICK);
-                            relativeTicksPassed = ticksPassed + extra;
-
-
-                            if (durationTicks > relativeTicksPassed) {
+                    extra = (int) (Util.minimalDistanceOf(startPos, endPos) / SPEED_BLOCKS_PER_TICK);
+                    relativeTicksPassed = ticksPassed + extra;
 
 
-                                shootDustParticle(world, startPos, endPos, itemStack);
+                    if (durationTicks > relativeTicksPassed) {
 
-                                startPos = new Vec3d(hologramPos.getX() + 0.2, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.8);
-                                shootDustParticle(world, startPos, endPos, itemStack);
 
-                                startPos = new Vec3d(hologramPos.getX() + 0.8, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.2);
-                                shootDustParticle(world, startPos, endPos, itemStack);
+                        shootDustParticle(world, startPos, endPos, itemStack);
 
-                                startPos = new Vec3d(hologramPos.getX() + 0.8, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.8);
-                                shootDustParticle(world, startPos, endPos, itemStack);
-                            }
-                        }
-                    });
-                }, TICKS_BETWEEN_PARTICLES,
-                durationTicks,
-                ParticleItemDust.TICKER_ID + Util.<TileCrafter>getTileEntity(world, crafterPos).masterPos());
+                        startPos = new Vec3d(hologramPos.getX() + 0.2, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.8);
+                        shootDustParticle(world, startPos, endPos, itemStack);
+
+                        startPos = new Vec3d(hologramPos.getX() + 0.8, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.2);
+                        shootDustParticle(world, startPos, endPos, itemStack);
+
+                        startPos = new Vec3d(hologramPos.getX() + 0.8, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.8);
+                        shootDustParticle(world, startPos, endPos, itemStack);
+                    }
+                }
+            });
+        }, TICKS_BETWEEN_PARTICLES, durationTicks, ParticleItemDust.TICKER_ID + Util.<TileCrafter>getTileEntity(world, crafterPos).masterPos());
 
     }
 

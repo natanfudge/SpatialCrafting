@@ -16,6 +16,7 @@ public final class ClientTicker {
     private static List<Ticker> tickers = new LinkedList<>();
     private static long ticks = 0;
     private static boolean inWorld = false;
+
     private ClientTicker() {}
 
     /**
@@ -54,6 +55,8 @@ public final class ClientTicker {
     }
 
     private static void tick() {
+        tickers.removeIf(ticker -> ticker.isDone);
+
         tickers.forEach(ticker -> {
 
             // Delay time has passed
@@ -68,7 +71,6 @@ public final class ClientTicker {
             }
         });
 
-        tickers.removeIf(ticker -> ticker.isDone);
 
         ticks++;
 

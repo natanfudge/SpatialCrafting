@@ -4,10 +4,7 @@ import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.SCConstants;
 import fudge.spatialcrafting.common.block.BlockCrafter;
 import fudge.spatialcrafting.common.util.Util;
-import fudge.spatialcrafting.network.PacketHandler;
-import fudge.spatialcrafting.network.block.PacketUpdateHologram;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -16,7 +13,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.apache.logging.log4j.Level;
@@ -25,21 +21,17 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class TileHologram extends TileEntity {
+
+
+    public static final String INVENTORY_NBT = "inventory";
+    public static final String LAST_CHANGE_TIME_NBT = "lastChangeTime";
+    public static final String MASTER_BLOCK_NBT = "masterBlock";
     private long lastChangeTime;
     private ItemStackHandler inventory = new ItemStackHandler(1) {
         @Override
         protected void onContentsChanged(int slot) {
-            if (!world.isRemote) {
-                lastChangeTime = world.getTotalWorldTime();
-                // Sends a packet from the server to the clients to update them that a change has occured
-                PacketHandler.getNetwork().sendToAllAround(new PacketUpdateHologram(TileHologram.this),
-                        new NetworkRegistry.TargetPoint(world.provider.getDimension(),
-                                pos.getX(),
-                                pos.getY(),
-                                pos.getZ(),
-                                SCConstants.NORMAL_ITEMSTACK_LIMIT));
-                markDirty();
-            }
+            Util.<TileHologram>getTileEntity(world, pos).setLastChangeTime(world.getTotalWorldTime());
+            markDirty();
         }
 
         @Override
@@ -55,7 +47,7 @@ public class TileHologram extends TileEntity {
     }
 
 
-    public TileCrafter getMasterCrafter() {
+    public TileCrafter getCrafter() {
         return Util.getTileEntity(world, getMasterPos());
     }
 
@@ -87,35 +79,44 @@ public class TileHologram extends TileEntity {
         return new AxisAlignedBB(getPos(), getPos().add(1, 2, 1));
     }
 
-    // Saves inventory
-    @Nullable
-    @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound compound) {
-        compound.setTag("inventory", inventory.serializeNBT());
-        compound.setLong("lastChangeTime", lastChangeTime);
+    protected NBTTagCompound serialized(NBTTagCompound existingData) {
+
+        existingData.setTag(INVENTORY_NBT, inventory.serializeNBT());
+        existingData.setLong(LAST_CHANGE_TIME_NBT, lastChangeTime);
         try {
-            compound.setLong("masterBlock", masterBlockPos.toLong());
+            existingData.setLong(MASTER_BLOCK_NBT, masterBlockPos.toLong());
         } catch (NullPointerException e) {
             SpatialCrafting.LOGGER.log(Level.ERROR,
                     "[Spatial Crafting] A hologram exists without being bound to a multiblock at " + pos + " ! Report to the mod author if this happens normally");
         }
 
-        return super.writeToNBT(compound);
+        return existingData;
+    }
+
+    protected void deserialize(NBTTagCompound serializedData) {
+        inventory.deserializeNBT(serializedData.getCompoundTag(INVENTORY_NBT));
+        lastChangeTime = serializedData.getLong(LAST_CHANGE_TIME_NBT);
+        try {
+            masterBlockPos = BlockPos.fromLong(serializedData.getLong(MASTER_BLOCK_NBT));
+        } catch (NullPointerException e) {
+            SpatialCrafting.LOGGER.log(Level.ERROR,
+                    "[Spatial Crafting] A hologram exists without being bound to a multiblock at " + pos + " ! Report to the mod author if this happens normally");
+        }
+    }
+
+
+    // Saves inventory
+    @Nullable
+    @Override
+    public NBTTagCompound writeToNBT(NBTTagCompound existingData) {
+        return super.writeToNBT(this.serialized(existingData));
     }
 
     // Loads inventory
     @Override
-    public void readFromNBT(NBTTagCompound compound) {
-        inventory.deserializeNBT(compound.getCompoundTag("inventory"));
-        lastChangeTime = compound.getLong("lastChangeTime");
-        try {
-            masterBlockPos = BlockPos.fromLong(compound.getLong("masterBlock"));
-        } catch (NullPointerException e) {
-            SpatialCrafting.LOGGER.log(Level.ERROR,
-                    "[Spatial Crafting] A hologram exists without being bound to a multiblock at " + pos + " ! Report to the mod author if this happens normally");
-        }
-
-        super.readFromNBT(compound);
+    public void readFromNBT(NBTTagCompound serializedData) {
+        super.readFromNBT(serializedData);
+        deserialize(serializedData);
     }
 
 
@@ -135,21 +136,37 @@ public class TileHologram extends TileEntity {
     }
 
     @Override
-    //todo: changed, might cause problems
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        Minecraft.getMinecraft().world.notifyBlockUpdate(pos, BlockCrafter.DEFAULT_STATE, BlockCrafter.DEFAULT_STATE, 1);
+    public void handleUpdateTag(NBTTagCompound data) {
+        super.handleUpdateTag(data);
+        deserialize(data);
     }
 
-    @Nullable
+    public void removeItem(int amount, boolean informClient) {
+        this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH).extractItem(0, amount, false);
+        if (informClient) {
+            IBlockState state = this.getBlockState();
+            world.notifyBlockUpdate(new BlockPos(pos), state, state, SCConstants.NOTIFY_CLIENT);
+        }
+    }
+
     @Override
     public SPacketUpdateTileEntity getUpdatePacket() {
-        return new SPacketUpdateTileEntity(this.pos, 0, getUpdateTag());
+        return new SPacketUpdateTileEntity(getPos(), 1, this.serialized(new NBTTagCompound()));
+    }
+
+    @Override
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+        deserialize(pkt.getNbtCompound());
+    }
+
+    private IBlockState getBlockState() {
+        return world.getBlockState(pos);
     }
 
     @Nullable
     @Override
     public NBTTagCompound getUpdateTag() {
-        return this.writeToNBT(new NBTTagCompound());
+        return this.serialized(super.getUpdateTag());
     }
 
 
