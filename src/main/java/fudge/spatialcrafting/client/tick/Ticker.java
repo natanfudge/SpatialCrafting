@@ -1,5 +1,8 @@
 package fudge.spatialcrafting.client.tick;
 
+import net.minecraftforge.client.event.GuiScreenEvent;
+
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public class Ticker {
@@ -17,6 +20,7 @@ public class Ticker {
         this.duration = duration;
         this.startTime = startTime;
         this.isDone = isDone;
+        this.id = id;
     }
 
     @Override
@@ -26,5 +30,10 @@ public class Ticker {
         }
 
         return ((Ticker) other).id.equals(this.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

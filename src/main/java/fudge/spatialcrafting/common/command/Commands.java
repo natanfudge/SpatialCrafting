@@ -1,6 +1,7 @@
 package fudge.spatialcrafting.common.command;
 
 import com.google.common.collect.Lists;
+import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.SCConstants;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -38,7 +39,7 @@ public class Commands extends CommandBase {
                     try {
                         command.execute(server, sender, words);
                     } catch (CommandException e) {
-                        e.printStackTrace();
+                        SpatialCrafting.LOGGER.error(e);
                     }
                 } else {
                     sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.no_permission", 0));

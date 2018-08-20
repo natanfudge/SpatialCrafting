@@ -48,7 +48,7 @@ public final class ClientTicker {
      */
     @SubscribeEvent
     public static void onTickStartAndEnd(TickEvent.ClientTickEvent event) {
-        if (event.phase == TickEvent.Phase.START || !inWorld || tickers.size() == 0) return;
+        if (event.phase == TickEvent.Phase.START || !inWorld || tickers.isEmpty()) return;
 
         tick();
     }

@@ -111,11 +111,9 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
                 WorldSavedDataCrafters.addMasterBlock(world, masterPos);
 
 
-            } else if (placer instanceof EntityPlayer) {
-                if (world.isRemote) {
-                    ((EntityPlayer) (placer)).sendStatusMessage(new TextComponentTranslation("tile.spatialcrafting.blockcrafter.no_space", 0),
-                            true);
-                }
+            } else if (world.isRemote && placer instanceof EntityPlayer) {
+                ((EntityPlayer) (placer)).sendStatusMessage(new TextComponentTranslation("tile.spatialcrafting.blockcrafter.no_space", 0), true);
+
             }
         }
 
@@ -188,7 +186,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         }
 
         // Removes the existing items
-        Util.innerForEach(crafter.getHolograms(), (blockPos) -> {
+        Util.innerForEach(crafter.getHolograms(), blockPos -> {
 
             world.getTileEntity(blockPos).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH).extractItem(0,
                     1,
@@ -216,10 +214,6 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     }
 
 
-    @Override
-    public int getLightValue(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return super.getLightValue(state, world, pos);
-    }
 
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
@@ -234,7 +228,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
             }
 
             // Destroy all holograms in the BlockPos list.
-            Util.innerForEach(crafter.getHolograms(), (blockPos) -> {
+            Util.innerForEach(crafter.getHolograms(), blockPos -> {
                 if (worldIn.getBlockState(blockPos).getBlock() == SCBlocks.HOLOGRAM) {
                     worldIn.setBlockState(blockPos, Blocks.AIR.getDefaultState(), NOTIFY_CLIENT + BLOCK_UPDATE);
                 }
@@ -296,7 +290,6 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
                 }
                 if (list.size() == crafterSize * crafterSize) {
                     return list;
-                    // return craftersSorted(list);
                 }
             }
         }

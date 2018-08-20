@@ -8,13 +8,13 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
-public abstract class BlockTileEntity<TE extends TileEntity> extends Block {
+public abstract class BlockTileEntity<T extends TileEntity> extends Block {
 
     public BlockTileEntity(Material material) {
         super(material);
     }
 
-    public abstract Class<TE> getTileEntityClass();
+    public abstract Class<T> getTileEntityClass();
 
     @Override
     public boolean hasTileEntity(IBlockState state) {
@@ -23,7 +23,7 @@ public abstract class BlockTileEntity<TE extends TileEntity> extends Block {
 
     @Nullable
     @Override
-    public abstract TE createTileEntity(World world, IBlockState state);
+    public abstract T createTileEntity(World world, IBlockState state);
 }
 
 

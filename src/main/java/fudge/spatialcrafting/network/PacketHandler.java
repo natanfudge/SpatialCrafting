@@ -12,6 +12,7 @@ public class PacketHandler {
     private static int packetId = 0;
 
     public PacketHandler() {
+        // Required for reflection
     }
 
     private static int nextID() {

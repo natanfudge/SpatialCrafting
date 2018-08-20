@@ -48,25 +48,5 @@ public class Offset extends Vec3i {
     public BlockPos adjustToMaster(Vec3i slavePos){
         return new BlockPos(slavePos.getX() - this.getX(), slavePos.getY() - this.getY(), slavePos.getZ() - this.getZ());
     }
-/*
-
-    */
-/**
-     * Currently only for the crafter blocks
-     *//*
-
-    public int toListPos(int crafterSize){
-        return getX() + this.getZ() * crafterSize;
-    }
-
-    */
-/**
-     * Currently only for the crafter blocks
-     *//*
-
-    public static Offset fromListPos(int listPos, int crafterSize){
-        return new Offset(listPos % crafterSize, 0, listPos / crafterSize);
-    }
-*/
 
 }

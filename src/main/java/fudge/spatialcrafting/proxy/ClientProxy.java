@@ -16,9 +16,12 @@ public class ClientProxy implements IProxy {
 
     @Override
     public void init() {
+        // No client-only inits at the moment
     }
 
     @Override
-    public void postInit() {}
+    public void postInit() {
+        // No client-only postInits at the moment
+    }
 
 }

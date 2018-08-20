@@ -2,7 +2,6 @@ package fudge.spatialcrafting.common.util;
 
 
 import fudge.spatialcrafting.SpatialCrafting;
-import jdk.nashorn.internal.objects.annotations.Constructor;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -43,13 +42,11 @@ public final class Util {
         return norm(pos1.subtract(pos2));
     }
 
-    private static double norm(Vec3d vec3){
+    private static double norm(Vec3d vec3) {
         return Math.sqrt(vec3.x * vec3.x + vec3.y * vec3.y + vec3.z * vec3.z);
     }
 
-    /*public static double euclideanDistanceOf(Vec3d pos1, Vec3d pos2) {
-        return Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y) + Math.abs(pos1.z - pos2.z);
-    }*/
+
 
     /**
      * Returns the position at the middle of the 2 BlockPoses.
@@ -64,8 +61,9 @@ public final class Util {
 
     /**
      * Drops an itemStack in the world
-     * @param world The world to drop the itemStack in
-     * @param pos The position in the world to drop the itemStack in
+     *
+     * @param world     The world to drop the itemStack in
+     * @param pos       The position in the world to drop the itemStack in
      * @param itemStack The itemStack to drop in the world.
      */
     public static void dropItemStack(World world, Vec3d pos, ItemStack itemStack) {
@@ -77,6 +75,7 @@ public final class Util {
     /**
      * Returns true if every inner element in the arrays is in the same in every position.
      * Currently throws exception if they are not the same size
+     *
      * @param tester The condition in which two inner objects are considered equal
      */
     public static <T> boolean innerEquals(T[][][] arr1, T[][][] arr2, BiPredicate<T, T> tester) {
@@ -112,10 +111,10 @@ public final class Util {
     }
 
 
-
     /**
      * Returns true if every inner element in the arrays is in the same in every position.
      * Currently throws exception if they are not the same size
+     *
      * @param tester The condition in which two inner objects are considered equal
      */
     public static <T1, T2> boolean innerEqualsDifferentSizes(T1[][][] arr1, T2[][][] arr2, BiPredicate<T1, T2> tester) {
@@ -125,7 +124,8 @@ public final class Util {
     /**
      * Returns true if every inner element in the arrays is in the same in every position.
      * Counts null the same as the array being not in bounds, allowing for different sizes of arrays to be equal.
-     * @param tester The condition in which two inner objects are considered equal
+     *
+     * @param tester     The condition in which two inner objects are considered equal
      * @param nullObject An object that should count as equal to null.
      */
     public static <T1, T2, T3> boolean innerEqualsDifferentSizes(T1[][][] arr1, T2[][][] arr2, BiPredicate<T1, T2> tester, T3 nullObject) {
@@ -260,6 +260,7 @@ public final class Util {
 
     /**
      * Perform an action on every inner object in a 3D array.
+     *
      * @param function The action to perforn on every inner object.
      */
     public static <T> void innerForEach(T[][][] arr, Consumer<T> function) {
@@ -278,22 +279,20 @@ public final class Util {
     }
 
 
-
-
-
-        /**
-         * Gets the TileEntity at the given position in the world
-         * @param world The world to get the TileEntity from
-         * @param pos The position in the world to get the TileEntity from
-         */
+    /**
+     * Gets the TileEntity at the given position in the world
+     *
+     * @param world The world to get the TileEntity from
+     * @param pos   The position in the world to get the TileEntity from
+     */
     @Contract("_,null -> null; null,_ -> null; !null,!null -> !null")
     @Nullable
-    public static <TE extends TileEntity> TE getTileEntity(IBlockAccess world, BlockPos pos) {
+    public static <T extends TileEntity> T getTileEntity(IBlockAccess world, BlockPos pos) {
         if (world == null) return null;
         if (pos == null) return null;
 
         try {
-            return (TE) world.getTileEntity(pos);
+            return (T) world.getTileEntity(pos);
         } catch (ClassCastException e) {
             SpatialCrafting.LOGGER.error("Invalid cast trying to cast between two different tile entities", e);
             return null;
@@ -301,30 +300,7 @@ public final class Util {
 
     }
 
-    /*@Nullable
-    public static <TE extends TileEntity> TE getTileEntity(IBlockAccess world, BlockPos pos) {
-        if (world != null) {
-            if (pos != null) {
 
-                try {
-                    return (TE) world.getTileEntity(pos);
-                } catch (ClassCastException e) {
-                    SpatialCrafting.LOGGER.error("Invalid cast trying to cast between two different tile entities", e);
-                } catch (NullPointerException e) {
-                    SpatialCrafting.LOGGER.error(e);
-                }
-
-            } else {
-                SpatialCrafting.LOGGER.error("BlockPos was null while trying to get tile entity", new NullPointerException());
-
-            }
-        } else {
-            SpatialCrafting.LOGGER.error("World was null while trying to get tile entity", new NullPointerException());
-        }
-
-        // There was a problem along the way
-        return null;
-    }*/
 
 
     /**

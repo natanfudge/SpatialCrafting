@@ -4,6 +4,7 @@ import crafttweaker.CraftTweakerAPI;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import crafttweaker.api.oredict.IOreDictEntry;
+import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.item.ItemStack;
@@ -15,8 +16,7 @@ import org.apache.commons.io.FilenameUtils;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -236,31 +236,31 @@ public class SpatialRecipe {
         final String SCRIPTS_PATH_SOURCE = "/assets/" + MODID + "/scripts/" + EXAMPLE_SCRIPT_NAME;
 
         File spatialCraftingDir = new File(CT_SCRIPTS_FOLDER_NAME + "/" + MODID);
-        if(!spatialCraftingDir.exists()){
+        if (!spatialCraftingDir.exists()) {
             spatialCraftingDir.mkdir();
         }
 
-        String SCRIPTS_PATH_DESTINATION = CT_SCRIPTS_FOLDER_NAME + "/" + MODID + "/" + EXAMPLE_SCRIPT_NAME;
-        URL sourceUrl = SpatialRecipe.class.getResource(SCRIPTS_PATH_SOURCE);
-
-        try {
-            File sourceFile = new File(sourceUrl.toURI());
-            File destFile = new File(SCRIPTS_PATH_DESTINATION);
-
-            try {
-                if (!destFile.exists() && !otherScriptExists(new File(CT_SCRIPTS_FOLDER_NAME + "/" + MODID))) {
-                    FileUtils.copyFile(sourceFile, destFile);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        final String SCRIPTS_PATH_DESTINATION = CT_SCRIPTS_FOLDER_NAME + "/" + MODID + "/" + EXAMPLE_SCRIPT_NAME;
+        InputStream sourceUrl = SpatialRecipe.class.getResourceAsStream(SCRIPTS_PATH_SOURCE);
 
 
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        File destFile = new File(SCRIPTS_PATH_DESTINATION);
+
+
+        copyScriptFile(CT_SCRIPTS_FOLDER_NAME, sourceUrl, destFile);
+
 
         //TODO write the script files into the scripts directory.
+    }
+
+    private static void copyScriptFile(String CT_SCRIPTS_FOLDER_NAME, InputStream sourceUrl, File destFile) {
+        try {
+            if (!destFile.exists() && !otherScriptExists(new File(CT_SCRIPTS_FOLDER_NAME + "/" + MODID))) {
+                FileUtils.copyInputStreamToFile(sourceUrl, destFile);
+            }
+        } catch (IOException e) {
+            SpatialCrafting.LOGGER.error(e);
+        }
     }
 
     private static boolean otherScriptExists(File folder) {

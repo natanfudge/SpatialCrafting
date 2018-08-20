@@ -37,7 +37,6 @@ public class ParticleItemDust extends Particle {
     private static final String TICKER_ID = "ticker_particle_item_dust";
     private static final float SPEED_BLOCKS_PER_TICK = 1.0f / TICKS_PER_SECOND;
     private static final int TICKS_BETWEEN_PARTICLES = (int) (0.1f * TICKS_PER_SECOND);
-    //private static final Function<Double,Double> DISTANCE_TO_TIME = (distance) -> 2 * distance / Math.sqrt(3);
 
     private static int distanceToTime(double distance){
         return (int)(1 * (distance * TICKS_PER_SECOND) / Math.sqrt(3));
@@ -45,7 +44,6 @@ public class ParticleItemDust extends Particle {
 
     private static int posesToExtraTicks(Vec3d pos1, Vec3d pos2) {
 
-        int normalTicks = (int)(Util.euclideanDistanceOf(pos1, pos2) / SPEED_BLOCKS_PER_TICK);
 
         final Vec3d vecUp = new Vec3d(0, 1, 0);
 
@@ -62,8 +60,7 @@ public class ParticleItemDust extends Particle {
         double secsPlus = (-x * cos(angle) + det) * 2 / 3;
         double secsMinus = (-x * cos(angle) - det) * 2 / 3;
 
-       // System.out.println("Plus: " + secsPlus);
-        //System.out.println("Minus: " + secsMinus);
+
 
         int ticksPlus = (int)Math.round(secsPlus / 2 * TICKS_PER_SECOND);
         int ticksMinus = (int)Math.round(secsMinus / 2 * TICKS_PER_SECOND);
@@ -74,15 +71,6 @@ public class ParticleItemDust extends Particle {
         return totalTicks/* - normalTicks*/;
     }
 
-    private static double preciseDistance(double distance){
-        return 1 * (distance * TICKS_PER_SECOND) / Math.sqrt(3);
-    }
-
-   /* private static double posesToExtraTicks(Vec3d pos1, Vec3d pos2){
-        double degree = Math.asin((pos1.subtract(pos2)).normalize().x);
-
-
-    }*/
 
 
     private Vec3d sourcePos;
@@ -116,9 +104,8 @@ public class ParticleItemDust extends Particle {
         TextureAtlasSprite texture = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(itemStack,
                 world,
                 null).getParticleTexture();
-        ParticleItemDust particle = new ParticleItemDust(world, startPos, endPos, speedX, speedY, speedZ, texture);
 
-        return particle;
+        return new ParticleItemDust(world, startPos, endPos, speedX, speedY, speedZ, texture);
     }
 
     //TODO: fix this. maybe make it faster as it goes on.
@@ -176,7 +163,7 @@ public class ParticleItemDust extends Particle {
                             int relativeTicksPassed = ticksPassed + extra;
 
                             if (relativeTicksPassed >= PHASE_2_START_TICKS) {
-                                double ticksSincePhase2 = relativeTicksPassed - PHASE_2_START_TICKS;
+                                double ticksSincePhase2 = relativeTicksPassed - (double)PHASE_2_START_TICKS;
                                 double newY = endPos.y + (ticksSincePhase2) * PHASE_2_SPEED_BLOCKS_PER_TICK_UPWARDS;
                                 endPos = new Vec3d(endPos.x, newY, endPos.z);
                             }

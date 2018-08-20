@@ -249,7 +249,7 @@ public class TileCrafter extends TileEntity {
         return Util.middleOf(edge1, edge2);
     }
 
-    public static BlockPos createMultiblock(World world, List<BlockPos> crafterList, EntityLivingBase placer, int crafterSize) {
+    public static BlockPos createMultiblock(World world, List<BlockPos> crafterList, int crafterSize) {
         BlockPos masterPos = getMasterPosFromList(crafterList);
 
 
@@ -310,7 +310,7 @@ public class TileCrafter extends TileEntity {
         Set<BlockPos> poses = WorldSavedDataCrafters.getMasterBlocks(world);
 
         // There are no master blocks
-        if (poses.size() == 0) {
+        if (poses.isEmpty()) {
             return null;
         }
 

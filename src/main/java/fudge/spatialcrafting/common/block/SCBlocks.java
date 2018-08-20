@@ -8,7 +8,6 @@ import fudge.spatialcrafting.common.tile.TileHologram;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -51,7 +50,7 @@ public final class SCBlocks {
         return blockList;
     }
 
-    public static <BlockT extends Block> BlockT createBlock(BlockT block, String name) {
+    public static <T extends Block> T createBlock(T block, String name) {
 
         block.setTranslationKey(SpatialCrafting.MODID + '.' + name);
 
@@ -70,8 +69,6 @@ public final class SCBlocks {
     public static void registerTileEntities() {
         GameRegistry.registerTileEntity(TileHologram.class, HOLOGRAM.getRegistryName());
         GameRegistry.registerTileEntity(TileCrafter.class, X2CRAFTER_BLOCK.getRegistryName());
-       /* GameRegistry.registerTileEntity(TileMasterCrafter.class,
-                new ResourceLocation(SpatialCrafting.MODID + ":" + RegistryNames.MASTER_CRAFTER_TE));*/
     }
 
     @SubscribeEvent
@@ -94,7 +91,8 @@ public final class SCBlocks {
         public static final String X3CRAFTER_BLOCK = "x3crafter_block";
         public static final String X4CRAFTER_BLOCK = "x4crafter_block";
         public static final String X5CRAFTER_BLOCK = "x5crafter_block";
-        public static final String MASTER_CRAFTER_TE = "master_crafter";
+
+        private RegistryNames(){}
 
     }
 

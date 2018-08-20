@@ -28,7 +28,7 @@ public class SpatialCrafting {
     public static final String VERSION = "0.1.0";
     public static final SpatialCraftingTab SPATIAL_CRAFTING_TAB = new SpatialCraftingTab();
 
-    public static final Logger LOGGER = LogManager.getLogger("Spatial Crafting");
+    public static final Logger LOGGER = LogManager.getLogger(NAME);
     private static final String SERVER_PROXY_PATH = "fudge.spatialcrafting.proxy.ServerProxy";
     private static final String CLIENT_PROXY_PATH = "fudge.spatialcrafting.proxy.ClientProxy";
     @Mod.Instance(MODID)

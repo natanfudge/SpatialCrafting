@@ -3,7 +3,6 @@ package fudge.spatialcrafting.common.tile;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.SCConstants;
 import fudge.spatialcrafting.common.block.BlockCrafter;
-import fudge.spatialcrafting.common.block.SCBlocks;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.block.PacketUpdateHologram;
@@ -39,8 +38,6 @@ public class TileHologram extends TileEntity {
                                 pos.getY(),
                                 pos.getZ(),
                                 SCConstants.NORMAL_ITEMSTACK_LIMIT));
-                IBlockState state = world.getBlockState(pos);
-                // world.notifyBlockUpdate(pos, state, state, SCConstants.NOTIFY_CLIENT);
                 markDirty();
             }
         }
@@ -57,12 +54,9 @@ public class TileHologram extends TileEntity {
         return masterBlockPos;
     }
 
-    /*public TileMasterCrafter getMasterCrafter() {
-        return (TileMasterCrafter) world.getTileEntity(getMasterPos());
-    }*/
 
-    public TileCrafter getMasterCrafter(){
-        return Util.getTileEntity(world,getMasterPos());
+    public TileCrafter getMasterCrafter() {
+        return Util.getTileEntity(world, getMasterPos());
     }
 
 
@@ -143,10 +137,7 @@ public class TileHologram extends TileEntity {
     @Override
     //todo: changed, might cause problems
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        Minecraft.getMinecraft().world.notifyBlockUpdate(pos,
-                BlockCrafter.DEFAULT_STATE,
-                BlockCrafter.DEFAULT_STATE,
-                1);
+        Minecraft.getMinecraft().world.notifyBlockUpdate(pos, BlockCrafter.DEFAULT_STATE, BlockCrafter.DEFAULT_STATE, 1);
     }
 
     @Nullable

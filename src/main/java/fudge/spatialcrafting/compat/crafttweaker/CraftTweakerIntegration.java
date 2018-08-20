@@ -13,8 +13,6 @@ import net.minecraft.item.ItemStack;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
-import java.io.File;
-
 
 // ZenClass means that it literally exists in zenscript
 @ZenClass("mods." + SpatialCrafting.MODID)

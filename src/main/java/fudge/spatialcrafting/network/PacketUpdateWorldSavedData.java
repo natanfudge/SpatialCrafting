@@ -1,5 +1,6 @@
 package fudge.spatialcrafting.network;
 
+import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -61,7 +62,7 @@ public class PacketUpdateWorldSavedData implements IMessage {
             keys.forEach(key -> craftEndTimes.put(BlockPos.fromLong(Long.parseLong(key)), Long.parseLong(key)));
 
         } catch (IOException e) {
-            e.printStackTrace();
+            SpatialCrafting.LOGGER.error(e);
         }
 
     }
