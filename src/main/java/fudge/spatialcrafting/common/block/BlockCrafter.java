@@ -106,7 +106,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
             // Searches for space above it
             if (spaceExists(world, crafterBlocks, size())) {
 
-                BlockPos masterPos = createMultiblock(world, crafterBlocks, placer, crafterSize);
+                BlockPos masterPos = createMultiblock(world, crafterBlocks, crafterSize);
                 // Stores the masterblock for the purposes of iterating through available crafters.
                 WorldSavedDataCrafters.addMasterBlock(world, masterPos);
 
