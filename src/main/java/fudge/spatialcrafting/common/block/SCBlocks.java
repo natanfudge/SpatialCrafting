@@ -23,8 +23,7 @@ import static net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 @Mod.EventBusSubscriber
 public final class SCBlocks {
 
-    @ObjectHolder(RegistryNames.SENSOR)
-    public static final BlockSensor SENSOR = notNull();
+
     @ObjectHolder(RegistryNames.HOLOGRAM)
     public static final BlockHologram HOLOGRAM = notNull();
     @ObjectHolder(RegistryNames.X2CRAFTER_BLOCK)
@@ -37,7 +36,7 @@ public final class SCBlocks {
     public static final BlockCrafter X5CRAFTER_BLOCK = notNull();
 
 
-    private static List<Block> blockList = ImmutableList.of(createBlock(new BlockSensor(), RegistryNames.SENSOR),
+    private static List<Block> blockList = ImmutableList.of(
             createBlock(new BlockHologram(), RegistryNames.HOLOGRAM),
             createBlock(new BlockCrafter(2), RegistryNames.X2CRAFTER_BLOCK),
             createBlock(new BlockCrafter(3), RegistryNames.X3CRAFTER_BLOCK),
@@ -61,7 +60,7 @@ public final class SCBlocks {
         block.setRegistryName(name);
 
         // Assigns the block the mod's creative tab
-        block.setCreativeTab(SpatialCrafting.SPATIAL_CRAFTING_TAB);
+       // block.setCreativeTab(SpatialCrafting.SPATIAL_CRAFTING_TAB);
 
         return block;
     }
@@ -85,7 +84,6 @@ public final class SCBlocks {
 
     public static final class RegistryNames {
 
-        public static final String SENSOR = "sensor";
         public static final String HOLOGRAM = "hologram";
         public static final String X2CRAFTER_BLOCK = "x2crafter_block";
         public static final String X3CRAFTER_BLOCK = "x3crafter_block";

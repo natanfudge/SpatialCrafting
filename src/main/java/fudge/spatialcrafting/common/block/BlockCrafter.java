@@ -52,6 +52,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         this.setDefaultState(this.blockState.getBaseState().withProperty(FORMED, false));
         this.setHardness(2.0F);
         this.setSoundType(SoundType.WOOD);
+        this.setCreativeTab(SpatialCrafting.SPATIAL_CRAFTING_TAB);
 
     }
 

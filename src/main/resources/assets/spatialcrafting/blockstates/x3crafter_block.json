@@ -3,11 +3,11 @@
   "defaults": {
     "model": "cube_top",
     "textures": {
-      "top": "spatialcrafting:block/x2crafter_block/top",
-      "side": "spatialcrafting:block/x2crafter_block/side"
+      "top": "spatialcrafting:block/crafter/x3/top",
+      "side": "spatialcrafting:block/crafter/x3/side"
     }
   },
-  "variants": {
+  "variants":{
     "formed": {
       "false": {
         "textures": {
@@ -18,16 +18,7 @@
         }
       }
     },
-    "inventory": [
-      {
-        "model": "cube_top",
-        "textures": {
-          "top": "spatialcrafting:block/x2crafter_block/top",
-          "side": "spatialcrafting:block/x2crafter_block/side"
-        },
-        "transform": "forge:default-block"
-      }
-    ]
+    "inventory": [{}]
   }
 }
 

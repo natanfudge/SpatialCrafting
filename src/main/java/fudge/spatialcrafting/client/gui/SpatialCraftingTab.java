@@ -14,7 +14,7 @@ public class SpatialCraftingTab extends CreativeTabs {
 
     @Override
     public ItemStack createIcon() {
-        return new ItemStack(SCBlocks.X2CRAFTER_BLOCK);
+        return new ItemStack(SCBlocks.X5CRAFTER_BLOCK);
     }
 
 }

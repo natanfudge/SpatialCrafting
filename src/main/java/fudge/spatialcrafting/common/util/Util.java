@@ -2,6 +2,7 @@ package fudge.spatialcrafting.common.util;
 
 
 import fudge.spatialcrafting.SpatialCrafting;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -13,6 +14,8 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
@@ -119,6 +122,7 @@ public final class Util {
     public static <T1, T2> boolean innerEqualsDifferentSizes(T1[][][] arr1, T2[][][] arr2, BiPredicate<T1, T2> tester) {
         return innerEqualsDifferentSizes(arr1, arr2, tester, null);
     }
+
 
     /**
      * Returns true if every inner element in the arrays is in the same in every position.
