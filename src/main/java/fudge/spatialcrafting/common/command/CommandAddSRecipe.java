@@ -8,7 +8,6 @@ import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
-import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -29,7 +28,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.List;
 
-public class CommandAddSRecipe extends CommandBase {
+public class CommandAddSRecipe extends SCCommand {
 
     public static final String RECIPES_FILE_NAME = "___generated_spatial_recipes___.zs";
 
@@ -111,13 +110,13 @@ public class CommandAddSRecipe extends CommandBase {
     @Override
     @Nonnull
     public String getName() {
-        return "printZS";
+        return "Add Spatial Recipe";
     }
 
     @Override
     @Nonnull
     public String getUsage(@Nonnull ICommandSender sender) {
-        return "sc addrecipe <wildcard/oredict> (optional)";
+        return "/sc addrecipe <exact/wildcard/oredict>";
     }
 
     @Override
@@ -225,4 +224,8 @@ public class CommandAddSRecipe extends CommandBase {
     }
 
 
+    @Override
+    public String description() {
+        return "commands.spatialcrafting.add_recipe.description";
+    }
 }

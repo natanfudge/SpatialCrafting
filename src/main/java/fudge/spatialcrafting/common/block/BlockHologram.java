@@ -105,7 +105,20 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
             ItemStack heldItem = player.getHeldItem(hand);
             if (!player.isSneaking()) {
                 // Inputs the held item into the hologram / takes it out of the hologram and gives it back to the player
-                if (!heldItem.isEmpty()) {
+
+                // Take item out of the hologram
+                ItemStack extractedItemStack = itemHandler.extractItem(0, SCConstants.NORMAL_ITEMSTACK_LIMIT, false);
+
+                // If there was anything in there
+                if (!extractedItemStack.isEmpty()) {
+                    ItemHandlerHelper.giveItemToPlayer(player, extractedItemStack);
+
+                    // If items were taken out during crafting then it must be stopped
+                    if (extractedItemStack.getCount() >= 1 && crafter.isCrafting()) {
+                        crafter.stopCrafting();
+                    }
+                    // If there was nothing in there, so we should put an item in there in the case that the player is holding an item.
+                } else if (!heldItem.isEmpty()) {
                     if (!crafter.isCrafting()) {
                         // Put item into the hologram
                         ItemStack remainingItemStack = itemHandler.insertItem(0, heldItem, false);
@@ -115,14 +128,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
                     }
 
                 } else {
-                    // Take item out of the hologram
-                    ItemStack extractedItemStack = itemHandler.extractItem(0, SCConstants.NORMAL_ITEMSTACK_LIMIT, false);
-                    ItemHandlerHelper.giveItemToPlayer(player, extractedItemStack);
 
-                    // If items were taken out during crafting then it must be stopped
-                    if (extractedItemStack.getCount() >= 1 && crafter.isCrafting()) {
-                        crafter.stopCrafting();
-                    }
 
                 }
 

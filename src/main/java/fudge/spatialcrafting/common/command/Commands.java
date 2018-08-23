@@ -10,16 +10,21 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Commands extends CommandBase {
-    private Map<List<String>, CommandBase> commands = new HashMap<>();
+    //private static Map<List<String>, CommandBase> commands = new HashMap<>();
+    private static List<SCCommand> commands = new ArrayList<>();
 
     public Commands() {
-        CommandAddSRecipe commandAddSRecipe = new CommandAddSRecipe();
-        commands.put(commandAddSRecipe.getAliases(), new CommandAddSRecipe());
+        //commands.put(commandAddSRecipe.getAliases(), commandAddSRecipe);
+        commands.add(new CommandAddSRecipe());
+        commands.add(new CommandHelp());
+    }
+
+    public static List<SCCommand> getCommands() {
+        return commands;
     }
 
     @Override
@@ -27,11 +32,8 @@ public class Commands extends CommandBase {
 
         // Look for the command in the map to see if we can execute it.
         boolean exists = false;
-        List<String> aliases;
-        CommandBase command;
-        for (Map.Entry<List<String>, CommandBase> entry : commands.entrySet()) {
-            aliases = entry.getKey();
-            command = entry.getValue();
+        for (CommandBase command : getCommands()) {
+            List<String> aliases = command.getAliases();
 
             if (aliases.contains(words[0].toLowerCase())) {
                 exists = true;

@@ -8,6 +8,7 @@ import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.TileHologram;
 import fudge.spatialcrafting.common.util.Util;
+import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
@@ -24,10 +25,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 import static fudge.spatialcrafting.common.SCConstants.BLOCK_UPDATE;
 import static fudge.spatialcrafting.common.SCConstants.NOTIFY_CLIENT;
@@ -123,6 +121,30 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         return true;
     }
 
+    public static boolean attemptMultiblock(World world, BlockPos pos, EntityLivingBase placer, int crafterSize) {
+        // The master block is the last block placed before the multiblock was formed
+        List<BlockPos> crafterBlocks = getPossibleMultiblock(world, pos);
+        if (crafterBlocks != null) {
+            // Searches for space above it
+            if (spaceExists(world, crafterBlocks, crafterSize)) {
+
+                BlockPos masterPos = createMultiblock(world, crafterBlocks, crafterSize);
+                // Stores the masterblock for the purposes of iterating through available crafters.
+                WorldSavedDataCrafters.addMasterBlock(world, masterPos);
+
+                return true;
+
+
+            } else if (world.isRemote && placer instanceof EntityPlayer) {
+                ((EntityPlayer) (placer)).sendStatusMessage(new TextComponentTranslation("tile.spatialcrafting.blockcrafter.no_space", 0), true);
+
+            }
+        }
+
+
+        return false;
+    }
+
     public int size() {
         return crafterSize;
     }
@@ -166,23 +188,13 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
      */
     @Override
     public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-        // The master block is the last block placed before the multiblock was formed
-        List<BlockPos> crafterBlocks = getPossibleMultiblock(world, pos);
-        if (crafterBlocks != null) {
-            // Searches for space above it
-            if (spaceExists(world, crafterBlocks, size())) {
+        attemptMultiblock(world, pos, placer, size());
+    }
 
-                BlockPos masterPos = createMultiblock(world, crafterBlocks, crafterSize);
-                // Stores the masterblock for the purposes of iterating through available crafters.
-                WorldSavedDataCrafters.addMasterBlock(world, masterPos);
-
-
-            } else if (world.isRemote && placer instanceof EntityPlayer) {
-                ((EntityPlayer) (placer)).sendStatusMessage(new TextComponentTranslation("tile.spatialcrafting.blockcrafter.no_space", 0), true);
-
-            }
-        }
-
+    @Override
+    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        attemptMultiblock(worldIn, pos, null, size());
+        List<String> s = new ArrayList<>();
     }
 
     @Override
@@ -193,7 +205,6 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
                 assert crafter != null;
 
                 ItemStack[][][] craftingInventory = crafter.getHologramInvArr();
-
 
                 if (!crafter.isCrafting()) {
                     // Check if any recipe matches, if so, beginCraft the recipe.
@@ -274,41 +285,45 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     }
 
     @Override
-    public void breakBlock(World world, BlockPos pos, IBlockState state) {
+    public void breakBlock(World world, BlockPos placedPos, IBlockState state) {
 
         if (state.getValue(FORMED)) {
-            TileCrafter crafter = (TileCrafter) world.getTileEntity(pos);
+            TileCrafter crafter = (TileCrafter) world.getTileEntity(placedPos);
             assert crafter != null;
 
-            if (crafter.isCrafting()) {
-                crafter.stopCraftingFromServer();
-            }
-
-            // Destroy all holograms in the BlockPos list.
-            Util.innerForEach(crafter.getHolograms(), blockPos -> {
-                if (world.getBlockState(blockPos).getBlock() == SCBlocks.HOLOGRAM) {
-                    world.setBlockState(blockPos, Blocks.AIR.getDefaultState(), NOTIFY_CLIENT + BLOCK_UPDATE);
-                }
-            });
-
-
-            // Notify the blocks they are no longer in a multiblock
-            Util.innerForEach2D(crafter.getCrafterBlocks(), crafterPos -> {
-                IBlockState blockState = world.getBlockState(crafterPos);
-                if (blockState.getBlock() instanceof BlockCrafter) {
-                    world.setBlockState(crafterPos, blockState.withProperty(FORMED, false), SCConstants.NOTIFY_CLIENT);
-                    world.setTileEntity(crafterPos, null);
-                }
-            });
-
-
-            WorldSavedDataCrafters.removeMasterBlock(world, crafter.masterPos());
+            destroyMultiblock(world, crafter);
 
 
         }
 
 
-        super.breakBlock(world, pos, state);
+        super.breakBlock(world, placedPos, state);
+    }
+
+    private void destroyMultiblock(World world, TileCrafter crafter) {
+
+        if (crafter.isCrafting()) {
+            crafter.stopCraftingFromServer();
+        }
+
+        // Destroy all holograms in the BlockPos list.
+        Util.innerForEach(crafter.getHolograms(), blockPos -> {
+            if (world.getBlockState(blockPos).getBlock() == SCBlocks.HOLOGRAM) {
+                world.setBlockState(blockPos, Blocks.AIR.getDefaultState(), NOTIFY_CLIENT + BLOCK_UPDATE);
+            }
+        });
+
+
+        // Notify the blocks they are no longer in a multiblock
+        Util.innerForEach2D(crafter.getCrafterBlocks(), crafterPos -> {
+            IBlockState blockState = world.getBlockState(crafterPos);
+            if (blockState.getBlock() instanceof BlockCrafter) {
+                world.setBlockState(crafterPos, blockState.withProperty(FORMED, false), SCConstants.NOTIFY_CLIENT);
+                world.setTileEntity(crafterPos, null);
+            }
+        });
+
+        WorldSavedDataCrafters.removeMasterBlock(world, crafter.masterPos());
     }
 
     @Override

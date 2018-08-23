@@ -2,7 +2,6 @@ package fudge.spatialcrafting.common.util;
 
 
 import fudge.spatialcrafting.SpatialCrafting;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -14,8 +13,6 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 

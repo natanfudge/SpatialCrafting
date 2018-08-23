@@ -1,10 +1,10 @@
 
 #Blocks
 tile.spatialcrafting.sensor.name=Sensor
-tile.spatialcrafting.x2crafter_block.name=2x2x2 Crafter Block
-tile.spatialcrafting.x3crafter_block.name=3x3x3 Crafter Block
-tile.spatialcrafting.x4crafter_block.name=4x4x4 Crafter Block
-tile.spatialcrafting.x5crafter_block.name=5x5x5 Crafter Block
+tile.spatialcrafting.x2crafter_block.name=Wood-carved Crafter
+tile.spatialcrafting.x3crafter_block.name=Stone-formed crafter
+tile.spatialcrafting.x4crafter_block.name=Ironforged crafter
+tile.spatialcrafting.x5crafter_block.name=Gem-infused Crafter
 
 
 
@@ -15,6 +15,7 @@ tile.spatialcrafting.blockcrafter.no_space=Not enough space to form multiblock
 commands.spatialcrafting.no_permission=You don't have the required permission to invoke this command.
 commands.spatialcrafting.no_such_command=There is no such Spatial Crafting command.
 
+commands.spatialcrafting.add_recipe.description=Adds a spatial recipe. You must first place the recipe's input in a nearby crafter and hold the recipe's output in your hand.
 commands.spatialcrafting.add_recipe.no_crafters=There are no crafters in this dimension!
 commands.spatialcrafting.add_recipe.empty_crafter=You must supply the nearest crafter with inputs.
 commands.spatialcrafting.add_recipe.empty_hand=You must hold an item as an output.
@@ -24,6 +25,11 @@ commands.spatialcrafting.add_recipe.success_num=Spatial recipe for %d %s added s
 commands.spatialcrafting.add_recipe.too_many_words=Add recipe only accepts one additional argument.
 commands.spatialcrafting.add_recipe.invalid_argument=Invalid Argument for adding a recipe. See CraftTweaker wiki (mods -> Spatial Crafting) for details.
 commands.spatialcrafting.add_recipe.too_many_oredicts=One of the given items have multiple matching ore dictionaries. You will have to add the ore dict you want manually.
+
+commands.spatialcrafting.help.description=Prints all command info.
+commands.spatialcrafting.help.optional=Parameters marked with < > are optional!
+commands.spatialcrafting.help.usage=Usage: %s
+
 
 #Recipes
 recipes.spatialcrafting.add_recipe.recipe_exists=That spatial recipe already exists!

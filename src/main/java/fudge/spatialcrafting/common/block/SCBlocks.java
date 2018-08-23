@@ -36,8 +36,7 @@ public final class SCBlocks {
     public static final BlockCrafter X5CRAFTER_BLOCK = notNull();
 
 
-    private static List<Block> blockList = ImmutableList.of(
-            createBlock(new BlockHologram(), RegistryNames.HOLOGRAM),
+    private static List<Block> blockList = ImmutableList.of(createBlock(new BlockHologram(), RegistryNames.HOLOGRAM),
             createBlock(new BlockCrafter(2), RegistryNames.X2CRAFTER_BLOCK),
             createBlock(new BlockCrafter(3), RegistryNames.X3CRAFTER_BLOCK),
             createBlock(new BlockCrafter(4), RegistryNames.X4CRAFTER_BLOCK),
@@ -60,7 +59,7 @@ public final class SCBlocks {
         block.setRegistryName(name);
 
         // Assigns the block the mod's creative tab
-       // block.setCreativeTab(SpatialCrafting.SPATIAL_CRAFTING_TAB);
+        // block.setCreativeTab(SpatialCrafting.SPATIAL_CRAFTING_TAB);
 
         return block;
     }

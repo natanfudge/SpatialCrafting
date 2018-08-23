@@ -313,11 +313,15 @@ public class TileCrafter extends TileEntity {
         return new SPacketUpdateTileEntity(getPos(), 1, nbtTag);
     }
 
+    // Called from the client
     @Override
     public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        NBTTagCompound tag = pkt.getNbtCompound();
-        setSharedData(tag.getLong(SHARED_DATA_NBT));
+        if (offset != null) {
+            NBTTagCompound tag = pkt.getNbtCompound();
+            setSharedData(tag.getLong(SHARED_DATA_NBT));
+        }
     }
+
 
     public void stopCraftingFromServer() {
         setSharedData(0);
