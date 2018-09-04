@@ -1,20 +1,27 @@
 package fudge.spatialcrafting.common.tile;
 
 
+import crafttweaker.api.item.IIngredient;
+import crafttweaker.api.item.IItemStack;
+import crafttweaker.api.minecraft.CraftTweakerMC;
+import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.client.particle.ParticleItemDust;
+import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.block.BlockCrafter;
-import fudge.spatialcrafting.common.block.SCBlocks;
+import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
+import fudge.spatialcrafting.common.tile.util.CraftersData;
+import fudge.spatialcrafting.common.tile.util.Offset;
+import fudge.spatialcrafting.common.util.RecipeUtil;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketHandler;
-import fudge.spatialcrafting.network.PacketStopParticles;
+import fudge.spatialcrafting.network.client.PacketStopParticles;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -24,100 +31,183 @@ import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Set;
 
-import static fudge.spatialcrafting.common.SCConstants.NOTIFY_CLIENT;
-import static fudge.spatialcrafting.common.block.BlockCrafter.FORMED;
+import static fudge.spatialcrafting.common.MCConstants.NOTIFY_CLIENT;
+import static fudge.spatialcrafting.common.block.BlockCrafter.CRAFT_DURATION_MULTIPLIER;
+import static fudge.spatialcrafting.common.block.BlockHologram.ACTIVE;
 
 
-public class TileCrafter extends TileEntity {
+public class TileCrafter extends TileEntity implements ITickable {
 
     private static final String OFFSET_NBT = "offset";
     private static final String SHARED_DATA_NBT = "sharedData";
+    /**
+     * Pass -1 to activate all layers
+     *
+     * @param layer
+     */
+    private static final int ACTIVATE_ALL = -1;
     private Offset offset;
 
     public TileCrafter() {
     }
 
+
     public TileCrafter(BlockPos pos, BlockPos masterPos) {
         offset = new Offset(pos, masterPos);
     }
 
-    public static BlockPos createMultiblock(World world, List<BlockPos> crafterList, int crafterSize) {
-        BlockPos masterPos = getMasterPosFromList(crafterList);
+
+    public boolean isHelpActive() {
+        return getRecipe() != null;
+    }
+
+    public void setActiveHolograms(int layerToActivate) {
+        int crafterSize = size();
+
+        for (int i = 0; i < crafterSize; i++) {
+            for (int j = 0; j < crafterSize; j++) {
+                for (int k = 0; k < crafterSize; k++) {
+                    BlockPos hologramPos = getHolograms()[i][j][k];
+                    IBlockState state = world.getBlockState(hologramPos);
+
+                    // If i,j,k are within bounds
+                    if (shouldActivateHologram(layerToActivate, i, j, k)) {
+                        world.setBlockState(hologramPos, state.withProperty(ACTIVE, true), NOTIFY_CLIENT);
+                    } else if (state.getValue(ACTIVE)) {
+                        world.setBlockState(hologramPos, state.withProperty(ACTIVE, false), NOTIFY_CLIENT);
+                    }
+                }
+            }
+
+        }
+    }
 
 
-        BlockPos[][][] holograms = new BlockPos[crafterSize][crafterSize][crafterSize];
+    private boolean shouldActivateHologram(int layerToActivate, int i, int j, int k) {
+        // This is for the purpose of crafting help
+        if (getRecipe() != null) {
+            int recipeSize = recipeSize();
 
-        int j = 0, k = 0;
-
-
-        for (BlockPos crafterPos : crafterList) {
-
-            // Connect crafters to the multiblock
-            // Change the crafters' blockstate and tile entity
-            world.setBlockState(crafterPos, world.getBlockState(crafterPos).withProperty(FORMED, true), NOTIFY_CLIENT);
-            TileCrafter tileCrafter = new TileCrafter(crafterPos, masterPos);
-            world.setTileEntity(crafterPos, tileCrafter);
-
-
-            for (int i = 1; i < crafterSize + 1; i++) {
-                // Place hologram
-                BlockPos hologramPos = crafterPos.add(0, i, 0);
-                world.setBlockState(hologramPos, SCBlocks.HOLOGRAM.getDefaultState());
-                holograms[i - 1][j][k] = hologramPos;
-
-                // Connect holograms to the multiblock
-                TileHologram hologramTile = Util.getTileEntity(world, hologramPos);
-                hologramTile.bindToMasterBlock(masterPos);
+            if ((layerToActivate == ACTIVATE_ALL || layerToActivate == i) && i < recipeSize && j < recipeSize && k < recipeSize) {
+                // if the recipe is null there then it should not be activated.
+                if (getRecipe().getRequiredInput()[i][j][k] != null || !isHelpActive()) {
+                    return true;
+                }
             }
 
 
-            k++;
-            if (k >= crafterSize) {
-                j++;
-                k = 0;
+        } else {
+            // This is for the up/down buttons
+            int size = size();
+
+            if ((layerToActivate == ACTIVATE_ALL || layerToActivate == i) && i < size && j < size && k < size) {
+                return true;
             }
         }
 
 
-        return masterPos;
+        return false;
+
 
     }
 
-    // MasterPos will be the one with the lowest x and z coordinates.
-    // This way all other poses offset will start from (0,0,0) (masterPos offset) and increase as they are farther away from masterPos.
-    private static BlockPos getMasterPosFromList(List<BlockPos> crafterList) {
-        BlockPos masterPos = crafterList.get(0);
-        for (BlockPos crafterPos : crafterList) {
-            if (crafterPos.getZ() + crafterPos.getX() < masterPos.getX() + masterPos.getZ()) {
-                masterPos = crafterPos;
-            }
-        }
 
-        return masterPos;
-    }
-
+    /**
+     */
     @Nullable
-    public static TileCrafter getClosestMasterBlock(World world, BlockPos pos) {
-        Set<BlockPos> poses = WorldSavedDataCrafters.getMasterBlocks(world);
+    public SpatialRecipe getRecipe() {
+        return getSharedData().getRecipe();
+    }
 
-        // There are no master blocks
-        if (poses.isEmpty()) {
-            return null;
+    public void setRecipe(SpatialRecipe recipe) {
+        getSharedData().setRecipe(recipe);
+    }
+
+    private boolean layerEnabled(int layer) {
+
+        int size = size();
+        BlockPos[][] holograms = getHolograms()[layer];
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                BlockPos hologramPos = holograms[i][j];
+
+                if (world.getBlockState(hologramPos).getValue(ACTIVE)) return true;
+            }
+
         }
 
-        // Find closest block
-        BlockPos closestPos = (BlockPos) poses.toArray()[0];
-        for (BlockPos currentPos : poses) {
-            if (Util.minimalDistanceOf(pos, currentPos) < Util.minimalDistanceOf(pos, closestPos)) {
-                closestPos = currentPos;
+        return false;
+    }
+
+    private boolean layerMatchesRecipe(int layer) {
+        SpatialRecipe recipe = getRecipe();
+
+        if (recipe == null) return false;
+
+        int size = recipeSize();
+        BlockPos[][] holograms = getHolograms()[layer];
+        ItemStack[][] itemStacks = getHologramInvArr()[layer];
+
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                BlockPos hologramPos = holograms[i][j];
+                IItemStack stack = CraftTweakerMC.getIItemStack(itemStacks[i][j]);
+                IIngredient requiredStack = recipe.getRequiredInput()[layer][i][j];
+
+                // If the hologram is not active it counts as complete
+                if (world.getBlockState(hologramPos).getValue(ACTIVE) && !RecipeUtil.nullSafeMatch(requiredStack, stack)) {
+                    return false;
+                }
+
             }
         }
 
-        return Util.getTileEntity(world, closestPos);
+        return true;
+
     }
+
+    public void startHelp(SpatialRecipe recipe) {
+
+        setRecipe(recipe);
+        setActiveHolograms(0);
+        // In case a layer has already been done
+        proceedHelp();
+    }
+
+    private int recipeSize() {
+        SpatialRecipe recipe = getRecipe();
+        if (recipe != null) {
+            return recipe.getRequiredInput().length;
+        } else {
+            return 0;
+        }
+    }
+
+    public void proceedHelp() {
+        for (int i = 0; i < recipeSize(); i++) {
+            if (layerEnabled(i) && layerMatchesRecipe(i)) {
+                if (i != recipeSize() - 1) {
+                    setActiveHolograms(i + 1);
+
+                    // Recursively activates layers in case multiple layers already match the recipe
+                    proceedHelp();
+                    return;
+                } else {
+                    // Last layer is treated differently
+                    activateAllLayers();
+
+                }
+            }
+        }
+    }
+
+
+    public void activateAllLayers() {
+        setActiveHolograms(ACTIVATE_ALL);
+    }
+
 
     public int size() {
         Block block = world.getBlockState(pos).getBlock();
@@ -148,6 +238,7 @@ public class TileCrafter extends TileEntity {
         return offset.equals(Offset.NONE);
     }
 
+
     public TileCrafter master() {
 
         if (this.isMaster()) return this;
@@ -163,34 +254,62 @@ public class TileCrafter extends TileEntity {
         return offset.adjustToMaster(this.pos);
     }
 
-    // In future might be better to return a "SharedInfo" object
-    public long getSharedData() {
-        return WorldSavedDataCrafters.getDataForMasterPos(world, masterPos());
+    public CraftersData getSharedData() {
+        return (CraftersData) WorldSavedDataCrafters.getDataForMasterPos(world, masterPos());
     }
 
-    // In future might be better to return a "SharedInfo" object
-    public void setSharedData(long craftEndTime) {
-        WorldSavedDataCrafters.setDataForMasterPos(world, masterPos(), craftEndTime);
+    public long getCraftEndTime() {
+        CraftersData data = getSharedData();
+        if (data != null) {
+            return getSharedData().getCraftTime();
+        } else {
+            String worldType = world.isRemote ? "client" : "server";
+            SpatialCrafting.LOGGER.error("Cannot find data for masterPos {} at pos {} in {} world",
+                    masterPos(),
+                    pos,
+                    worldType,
+                    new NullPointerException());
+            return 0;
+        }
     }
 
-    public void stopCrafting() {
-        setSharedData(0);
-        if (world.isRemote) {
-            ParticleItemDust.stopParticles(this);
+
+    public void setCraftEndTime(long time) {
+        CraftersData data = getSharedData();
+
+
+        if (data != null) {
+            data.setCraftTime(time);
+        } else {
+            SpatialCrafting.LOGGER.error("Cannot find data for masterPos {} at pos {}", masterPos(), pos);
+        }
+
+    }
+
+    public void resetCraftingState() {
+        resetCraftingState(false);
+    }
+
+    public void resetCraftingState(boolean sendDisableParticlesPacket) {
+        setCraftEndTime(0);
+
+        if (sendDisableParticlesPacket) {
+            final int RANGE = 64;
+            PacketHandler.getNetwork().sendToAllAround(new PacketStopParticles(masterPos()),
+                    new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), RANGE));
         }
     }
 
     public boolean craftTimeHasPassed() {
-        return world.getWorldTime() >= getSharedData();
+        return getCraftEndTime() != 0 && world.getWorldTime() >= getCraftEndTime();
     }
 
     public boolean isCrafting() {
-        return getSharedData() != 0;
+        return getCraftEndTime() != 0;
     }
 
-    public void scheduleCraft(World world, Block crafterBlock, int delay) {
-        world.scheduleUpdate(new BlockPos(masterPos()), crafterBlock, delay);
-        setSharedData(world.getWorldTime() + delay);
+    public void scheduleCraft(World world, int delay) {
+        setCraftEndTime(world.getWorldTime() + delay);
     }
 
     public BlockPos[][] getCrafterBlocks() {
@@ -205,11 +324,6 @@ public class TileCrafter extends TileEntity {
 
         return positions;
 
-    }
-
-    public void bindToMasterBlock(BlockPos slavePos, BlockPos masterPos) {
-        offset = new Offset(slavePos, masterPos);
-        this.markDirty();
     }
 
     @Nullable
@@ -307,28 +421,6 @@ public class TileCrafter extends TileEntity {
         return this.serialized(super.getUpdateTag());
     }
 
-    public SPacketUpdateTileEntity getUpdatePacket() {
-        NBTTagCompound nbtTag = new NBTTagCompound();
-        nbtTag.setLong(SHARED_DATA_NBT, getSharedData());
-        return new SPacketUpdateTileEntity(getPos(), 1, nbtTag);
-    }
-
-    // Called from the client
-    @Override
-    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-        if (offset != null) {
-            NBTTagCompound tag = pkt.getNbtCompound();
-            setSharedData(tag.getLong(SHARED_DATA_NBT));
-        }
-    }
-
-
-    public void stopCraftingFromServer() {
-        setSharedData(0);
-        final int RANGE = 64;
-        PacketHandler.getNetwork().sendToAllAround(new PacketStopParticles(masterPos()),
-                new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), RANGE));
-    }
 
     public Vec3d centerOfHolograms() {
         BlockPos[][][] holograms = getHolograms();
@@ -342,5 +434,62 @@ public class TileCrafter extends TileEntity {
     }
 
 
+    @Override
+    public void update() {
+        if (!isMaster()) return;
+        if (getSharedData() == null) return;
+
+        if (craftTimeHasPassed()) {
+            stopHelp();
+
+            if (!world.isRemote) {
+                completeCrafting(world);
+            } else {
+                this.resetCraftingState();
+            }
+
+
+        }
+
+    }
+
+    private void completeCrafting(World world) {
+
+        this.resetCraftingState();
+
+        // Calculates the point at which the particle will end to decide where to drop the item.
+        Vec3d center = centerOfHolograms();
+        int durationTicks = this.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
+        double newY = center.y + (durationTicks - ParticleItemDust.PHASE_2_START_TICKS) * ParticleItemDust.PHASE_2_SPEED_BLOCKS_PER_TICK_UPWARDS;
+        Vec3d endPos = new Vec3d(center.x, newY, center.z);
+
+        // Find the correct recipe to craft with
+        for (SpatialRecipe recipe : SpatialRecipe.getRecipes()) {
+            if (recipe.matches(getHologramInvArr()) && !this.isCrafting()) {
+                // Finally, drop the item on the ground.
+                Util.dropItemStack(world, endPos, recipe.getOutput());
+            }
+        }
+
+        // Removes the existing items
+        Util.innerForEach(getHolograms(), blockPos -> Util.<TileHologram>getTileEntity(world, blockPos).removeItem(1, true));
+
+
+    }
+
+
+    public void stopHelp(boolean activateRecipeHologramsOnly) {
+
+        // If the recipe is removed before, then all holograms will activate
+        if (!activateRecipeHologramsOnly) setRecipe(null);
+        activateAllLayers();
+        // If the recipe is removed after, then only the recipe holograms will activate
+        if (activateRecipeHologramsOnly) setRecipe(null);
+
+    }
+
+    public void stopHelp() {
+        stopHelp(false);
+    }
 }
 

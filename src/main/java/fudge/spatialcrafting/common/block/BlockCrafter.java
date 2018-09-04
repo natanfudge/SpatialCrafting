@@ -2,18 +2,21 @@ package fudge.spatialcrafting.common.block;
 
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.client.particle.ParticleItemDust;
-import fudge.spatialcrafting.common.SCConstants;
+import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.TileCrafter;
-import fudge.spatialcrafting.common.tile.TileHologram;
+import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.common.util.Util;
+import fudge.spatialcrafting.network.PacketHandler;
+import fudge.spatialcrafting.network.client.PacketAttemptMultiblock;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -21,15 +24,16 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 
-import java.util.*;
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Objects;
 
-import static fudge.spatialcrafting.common.SCConstants.BLOCK_UPDATE;
-import static fudge.spatialcrafting.common.SCConstants.NOTIFY_CLIENT;
-import static fudge.spatialcrafting.common.tile.TileCrafter.createMultiblock;
+import static fudge.spatialcrafting.common.MCConstants.BLOCK_UPDATE;
+import static fudge.spatialcrafting.common.MCConstants.NOTIFY_CLIENT;
 
 
 @SuppressWarnings("deprecation")
@@ -39,9 +43,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     public static final int CRAFT_DURATION_MULTIPLIER = 5;
 
     public static final PropertyBool FORMED = PropertyBool.create("formed");
-    public static final IBlockState DEFAULT_STATE = new BlockCrafter(1).blockState.getBaseState().withProperty(FORMED, false);
     private final int crafterSize;
-
 
     public BlockCrafter(int size) {
         super(Material.WOOD);
@@ -54,95 +56,11 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
 
     }
 
-    private static List<BlockPos> getPossibleMultiblock(World world, BlockPos originalPos) {
-        List<BlockPos> nearbyCrafters = new LinkedList<>();
 
-        int crafterSize = ((BlockCrafter) (world.getBlockState(originalPos).getBlock())).size();
-        BlockPos currentPos;
-
-        // Put all nearby crafters in a list
-        for (int i = -(crafterSize - 1); i <= crafterSize - 1; i++) {
-            for (int j = -(crafterSize - 1); j <= crafterSize - 1; j++) {
-                currentPos = originalPos.add(i, 0, j);
-
-                // Adds if the other block is a crafter and of the same size.
-                if (world.getBlockState(currentPos).getBlock().equals(world.getBlockState(originalPos).getBlock())) {
-                    nearbyCrafters.add(currentPos);
-                }
-
-            }
-        }
-
-        List<BlockPos> list;
-
-        // Try to form a multiblock from the existing crafters
-        for (BlockPos nearbyCrafter1 : nearbyCrafters) {
-            list = new LinkedList<>();
-            list.add(nearbyCrafter1);
-            for (BlockPos nearbyCrafter2 : nearbyCrafters) {
-
-                if (nearbyCrafter2.equals(nearbyCrafter1)) {
-                    continue;
-                }
-
-                if (validateMultiblockList(list, nearbyCrafter2, crafterSize)) {
-                    list.add(nearbyCrafter2);
-                }
-                if (list.size() == crafterSize * crafterSize) {
-                    return list;
-                }
-            }
-        }
-
-        return null;
-
-    }
-
-    private static boolean validateMultiblockList(List<BlockPos> list, BlockPos newValue, int crafterSize) {
-        for (BlockPos oldValue : list) {
-            if (Util.minimalDistanceOf(oldValue, newValue) > crafterSize - 1) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public static boolean spaceExists(World world, List<BlockPos> startingPoses, int crafterSize) {
-
-        for (BlockPos blockPos : startingPoses) {
-            for (int i = 1; i <= crafterSize; i++) {
-                if (!world.getBlockState(blockPos.add(0, i, 0)).getBlock().equals(Blocks.AIR)) {
-                    return false;
-                }
-            }
-        }
-
-
-        return true;
-    }
-
-    public static boolean attemptMultiblock(World world, BlockPos pos, EntityLivingBase placer, int crafterSize) {
-        // The master block is the last block placed before the multiblock was formed
-        List<BlockPos> crafterBlocks = getPossibleMultiblock(world, pos);
-        if (crafterBlocks != null) {
-            // Searches for space above it
-            if (spaceExists(world, crafterBlocks, crafterSize)) {
-
-                BlockPos masterPos = createMultiblock(world, crafterBlocks, crafterSize);
-                // Stores the masterblock for the purposes of iterating through available crafters.
-                WorldSavedDataCrafters.addMasterBlock(world, masterPos);
-
-                return true;
-
-
-            } else if (world.isRemote && placer instanceof EntityPlayer) {
-                ((EntityPlayer) (placer)).sendStatusMessage(new TextComponentTranslation("tile.spatialcrafting.blockcrafter.no_space", 0), true);
-
-            }
-        }
-
-
-        return false;
+    @Override
+    public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
+        tooltip.add(new TextComponentTranslation(String.format("tile.spatialcrafting.x%dcrafter_block.info",
+                size())).getUnformattedComponentText());
     }
 
     public int size() {
@@ -180,7 +98,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
         // onBlockPlacedBy(worldIn, pos, state, null, null);
-        //TODO: Might not work when placed by a machine
+        // Might not work when placed by a machine
     }
 
     /**
@@ -188,13 +106,21 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
      */
     @Override
     public void onBlockPlacedBy(World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
-        attemptMultiblock(world, pos, placer, size());
+        CrafterUtil.attemptMultiblock(world, pos, placer, size());
     }
 
     @Override
-    public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-        attemptMultiblock(worldIn, pos, null, size());
-        List<String> s = new ArrayList<>();
+    public void neighborChanged(IBlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        if (!state.getValue(FORMED)) {
+            CrafterUtil.attemptMultiblock(world, pos, null, size());
+
+            // Send this to the client
+            final int RANGE = 64;
+            PacketHandler.getNetwork().sendToAllAround(new PacketAttemptMultiblock(pos),
+                    new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), RANGE));
+        }
+
+
     }
 
     @Override
@@ -219,10 +145,10 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
 
             }
 
-
         } catch (Exception e) {
             SpatialCrafting.LOGGER.error("Error in BlockCrafter::OnBlockActivated", e);
         }
+
 
         return false;
 
@@ -231,58 +157,20 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     private void beginCraft(World world, BlockPos pos) {
 
         TileCrafter crafter = Util.getTileEntity(world, pos);
-        assert crafter != null;
 
         if (world.isRemote) {
             ParticleItemDust.playCraftParticles(world, pos);
         }
 
-        int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * SCConstants.TICKS_PER_SECOND;
+        int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
 
-        crafter.scheduleCraft(world, this, durationTicks);
+        crafter.scheduleCraft(world, durationTicks);
 
-
-    }
-
-    private void completeCrafting(World world, TileCrafter crafter) {
-
-        crafter.stopCrafting();
-
-        // Calculates the point at which the particle will end to decide where to drop the item.
-        Vec3d center = crafter.centerOfHolograms();
-        int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * SCConstants.TICKS_PER_SECOND;
-        double newY = center.y + (durationTicks - ParticleItemDust.PHASE_2_START_TICKS) * ParticleItemDust.PHASE_2_SPEED_BLOCKS_PER_TICK_UPWARDS;
-        Vec3d endPos = new Vec3d(center.x, newY, center.z);
-
-        // Find the correct recipe to craft with
-        for (SpatialRecipe recipe : SpatialRecipe.getRecipes()) {
-            if (recipe.matches(crafter.getHologramInvArr()) && !crafter.isCrafting()) {
-                // Finally, drop the item on the ground.
-                Util.dropItemStack(world, endPos, recipe.getOutput());
-            }
-        }
-
-        // Removes the existing items
-        Util.innerForEach(crafter.getHolograms(), blockPos -> Util.<TileHologram>getTileEntity(world, blockPos).removeItem(1, true));
+        crafter.activateAllLayers();
 
 
     }
 
-    /**
-     * Called whenever scheduleBlockUpdate is called ON THE SERVER.
-     */
-    @Override
-    public void updateTick(World world, BlockPos pos, IBlockState state, Random rand) {
-        if (state.getValue(FORMED)) {
-            TileCrafter crafter = Util.getTileEntity(world, pos);
-            assert crafter != null;
-
-            if (crafter.isCrafting() && crafter.craftTimeHasPassed()) {
-                completeCrafting(world, crafter);
-                world.notifyBlockUpdate(pos, state, state, NOTIFY_CLIENT);
-            }
-        }
-    }
 
     @Override
     public void breakBlock(World world, BlockPos placedPos, IBlockState state) {
@@ -303,13 +191,13 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     private void destroyMultiblock(World world, TileCrafter crafter) {
 
         if (crafter.isCrafting()) {
-            crafter.stopCraftingFromServer();
+            crafter.resetCraftingState(true);
         }
 
         // Destroy all holograms in the BlockPos list.
-        Util.innerForEach(crafter.getHolograms(), blockPos -> {
-            if (world.getBlockState(blockPos).getBlock() == SCBlocks.HOLOGRAM) {
-                world.setBlockState(blockPos, Blocks.AIR.getDefaultState(), NOTIFY_CLIENT + BLOCK_UPDATE);
+        Util.innerForEach(crafter.getHolograms(), hologramPos -> {
+            if (world.getBlockState(hologramPos).getBlock() == SCBlocks.HOLOGRAM) {
+                world.setBlockState(hologramPos, Blocks.AIR.getDefaultState(), NOTIFY_CLIENT + BLOCK_UPDATE);
             }
         });
 
@@ -318,12 +206,14 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         Util.innerForEach2D(crafter.getCrafterBlocks(), crafterPos -> {
             IBlockState blockState = world.getBlockState(crafterPos);
             if (blockState.getBlock() instanceof BlockCrafter) {
-                world.setBlockState(crafterPos, blockState.withProperty(FORMED, false), SCConstants.NOTIFY_CLIENT);
-                world.setTileEntity(crafterPos, null);
+                world.setBlockState(crafterPos, blockState.withProperty(FORMED, false), MCConstants.NOTIFY_CLIENT);
+                Util.removeTileEntity(world, crafterPos, true);
             }
         });
 
-        WorldSavedDataCrafters.removeMasterBlock(world, crafter.masterPos());
+        WorldSavedDataCrafters.removeData(world, crafter.masterPos(), true);
+
+
     }
 
     @Override

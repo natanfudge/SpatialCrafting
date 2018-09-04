@@ -27,6 +27,16 @@ public class CommandHelp extends SCCommand {
     }
 
     @Override
+    int minArgs() {
+        return 0;
+    }
+
+    @Override
+    int maxArgs() {
+        return 0;
+    }
+
+    @Override
     public String getName() {
         return "Help";
     }
@@ -40,7 +50,6 @@ public class CommandHelp extends SCCommand {
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
 
         TextComponentTranslation optional = new TextComponentTranslation("commands.spatialcrafting.help.optional");
-        // optional.getStyle().setBold(true);
         optional.getStyle().setColor(TextFormatting.GOLD);
         sender.sendMessage(optional);
         newLine(sender);

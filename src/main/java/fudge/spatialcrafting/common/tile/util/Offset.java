@@ -1,4 +1,4 @@
-package fudge.spatialcrafting.common.tile;
+package fudge.spatialcrafting.common.tile.util;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;

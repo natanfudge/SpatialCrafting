@@ -1,9 +1,9 @@
-package fudge.spatialcrafting.network;
+package fudge.spatialcrafting.network.client;
 
 import fudge.spatialcrafting.client.particle.ParticleItemDust;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.Util;
-import io.netty.buffer.ByteBuf;
+import fudge.spatialcrafting.network.PacketBlockPos;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -15,26 +15,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 
 // Packet from server to client
-public class PacketStopParticles implements IMessage {
+public class PacketStopParticles extends PacketBlockPos {
 
-    private BlockPos masterPos;
 
-    public PacketStopParticles(BlockPos pos) {
-        masterPos = pos;
+    public PacketStopParticles(BlockPos masterPos) {
+        super(masterPos);
     }
 
     // Necessary for reflection
     public PacketStopParticles() {
-    }
-
-    @Override
-    public void toBytes(ByteBuf buffer) {
-        buffer.writeLong(masterPos.toLong());
-    }
-
-    @Override
-    public void fromBytes(ByteBuf buffer) {
-        masterPos = BlockPos.fromLong(buffer.readLong());
     }
 
 
@@ -49,11 +38,11 @@ public class PacketStopParticles implements IMessage {
                 @SideOnly(Side.CLIENT)
                 public void run() {
                     World world = Minecraft.getMinecraft().world;
-                    TileCrafter crafter = Util.getTileEntity(world, message.masterPos);
+                    TileCrafter crafter = Util.getTileEntity(world, message.pos);
 
                     // Backup crafter tile entity
                     if (crafter == null) {
-                        crafter = Util.getTileEntity(world, message.masterPos.add(1, 0, 0));
+                        crafter = Util.getTileEntity(world, message.pos.add(1, 0, 0));
                     }
 
 

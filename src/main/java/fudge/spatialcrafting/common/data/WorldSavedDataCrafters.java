@@ -1,27 +1,33 @@
 package fudge.spatialcrafting.common.data;
 
 import fudge.spatialcrafting.SpatialCrafting;
+import fudge.spatialcrafting.common.tile.util.CraftersData;
+import fudge.spatialcrafting.common.tile.util.SharedData;
+import fudge.spatialcrafting.network.PacketHandler;
+import fudge.spatialcrafting.network.client.PacketRemoveMasterBlock;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldSavedData;
+import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nonnull;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class WorldSavedDataCrafters extends WorldSavedData {
 
-    public static final String CRAFTERS_NBT = "crafters";
+    public static final String DATA_NBT = "data";
     private static final String DATA_NAME = SpatialCrafting.MODID + " worldSavedData";
-    private Map<BlockPos, Long> craftEndTimes;
+    private List<SharedData> allSharedData = new ArrayList<>();
 
     // Required constructor
     public WorldSavedDataCrafters(String name) {
         super(name);
-        craftEndTimes = new HashMap<>();
     }
 
     public WorldSavedDataCrafters() {
@@ -32,19 +38,17 @@ public class WorldSavedDataCrafters extends WorldSavedData {
      * For client-side syncing
      *
      * @param world should be a client world
-     * @param data  the data transferred from the packet (a map)
+     * @param data  the data transferred from the packet
      */
-    public static void setData(World world, Map<BlockPos, Long> data) {
-        getInstance(world).craftEndTimes = data;
+    public static void setAllData(World world, List<SharedData> data) {
+        getInstance(world).allSharedData = data;
     }
 
     /**
-     * For client-side syncing
      *
-     * @param world should be a server world
      */
-    public static Map<BlockPos, Long> getData(World world) {
-        return getInstance(world).craftEndTimes;
+    public static List<SharedData> getAllData(World world) {
+        return getInstance(world).allSharedData;
     }
 
     /**
@@ -64,54 +68,73 @@ public class WorldSavedDataCrafters extends WorldSavedData {
         return instance;
     }
 
-    public static Set<BlockPos> getMasterBlocks(World world) {
-        return getInstance(world).craftEndTimes.keySet();
+    public static List<BlockPos> getMasterBlocks(World world) {
+        List<BlockPos> masterBlocks = new LinkedList<>();
+
+        getAllData(world).forEach(data -> masterBlocks.add(data.getMasterPos()));
+
+        return masterBlocks;
     }
 
-    public static void addMasterBlock(World world, BlockPos pos) {
+    public static void addData(World world, BlockPos pos) {
         WorldSavedDataCrafters instance = getInstance(world);
-        instance.craftEndTimes.put(pos, 0L);
+        if (instance.allSharedData == null) instance.allSharedData = new ArrayList<>();
+        SharedData data = new CraftersData(pos);
+        instance.allSharedData.add(data);
+
         instance.markDirty();
     }
 
-    public static void removeMasterBlock(World world, BlockPos pos) {
+    public static void removeData(World world, BlockPos pos, boolean syncClient) {
         WorldSavedDataCrafters instance = getInstance(world);
-        instance.craftEndTimes.remove(pos);
+        instance.allSharedData.removeIf(data -> data.getMasterPos().equals(pos));
         instance.markDirty();
+
+        if (syncClient) {
+            PacketHandler.getNetwork().sendToDimension(new PacketRemoveMasterBlock(pos), world.provider.getDimension());
+        }
     }
 
-    // In the future might be better to return a "SharedData" object
-    public static long getDataForMasterPos(@Nonnull World world, @Nonnull BlockPos pos) {
-        Map<BlockPos, Long> times = getInstance(world).craftEndTimes;
-        if (times.containsKey(pos)) {
-            return times.get(pos);
-        } else {
-            return 0;
+    // In the future might be better to return a "CraftersData" object
+    @Nullable
+    public static SharedData getDataForMasterPos(@Nonnull World world, @Nonnull BlockPos pos) {
+        List<SharedData> allData = getAllData(world);
+        for (SharedData data : allData) {
+            if (data.getMasterPos().equals(pos)) return data;
         }
 
+        return null;
+
     }
 
-    // In the future might be better to return a "SharedData" object
-    public static void setDataForMasterPos(World world, BlockPos pos, long craftEndTime) {
+    public static void setOneData(World world, SharedData dataToSet) {
         WorldSavedDataCrafters instance = getInstance(world);
-        instance.craftEndTimes.replace(pos, craftEndTime);
+        instance.allSharedData.replaceAll(data -> {
+            if (data.getMasterPos().equals(dataToSet.getMasterPos())) {
+                return dataToSet;
+            } else {
+                return data;
+            }
+        });
         instance.markDirty();
     }
 
     public NBTTagCompound serialized(NBTTagCompound existingData) {
-        NBTTagCompound craftersNBT = new NBTTagCompound();
-        craftEndTimes.forEach((pos, time) -> craftersNBT.setLong(Long.toString(pos.toLong()), time));
 
-        existingData.setTag(CRAFTERS_NBT, craftersNBT);
+        NBTTagList list = new NBTTagList();
+        allSharedData.forEach(data -> list.appendTag(data.serialized(new NBTTagCompound())));
+
+        existingData.setTag(DATA_NBT, list);
+
         return existingData;
     }
 
     public void deserialize(NBTTagCompound serializedData) {
-        NBTTagCompound craftersNBT = serializedData.getCompoundTag(CRAFTERS_NBT);
-        Set<String> keys = craftersNBT.getKeySet();
-
-        keys.forEach(key -> craftEndTimes.put(BlockPos.fromLong(Long.parseLong(key)), Long.parseLong(key)));
-
+        NBTTagList list = serializedData.getTagList(DATA_NBT, Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < list.tagCount(); i++) {
+            // Hardcoded for CraftersData
+            allSharedData.add(new CraftersData(list.getCompoundTagAt(i)));
+        }
     }
 
     @Override
@@ -124,6 +147,7 @@ public class WorldSavedDataCrafters extends WorldSavedData {
         deserialize(serializedData);
 
     }
+
 
 }
 

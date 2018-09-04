@@ -1,7 +1,7 @@
 package fudge.spatialcrafting.common.tile;
 
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.SCConstants;
+import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.block.BlockCrafter;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.block.state.IBlockState;
@@ -12,6 +12,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
@@ -51,6 +52,10 @@ public class TileHologram extends TileEntity {
         return Util.getTileEntity(world, getMasterPos());
     }
 
+    @Override
+    public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+        return oldState.getBlock() != newState.getBlock();
+    }
 
     public int getCrafterSize() {
         return ((BlockCrafter) world.getBlockState(this.getMasterPos()).getBlock()).size();
@@ -73,7 +78,6 @@ public class TileHologram extends TileEntity {
     }
 
 
-    @Nullable
     @Override
     public AxisAlignedBB getRenderBoundingBox() {
         return new AxisAlignedBB(getPos(), getPos().add(1, 2, 1));
@@ -145,7 +149,7 @@ public class TileHologram extends TileEntity {
         this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH).extractItem(0, amount, false);
         if (informClient) {
             IBlockState state = this.getBlockState();
-            world.notifyBlockUpdate(new BlockPos(pos), state, state, SCConstants.NOTIFY_CLIENT);
+            world.notifyBlockUpdate(new BlockPos(pos), state, state, MCConstants.NOTIFY_CLIENT);
         }
     }
 

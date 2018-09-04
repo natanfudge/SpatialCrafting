@@ -17,10 +17,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static fudge.spatialcrafting.SpatialCrafting.MODID;
 import static fudge.spatialcrafting.common.command.CommandAddSRecipe.RECIPES_FILE_NAME;
@@ -29,15 +26,32 @@ public class SpatialRecipe {
 
     //TODO: add unshaped crafting
     private static final String EXAMPLE_SCRIPT_NAME = "SpatialRecipeExamples.zs";
+    private static final String ID_NBT = "id";
+    private static final String HELP_ACTIVE_NBT = "isHelpActive";
     private static List<SpatialRecipe> recipeList = new ArrayList<>();
+    private static String RECIPE_ID_NBT = "recipeID";
     private final IIngredient[][][] requiredInput;
     private final ItemStack output;
+    private boolean helpActive = false;
+
+    /*public NBTTagCompound serialized( NBTTagCompound existingData){
+        existingData.setInteger( ID_NBT,getID());
+        existingData.setBoolean(HELP_ACTIVE_NBT, isHelpActive);
+        return existingData;
+    }
+
+    public static SpatialRecipe deserialize(NBTTagCompound serializedData){
+        SpatialRecipe recipe = fromID(serializedData.getInteger(ID_NBT));
+        recipe.setHelpActive(serializedData.getBoolean(HELP_ACTIVE_NBT));
+
+        return recipe;
+    }*/
+
 
     public SpatialRecipe(IIngredient[][][] recipeInput, ItemStack recipeOutput) {
         this.requiredInput = recipeInput;
         this.output = recipeOutput;
     }
-
 
     @Nullable
     public static SpatialRecipe getRecipeFromItemStacks(ItemStack[][][] itemStackInput, ItemStack output, RecipeAddition recipeAddition) {
@@ -88,6 +102,17 @@ public class SpatialRecipe {
 
         return new SpatialRecipe(ingredientInput, output);
 
+    }
+
+    public static List<SpatialRecipe> getRecipesForSize(int size) {
+        List<SpatialRecipe> recipes = new LinkedList<>();
+        for (SpatialRecipe recipe : getRecipes()) {
+            if (recipe.requiredInput.length == size) {
+                recipes.add(recipe);
+            }
+        }
+
+        return recipes;
     }
 
     public static List<SpatialRecipe> getRecipes() {
@@ -175,7 +200,6 @@ public class SpatialRecipe {
         copyScriptFile(CT_SCRIPTS_FOLDER_NAME, sourceUrl, destFile);
 
 
-        //TODO write the script files into the scripts directory.
     }
 
     private static void copyScriptFile(String CT_SCRIPTS_FOLDER_NAME, InputStream sourceUrl, File destFile) {
@@ -200,6 +224,10 @@ public class SpatialRecipe {
 
     }
 
+    public static SpatialRecipe fromID(int ID) {
+        return getRecipes().get(ID);
+    }
+
     public IIngredient[][][] getRequiredInput() {
         return requiredInput;
     }
@@ -220,6 +248,10 @@ public class SpatialRecipe {
         return Util.innerEqualsDifferentSizes(this.requiredInput, other.requiredInput, Object::equals) && itemStackEquals(this.output,
                 other.output);
 
+    }
+
+    public boolean sameIDAs(SpatialRecipe other) {
+        return other.getID() == this.getID();
     }
 
     @Override
@@ -273,6 +305,18 @@ public class SpatialRecipe {
         outputBuilder.append("\n]");
 
         return outputBuilder.toString();
+    }
+
+    public int getID() {
+        return getRecipes().indexOf(this);
+    }
+
+    public int size() {
+        return getRequiredInput().length;
+    }
+
+    public String toString() {
+        return String.format("SpatialRecipe output = %s size = %d", getOutput(), this.size());
     }
 
 

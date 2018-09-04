@@ -13,7 +13,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import static fudge.spatialcrafting.common.SCConstants.NOTIFY_CLIENT;
+import static fudge.spatialcrafting.common.MCConstants.NOTIFY_CLIENT;
 
 
 @SuppressWarnings("deprecation")

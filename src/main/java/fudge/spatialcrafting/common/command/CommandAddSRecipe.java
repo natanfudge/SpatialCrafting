@@ -1,11 +1,12 @@
 package fudge.spatialcrafting.common.command;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.SCConstants;
+import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.crafting.RecipeAddition;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
+import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
 import net.minecraft.command.ICommandSender;
@@ -31,12 +32,7 @@ import java.util.List;
 public class CommandAddSRecipe extends SCCommand {
 
     public static final String RECIPES_FILE_NAME = "___generated_spatial_recipes___.zs";
-
-    private final List<String> aliases;
-
-    public CommandAddSRecipe() {
-        aliases = Lists.newArrayList("addrecipe", "ar");
-    }
+    private static final List<String> ALIASES = ImmutableList.of("addrecipe", "ar");
 
     private static void addCrTScript(String command) {
         try {
@@ -100,11 +96,10 @@ public class CommandAddSRecipe extends SCCommand {
 
     }
 
-
     @Override
     @Nonnull
     public List<String> getAliases() {
-        return aliases;
+        return ALIASES;
     }
 
     @Override
@@ -116,7 +111,7 @@ public class CommandAddSRecipe extends SCCommand {
     @Override
     @Nonnull
     public String getUsage(@Nonnull ICommandSender sender) {
-        return "/sc addrecipe <exact/wildcard/oredict>";
+        return "/sc addrecipe [exact/wildcard/oredict]";
     }
 
     @Override
@@ -128,13 +123,7 @@ public class CommandAddSRecipe extends SCCommand {
             return;
         }
 
-        // Max 2 words
-        if (words.length > 2) {
-            sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.too_many_words", 0));
-            return;
-        }
-
-        TileCrafter crafter = TileCrafter.getClosestMasterBlock(sender.getEntityWorld(), sender.getPosition());
+        TileCrafter crafter = CrafterUtil.getClosestMasterBlock(sender.getEntityWorld(), sender.getPosition());
 
         try {
             // Get output from player's hand
@@ -215,7 +204,7 @@ public class CommandAddSRecipe extends SCCommand {
 
     @Override
     public int getRequiredPermissionLevel() {
-        return SCConstants.HIGHEST;
+        return MCConstants.HIGHEST;
     }
 
     @Override
@@ -227,5 +216,15 @@ public class CommandAddSRecipe extends SCCommand {
     @Override
     public String description() {
         return "commands.spatialcrafting.add_recipe.description";
+    }
+
+    @Override
+    int minArgs() {
+        return 0;
+    }
+
+    @Override
+    int maxArgs() {
+        return 1;
     }
 }

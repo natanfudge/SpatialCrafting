@@ -2,7 +2,7 @@
 package fudge.spatialcrafting.client.particle;
 
 import fudge.spatialcrafting.client.tick.ClientTicker;
-import fudge.spatialcrafting.common.SCConstants;
+import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.client.Minecraft;
@@ -22,7 +22,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
-import static fudge.spatialcrafting.common.SCConstants.TICKS_PER_SECOND;
+import static fudge.spatialcrafting.common.MCConstants.TICKS_PER_SECOND;
 import static fudge.spatialcrafting.common.block.BlockCrafter.CRAFT_DURATION_MULTIPLIER;
 
 
@@ -101,7 +101,7 @@ public class ParticleItemDust extends Particle {
         assert crafter != null;
 
 
-        int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * SCConstants.TICKS_PER_SECOND;
+        int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
 
         ClientTicker.addTicker(ticksPassed -> {
 

@@ -1,18 +1,19 @@
 package fudge.spatialcrafting.common.util;
 
 
-import fudge.spatialcrafting.SpatialCrafting;
+import fudge.spatialcrafting.network.PacketHandler;
+import fudge.spatialcrafting.network.client.PacketRemoveTileEntity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
@@ -25,6 +26,13 @@ public final class Util {
      */
     public static int minimalDistanceOf(Vec3i pos1, Vec3i pos2) {
         return Math.max(Math.abs(pos1.getX() - pos2.getX()), Math.max(Math.abs(pos1.getY() - pos2.getY()), Math.abs(pos1.getZ() - pos2.getZ())));
+    }
+
+    public static void removeTileEntity(World world, BlockPos pos, boolean syncClient) {
+        world.removeTileEntity(pos);
+        if (syncClient) {
+            PacketHandler.getNetwork().sendToDimension(new PacketRemoveTileEntity(pos), world.provider.getDimension());
+        }
     }
 
 
@@ -40,6 +48,10 @@ public final class Util {
      */
     public static double euclideanDistanceOf(Vec3d pos1, Vec3d pos2) {
         return norm(pos1.subtract(pos2));
+    }
+
+    public static double euclideanDistanceOf(Vec3i pos1, Vec3i pos2) {
+        return euclideanDistanceOf(new Vec3d(pos1.getX(), pos1.getY(), pos2.getZ()), new Vec3d(pos2.getX(), pos2.getY(), pos2.getZ()));
     }
 
     private static double norm(Vec3d vec3) {
@@ -128,19 +140,24 @@ public final class Util {
      * @param tester     The condition in which two inner objects are considered equal
      * @param nullObject An object that should count as equal to null.
      */
+    //TODO clean this method
     public static <T1, T2, T3> boolean innerEqualsDifferentSizes(T1[][][] arr1, T2[][][] arr2, BiPredicate<T1, T2> tester, T3 nullObject) {
+
+        // Objects that behaves the same as a null
+        GeneralNull gNull = new GeneralNull(nullObject);
+
         for (int i = 0; i < Math.max(arr1.length, arr2.length); i++) {
 
             // Out of bounds handling
             if (i >= arr1.length) {
-                if (areaIsNull(arr2[i])) {
+                if (areaIsNull(arr2[i], gNull)) {
                     continue;   // This is fine, this area counts as equal
                 } else {
                     return false; // Out of bounds and in the other exists something that is not null, then it does not count as equal.
                 }
             }
             if (i >= arr2.length) {
-                if (areaIsNull(arr1[i])) {
+                if (areaIsNull(arr1[i], gNull)) {
                     continue;
                 } else {
                     return false;
@@ -151,14 +168,14 @@ public final class Util {
 
                 // Out of bounds handling
                 if (j >= arr1[i].length) {
-                    if (areaIsNull(arr2[i][j])) {
+                    if (areaIsNull(arr2[i][j], gNull)) {
                         continue;   // This is fine, this area counts as equal
                     } else {
                         return false;   // Out of bounds and in the other exists something that is not null, then it does not count as equal.
                     }
                 }
                 if (j >= arr2[i].length) {
-                    if (areaIsNull(arr1[i][j])) {
+                    if (areaIsNull(arr1[i][j], gNull)) {
                         continue;
                     } else {
                         return false;
@@ -169,14 +186,14 @@ public final class Util {
 
                     // Out of bounds handling
                     if (k >= arr1[i][j].length) {
-                        if (arr2[i][j][k] == null) {
+                        if (gNull.equals(arr2[i][j][k])) {
                             continue;   // This is fine, this area counts as equal
                         } else {
                             return false;   // Out of bounds and in the other exists something that is not null, then it does not count as equal.
                         }
                     }
                     if (k >= arr2[i][j].length) {
-                        if (arr1[i][j][k] == null) {
+                        if (gNull.equals(arr1[i][j][k])) {
                             continue;
                         } else {
                             return false;
@@ -218,9 +235,9 @@ public final class Util {
         return true;
     }
 
-    private static <T> boolean areaIsNull(T[] areaOfArr) {
+    private static <T> boolean areaIsNull(T[] areaOfArr, GeneralNull nullObject) {
         for (T object : areaOfArr) {
-            if (object != null) {
+            if (!nullObject.equals(object)) {
                 return false;
             }
         }
@@ -228,10 +245,10 @@ public final class Util {
         return true;
     }
 
-    private static <T> boolean areaIsNull(T[][] areaOfArr) {
+    private static <T> boolean areaIsNull(T[][] areaOfArr, GeneralNull nullObject) {
         for (T[] arr1D : areaOfArr) {
             for (T object : arr1D) {
-                if (object != null) {
+                if (!nullObject.equals(object)) {
                     return false;
                 }
             }
@@ -239,7 +256,6 @@ public final class Util {
 
         return true;
     }
-
 
     /**
      * Returns true if every inner element in a 3D array is equal to a singular object.
@@ -256,7 +272,6 @@ public final class Util {
         }
         return true;
     }
-
 
     /**
      * Perform an action on every inner object in a 3D array.
@@ -278,26 +293,23 @@ public final class Util {
         }
     }
 
-
     /**
      * Gets the TileEntity at the given position in the world
      *
      * @param world The world to get the TileEntity from
      * @param pos   The position in the world to get the TileEntity from
      */
-    @Nullable
+    @Nonnull
     public static <T extends TileEntity> T getTileEntity(@Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
 
 
         try {
             return (T) world.getTileEntity(pos);
         } catch (ClassCastException e) {
-            SpatialCrafting.LOGGER.error("Invalid cast trying to cast between two different tile entities", e);
-            return null;
+            throw new ClassCastException("Invalid cast trying to cast between two different tile entities");
         }
 
     }
-
 
     /**
      * Trick intellij into not being NPE tricked by the forge objectholder trick
@@ -307,5 +319,23 @@ public final class Util {
         return null;
     }
 
+    private static class GeneralNull {
+        private Object nullObject;
+
+        private GeneralNull(Object nullObject) {
+            this.nullObject = nullObject;
+        }
+
+        public boolean equals(Object other) {
+            return other == null || other.equals(nullObject);
+        }
+
+    }
+
+
+    public static String translate(String key) {
+        TextComponentTranslation translatedText = new TextComponentTranslation(key);
+        return translatedText.getUnformattedComponentText();
+    }
 
 }

@@ -1,12 +1,13 @@
-package fudge.spatialcrafting.network;
+package fudge.spatialcrafting.network.client;
 
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
+import fudge.spatialcrafting.common.tile.util.CraftersData;
+import fudge.spatialcrafting.common.tile.util.SharedData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -15,36 +16,33 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+
+/**
+ * Packet from server to client
+ * Hardcoded to CrafterData
+ **/
+public class PacketUpdateOneSharedData implements IMessage {
+
+    private static final String DATA_NBT = "data";
+    private SharedData data;
 
 
-// Packet from server to client
-public class PacketUpdateAllSharedData implements IMessage {
-
-    private Map<BlockPos, Long> craftEndTimes;
-
-
-    public PacketUpdateAllSharedData(Map<BlockPos, Long> craftEndTimes) {
-        this.craftEndTimes = craftEndTimes;
+    public PacketUpdateOneSharedData(SharedData data) {
+        this.data = data;
     }
 
 
-    // Necessary for reflection
-    public PacketUpdateAllSharedData() {
+    public PacketUpdateOneSharedData() {
+        // Necessary for reflection
     }
 
     @Override
     public void toBytes(ByteBuf buffer) {
+
         // PacketBuffers are easier to use
         PacketBuffer wrappedBuffer = new PacketBuffer(buffer);
 
-        // Serialize Map to NBT
-        NBTTagCompound serializedMap = new NBTTagCompound();
-        craftEndTimes.forEach((pos, time) -> serializedMap.setLong(Long.toString(pos.toLong()), time));
-        // Serialize NBT to ByteBuf
-        wrappedBuffer.writeCompoundTag(serializedMap);
+        wrappedBuffer.writeCompoundTag(data.serialized(new NBTTagCompound()));
 
 
     }
@@ -54,12 +52,9 @@ public class PacketUpdateAllSharedData implements IMessage {
         PacketBuffer wrappedBuffer = new PacketBuffer(buffer);
 
         try {
-            NBTTagCompound serializedMap = wrappedBuffer.readCompoundTag();
+            NBTTagCompound serializedData = wrappedBuffer.readCompoundTag();
+            data = new CraftersData(serializedData);
 
-            Set<String> keys = serializedMap.getKeySet();
-
-            craftEndTimes = new HashMap<>();
-            keys.forEach(key -> craftEndTimes.put(BlockPos.fromLong(Long.parseLong(key)), Long.parseLong(key)));
 
         } catch (IOException e) {
             SpatialCrafting.LOGGER.error(e);
@@ -68,18 +63,18 @@ public class PacketUpdateAllSharedData implements IMessage {
     }
 
 
-    public static class Handler implements IMessageHandler<PacketUpdateAllSharedData, IMessage> {
+    public static class Handler implements IMessageHandler<PacketUpdateOneSharedData, IMessage> {
 
         @Override
         @SideOnly(Side.CLIENT)
-        public IMessage onMessage(PacketUpdateAllSharedData message, MessageContext ctx) {
+        public IMessage onMessage(PacketUpdateOneSharedData message, MessageContext ctx) {
 
             Minecraft.getMinecraft().addScheduledTask((new Runnable() {
                 @Override
                 @SideOnly(Side.CLIENT)
                 public void run() {
                     World world = Minecraft.getMinecraft().world;
-                    WorldSavedDataCrafters.setData(world, message.craftEndTimes);
+                    WorldSavedDataCrafters.setOneData(world, message.data);
                 }
             }));
 

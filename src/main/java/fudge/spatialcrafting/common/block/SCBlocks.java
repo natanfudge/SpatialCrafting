@@ -2,7 +2,7 @@ package fudge.spatialcrafting.common.block;
 
 import com.google.common.collect.ImmutableList;
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.SCConstants;
+import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.TileHologram;
 import net.minecraft.block.Block;
@@ -48,12 +48,19 @@ public final class SCBlocks {
         return blockList;
     }
 
+    /**
+     * Can only be used after registry
+     */
+    public static List<BlockCrafter> getAllCrafterBlocks() {
+        return ImmutableList.of(X2CRAFTER_BLOCK, X3CRAFTER_BLOCK, X4CRAFTER_BLOCK, X5CRAFTER_BLOCK);
+    }
+
     public static <T extends Block> T createBlock(T block, String name) {
 
         block.setTranslationKey(SpatialCrafting.MODID + '.' + name);
 
         // How fast the block breaks, this is the default in case I forget to add it especially for specific blocks or I don't care.
-        block.setHardness(SCConstants.BASE_HARDNESS);
+        block.setHardness(MCConstants.BASE_HARDNESS);
 
         // Name for Forge registry
         block.setRegistryName(name);

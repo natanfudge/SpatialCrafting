@@ -1,13 +1,15 @@
 package fudge.spatialcrafting.common.block;
 
-import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.SCConstants;
+import fudge.spatialcrafting.client.particle.ParticleItemDust;
+import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.TileHologram;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialTransparent;
+import net.minecraft.block.properties.PropertyBool;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -33,10 +35,12 @@ import javax.annotation.Nullable;
 public class BlockHologram extends BlockTileEntity<TileHologram> {
 
 
+    public static final PropertyBool ACTIVE = PropertyBool.create("active");
     private static final Material HOLOGRAM = new MaterialTransparent(MapColor.AIR);
 
     public BlockHologram() {
         super(HOLOGRAM);
+        this.setDefaultState(this.blockState.getBaseState().withProperty(ACTIVE, false));
     }
 
 
@@ -48,6 +52,40 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
         return false;
     }
 
+    @Override
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
+        if (state.getValue(ACTIVE)) {
+            return super.getBoundingBox(state, source, pos);
+        } else {
+            return new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+        }
+
+    }
+
+
+    @Override
+    protected BlockStateContainer createBlockState() {
+        return new BlockStateContainer(this, ACTIVE);
+    }
+
+    @Override
+    public int getMetaFromState(IBlockState state) {
+        if (state.getValue(ACTIVE)) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    @Override
+    public IBlockState getStateFromMeta(int meta) {
+        if (meta == 1) {
+            return this.getDefaultState().withProperty(ACTIVE, true);
+        } else {
+            return this.getDefaultState().withProperty(ACTIVE, false);
+        }
+    }
+
     /**
      * Makes it see-through
      */
@@ -57,6 +95,10 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
         return BlockRenderLayer.TRANSLUCENT;
     }
 
+    @Override
+    public BlockStateContainer getBlockState() {
+        return super.getBlockState();
+    }
 
     /**
      * @return NULL_AABB (null collision box) if you can pass through it, FULL_BLOCK_AABB if you can't.
@@ -86,65 +128,99 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
     @Override
     public float getBlockHardness(IBlockState blockState, World worldIn, BlockPos pos) {
         // Unbreakable
-        return SCConstants.UNBREAKABLE;
+        return MCConstants.UNBREAKABLE;
     }
 
     @Override
     public float getExplosionResistance(Entity exploder) {
-        return SCConstants.INDESTRUCTIBLE;
+        return MCConstants.INDESTRUCTIBLE;
     }
 
 
-    //TODO: fix bug with stuff sometimes not inserting server side
     @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
-        try {
-            TileHologram tile = Util.getTileEntity(world, pos);
-            TileCrafter crafter = tile.getCrafter();
-            IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.UP);
-            ItemStack heldItem = player.getHeldItem(hand);
-            if (!player.isSneaking()) {
-                // Inputs the held item into the hologram / takes it out of the hologram and gives it back to the player
+        if (!state.getValue(ACTIVE)) return false;
 
-                // Take item out of the hologram
-                ItemStack extractedItemStack = itemHandler.extractItem(0, SCConstants.NORMAL_ITEMSTACK_LIMIT, false);
 
-                // If there was anything in there
-                if (!extractedItemStack.isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, extractedItemStack);
+        //TODO make it so you can disable the crafting help
 
-                    // If items were taken out during crafting then it must be stopped
-                    if (extractedItemStack.getCount() >= 1 && crafter.isCrafting()) {
-                        crafter.stopCrafting();
+        TileHologram hologramTile = Util.getTileEntity(world, pos);
+        TileCrafter crafter = hologramTile.getCrafter();
+        IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        ItemStack heldItem = player.getHeldItem(hand);
+        if (!player.isSneaking()) {
+            // Inputs the held item into the hologram / takes it out of the hologram and gives it back to the player
+
+            if (heldItem.isEmpty()) {
+                extractItem(world, player, crafter, itemHandler);
+
+                // If there was nothing in there, so we should put an item in there in the case that the player is holding an item.
+            } else /*if (!heldItem.isEmpty()) */ {
+                if (!crafter.isCrafting()) {
+                    // Put item into the hologram
+                    ItemStack remainingItemStack = itemHandler.insertItem(0, heldItem, false);
+
+
+                    if (!player.isCreative()) {
+                        player.setHeldItem(hand, remainingItemStack);
                     }
-                    // If there was nothing in there, so we should put an item in there in the case that the player is holding an item.
-                } else if (!heldItem.isEmpty()) {
-                    if (!crafter.isCrafting()) {
-                        // Put item into the hologram
-                        ItemStack remainingItemStack = itemHandler.insertItem(0, heldItem, false);
-                        if (!player.isCreative()) {
-                            player.setHeldItem(hand, remainingItemStack);
-                        }
-                    }
-
-                } else {
-
-
                 }
+
 
             }
 
+            if (crafter.isHelpActive()) {
+                crafter.proceedHelp();
+            }
 
-        } catch (Exception e) {
-            SpatialCrafting.LOGGER.error("Exception caught in BlockHologram::onBlockActivated", e);
+
+            return true;
         }
-        return true;
+        return false;
     }
 
+    private void extractItem(World world, EntityPlayer player, TileCrafter crafter, IItemHandler itemHandler) {
+        // Take item out of the hologram
+        ItemStack extractedItemStack = itemHandler.extractItem(0, MCConstants.NORMAL_ITEMSTACK_LIMIT, false);
+        ItemHandlerHelper.giveItemToPlayer(player, extractedItemStack);
+
+        // If items were taken out during crafting then it must be stopped
+        if (extractedItemStack.getCount() >= 1 && crafter.isCrafting()) {
+            crafter.resetCraftingState();
+            if (world.isRemote) {
+                ParticleItemDust.stopParticles(crafter);
+            }
+        }
+    }
+
+    @Override
+    public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {
+        checkForItemExtraction(world, pos, player);
+    }
+
+    private void checkForItemExtraction(World world, BlockPos pos, EntityPlayer player) {
+        TileHologram hologramTile = Util.getTileEntity(world, pos);
+        TileCrafter crafter = hologramTile.getCrafter();
+        IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+
+        if (!player.isSneaking()) {
+            extractItem(world, player, crafter, itemHandler);
+        }
+    }
+
+
+    @Override
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        //Edge case when a hologram is left clicked in creative. Neither breakBlock or onBlockClicked is called.
+        checkForItemExtraction(world, pos, player);
+
+        return false;
+    }
 
     @Override
     public void breakBlock(World world, BlockPos pos, IBlockState state) {
         TileHologram tile = Util.getTileEntity(world, pos);
+
         IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH);
         ItemStack itemStack = itemHandler.getStackInSlot(0);
 
@@ -154,6 +230,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
         }
 
         super.breakBlock(world, pos, state);
+
     }
 
     @Override
