@@ -15,7 +15,7 @@ JEI shows each layer of the recipe individually (from bottom to top - layer 1 wi
 ## Adding Recipes
 
 You may have noticed there are not that many spatial recipes. This is because Spatial Crafting is designed to provide custom recipes to various modded items. For this reason adding recipes is extremely easy:  
-First, insert a nearby crafter with the items that you want to serve as the input. (Tip: <b>type /sc layer <layerNumber> to activate the layer that you want to insert items into.)</b>  
+First, insert a nearby crafter with the items that you want to serve as the input. (Tip: <b>type /sc layer [layerNumber] to activate the layer that you want to insert items into.)</b>  
 Then, hold the item (or any amount of that item) that you want to be the output for the recipe in your main hand.  
 Finally, <b>type /sc addRecipe (or /sc ar) to add the recipe</b>.  
 <i>Note: the recipe will be added immediately, but currently (fix coming soonTM) you will need to close and reopen the game to see the changes in JEI. 
