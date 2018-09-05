@@ -245,9 +245,10 @@ public class SpatialRecipe {
     }
 
     public boolean matches(ItemStack[][][] craftingInventory) {
-        return ArrayUtil.innerEqualsDifferentSizes(requiredInput, craftingInventory, (required, actualInput) -> {
-            return required.matches(CraftTweakerMC.getIItemStack(actualInput));
-        }, ItemStack.EMPTY);
+        return ArrayUtil.innerEqualsDifferentSizes(requiredInput,
+                craftingInventory,
+                (required, actualInput) -> required.matches(CraftTweakerMC.getIItemStack(actualInput)),
+                ItemStack.EMPTY);
 
     }
 

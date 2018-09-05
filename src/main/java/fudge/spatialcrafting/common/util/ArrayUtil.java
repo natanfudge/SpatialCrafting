@@ -1,10 +1,15 @@
 package fudge.spatialcrafting.common.util;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
+@UtilityClass
 public class ArrayUtil {
+
+
     /**
      * Returns true if every inner element in the arrays is in the same in every position.
      * Currently throws exception if they are not the same size

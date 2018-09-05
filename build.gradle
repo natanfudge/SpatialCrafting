@@ -9,6 +9,7 @@ buildscript {
 }
 plugins {
     id "org.sonarqube" version "2.6"
+    id 'net.ltgt.apt' version '0.10'
 }
 apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
@@ -47,6 +48,9 @@ repositories{
         name 'jared maven'
         url "http://maven.blamejared.com/"
     }
+
+    mavenCentral()
+
 }
 
 dependencies {
@@ -64,6 +68,11 @@ dependencies {
     compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.8.468"
 
     compile group: 'org.jetbrains', name: 'annotations', version: '13.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.2'
+
+    apt "org.projectlombok:lombok:1.18.2"
+
 
 }
 
