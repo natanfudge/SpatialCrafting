@@ -19,10 +19,14 @@ public class ScJeiPlugin implements IModPlugin {
     private static List<CategorySpatialRecipe> recipeCategories = new ArrayList<>(4);
 
     @Override
-    public void registerItemSubtypes(ISubtypeRegistry subtypeRegistry) {}
+    public void registerItemSubtypes(ISubtypeRegistry subtypeRegistry) {
+        // No subtypes
+    }
 
     @Override
-    public void registerIngredients(IModIngredientRegistration registry) {}
+    public void registerIngredients(IModIngredientRegistration registry) {
+        // No ingredients
+    }
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration registry) {
@@ -56,6 +60,8 @@ public class ScJeiPlugin implements IModPlugin {
 
 
     @Override
-    public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {}
+    public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
+        // No runtime actions needed
+    }
 
 }

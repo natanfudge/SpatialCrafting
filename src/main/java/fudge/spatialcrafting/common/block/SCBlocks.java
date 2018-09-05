@@ -16,7 +16,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 
 import java.util.List;
 
-import static fudge.spatialcrafting.common.util.Util.notNull;
+import static fudge.spatialcrafting.common.util.Util.objectHolder;
 import static net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 
 @ObjectHolder(SpatialCrafting.MODID)
@@ -25,15 +25,15 @@ public final class SCBlocks {
 
 
     @ObjectHolder(RegistryNames.HOLOGRAM)
-    public static final BlockHologram HOLOGRAM = notNull();
+    public static final BlockHologram HOLOGRAM = objectHolder();
     @ObjectHolder(RegistryNames.X2CRAFTER_BLOCK)
-    public static final BlockCrafter X2CRAFTER_BLOCK = notNull();
+    public static final BlockCrafter X2CRAFTER_BLOCK = objectHolder();
     @ObjectHolder(RegistryNames.X3CRAFTER_BLOCK)
-    public static final BlockCrafter X3CRAFTER_BLOCK = notNull();
+    public static final BlockCrafter X3CRAFTER_BLOCK = objectHolder();
     @ObjectHolder(RegistryNames.X4CRAFTER_BLOCK)
-    public static final BlockCrafter X4CRAFTER_BLOCK = notNull();
+    public static final BlockCrafter X4CRAFTER_BLOCK = objectHolder();
     @ObjectHolder(RegistryNames.X5CRAFTER_BLOCK)
-    public static final BlockCrafter X5CRAFTER_BLOCK = notNull();
+    public static final BlockCrafter X5CRAFTER_BLOCK = objectHolder();
 
 
     private static List<Block> blockList = ImmutableList.of(createBlock(new BlockHologram(), RegistryNames.HOLOGRAM),
@@ -64,9 +64,6 @@ public final class SCBlocks {
 
         // Name for Forge registry
         block.setRegistryName(name);
-
-        // Assigns the block the mod's creative tab
-        // block.setCreativeTab(SpatialCrafting.SPATIAL_CRAFTING_TAB);
 
         return block;
     }

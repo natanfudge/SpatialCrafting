@@ -18,8 +18,6 @@ public class CommandDebug extends SCCommand {
 
     private static final List<String> ALIASES = ImmutableList.of("debug");
 
-    public CommandDebug() {}
-
     @Override
     public String description() {
         return "commands.spatialcrafting.debug.description";
@@ -43,7 +41,6 @@ public class CommandDebug extends SCCommand {
 
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
-        SpatialCrafting.LOGGER.info(Debug.getAllCrafterData(sender.getEntityWorld(), false));
         World serverWorld = sender.getEntityWorld();
 
         String message = Debug.getAllCrafterData(serverWorld, false);
@@ -52,6 +49,7 @@ public class CommandDebug extends SCCommand {
             PacketHandler.getNetwork().sendTo(new PacketDebugPrint(), getCommandSenderAsPlayer(sender));
         } catch (PlayerNotFoundException ignored) {
         }
+
 
         sender.sendMessage(new TextComponentString(message));
 

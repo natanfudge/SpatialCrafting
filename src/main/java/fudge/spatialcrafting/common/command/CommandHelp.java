@@ -45,7 +45,7 @@ public class CommandHelp extends SCCommand {
         newLine(sender);
 
 
-        Commands.getCommands().forEach((command) -> {
+        Commands.getCommandList().forEach(command -> {
             TextComponentString name = new TextComponentString(command.getName());
             name.getStyle().setBold(true);
             name.getStyle().setUnderlined(true);

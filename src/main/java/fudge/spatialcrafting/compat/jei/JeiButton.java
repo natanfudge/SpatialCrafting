@@ -28,7 +28,7 @@ public abstract class JeiButton {
         this.textureLocationOff = offTextureLocation;
     }
 
-    public ResourceLocation getTexture(Minecraft minecraft) {
+    public ResourceLocation getTexture() {
         return textureLocation;
     }
 
@@ -83,7 +83,7 @@ public abstract class JeiButton {
                 clearColor();
             }
             // Draw on texture
-            minecraft.getTextureManager().bindTexture(getTexture(minecraft));
+            minecraft.getTextureManager().bindTexture(getTexture());
             Gui.drawModalRectWithCustomSizedTexture(xOffset, yOffset, 0, 0, width, height, width, height);
         } else {
             clearColor();

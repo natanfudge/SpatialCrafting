@@ -12,6 +12,8 @@ import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.util.CraftersData;
 import fudge.spatialcrafting.common.tile.util.Offset;
+import fudge.spatialcrafting.common.util.ArrayUtil;
+import fudge.spatialcrafting.common.util.MathUtil;
 import fudge.spatialcrafting.common.util.RecipeUtil;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketHandler;
@@ -40,7 +42,6 @@ import static fudge.spatialcrafting.common.block.BlockHologram.ACTIVE;
 public class TileCrafter extends TileEntity implements ITickable {
 
     private static final String OFFSET_NBT = "offset";
-    private static final String SHARED_DATA_NBT = "sharedData";
     /**
      * Pass -1 to activate all layers
      *
@@ -363,7 +364,7 @@ public class TileCrafter extends TileEntity implements ITickable {
 
         BlockPos[][] crafters = getCrafterBlocks();
 
-        Util.innerForEach2D(crafters, crafterPos -> {
+        ArrayUtil.innerForEach2D(crafters, crafterPos -> {
             for (int i = 0; i < size; i++) {
                 Offset crafterOffset = new Offset(crafterPos, masterPos());
 
@@ -430,7 +431,7 @@ public class TileCrafter extends TileEntity implements ITickable {
         Vec3d edge1 = new Vec3d(holograms[0][0][0]);
         Vec3d edge2 = new Vec3d(holograms[size][size][size].add(1, 1, 1));
 
-        return Util.middleOf(edge1, edge2);
+        return MathUtil.middleOf(edge1, edge2);
     }
 
 
@@ -472,7 +473,7 @@ public class TileCrafter extends TileEntity implements ITickable {
         }
 
         // Removes the existing items
-        Util.innerForEach(getHolograms(), blockPos -> Util.<TileHologram>getTileEntity(world, blockPos).removeItem(1, true));
+        ArrayUtil.innerForEach(getHolograms(), blockPos -> Util.<TileHologram>getTileEntity(world, blockPos).removeItem(1, true));
 
 
     }

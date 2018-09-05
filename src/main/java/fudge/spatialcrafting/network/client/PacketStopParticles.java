@@ -41,7 +41,7 @@ public class PacketStopParticles extends PacketBlockPos {
                     TileCrafter crafter;
                     try {
                         crafter = Util.getTileEntity(world, message.pos);
-                    }catch (NullPointerException e){
+                    } catch (NullPointerException e) {
                         // Backup crafter tile entity
                         crafter = Util.getTileEntity(world, message.pos.add(1, 0, 0));
                     }

@@ -2,12 +2,12 @@ package fudge.spatialcrafting.common.util;
 
 import java.util.Objects;
 
-public class Rectangle<T,S> {
+public class Rectangle<T, S> {
 
     private T width;
     private S height;
 
-    public Rectangle(T width, S height){
+    public Rectangle(T width, S height) {
         this.width = width;
         this.height = height;
     }

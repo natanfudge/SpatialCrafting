@@ -73,7 +73,6 @@ public class CommandLayer extends SCCommand {
         }
 
 
-
     }
 
     @Override

@@ -14,17 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Commands extends CommandBase {
-    private static List<SCCommand> commands = new ArrayList<>();
+    private static List<SCCommand> commandList = new ArrayList<>();
 
     public Commands() {
-        commands.add(new CommandAddSRecipe());
-        commands.add(new CommandHelp());
-        commands.add(new CommandDebug());
-        commands.add(new CommandLayer());
+        commandList.add(new CommandAddSRecipe());
+        commandList.add(new CommandHelp());
+        commandList.add(new CommandDebug());
+        commandList.add(new CommandLayer());
     }
 
-    public static List<SCCommand> getCommands() {
-        return commands;
+    public static List<SCCommand> getCommandList() {
+        return commandList;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class Commands extends CommandBase {
 
         // Look for the command in the map to see if we can execute it.
         boolean exists = false;
-        for (SCCommand command : getCommands()) {
+        for (SCCommand command : getCommandList()) {
             List<String> aliases = command.getAliases();
 
             if (aliases.contains(words[0].toLowerCase())) {

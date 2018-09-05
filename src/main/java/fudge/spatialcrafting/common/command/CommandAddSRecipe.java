@@ -6,8 +6,8 @@ import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.crafting.RecipeAddition;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
+import fudge.spatialcrafting.common.util.ArrayUtil;
 import fudge.spatialcrafting.common.util.CrafterUtil;
-import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.PlayerNotFoundException;
@@ -80,7 +80,7 @@ public class CommandAddSRecipe extends SCCommand {
     private static boolean isValidRecipe(ItemStack[][][] input, ItemStack output, @Nonnull EntityPlayerMP player) {
 
         // If the input is just air
-        if (Util.arrEqualsObj(input, Items.AIR, (itemStack, air) -> itemStack.getItem().equals(air))) {
+        if (ArrayUtil.arrEqualsObj(input, Items.AIR, (itemStack, air) -> itemStack.getItem().equals(air))) {
             player.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.empty_crafter", 0));
             return false;
         }

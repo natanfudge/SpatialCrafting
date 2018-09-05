@@ -6,6 +6,7 @@ import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.TileCrafter;
+import fudge.spatialcrafting.common.util.ArrayUtil;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketHandler;
@@ -195,7 +196,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         }
 
         // Destroy all holograms in the BlockPos list.
-        Util.innerForEach(crafter.getHolograms(), hologramPos -> {
+        ArrayUtil.innerForEach(crafter.getHolograms(), hologramPos -> {
             if (world.getBlockState(hologramPos).getBlock() == SCBlocks.HOLOGRAM) {
                 world.setBlockState(hologramPos, Blocks.AIR.getDefaultState(), NOTIFY_CLIENT + BLOCK_UPDATE);
             }
@@ -203,7 +204,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
 
 
         // Notify the blocks they are no longer in a multiblock
-        Util.innerForEach2D(crafter.getCrafterBlocks(), crafterPos -> {
+        ArrayUtil.innerForEach2D(crafter.getCrafterBlocks(), crafterPos -> {
             IBlockState blockState = world.getBlockState(crafterPos);
             if (blockState.getBlock() instanceof BlockCrafter) {
                 world.setBlockState(crafterPos, blockState.withProperty(FORMED, false), MCConstants.NOTIFY_CLIENT);

@@ -5,7 +5,7 @@ import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import crafttweaker.api.oredict.IOreDictEntry;
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.util.Util;
+import fudge.spatialcrafting.common.util.ArrayUtil;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -26,27 +26,10 @@ public class SpatialRecipe {
 
     //TODO: add unshaped crafting
     private static final String EXAMPLE_SCRIPT_NAME = "SpatialRecipeExamples.zs";
-    private static final String ID_NBT = "id";
-    private static final String HELP_ACTIVE_NBT = "isHelpActive";
+    private static final String CT_SCRIPTS_FOLDER_NAME = "scripts";
     private static List<SpatialRecipe> recipeList = new ArrayList<>();
-    private static String RECIPE_ID_NBT = "recipeID";
     private final IIngredient[][][] requiredInput;
     private final ItemStack output;
-    private boolean helpActive = false;
-
-    /*public NBTTagCompound serialized( NBTTagCompound existingData){
-        existingData.setInteger( ID_NBT,getID());
-        existingData.setBoolean(HELP_ACTIVE_NBT, isHelpActive);
-        return existingData;
-    }
-
-    public static SpatialRecipe deserialize(NBTTagCompound serializedData){
-        SpatialRecipe recipe = fromID(serializedData.getInteger(ID_NBT));
-        recipe.setHelpActive(serializedData.getBoolean(HELP_ACTIVE_NBT));
-
-        return recipe;
-    }*/
-
 
     public SpatialRecipe(IIngredient[][][] recipeInput, ItemStack recipeOutput) {
         this.requiredInput = recipeInput;
@@ -133,7 +116,7 @@ public class SpatialRecipe {
 
             // If the input is the same it means there is some kind of conflict.
             // "newIng.contains(oldIng) || oldIng.contains(newIng)" insures the recipes intersect
-            if (Util.innerEqualsDifferentSizes(newRecipe.requiredInput,
+            if (ArrayUtil.innerEqualsDifferentSizes(newRecipe.requiredInput,
                     existingRecipe.requiredInput,
                     (newIng, oldIng) -> newIng.contains(oldIng) || oldIng.contains(newIng))) {
 
@@ -175,7 +158,6 @@ public class SpatialRecipe {
      */
     public static void preInit() {
 
-        final String CT_SCRIPTS_FOLDER_NAME = "scripts";
 
         // Create scripts folder if it doesn't exist.
         File scriptsDir = new File(CT_SCRIPTS_FOLDER_NAME);
@@ -185,24 +167,24 @@ public class SpatialRecipe {
 
         final String SCRIPTS_PATH_SOURCE = "/assets/" + MODID + "/scripts/" + EXAMPLE_SCRIPT_NAME;
 
-        File spatialCraftingDir = new File(CT_SCRIPTS_FOLDER_NAME + "/" + MODID);
+        File spatialCraftingDir = new File(CT_SCRIPTS_FOLDER_NAME + File.separator + MODID);
         if (!spatialCraftingDir.exists()) {
             spatialCraftingDir.mkdir();
         }
 
-        final String SCRIPTS_PATH_DESTINATION = CT_SCRIPTS_FOLDER_NAME + "/" + MODID + "/" + EXAMPLE_SCRIPT_NAME;
+        final String SCRIPTS_PATH_DESTINATION = CT_SCRIPTS_FOLDER_NAME + File.separator + MODID + File.separator + EXAMPLE_SCRIPT_NAME;
         InputStream sourceUrl = SpatialRecipe.class.getResourceAsStream(SCRIPTS_PATH_SOURCE);
 
 
         File destFile = new File(SCRIPTS_PATH_DESTINATION);
 
 
-        copyScriptFile(CT_SCRIPTS_FOLDER_NAME, sourceUrl, destFile);
+        copyScriptFile(sourceUrl, destFile);
 
 
     }
 
-    private static void copyScriptFile(String CT_SCRIPTS_FOLDER_NAME, InputStream sourceUrl, File destFile) {
+    private static void copyScriptFile(InputStream sourceUrl, File destFile) {
         try {
             if (!destFile.exists() && !otherScriptExists(new File(CT_SCRIPTS_FOLDER_NAME + "/" + MODID))) {
                 FileUtils.copyInputStreamToFile(sourceUrl, destFile);
@@ -245,7 +227,7 @@ public class SpatialRecipe {
 
         SpatialRecipe other = (SpatialRecipe) otherObj;
 
-        return Util.innerEqualsDifferentSizes(this.requiredInput, other.requiredInput, Object::equals) && itemStackEquals(this.output,
+        return ArrayUtil.innerEqualsDifferentSizes(this.requiredInput, other.requiredInput, Object::equals) && itemStackEquals(this.output,
                 other.output);
 
     }
@@ -263,7 +245,7 @@ public class SpatialRecipe {
     }
 
     public boolean matches(ItemStack[][][] craftingInventory) {
-        return Util.innerEqualsDifferentSizes(requiredInput, craftingInventory, (required, actualInput) -> {
+        return ArrayUtil.innerEqualsDifferentSizes(requiredInput, craftingInventory, (required, actualInput) -> {
             return required.matches(CraftTweakerMC.getIItemStack(actualInput));
         }, ItemStack.EMPTY);
 

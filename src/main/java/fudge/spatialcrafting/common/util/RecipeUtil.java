@@ -3,7 +3,9 @@ package fudge.spatialcrafting.common.util;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
 
-public class RecipeUtil {
+public final class RecipeUtil {
+
+    private RecipeUtil() {}
 
     /**
      * Checks if an ingredient matches an IItemStack, but return false if the ingredient is null instead of crashing...

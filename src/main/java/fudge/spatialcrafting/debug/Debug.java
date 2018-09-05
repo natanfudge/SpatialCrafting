@@ -4,31 +4,20 @@ import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.util.CraftersData;
 import fudge.spatialcrafting.common.tile.util.SharedData;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.World;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.List;
 
 @Mod.EventBusSubscriber
-public class Debug {
+public final class Debug {
 
-   /* public static void printAllCrafterData(World world) {
-        List<SharedData> allData = WorldSavedDataCrafters.getAllData(world);
-
-        StringBuilder string = new StringBuilder();
-
-
-        allData.forEach(dataG -> {
-            CraftersData data = (CraftersData) dataG;
-            String worldType = world.isRemote ? "CLIENT" : "SERVER";
-            SpatialCrafting.LOGGER.info("**** Data for crafter multiblock at masterPos = {} in {} world ****", data.getMasterPos(),worldType);
-            SpatialCrafting.LOGGER.info("Craft End Time = {} ", data.getCraftTime() != 0 ? data.getCraftTime() : "not crafting");
-            SpatialCrafting.LOGGER.info("Recipe = {} \n", data.getRecipe() != null ? data.getRecipe() : "No help recipe active");
-
-        });
-    }*/
+   private Debug(){}
 
     public static String getAllCrafterData(World world, boolean client) {
         List<SharedData> allData = WorldSavedDataCrafters.getAllData(world);
@@ -39,15 +28,20 @@ public class Debug {
         allData.forEach(dataG -> {
             CraftersData data = (CraftersData) dataG;
             String worldType = client ? "CLIENT" : "SERVER";
-            string.append(String.format("\n**** Data for crafter multiblock at masterPos = %s in %s world ****\n",
+            string.append(String.format("%n**** Data for crafter multiblock at masterPos = %s in %s world ****%n",
                     data.getMasterPos(),
                     worldType));
-            string.append(String.format("Craft End Time = %s \n", data.getCraftTime() != 0 ? data.getCraftTime() : "not crafting"));
-            string.append(String.format("Recipe = %s \n", data.getRecipe() != null ? data.getRecipe() : "No help recipe active"));
+            string.append(String.format("Craft End Time = %s %n", data.getCraftTime() != 0 ? data.getCraftTime() : "not crafting"));
+            string.append(String.format("Recipe = %s %n", data.getRecipe() != null ? data.getRecipe() : "No help recipe active"));
 
         });
 
         return string.toString();
+    }
+
+    @SideOnly(Side.CLIENT)
+    public static void printClientDebug(){
+        SpatialCrafting.LOGGER.info(Debug.getAllCrafterData(Minecraft.getMinecraft().world, true));
     }
 
     @SubscribeEvent
@@ -59,7 +53,6 @@ public class Debug {
             }
         }
     }
-
 
 
 }

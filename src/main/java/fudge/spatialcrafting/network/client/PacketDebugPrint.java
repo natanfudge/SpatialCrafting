@@ -20,7 +20,9 @@ public class PacketDebugPrint implements IMessage {
     }
 
     @Override
-    public void fromBytes(ByteBuf buf) {}
+    public void fromBytes(ByteBuf buf) {
+        // No data needed
+    }
 
     @Override
     public void toBytes(ByteBuf buf) {}

@@ -7,7 +7,9 @@ import crafttweaker.api.minecraft.CraftTweakerMC;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
+import fudge.spatialcrafting.common.util.ArrayUtil;
 import fudge.spatialcrafting.common.util.CrafterUtil;
+import fudge.spatialcrafting.common.util.MathUtil;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.server.PacketSetActiveLayer;
@@ -17,7 +19,6 @@ import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IRecipeWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -64,7 +65,7 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
 
     private static List<List<ItemStack>> fromArray(IIngredient[][][] arr, int layer) {
         List<List<ItemStack>> list = new ArrayList<>();
-        Util.innerForEach2D(arr[layer], ingredient -> {
+        ArrayUtil.innerForEach2D(arr[layer], ingredient -> {
             if (ingredient != null) {
                 list.add(Lists.newArrayList(CraftTweakerMC.getItemStacks(ingredient.getItems())));
             } else {
@@ -166,36 +167,33 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
 
                     }
 
-                    int MAX_TEST_WIDTH = 0;
+                    int maxWidth = 0;
                     if (!craftersExistNearby(minecraft)) {
                         textLines.add(TextFormatting.RED + translate("jei.wrapper.helpButton.error.no_crafters"));
-                        MAX_TEST_WIDTH = 150;
+                        maxWidth = 150;
                     } else if (!nearestCrafterBigEnough(minecraft)) {
                         textLines.add(TextFormatting.RED + translate("jei.wrapper.helpButton.error.crafter_too_small"));
-                        MAX_TEST_WIDTH = 100;
+                        maxWidth = 100;
 
                     }
 
                     final int HEIGHT = minecraft.displayHeight;
                     final int SCREEN_WIDTH = minecraft.displayWidth;
 
-                    GuiUtils.drawHoveringText(textLines, cursorX, cursorY, SCREEN_WIDTH, HEIGHT, MAX_TEST_WIDTH, minecraft.fontRenderer);
+                    GuiUtils.drawHoveringText(textLines, cursorX, cursorY, SCREEN_WIDTH, HEIGHT, maxWidth, minecraft.fontRenderer);
                 }
             }
 
 
             @Override
-            public ResourceLocation getTexture(Minecraft minecraft) {
-                return nearestCrafterMatches(minecraft) ? HELP_ACTIVE_LOCATION : HELP_LOCATION;
+            public ResourceLocation getTexture() {
+                return nearestCrafterMatches(Minecraft.getMinecraft()) ? HELP_ACTIVE_LOCATION : HELP_LOCATION;
             }
         };
 
 
         return ImmutableList.of(upButton, downButton, helpButton);
     }
-
-
-
 
 
     private boolean nearestCrafterMatches(Minecraft minecraft) {
@@ -225,11 +223,8 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
 
 
         final int MAX_DISTANCE = 64;
-        if (closestCrafter != null && Util.euclideanDistanceOf(closestCrafter.getPos(), playerPos) < MAX_DISTANCE) {
-            return true;
-        } else {
-            return false;
-        }
+        return closestCrafter != null && MathUtil.euclideanDistanceOf(closestCrafter.getPos(), playerPos) < MAX_DISTANCE;
+
     }
 
     private int recipeSize() {
@@ -251,12 +246,12 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
     }
 
     private void changeLayer(Minecraft minecraft) {
-        RefreshCategory();
+        refreshCategory();
         PacketHandler.getNetwork().sendToServer(new PacketSetActiveLayer(minecraft.player.getPosition(), layer));
     }
 
     // Hacky category refreshing
-    private void RefreshCategory() {
+    private void refreshCategory() {
         try {
             Class ingredients = Class.forName("mezz.jei.ingredients.Ingredients");
             IIngredients iingredients = (IIngredients) ingredients.newInstance();

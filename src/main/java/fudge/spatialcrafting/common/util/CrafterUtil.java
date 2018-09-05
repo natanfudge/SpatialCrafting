@@ -22,7 +22,10 @@ import static fudge.spatialcrafting.common.MCConstants.NOTIFY_CLIENT;
 import static fudge.spatialcrafting.common.block.BlockCrafter.FORMED;
 import static fudge.spatialcrafting.common.block.BlockHologram.ACTIVE;
 
-public class CrafterUtil {
+public final class CrafterUtil {
+
+    private CrafterUtil() {}
+
     private static void createMultiblock(World world, List<BlockPos> crafterList, int crafterSize) {
 
         BlockPos masterPos = getMasterPosFromList(crafterList);
@@ -91,7 +94,7 @@ public class CrafterUtil {
         // Find closest block
         BlockPos closestPos = (BlockPos) poses.toArray()[0];
         for (BlockPos currentPos : poses) {
-            if (Util.minimalDistanceOf(pos, currentPos) < Util.minimalDistanceOf(pos, closestPos)) {
+            if (MathUtil.minimalDistanceOf(pos, currentPos) < MathUtil.minimalDistanceOf(pos, closestPos)) {
                 closestPos = currentPos;
             }
         }
@@ -186,7 +189,7 @@ public class CrafterUtil {
 
     private static boolean validateMultiblockList(List<BlockPos> list, BlockPos newValue, int crafterSize) {
         for (BlockPos oldValue : list) {
-            if (Util.minimalDistanceOf(oldValue, newValue) > crafterSize - 1) {
+            if (MathUtil.minimalDistanceOf(oldValue, newValue) > crafterSize - 1) {
                 return false;
             }
         }

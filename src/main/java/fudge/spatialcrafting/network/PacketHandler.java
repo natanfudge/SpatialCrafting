@@ -37,7 +37,6 @@ public class PacketHandler {
         network.registerMessage(new PacketStopCraftingHelp.Handler(), PacketStopCraftingHelp.class, nextID(), Side.SERVER);
 
 
-
     }
 
     public static SimpleNetworkWrapper getNetwork() {

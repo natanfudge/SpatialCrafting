@@ -3,6 +3,8 @@ package fudge.spatialcrafting.client.particle;
 import fudge.spatialcrafting.client.tick.ClientTicker;
 import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.tile.TileCrafter;
+import fudge.spatialcrafting.common.util.ArrayUtil;
+import fudge.spatialcrafting.common.util.MathUtil;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -23,7 +25,7 @@ import net.minecraftforge.items.IItemHandler;
 
 import static fudge.spatialcrafting.common.MCConstants.TICKS_PER_SECOND;
 import static fudge.spatialcrafting.common.block.BlockCrafter.CRAFT_DURATION_MULTIPLIER;
-import static fudge.spatialcrafting.common.util.Util.euclideanDistanceOf;
+import static fudge.spatialcrafting.common.util.MathUtil.euclideanDistanceOf;
 import static java.lang.Math.cos;
 import static java.lang.Math.sqrt;
 
@@ -147,7 +149,7 @@ public class ParticleItemDust extends Particle {
                             }
                         }*/
 
-            Util.innerForEach(crafter.getHolograms(), hologramPos -> {
+            ArrayUtil.innerForEach(crafter.getHolograms(), hologramPos -> {
                 TileEntity hologramTile = Util.getTileEntity(world, hologramPos);
                 IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH);
                 ItemStack itemStack = itemHandler.getStackInSlot(0);
@@ -157,7 +159,7 @@ public class ParticleItemDust extends Particle {
 
                     Vec3d endPos = crafter.centerOfHolograms();
 
-                    int extra = (int) (Util.minimalDistanceOf(startPos, endPos) / SPEED_BLOCKS_PER_TICK);
+                    int extra = (int) (MathUtil.minimalDistanceOf(startPos, endPos) / SPEED_BLOCKS_PER_TICK);
                     int relativeTicksPassed = ticksPassed + extra;
 
                     if (relativeTicksPassed >= PHASE_2_START_TICKS) {
@@ -166,7 +168,7 @@ public class ParticleItemDust extends Particle {
                         endPos = new Vec3d(endPos.x, newY, endPos.z);
                     }
 
-                    extra = (int) (Util.minimalDistanceOf(startPos, endPos) / SPEED_BLOCKS_PER_TICK);
+                    extra = (int) (MathUtil.minimalDistanceOf(startPos, endPos) / SPEED_BLOCKS_PER_TICK);
                     relativeTicksPassed = ticksPassed + extra;
 
 
