@@ -1,6 +1,9 @@
 package fudge.spatialcrafting.common;
 
-public final class MCConstants {
+import lombok.experimental.UtilityClass;
+
+@UtilityClass
+public class MCConstants {
 
     // SetBlockState argument
     public static final int BLOCK_UPDATE = 1;
@@ -16,8 +19,6 @@ public final class MCConstants {
 
     public static final int NORMAL_ITEMSTACK_LIMIT = 64;
     public static final int TICKS_PER_SECOND = 20;
-
-    private MCConstants() {}
 
 
 }

@@ -1,8 +1,10 @@
 package fudge.spatialcrafting.common.util;
 
+import lombok.experimental.UtilityClass;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
+@UtilityClass
 public class MathUtil {
     /**
      * Returns the distance between 2 positions. counts diagonals as 1 distance (rather than 2 or 3)

@@ -2,10 +2,10 @@ package fudge.spatialcrafting.common.util;
 
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
+import lombok.experimental.UtilityClass;
 
-public final class RecipeUtil {
-
-    private RecipeUtil() {}
+@UtilityClass
+public class RecipeUtil {
 
     /**
      * Checks if an ingredient matches an IItemStack, but return false if the ingredient is null instead of crashing...

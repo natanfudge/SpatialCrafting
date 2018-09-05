@@ -6,6 +6,7 @@ import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.event.CrafterMultiblockCreatedEvent;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.TileHologram;
+import lombok.experimental.UtilityClass;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -22,9 +23,8 @@ import static fudge.spatialcrafting.common.MCConstants.NOTIFY_CLIENT;
 import static fudge.spatialcrafting.common.block.BlockCrafter.FORMED;
 import static fudge.spatialcrafting.common.block.BlockHologram.ACTIVE;
 
-public final class CrafterUtil {
-
-    private CrafterUtil() {}
+@UtilityClass
+public class CrafterUtil {
 
     private static void createMultiblock(World world, List<BlockPos> crafterList, int crafterSize) {
 

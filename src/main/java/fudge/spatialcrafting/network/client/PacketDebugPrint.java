@@ -25,7 +25,9 @@ public class PacketDebugPrint implements IMessage {
     }
 
     @Override
-    public void toBytes(ByteBuf buf) {}
+    public void toBytes(ByteBuf buf) {
+        // No data needed
+    }
 
 
     public static class Handler implements IMessageHandler<PacketDebugPrint, IMessage> {

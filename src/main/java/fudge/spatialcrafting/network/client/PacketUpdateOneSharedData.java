@@ -23,7 +23,6 @@ import java.io.IOException;
  **/
 public class PacketUpdateOneSharedData implements IMessage {
 
-    private static final String DATA_NBT = "data";
     private SharedData data;
 
 

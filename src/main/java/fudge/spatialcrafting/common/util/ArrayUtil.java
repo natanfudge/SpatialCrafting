@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 @UtilityClass
 public class ArrayUtil {
 
-
     /**
      * Returns true if every inner element in the arrays is in the same in every position.
      * Currently throws exception if they are not the same size
@@ -20,6 +19,7 @@ public class ArrayUtil {
         for (int i = 0; i < arr1.length; i++) {
             for (int j = 0; j < arr1[i].length; j++) {
                 for (int k = 0; k < arr1[i][j].length; k++) {
+
 
                     T object1 = arr1[i][j][k];
                     T object2 = arr2[i][j][k];
@@ -48,6 +48,7 @@ public class ArrayUtil {
         return innerEquals(arr1, arr2, Object::equals);
     }
 
+
     /**
      * Returns true if every inner element in the arrays is in the same in every position.
      * Currently throws exception if they are not the same size
@@ -66,8 +67,6 @@ public class ArrayUtil {
      * @param nullObject An object that should count as equal to null.
      */
     public static <T1, T2, T3> boolean innerEqualsDifferentSizes(T1[][][] arr1, T2[][][] arr2, BiPredicate<T1, T2> tester, T3 nullObject) {
-
-        boolean equals;
 
         // Objects that behaves the same as a null
         GeneralNull gNull = new GeneralNull(nullObject);
@@ -160,7 +159,6 @@ public class ArrayUtil {
 
         return true;
     }
-
 
 
     private static <T> boolean areaIsNull(T[] areaOfArr, GeneralNull nullObject) {

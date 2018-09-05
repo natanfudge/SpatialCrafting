@@ -3,30 +3,27 @@ package fudge.spatialcrafting.common.util;
 
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketRemoveTileEntity;
+import lombok.experimental.UtilityClass;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
-import java.util.function.BiPredicate;
-import java.util.function.Consumer;
 
-public final class Util {
-
-    private Util() {}
+@UtilityClass
+public class Util {
 
     public static void removeTileEntity(World world, BlockPos pos, boolean syncClient) {
         world.removeTileEntity(pos);
         if (syncClient) {
             PacketHandler.getNetwork().sendToDimension(new PacketRemoveTileEntity(pos), world.provider.getDimension());
         }
+
     }
 
 
