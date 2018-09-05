@@ -41,7 +41,7 @@ public final class WorldSaveDataSync {
             List<SharedData> data = WorldSavedDataCrafters.getAllData(world);
             PacketHandler.getNetwork().sendTo(new PacketUpdateAllSharedData(data), (EntityPlayerMP) player);
 
-            if (SpatialCrafting.debugActive) {
+            if (SpatialCrafting.isDebugActive()) {
                 PacketHandler.getNetwork().sendTo(new PacketDebugPrint(), (EntityPlayerMP) player);
             }
 

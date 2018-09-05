@@ -30,7 +30,8 @@ public class SpatialCrafting {
     public static final Logger LOGGER = LogManager.getLogger(NAME);
     private static final String SERVER_PROXY_PATH = "fudge.spatialcrafting.proxy.ServerProxy";
     private static final String CLIENT_PROXY_PATH = "fudge.spatialcrafting.proxy.ClientProxy";
-    public static boolean debugActive = true;
+    private static boolean DEBUG_ACTIVE = true;
+
     @Mod.Instance(MODID)
     private static SpatialCrafting instance;
     @SuppressWarnings("unused")
@@ -45,6 +46,9 @@ public class SpatialCrafting {
         return proxy;
     }
 
+    public static boolean isDebugActive() {
+        return DEBUG_ACTIVE;
+    }
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {

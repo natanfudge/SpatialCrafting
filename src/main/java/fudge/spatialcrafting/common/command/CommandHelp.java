@@ -27,16 +27,6 @@ public class CommandHelp extends SCCommand {
     }
 
     @Override
-    int minArgs() {
-        return 0;
-    }
-
-    @Override
-    int maxArgs() {
-        return 0;
-    }
-
-    @Override
     public String getName() {
         return "Help";
     }

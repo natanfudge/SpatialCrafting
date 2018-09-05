@@ -38,13 +38,13 @@ public class PacketStopParticles extends PacketBlockPos {
                 @SideOnly(Side.CLIENT)
                 public void run() {
                     World world = Minecraft.getMinecraft().world;
-                    TileCrafter crafter = Util.getTileEntity(world, message.pos);
-
-                    // Backup crafter tile entity
-                    if (crafter == null) {
+                    TileCrafter crafter;
+                    try {
+                        crafter = Util.getTileEntity(world, message.pos);
+                    }catch (NullPointerException e){
+                        // Backup crafter tile entity
                         crafter = Util.getTileEntity(world, message.pos.add(1, 0, 0));
                     }
-
 
                     ParticleItemDust.stopParticles(crafter);
 

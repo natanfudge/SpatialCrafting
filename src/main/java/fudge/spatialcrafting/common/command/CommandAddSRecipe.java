@@ -219,12 +219,7 @@ public class CommandAddSRecipe extends SCCommand {
     }
 
     @Override
-    int minArgs() {
-        return 0;
-    }
-
-    @Override
-    int maxArgs() {
+    public int maxArgs() {
         return 1;
     }
 }

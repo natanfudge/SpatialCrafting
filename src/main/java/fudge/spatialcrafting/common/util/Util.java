@@ -14,6 +14,7 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
+import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
@@ -330,6 +331,10 @@ public final class Util {
             return other == null || other.equals(nullObject);
         }
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(nullObject);
+        }
     }
 
 

@@ -5,6 +5,6 @@ import net.minecraft.command.CommandBase;
 
 public abstract class SCCommand extends CommandBase{
     abstract String description();
-    abstract int minArgs();
-    abstract int maxArgs();
+    public int minArgs(){return 0;}
+    public int maxArgs(){return 0;}
 }

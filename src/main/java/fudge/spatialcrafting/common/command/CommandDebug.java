@@ -25,15 +25,6 @@ public class CommandDebug extends SCCommand {
         return "commands.spatialcrafting.debug.description";
     }
 
-    @Override
-    int minArgs() {
-        return 0;
-    }
-
-    @Override
-    int maxArgs() {
-        return 0;
-    }
 
     @Override
     public List<String> getAliases() {

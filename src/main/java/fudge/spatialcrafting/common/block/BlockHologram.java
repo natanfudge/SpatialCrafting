@@ -95,10 +95,6 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
         return BlockRenderLayer.TRANSLUCENT;
     }
 
-    @Override
-    public BlockStateContainer getBlockState() {
-        return super.getBlockState();
-    }
 
     /**
      * @return NULL_AABB (null collision box) if you can pass through it, FULL_BLOCK_AABB if you can't.
@@ -155,7 +151,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
                 extractItem(world, player, crafter, itemHandler);
 
                 // If there was nothing in there, so we should put an item in there in the case that the player is holding an item.
-            } else /*if (!heldItem.isEmpty()) */ {
+            } else {
                 if (!crafter.isCrafting()) {
                     // Put item into the hologram
                     ItemStack remainingItemStack = itemHandler.insertItem(0, heldItem, false);

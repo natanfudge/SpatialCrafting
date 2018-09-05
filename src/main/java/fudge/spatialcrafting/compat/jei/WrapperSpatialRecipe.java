@@ -17,6 +17,7 @@ import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IRecipeWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -192,6 +193,9 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
 
         return ImmutableList.of(upButton, downButton, helpButton);
     }
+
+
+
 
 
     private boolean nearestCrafterMatches(Minecraft minecraft) {

@@ -20,12 +20,12 @@ public class CommandLayer extends SCCommand {
     }
 
     @Override
-    int minArgs() {
+    public int minArgs() {
         return 1;
     }
 
     @Override
-    int maxArgs() {
+    public int maxArgs() {
         return 1;
     }
 

@@ -8,7 +8,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 
 import java.util.List;
 
@@ -53,7 +52,7 @@ public class Debug {
 
     @SubscribeEvent
     public static void debugOnWorldLoad(WorldEvent.Load event) {
-        if (SpatialCrafting.debugActive && !event.getWorld().isRemote) {
+        if (SpatialCrafting.isDebugActive() && !event.getWorld().isRemote) {
             String debugInfo = getAllCrafterData(event.getWorld(), false);
             if (!debugInfo.equals("")) {
                 SpatialCrafting.LOGGER.info(getAllCrafterData(event.getWorld(), false));
