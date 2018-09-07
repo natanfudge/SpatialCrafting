@@ -2,6 +2,7 @@ package fudge.spatialcrafting.common.util;
 
 import lombok.experimental.UtilityClass;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -66,7 +67,7 @@ public class ArrayUtil {
      * @param tester     The condition in which two inner objects are considered equal
      * @param nullObject An object that should count as equal to null.
      */
-    public static <T1, T2, T3> boolean innerEqualsDifferentSizes(T1[][][] arr1, T2[][][] arr2, BiPredicate<T1, T2> tester, T3 nullObject) {
+    public static <T1, T2, T3> boolean innerEqualsDifferentSizes(T1[][][] arr1, T2[][][] arr2, BiPredicate<T1, T2> tester,@Nullable T3 nullObject) {
 
         // Objects that behaves the same as a null
         GeneralNull gNull = new GeneralNull(nullObject);
@@ -220,12 +221,14 @@ public class ArrayUtil {
     }
 
     private static class GeneralNull {
+        @Nullable
         private Object nullObject;
 
-        private GeneralNull(Object nullObject) {
+        private GeneralNull(@Nullable Object nullObject) {
             this.nullObject = nullObject;
         }
 
+        @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
         public boolean equals(Object other) {
             return other == null || other.equals(nullObject);
         }

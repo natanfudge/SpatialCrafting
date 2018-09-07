@@ -2,6 +2,7 @@ package fudge.spatialcrafting.network.client;
 
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.network.PacketBlockPos;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -11,21 +12,21 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
+
 
 // Packet from server to client
+@NoArgsConstructor
 public class PacketRemoveMasterBlock extends PacketBlockPos {
 
     public PacketRemoveMasterBlock(BlockPos masterPos) {
         super(masterPos);
     }
 
-    public PacketRemoveMasterBlock() {
-        // Necessary for reflection
-    }
-
     public static class Handler implements IMessageHandler<PacketRemoveMasterBlock, IMessage> {
 
         @Override
+        @Nullable
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(PacketRemoveMasterBlock message, MessageContext ctx) {
 

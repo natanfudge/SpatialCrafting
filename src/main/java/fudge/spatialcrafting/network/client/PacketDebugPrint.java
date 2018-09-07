@@ -3,6 +3,7 @@ package fudge.spatialcrafting.network.client;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.debug.Debug;
 import io.netty.buffer.ByteBuf;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -10,14 +11,12 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
+
 
 // Packet from server to client
+@NoArgsConstructor
 public class PacketDebugPrint implements IMessage {
-
-
-    public PacketDebugPrint() {
-        // Necessary for reflection
-    }
 
     @Override
     public void fromBytes(ByteBuf buf) {
@@ -33,6 +32,7 @@ public class PacketDebugPrint implements IMessage {
     public static class Handler implements IMessageHandler<PacketDebugPrint, IMessage> {
 
         @Override
+        @Nullable
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(PacketDebugPrint message, MessageContext ctx) {
 
@@ -40,7 +40,7 @@ public class PacketDebugPrint implements IMessage {
                 @Override
                 @SideOnly(Side.CLIENT)
                 public void run() {
-                    SpatialCrafting.LOGGER.info(Debug.getAllCrafterData(Minecraft.getMinecraft().world, true));
+                    SpatialCrafting.LOGGER.info(Debug.getAllCrafterData(Minecraft.getMinecraft().world));
                 }
             }));
 

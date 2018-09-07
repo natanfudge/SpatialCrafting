@@ -38,8 +38,8 @@ public class CraftersData extends SharedData {
         return currentHelpRecipe;
     }
 
-    public void setRecipe(SpatialRecipe currentHelpRecipe) {
-        this.currentHelpRecipe = currentHelpRecipe;
+    public void setRecipe(@Nullable SpatialRecipe helpRecipe) {
+        this.currentHelpRecipe = helpRecipe;
     }
 
     @Override

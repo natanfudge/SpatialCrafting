@@ -46,6 +46,7 @@ public class CommandAddSRecipe extends SCCommand {
                 // Go to the spatialcrafting folder(if it doesn't exist create a new one)
                 File scDir = new File(scriptsDir + "/" + SC_DIR_NAME);
                 if (!scDir.exists()) {
+                    //noinspection ResultOfMethodCallIgnored
                     scDir.mkdir();
                 }
 
@@ -164,7 +165,7 @@ public class CommandAddSRecipe extends SCCommand {
                     SpatialRecipe recipe = SpatialRecipe.getRecipeFromItemStacks(input, output, recipeAdditionType);
 
                     // If the user did oredict and there are too many oredicts we face a problem (recipe will be null)
-                    if (recipeAdditionType == RecipeAddition.OREDICT && recipe == null) {
+                    if (recipe == null) {
                         sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.too_many_oredicts", 0));
                         return;
                     }

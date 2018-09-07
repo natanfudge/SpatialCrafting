@@ -15,6 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 import org.apache.logging.log4j.Level;
 
@@ -24,9 +25,9 @@ import javax.annotation.Nullable;
 public class TileHologram extends TileEntity {
 
 
-    public static final String INVENTORY_NBT = "inventory";
-    public static final String LAST_CHANGE_TIME_NBT = "lastChangeTime";
-    public static final String MASTER_BLOCK_NBT = "masterBlock";
+    private static final String INVENTORY_NBT = "inventory";
+    private static final String LAST_CHANGE_TIME_NBT = "lastChangeTime";
+    private static final String MASTER_BLOCK_NBT = "masterBlock";
     private long lastChangeTime;
     private ItemStackHandler inventory = new ItemStackHandler(1) {
         @Override
@@ -110,7 +111,6 @@ public class TileHologram extends TileEntity {
 
 
     // Saves inventory
-    @Nullable
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound existingData) {
         return super.writeToNBT(this.serialized(existingData));
@@ -139,6 +139,13 @@ public class TileHologram extends TileEntity {
         }
     }
 
+    public IItemHandler getItemHandler(){
+        IItemHandler itemHandler = getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        assert itemHandler != null;
+        return itemHandler;
+    }
+
+
     @Override
     public void handleUpdateTag(NBTTagCompound data) {
         super.handleUpdateTag(data);
@@ -146,7 +153,7 @@ public class TileHologram extends TileEntity {
     }
 
     public void removeItem(int amount, boolean informClient) {
-        this.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH).extractItem(0, amount, false);
+        this.getItemHandler().extractItem(0, amount, false);
         if (informClient) {
             IBlockState state = this.getBlockState();
             world.notifyBlockUpdate(new BlockPos(pos), state, state, MCConstants.NOTIFY_CLIENT);
@@ -167,7 +174,6 @@ public class TileHologram extends TileEntity {
         return world.getBlockState(pos);
     }
 
-    @Nullable
     @Override
     public NBTTagCompound getUpdateTag() {
         return this.serialized(super.getUpdateTag());

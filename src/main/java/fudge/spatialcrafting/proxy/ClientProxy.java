@@ -7,21 +7,11 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class ClientProxy implements IProxy {
+public class ClientProxy extends Proxy {
 
     @Override
     public void preInit() {
         ClientRegistry.bindTileEntitySpecialRenderer(TileHologram.class, new TESRHologram());
-    }
-
-    @Override
-    public void init() {
-        // No client-only inits at the moment
-    }
-
-    @Override
-    public void postInit() {
-        // No client-only postInits at the moment
     }
 
 }

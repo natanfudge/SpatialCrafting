@@ -5,18 +5,15 @@ import fudge.spatialcrafting.network.client.*;
 import fudge.spatialcrafting.network.server.PacketSetActiveLayer;
 import fudge.spatialcrafting.network.server.PacketStartCraftingHelp;
 import fudge.spatialcrafting.network.server.PacketStopCraftingHelp;
+import lombok.NoArgsConstructor;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 
-
+@NoArgsConstructor
 public class PacketHandler {
-    private static SimpleNetworkWrapper network = null;
+    private static SimpleNetworkWrapper network;
     private static int packetId = 0;
-
-    public PacketHandler() {
-        // Required for reflection
-    }
 
     private static int nextID() {
         return packetId++;

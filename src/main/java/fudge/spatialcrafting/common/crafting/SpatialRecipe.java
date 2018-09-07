@@ -106,11 +106,8 @@ public class SpatialRecipe {
         recipeList.add(recipe);
     }
 
-    public static void removeRecipe(SpatialRecipe recipe) {
-        recipeList.remove(recipe);
-    }
 
-    public static boolean noRecipeConflict(SpatialRecipe newRecipe, ICommandSender sender) {
+    public static boolean noRecipeConflict(SpatialRecipe newRecipe, @Nullable ICommandSender sender) {
 
         for (SpatialRecipe existingRecipe : getRecipes()) {
 
@@ -138,7 +135,7 @@ public class SpatialRecipe {
     }
 
     // Handles the different error method for when you use a command or you do it via @ZenMethod
-    private static void error(String errorTranslationKey, ICommandSender sender) {
+    private static void error(String errorTranslationKey, @Nullable ICommandSender sender) {
         TextComponentTranslation text = new TextComponentTranslation(errorTranslationKey);
         // Command
         if (sender != null) {
@@ -156,6 +153,7 @@ public class SpatialRecipe {
     /**
      * Copies the recipes in the compiled code to the run directory so they may be come with the mod jar but be used normally by pack makers.
      */
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void preInit() {
 
 
@@ -195,7 +193,9 @@ public class SpatialRecipe {
     }
 
     private static boolean otherScriptExists(File folder) {
-        for (File file : folder.listFiles()) {
+        File[] files = folder.listFiles();
+        assert files != null;
+        for (File file : files) {
             if (FilenameUtils.getExtension(file.toString()).equals("zs") && !FilenameUtils.getName(file.toString()).equals(RECIPES_FILE_NAME) && !FilenameUtils.getName(
                     file.toString()).equals(EXAMPLE_SCRIPT_NAME)) {
                 return true;

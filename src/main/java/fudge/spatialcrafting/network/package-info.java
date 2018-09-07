@@ -1,0 +1,4 @@
+@EverythingIsNonNullByDefault
+package fudge.spatialcrafting.network;
+
+import fudge.spatialcrafting.common.util.EverythingIsNonNullByDefault;

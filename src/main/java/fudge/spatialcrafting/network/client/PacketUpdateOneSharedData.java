@@ -1,26 +1,28 @@
 package fudge.spatialcrafting.network.client;
 
-import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.util.CraftersData;
 import fudge.spatialcrafting.common.tile.util.SharedData;
 import io.netty.buffer.ByteBuf;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import java.io.IOException;
+import javax.annotation.Nullable;
 
 /**
  * Packet from server to client
  * Hardcoded to CrafterData
  **/
+//TODO: this is not used at all?...
+@NoArgsConstructor
 public class PacketUpdateOneSharedData implements IMessage {
 
     private SharedData data;
@@ -30,41 +32,23 @@ public class PacketUpdateOneSharedData implements IMessage {
         this.data = data;
     }
 
-
-    public PacketUpdateOneSharedData() {
-        // Necessary for reflection
-    }
-
     @Override
     public void toBytes(ByteBuf buffer) {
-
-        // PacketBuffers are easier to use
-        PacketBuffer wrappedBuffer = new PacketBuffer(buffer);
-
-        wrappedBuffer.writeCompoundTag(data.serialized(new NBTTagCompound()));
-
-
+        ByteBufUtils.writeTag(buffer, data.serialized(new NBTTagCompound()));
     }
 
     @Override
     public void fromBytes(ByteBuf buffer) {
-        PacketBuffer wrappedBuffer = new PacketBuffer(buffer);
-
-        try {
-            NBTTagCompound serializedData = wrappedBuffer.readCompoundTag();
-            data = new CraftersData(serializedData);
-
-
-        } catch (IOException e) {
-            SpatialCrafting.LOGGER.error(e);
-        }
-
+        NBTTagCompound compound = ByteBufUtils.readTag(buffer);
+        assert compound != null;
+        data = new CraftersData(compound);
     }
 
 
     public static class Handler implements IMessageHandler<PacketUpdateOneSharedData, IMessage> {
 
         @Override
+        @Nullable
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(PacketUpdateOneSharedData message, MessageContext ctx) {
 

@@ -4,7 +4,6 @@ package fudge.spatialcrafting.common.tile;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.minecraft.CraftTweakerMC;
-import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.client.particle.ParticleItemDust;
 import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.block.BlockCrafter;
@@ -28,7 +27,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
@@ -42,11 +40,6 @@ import static fudge.spatialcrafting.common.block.BlockHologram.ACTIVE;
 public class TileCrafter extends TileEntity implements ITickable {
 
     private static final String OFFSET_NBT = "offset";
-    /**
-     * Pass -1 to activate all layers
-     *
-     * @param layer
-     */
     private static final int ACTIVATE_ALL = -1;
     private Offset offset;
 
@@ -86,15 +79,17 @@ public class TileCrafter extends TileEntity implements ITickable {
 
 
     private boolean shouldActivateHologram(int layerToActivate, int i, int j, int k) {
+
         // This is for the purpose of crafting help
         if (getRecipe() != null) {
             int recipeSize = recipeSize();
 
+            //If this is the correct layer and it is in bounds then check if this hologram is required for the recipe, otherwise false.
             if ((layerToActivate == ACTIVATE_ALL || layerToActivate == i) && i < recipeSize && j < recipeSize && k < recipeSize) {
                 // if the recipe is null there then it should not be activated.
-                if (getRecipe().getRequiredInput()[i][j][k] != null || !isHelpActive()) {
-                    return true;
-                }
+                return getRecipe().getRequiredInput()[i][j][k] != null || !isHelpActive();
+            } else {
+                return false;
             }
 
 
@@ -102,14 +97,9 @@ public class TileCrafter extends TileEntity implements ITickable {
             // This is for the up/down buttons
             int size = size();
 
-            if ((layerToActivate == ACTIVATE_ALL || layerToActivate == i) && i < size && j < size && k < size) {
-                return true;
-            }
+            //If this is the correct layer and it is in bounds then return true, otherwise false.
+            return (layerToActivate == ACTIVATE_ALL || layerToActivate == i) && i < size && j < size && k < size;
         }
-
-
-        return false;
-
 
     }
 
@@ -121,7 +111,7 @@ public class TileCrafter extends TileEntity implements ITickable {
         return getSharedData().getRecipe();
     }
 
-    public void setRecipe(SpatialRecipe recipe) {
+    public void setRecipe(@Nullable SpatialRecipe recipe) {
         getSharedData().setRecipe(recipe);
     }
 
@@ -255,36 +245,25 @@ public class TileCrafter extends TileEntity implements ITickable {
         return offset.adjustToMaster(this.pos);
     }
 
-    public CraftersData getSharedData() {
-        return (CraftersData) WorldSavedDataCrafters.getDataForMasterPos(world, masterPos());
+    private CraftersData getSharedData() {
+        CraftersData data = (CraftersData) WorldSavedDataCrafters.getDataForMasterPos(world, masterPos());
+        if (data != null) {
+            return data;
+        } else {
+            throw new NullPointerException(String.format("Cannot find data for masterPos %s at pos %s in %s world",
+                    masterPos(),
+                    pos,
+                    world.isRemote ? "CLIENT" : "SERVER"));
+        }
     }
 
     public long getCraftEndTime() {
-        CraftersData data = getSharedData();
-        if (data != null) {
-            return getSharedData().getCraftTime();
-        } else {
-            String worldType = world.isRemote ? "client" : "server";
-            SpatialCrafting.LOGGER.error("Cannot find data for masterPos {} at pos {} in {} world",
-                    masterPos(),
-                    pos,
-                    worldType,
-                    new NullPointerException());
-            return 0;
-        }
+        return getSharedData().getCraftTime();
     }
 
 
     public void setCraftEndTime(long time) {
-        CraftersData data = getSharedData();
-
-
-        if (data != null) {
-            data.setCraftTime(time);
-        } else {
-            SpatialCrafting.LOGGER.error("Cannot find data for masterPos {} at pos {}", masterPos(), pos);
-        }
-
+        getSharedData().setCraftTime(time);
     }
 
     public void resetCraftingState() {
@@ -301,7 +280,7 @@ public class TileCrafter extends TileEntity implements ITickable {
         }
     }
 
-    public boolean craftTimeHasPassed() {
+    private boolean craftTimeHasPassed() {
         return getCraftEndTime() != 0 && world.getWorldTime() >= getCraftEndTime();
     }
 
@@ -327,7 +306,6 @@ public class TileCrafter extends TileEntity implements ITickable {
 
     }
 
-    @Nullable
     public ItemStack[][][] getHologramInvArr() {
 
 
@@ -341,8 +319,8 @@ public class TileCrafter extends TileEntity implements ITickable {
                 for (int k = 0; k < size; k++) {
                     // Due to the way Minecraft handles nulls in this case,
                     // if there is an empty space in the blockPos array it will just put in air(which is what we want).
-                    TileEntity hologramTile = world.getTileEntity(holograms[i][j][k]);
-                    IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+                    TileHologram hologramTile = Util.getTileEntity(world, holograms[i][j][k]);
+                    IItemHandler itemHandler = hologramTile.getItemHandler();
 
                     returning[i][j][k] = itemHandler.getStackInSlot(0);
                 }
@@ -438,7 +416,10 @@ public class TileCrafter extends TileEntity implements ITickable {
     @Override
     public void update() {
         if (!isMaster()) return;
-        if (getSharedData() == null) return;
+
+        // Update gets called once before the shared data is synced to the client, meaning it will be null at that time.
+        // This is a fix to the errors it causes.
+        if (WorldSavedDataCrafters.getDataForMasterPos(world, masterPos()) == null) return;
 
         if (craftTimeHasPassed()) {
             stopHelp();
@@ -479,18 +460,14 @@ public class TileCrafter extends TileEntity implements ITickable {
     }
 
 
-    public void stopHelp(boolean activateRecipeHologramsOnly) {
+    public void stopHelp() {
 
         // If the recipe is removed before, then all holograms will activate
-        if (!activateRecipeHologramsOnly) setRecipe(null);
+        setRecipe(null);
         activateAllLayers();
-        // If the recipe is removed after, then only the recipe holograms will activate
-        if (activateRecipeHologramsOnly) setRecipe(null);
 
     }
 
-    public void stopHelp() {
-        stopHelp(false);
-    }
+
 }
 

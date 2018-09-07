@@ -4,6 +4,7 @@ import fudge.spatialcrafting.client.particle.ParticleItemDust;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketBlockPos;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -13,8 +14,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
+
 
 // Packet from server to client
+@NoArgsConstructor
 public class PacketStopParticles extends PacketBlockPos {
 
 
@@ -22,14 +26,10 @@ public class PacketStopParticles extends PacketBlockPos {
         super(masterPos);
     }
 
-    // Necessary for reflection
-    public PacketStopParticles() {
-    }
-
-
     public static class Handler implements IMessageHandler<PacketStopParticles, IMessage> {
 
         @Override
+        @Nullable
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(PacketStopParticles message, MessageContext ctx) {
 

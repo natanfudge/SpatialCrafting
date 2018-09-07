@@ -4,14 +4,18 @@ import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.network.PacketBlockPos;
 import io.netty.buffer.ByteBuf;
+import lombok.NoArgsConstructor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+import javax.annotation.Nullable;
+
 
 // Packet from server to client
+@NoArgsConstructor
 public class PacketSetActiveLayer extends PacketBlockPos {
 
     private int layerToSet;
@@ -19,10 +23,6 @@ public class PacketSetActiveLayer extends PacketBlockPos {
     public PacketSetActiveLayer(BlockPos playerPos, int layer) {
         super(playerPos);
         this.layerToSet = layer;
-    }
-
-    // Necessary for reflection
-    public PacketSetActiveLayer() {
     }
 
     @Override
@@ -41,6 +41,7 @@ public class PacketSetActiveLayer extends PacketBlockPos {
     public static class Handler implements IMessageHandler<PacketSetActiveLayer, IMessage> {
 
         @Override
+        @Nullable
         public IMessage onMessage(PacketSetActiveLayer message, MessageContext ctx) {
 
             WorldServer serverWorld = ctx.getServerHandler().player.getServerWorld();

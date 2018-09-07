@@ -24,7 +24,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
@@ -138,12 +137,11 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
         if (!state.getValue(ACTIVE)) return false;
 
 
-        //TODO make it so you can disable the crafting help
-
         TileHologram hologramTile = Util.getTileEntity(world, pos);
         TileCrafter crafter = hologramTile.getCrafter();
-        IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        IItemHandler itemHandler = hologramTile.getItemHandler();
         ItemStack heldItem = player.getHeldItem(hand);
+
         if (!player.isSneaking()) {
             // Inputs the held item into the hologram / takes it out of the hologram and gives it back to the player
 
@@ -197,7 +195,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
     private void checkForItemExtraction(World world, BlockPos pos, EntityPlayer player) {
         TileHologram hologramTile = Util.getTileEntity(world, pos);
         TileCrafter crafter = hologramTile.getCrafter();
-        IItemHandler itemHandler = hologramTile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
+        IItemHandler itemHandler = hologramTile.getItemHandler();
 
         if (!player.isSneaking()) {
             extractItem(world, player, crafter, itemHandler);
@@ -217,7 +215,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
     public void breakBlock(World world, BlockPos pos, IBlockState state) {
         TileHologram tile = Util.getTileEntity(world, pos);
 
-        IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, EnumFacing.NORTH);
+        IItemHandler itemHandler = tile.getItemHandler();
         ItemStack itemStack = itemHandler.getStackInSlot(0);
 
         // Drops the item in the hologram (if it exists) on the ground.

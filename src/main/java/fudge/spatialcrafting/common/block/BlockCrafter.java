@@ -43,7 +43,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
 
     public static final int CRAFT_DURATION_MULTIPLIER = 5;
 
-    public static final PropertyBool FORMED = PropertyBool.create("formed");
+    public static  PropertyBool FORMED = PropertyBool.create("formed");
     private final int crafterSize;
 
     public BlockCrafter(int size) {
@@ -129,7 +129,6 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         try {
             if (state.getValue(FORMED) && playerIn.getHeldItem(hand).isEmpty()) {
                 TileCrafter crafter = Util.getTileEntity(world, pos);
-                assert crafter != null;
 
                 ItemStack[][][] craftingInventory = crafter.getHologramInvArr();
 

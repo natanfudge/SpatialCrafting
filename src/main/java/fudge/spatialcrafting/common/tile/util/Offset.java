@@ -15,7 +15,7 @@ public class Offset extends Vec3i {
     private static final long Y_MASK = (1L << NUM_Y_BITS) - 1L;
     private static final long Z_MASK = (1L << NUM_Z_BITS) - 1L;
 
-    public Offset(int xIn, int yIn, int zIn) {
+    private Offset(int xIn, int yIn, int zIn) {
         super(xIn, yIn, zIn);
     }
 

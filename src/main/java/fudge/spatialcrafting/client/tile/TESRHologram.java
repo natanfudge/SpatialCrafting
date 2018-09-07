@@ -50,6 +50,7 @@ public class TESRHologram extends TileEntitySpecialRenderer<TileHologram> {
 
             // Spins the item around
             GlStateManager.rotate((float) time, 0, SPIN_SPEED, 0);
+            GlStateManager.color(1, 1, 1, 0.5f);
 
             // Gets model
             IBakedModel model = minecraft.getRenderItem().getItemModelWithOverrides(stack, tile.getWorld(), null);

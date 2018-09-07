@@ -4,6 +4,7 @@ import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.util.CraftersData;
 import fudge.spatialcrafting.common.tile.util.SharedData;
 import io.netty.buffer.ByteBuf;
+import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -14,11 +15,13 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 // Packet from server to client
+@NoArgsConstructor
 public class PacketUpdateAllSharedData implements IMessage {
 
     private static final String DATA_NBT = "data";
@@ -27,11 +30,6 @@ public class PacketUpdateAllSharedData implements IMessage {
 
     public PacketUpdateAllSharedData(List<SharedData> data) {
         this.allData = data;
-    }
-
-
-    // Necessary for reflection
-    public PacketUpdateAllSharedData() {
     }
 
     @Override
@@ -57,7 +55,7 @@ public class PacketUpdateAllSharedData implements IMessage {
         if (allSerializedData != null) {
             Set<String> keys = allSerializedData.getKeySet();
 
-            if (allData == null) allData = new ArrayList<>();
+            allData = new ArrayList<>();
             keys.forEach(key -> allData.add(new CraftersData(allSerializedData.getCompoundTag(key))));
         }
 
@@ -68,6 +66,7 @@ public class PacketUpdateAllSharedData implements IMessage {
     public static class Handler implements IMessageHandler<PacketUpdateAllSharedData, IMessage> {
 
         @Override
+        @Nullable
         @SideOnly(Side.CLIENT)
         public IMessage onMessage(PacketUpdateAllSharedData message, MessageContext ctx) {
 

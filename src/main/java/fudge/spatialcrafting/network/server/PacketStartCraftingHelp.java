@@ -5,12 +5,16 @@ import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.network.PacketBlockPos;
 import io.netty.buffer.ByteBuf;
+import lombok.NoArgsConstructor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+import javax.annotation.Nullable;
+
+@NoArgsConstructor
 public class PacketStartCraftingHelp extends PacketBlockPos {
 
     private int recipeID;
@@ -18,10 +22,6 @@ public class PacketStartCraftingHelp extends PacketBlockPos {
     public PacketStartCraftingHelp(BlockPos masterPos, SpatialRecipe recipe) {
         super(masterPos);
         this.recipeID = recipe.getID();
-    }
-
-    public PacketStartCraftingHelp() {
-        // Necessary for reflection
     }
 
     @Override
@@ -40,6 +40,7 @@ public class PacketStartCraftingHelp extends PacketBlockPos {
     public static class Handler implements IMessageHandler<PacketStartCraftingHelp, IMessage> {
 
         @Override
+        @Nullable
         public IMessage onMessage(PacketStartCraftingHelp message, MessageContext ctx) {
 
             WorldServer serverWorld = ctx.getServerHandler().player.getServerWorld();

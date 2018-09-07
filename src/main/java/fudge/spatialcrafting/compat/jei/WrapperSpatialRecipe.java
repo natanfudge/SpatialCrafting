@@ -198,11 +198,11 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
 
     private boolean nearestCrafterMatches(Minecraft minecraft) {
         TileCrafter crafter = CrafterUtil.getClosestMasterBlock(minecraft.world, minecraft.player.getPosition());
-        return crafterMatches(crafter);
+        return crafter != null && crafterMatches(crafter);
     }
 
     private boolean crafterMatches(TileCrafter crafter) {
-        if (crafter == null || crafter.getRecipe() == null) return false;
+        if (crafter.getRecipe() == null) return false;
 
         return crafter.getRecipe().sameIDAs(recipe);
     }

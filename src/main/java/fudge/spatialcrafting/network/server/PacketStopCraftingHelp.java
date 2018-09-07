@@ -3,12 +3,16 @@ package fudge.spatialcrafting.network.server;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.network.PacketBlockPos;
+import lombok.NoArgsConstructor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
+import javax.annotation.Nullable;
+
+@NoArgsConstructor
 public class PacketStopCraftingHelp extends PacketBlockPos {
 
 
@@ -16,14 +20,10 @@ public class PacketStopCraftingHelp extends PacketBlockPos {
         super(playerPos);
     }
 
-    public PacketStopCraftingHelp() {
-        // Necessary for reflection
-    }
-
-
     public static class Handler implements IMessageHandler<PacketStopCraftingHelp, IMessage> {
 
         @Override
+        @Nullable
         public IMessage onMessage(PacketStopCraftingHelp message, MessageContext ctx) {
 
             WorldServer serverWorld = ctx.getServerHandler().player.getServerWorld();

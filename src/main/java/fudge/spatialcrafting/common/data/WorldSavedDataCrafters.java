@@ -12,6 +12,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,7 +22,7 @@ import java.util.List;
 
 public class WorldSavedDataCrafters extends WorldSavedData {
 
-    public static final String DATA_NBT = "data";
+    private static final String DATA_NBT = "data";
     private static final String DATA_NAME = SpatialCrafting.MODID + " worldSavedData";
     private List<SharedData> allSharedData = new ArrayList<>();
 
@@ -54,7 +55,7 @@ public class WorldSavedDataCrafters extends WorldSavedData {
     /**
      * Returns the WorldSavedDataCrafters instance of a world
      */
-    public static WorldSavedDataCrafters getInstance(World world) {
+    private static WorldSavedDataCrafters getInstance(World world) {
         //Every World object has a respective instance of this class (WorldSavedDataCrafters) stored inside it.
         MapStorage storage = world.getPerWorldStorage();
         WorldSavedDataCrafters instance = (WorldSavedDataCrafters) storage.getOrLoadData(WorldSavedDataCrafters.class, DATA_NAME);
@@ -78,6 +79,7 @@ public class WorldSavedDataCrafters extends WorldSavedData {
 
     public static void addData(World world, BlockPos pos) {
         WorldSavedDataCrafters instance = getInstance(world);
+        // For some reason allSharedData becomes null sometimes, this fixes it but it shouldn't be like this...
         if (instance.allSharedData == null) instance.allSharedData = new ArrayList<>();
         SharedData data = new CraftersData(pos);
         instance.allSharedData.add(data);
@@ -119,7 +121,7 @@ public class WorldSavedDataCrafters extends WorldSavedData {
         instance.markDirty();
     }
 
-    public NBTTagCompound serialized(NBTTagCompound existingData) {
+    private NBTTagCompound serialized(NBTTagCompound existingData) {
 
         NBTTagList list = new NBTTagList();
         allSharedData.forEach(data -> list.appendTag(data.serialized(new NBTTagCompound())));
@@ -129,7 +131,7 @@ public class WorldSavedDataCrafters extends WorldSavedData {
         return existingData;
     }
 
-    public void deserialize(NBTTagCompound serializedData) {
+    private void deserialize(NBTTagCompound serializedData) {
         NBTTagList list = serializedData.getTagList(DATA_NBT, Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < list.tagCount(); i++) {
             // Hardcoded for CraftersData
@@ -137,13 +139,14 @@ public class WorldSavedDataCrafters extends WorldSavedData {
         }
     }
 
+    @NotNull
     @Override
-    public NBTTagCompound writeToNBT(NBTTagCompound existingData) {
+    public NBTTagCompound writeToNBT(@NotNull NBTTagCompound existingData) {
         return this.serialized(existingData);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound serializedData) {
+    public void readFromNBT(@NotNull NBTTagCompound serializedData) {
         deserialize(serializedData);
 
     }

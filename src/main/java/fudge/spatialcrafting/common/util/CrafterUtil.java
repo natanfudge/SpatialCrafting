@@ -143,6 +143,7 @@ public class CrafterUtil {
 
     }
 
+    @Nullable
     private static List<BlockPos> getPossibleMultiblock(World world, BlockPos originalPos) {
         List<BlockPos> nearbyCrafters = new LinkedList<>();
 

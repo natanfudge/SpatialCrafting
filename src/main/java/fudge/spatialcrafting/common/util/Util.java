@@ -45,17 +45,22 @@ public class Util {
      *
      * @param world The world to get the TileEntity from
      * @param pos   The position in the world to get the TileEntity from
+     * @throws NullPointerException instead of returning null when there is no tileEntity at the specified position
+     * @throws ClassCastException   if the tile entity type that was requested does not match the one that exists at the specified position
      */
     @Nonnull
     public static <T extends TileEntity> T getTileEntity(@Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
 
-
+        TileEntity tileEntity = world.getTileEntity(pos);
         try {
-            return (T) world.getTileEntity(pos);
+            if (tileEntity != null) {
+                return (T) tileEntity;
+            } else {
+                throw new NullPointerException("Attempt to get a tile entity at a position in which there is none");
+            }
         } catch (ClassCastException e) {
             throw new ClassCastException("Invalid cast trying to cast between two different tile entities");
         }
-
     }
 
     /**

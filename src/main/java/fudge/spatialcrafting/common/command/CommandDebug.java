@@ -43,7 +43,7 @@ public class CommandDebug extends SCCommand {
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
         World serverWorld = sender.getEntityWorld();
 
-        String message = Debug.getAllCrafterData(serverWorld, false);
+        String message = Debug.getAllCrafterData(serverWorld);
         SpatialCrafting.LOGGER.info(message);
         try {
             PacketHandler.getNetwork().sendTo(new PacketDebugPrint(), getCommandSenderAsPlayer(sender));

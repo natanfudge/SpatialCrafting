@@ -17,6 +17,7 @@ import static fudge.spatialcrafting.common.MCConstants.NOTIFY_CLIENT;
 
 
 @SuppressWarnings("deprecation")
+@Deprecated
 public class BlockSensor extends Block {
 
     public static final PropertyBool ON = PropertyBool.create("on");

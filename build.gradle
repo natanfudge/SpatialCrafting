@@ -69,6 +69,8 @@ dependencies {
 
     compile group: 'org.jetbrains', name: 'annotations', version: '13.0'
 
+    //compile group: 'org.eclipse.jdt', name:'annotations',version:'2.2.0'
+
     compileOnly 'org.projectlombok:lombok:1.18.2'
 
     apt "org.projectlombok:lombok:1.18.2"
