@@ -14,9 +14,10 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
+def MODID = "spatialcrafting"
 
 version = "1.12.2-0.4.0.0"
-group = "com.fudge.spatialcrafting" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = "com.fudge.${MODID}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "SpatialCrafting"
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
@@ -69,14 +70,13 @@ dependencies {
 
     compile group: 'org.jetbrains', name: 'annotations', version: '13.0'
 
-    //compile group: 'org.eclipse.jdt', name:'annotations',version:'2.2.0'
-
     compileOnly 'org.projectlombok:lombok:1.18.2'
 
     apt "org.projectlombok:lombok:1.18.2"
 
 
 }
+
 
 processResources {
     // this will ensure that this task is redone when the versions change.
@@ -95,4 +95,15 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
+
+    // Access transfo
+    rename '(.+_at.cfg)', 'META-INF/$1'
+
+}
+
+jar {
+    manifest {
+        attributes "FMLAT": "${MODID}_at.cfg"
+    }
+
 }

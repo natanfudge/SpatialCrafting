@@ -139,20 +139,22 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
 
         TileHologram hologramTile = Util.getTileEntity(world, pos);
         TileCrafter crafter = hologramTile.getCrafter();
-        IItemHandler itemHandler = hologramTile.getItemHandler();
         ItemStack heldItem = player.getHeldItem(hand);
 
         if (!player.isSneaking()) {
             // Inputs the held item into the hologram / takes it out of the hologram and gives it back to the player
 
             if (heldItem.isEmpty()) {
-                extractItem(world, player, crafter, itemHandler);
+                extractItem(world, player, crafter, hologramTile);
 
                 // If there was nothing in there, so we should put an item in there in the case that the player is holding an item.
             } else {
                 if (!crafter.isCrafting()) {
+                    // Stop displaying ghost item. Note that this must be done BEFORE inserting or no item will be inserted.
+                    hologramTile.stopDisplayingGhostItem();
+
                     // Put item into the hologram
-                    ItemStack remainingItemStack = itemHandler.insertItem(0, heldItem, false);
+                    ItemStack remainingItemStack = hologramTile.insertItem(heldItem);
 
 
                     if (!player.isCreative()) {
@@ -173,9 +175,9 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
         return false;
     }
 
-    private void extractItem(World world, EntityPlayer player, TileCrafter crafter, IItemHandler itemHandler) {
+    private void extractItem(World world, EntityPlayer player, TileCrafter crafter, TileHologram hologram) {
         // Take item out of the hologram
-        ItemStack extractedItemStack = itemHandler.extractItem(0, MCConstants.NORMAL_ITEMSTACK_LIMIT, false);
+        ItemStack extractedItemStack = hologram.extractItem(MCConstants.NORMAL_ITEMSTACK_LIMIT);
         ItemHandlerHelper.giveItemToPlayer(player, extractedItemStack);
 
         // If items were taken out during crafting then it must be stopped
@@ -195,10 +197,9 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
     private void checkForItemExtraction(World world, BlockPos pos, EntityPlayer player) {
         TileHologram hologramTile = Util.getTileEntity(world, pos);
         TileCrafter crafter = hologramTile.getCrafter();
-        IItemHandler itemHandler = hologramTile.getItemHandler();
 
         if (!player.isSneaking()) {
-            extractItem(world, player, crafter, itemHandler);
+            extractItem(world, player, crafter, hologramTile);
         }
     }
 
@@ -215,8 +216,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
     public void breakBlock(World world, BlockPos pos, IBlockState state) {
         TileHologram tile = Util.getTileEntity(world, pos);
 
-        IItemHandler itemHandler = tile.getItemHandler();
-        ItemStack itemStack = itemHandler.getStackInSlot(0);
+        ItemStack itemStack = tile.getStoredItem();
 
         // Drops the item in the hologram (if it exists) on the ground.
         if (!itemStack.isEmpty()) {

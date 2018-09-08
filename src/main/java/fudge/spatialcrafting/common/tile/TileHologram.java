@@ -5,6 +5,7 @@ import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.block.BlockCrafter;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -28,7 +29,9 @@ public class TileHologram extends TileEntity {
     private static final String INVENTORY_NBT = "inventory";
     private static final String LAST_CHANGE_TIME_NBT = "lastChangeTime";
     private static final String MASTER_BLOCK_NBT = "masterBlock";
+    private static final String DISPLAYING_GHOST_ITEM_NBT = "displayingGhostItem";
     private long lastChangeTime;
+    private boolean displayingGhostItem = false;
     private ItemStackHandler inventory = new ItemStackHandler(1) {
         @Override
         protected void onContentsChanged(int slot) {
@@ -41,6 +44,24 @@ public class TileHologram extends TileEntity {
             return 1;
         }
     };
+
+    public boolean isDisplayingGhostItem() {
+        return displayingGhostItem;
+    }
+
+    public void displayGhostItem(ItemStack item) {
+        if(!isDisplayingGhostItem()) {
+            getItemHandler().insertItem(0, item, false);
+            displayingGhostItem = true;
+        }
+    }
+
+    public void stopDisplayingGhostItem() {
+        if(isDisplayingGhostItem()) {
+            getItemHandler().extractItem(0, 1, false);
+            displayingGhostItem = false;
+        }
+    }
 
     private BlockPos masterBlockPos;
 
@@ -57,6 +78,7 @@ public class TileHologram extends TileEntity {
     public boolean shouldRefresh(World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
         return oldState.getBlock() != newState.getBlock();
     }
+
 
     public int getCrafterSize() {
         return ((BlockCrafter) world.getBlockState(this.getMasterPos()).getBlock()).size();
@@ -88,6 +110,7 @@ public class TileHologram extends TileEntity {
 
         existingData.setTag(INVENTORY_NBT, inventory.serializeNBT());
         existingData.setLong(LAST_CHANGE_TIME_NBT, lastChangeTime);
+        existingData.setBoolean(DISPLAYING_GHOST_ITEM_NBT, displayingGhostItem);
         try {
             existingData.setLong(MASTER_BLOCK_NBT, masterBlockPos.toLong());
         } catch (NullPointerException e) {
@@ -101,6 +124,7 @@ public class TileHologram extends TileEntity {
     protected void deserialize(NBTTagCompound serializedData) {
         inventory.deserializeNBT(serializedData.getCompoundTag(INVENTORY_NBT));
         lastChangeTime = serializedData.getLong(LAST_CHANGE_TIME_NBT);
+        displayingGhostItem = serializedData.getBoolean(DISPLAYING_GHOST_ITEM_NBT);
         try {
             masterBlockPos = BlockPos.fromLong(serializedData.getLong(MASTER_BLOCK_NBT));
         } catch (NullPointerException e) {
@@ -139,10 +163,23 @@ public class TileHologram extends TileEntity {
         }
     }
 
-    public IItemHandler getItemHandler(){
+    private IItemHandler getItemHandler() {
         IItemHandler itemHandler = getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null);
         assert itemHandler != null;
         return itemHandler;
+    }
+
+    public ItemStack insertItem(ItemStack item) {
+        stopDisplayingGhostItem();
+        return getItemHandler().insertItem(0, item, false);
+    }
+
+    public ItemStack extractItem(int amount) {
+        return isDisplayingGhostItem() ? ItemStack.EMPTY : getItemHandler().extractItem(0, amount, false);
+    }
+
+    public ItemStack getStoredItem(){
+        return isDisplayingGhostItem() ? ItemStack.EMPTY : getItemHandler().getStackInSlot(0);
     }
 
 

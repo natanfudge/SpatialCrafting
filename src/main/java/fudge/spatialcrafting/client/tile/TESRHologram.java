@@ -1,5 +1,6 @@
 package fudge.spatialcrafting.client.tile;
 
+import fudge.spatialcrafting.client.RenderUtil;
 import fudge.spatialcrafting.common.tile.TileHologram;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -29,6 +30,7 @@ public class TESRHologram extends TileEntitySpecialRenderer<TileHologram> {
         if (!stack.isEmpty()) {
             final Minecraft minecraft = Minecraft.getMinecraft();
 
+
             // Must be done for all GL calls
             GlStateManager.pushMatrix();
             // Required for the item to render properly
@@ -50,7 +52,6 @@ public class TESRHologram extends TileEntitySpecialRenderer<TileHologram> {
 
             // Spins the item around
             GlStateManager.rotate((float) time, 0, SPIN_SPEED, 0);
-            GlStateManager.color(1, 1, 1, 0.5f);
 
             // Gets model
             IBakedModel model = minecraft.getRenderItem().getItemModelWithOverrides(stack, tile.getWorld(), null);
@@ -58,7 +59,8 @@ public class TESRHologram extends TileEntitySpecialRenderer<TileHologram> {
 
             // Attaches texture and renders model
             minecraft.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-            minecraft.getRenderItem().renderItem(stack, model);
+            if(tile.isDisplayingGhostItem()) RenderUtil.renderGhostItem(stack, model);
+            else minecraft.getRenderItem().renderItem(stack, model);
 
             // Enabled GL stuff must be disabled after.
             GlStateManager.scale(1, 1, 1);
@@ -68,6 +70,8 @@ public class TESRHologram extends TileEntitySpecialRenderer<TileHologram> {
 
         }
     }
+
+
 }
 
 

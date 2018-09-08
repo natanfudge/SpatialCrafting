@@ -43,7 +43,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
 
     public static final int CRAFT_DURATION_MULTIPLIER = 5;
 
-    public static  PropertyBool FORMED = PropertyBool.create("formed");
+    public static final PropertyBool FORMED = PropertyBool.create("formed");
     private final int crafterSize;
 
     public BlockCrafter(int size) {

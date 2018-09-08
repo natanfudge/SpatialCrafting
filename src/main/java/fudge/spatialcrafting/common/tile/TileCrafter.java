@@ -17,6 +17,7 @@ import fudge.spatialcrafting.common.util.RecipeUtil;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketStopParticles;
+import lombok.NoArgsConstructor;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -36,27 +37,28 @@ import static fudge.spatialcrafting.common.MCConstants.NOTIFY_CLIENT;
 import static fudge.spatialcrafting.common.block.BlockCrafter.CRAFT_DURATION_MULTIPLIER;
 import static fudge.spatialcrafting.common.block.BlockHologram.ACTIVE;
 
-
 public class TileCrafter extends TileEntity implements ITickable {
 
     private static final String OFFSET_NBT = "offset";
     private static final int ACTIVATE_ALL = -1;
     private Offset offset;
 
-    public TileCrafter() {
-    }
-
-
     public TileCrafter(BlockPos pos, BlockPos masterPos) {
         offset = new Offset(pos, masterPos);
     }
 
+    public TileCrafter(){}
 
     public boolean isHelpActive() {
         return getRecipe() != null;
     }
 
-    public void setActiveHolograms(int layerToActivate) {
+
+    public void setActiveHolograms(int layerToActivate){
+        setActiveHolograms(layerToActivate, true);
+    }
+
+    public void setActiveHolograms(int layerToActivate, boolean displayGhostItems) {
         int crafterSize = size();
 
         for (int i = 0; i < crafterSize; i++) {
@@ -64,12 +66,23 @@ public class TileCrafter extends TileEntity implements ITickable {
                 for (int k = 0; k < crafterSize; k++) {
                     BlockPos hologramPos = getHolograms()[i][j][k];
                     IBlockState state = world.getBlockState(hologramPos);
+                    TileHologram hologram = Util.getTileEntity(world, hologramPos);
 
                     // If i,j,k are within bounds
                     if (shouldActivateHologram(layerToActivate, i, j, k)) {
                         world.setBlockState(hologramPos, state.withProperty(ACTIVE, true), NOTIFY_CLIENT);
+
+                        // Display transparent item if applicable
+                        if(getRecipe() != null && displayGhostItems){
+                            ItemStack stack = RecipeUtil.getVisibleItemStack(getRecipe().getRequiredInput()[i][j][k]);
+                            hologram.displayGhostItem(stack);
+                        }else{
+                            hologram.stopDisplayingGhostItem();
+                        }
+
                     } else if (state.getValue(ACTIVE)) {
                         world.setBlockState(hologramPos, state.withProperty(ACTIVE, false), NOTIFY_CLIENT);
+                        hologram.stopDisplayingGhostItem();
                     }
                 }
             }
@@ -196,8 +209,9 @@ public class TileCrafter extends TileEntity implements ITickable {
 
 
     public void activateAllLayers() {
-        setActiveHolograms(ACTIVATE_ALL);
+        setActiveHolograms(ACTIVATE_ALL,false);
     }
+
 
 
     public int size() {
@@ -308,7 +322,6 @@ public class TileCrafter extends TileEntity implements ITickable {
 
     public ItemStack[][][] getHologramInvArr() {
 
-
         int size = size();
         ItemStack[][][] returning = new ItemStack[size][size][size];
 
@@ -320,9 +333,8 @@ public class TileCrafter extends TileEntity implements ITickable {
                     // Due to the way Minecraft handles nulls in this case,
                     // if there is an empty space in the blockPos array it will just put in air(which is what we want).
                     TileHologram hologramTile = Util.getTileEntity(world, holograms[i][j][k]);
-                    IItemHandler itemHandler = hologramTile.getItemHandler();
 
-                    returning[i][j][k] = itemHandler.getStackInSlot(0);
+                    returning[i][j][k] = hologramTile.getStoredItem();
                 }
             }
         }

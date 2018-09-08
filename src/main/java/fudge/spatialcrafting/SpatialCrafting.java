@@ -6,7 +6,7 @@ import fudge.spatialcrafting.common.command.Commands;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
 import fudge.spatialcrafting.network.PacketHandler;
-import fudge.spatialcrafting.proxy.Proxy;
+import fudge.spatialcrafting.proxy.IProxy;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -36,13 +36,13 @@ public class SpatialCrafting {
     private static SpatialCrafting instance;
     @SuppressWarnings("unused")
     @SidedProxy(serverSide = SERVER_PROXY_PATH, clientSide = CLIENT_PROXY_PATH)
-    private static Proxy proxy;
+    private static IProxy proxy;
 
     public static SpatialCrafting instance() {
         return instance;
     }
 
-    public static Proxy proxy() {
+    public static IProxy proxy() {
         return proxy;
     }
 
