@@ -1,4 +1,4 @@
-package fudge.spatialcrafting.client;
+package fudge.spatialcrafting.client.util;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;

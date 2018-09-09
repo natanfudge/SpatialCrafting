@@ -4,7 +4,6 @@ package fudge.spatialcrafting.common.tile;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.minecraft.CraftTweakerMC;
-import fudge.spatialcrafting.client.particle.ParticleItemDust;
 import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.block.BlockCrafter;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
@@ -17,7 +16,6 @@ import fudge.spatialcrafting.common.util.RecipeUtil;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketStopParticles;
-import lombok.NoArgsConstructor;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -28,7 +26,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.items.IItemHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -47,14 +44,14 @@ public class TileCrafter extends TileEntity implements ITickable {
         offset = new Offset(pos, masterPos);
     }
 
-    public TileCrafter(){}
+    public TileCrafter() {}
 
     public boolean isHelpActive() {
         return getRecipe() != null;
     }
 
 
-    public void setActiveHolograms(int layerToActivate){
+    public void setActiveHolograms(int layerToActivate) {
         setActiveHolograms(layerToActivate, true);
     }
 
@@ -73,10 +70,10 @@ public class TileCrafter extends TileEntity implements ITickable {
                         world.setBlockState(hologramPos, state.withProperty(ACTIVE, true), NOTIFY_CLIENT);
 
                         // Display transparent item if applicable
-                        if(getRecipe() != null && displayGhostItems){
+                        if (getRecipe() != null && displayGhostItems) {
                             ItemStack stack = RecipeUtil.getVisibleItemStack(getRecipe().getRequiredInput()[i][j][k]);
                             hologram.displayGhostItem(stack);
-                        }else{
+                        } else {
                             hologram.stopDisplayingGhostItem();
                         }
 
@@ -209,9 +206,8 @@ public class TileCrafter extends TileEntity implements ITickable {
 
 
     public void activateAllLayers() {
-        setActiveHolograms(ACTIVATE_ALL,false);
+        setActiveHolograms(ACTIVATE_ALL, false);
     }
-
 
 
     public int size() {
@@ -454,7 +450,8 @@ public class TileCrafter extends TileEntity implements ITickable {
         // Calculates the point at which the particle will end to decide where to drop the item.
         Vec3d center = centerOfHolograms();
         int durationTicks = this.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
-        double newY = center.y + (durationTicks - ParticleItemDust.PHASE_2_START_TICKS) * ParticleItemDust.PHASE_2_SPEED_BLOCKS_PER_TICK_UPWARDS;
+        //TODO change this accordingly to the slamdown
+        double newY = center.y;
         Vec3d endPos = new Vec3d(center.x, newY, center.z);
 
         // Find the correct recipe to craft with

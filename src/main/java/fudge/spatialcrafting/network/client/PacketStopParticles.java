@@ -1,6 +1,6 @@
 package fudge.spatialcrafting.network.client;
 
-import fudge.spatialcrafting.client.particle.ParticleItemDust;
+import fudge.spatialcrafting.client.util.ParticleUtil;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketBlockPos;
@@ -46,7 +46,7 @@ public class PacketStopParticles extends PacketBlockPos {
                         crafter = Util.getTileEntity(world, message.pos.add(1, 0, 0));
                     }
 
-                    ParticleItemDust.stopParticles(crafter);
+                    ParticleUtil.stopCraftParticles(crafter);
 
                 }
             }));

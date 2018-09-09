@@ -73,6 +73,7 @@ public final class CraftTweakerIntegration {
 
             //TODO IngredientConditions
             //TODO transfomers
+            //TODO make it so you can control the crafting time
 
 
             SpatialRecipe recipe = new SpatialRecipe(input, CraftTweakerMC.getItemStack(output));

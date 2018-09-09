@@ -1,6 +1,6 @@
 package fudge.spatialcrafting.common.block;
 
-import fudge.spatialcrafting.client.particle.ParticleItemDust;
+import fudge.spatialcrafting.client.util.ParticleUtil;
 import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.TileHologram;
@@ -184,7 +184,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
         if (extractedItemStack.getCount() >= 1 && crafter.isCrafting()) {
             crafter.resetCraftingState();
             if (world.isRemote) {
-                ParticleItemDust.stopParticles(crafter);
+                ParticleUtil.stopCraftParticles(crafter);
             }
         }
     }

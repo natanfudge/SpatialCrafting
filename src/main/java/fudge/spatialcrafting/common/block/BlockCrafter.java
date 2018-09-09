@@ -1,7 +1,7 @@
 package fudge.spatialcrafting.common.block;
 
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.client.particle.ParticleItemDust;
+import fudge.spatialcrafting.client.util.ParticleUtil;
 import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
@@ -159,7 +159,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         TileCrafter crafter = Util.getTileEntity(world, pos);
 
         if (world.isRemote) {
-            ParticleItemDust.playCraftParticles(world, pos);
+            ParticleUtil.playCraftParticles(world, pos);
         }
 
         int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;

@@ -3,6 +3,9 @@ package fudge.spatialcrafting.common.tile;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.block.BlockCrafter;
+import fudge.spatialcrafting.common.tile.util.Offset;
+import fudge.spatialcrafting.common.util.CrafterUtil;
+import fudge.spatialcrafting.common.util.RecipeUtil;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -25,6 +28,7 @@ import javax.annotation.Nullable;
 
 public class TileHologram extends TileEntity {
 
+    //TODO turn 3d arrays into a 3DArray class
 
     private static final String INVENTORY_NBT = "inventory";
     private static final String LAST_CHANGE_TIME_NBT = "lastChangeTime";
@@ -175,7 +179,24 @@ public class TileHologram extends TileEntity {
     }
 
     public ItemStack extractItem(int amount) {
-        return isDisplayingGhostItem() ? ItemStack.EMPTY : getItemHandler().extractItem(0, amount, false);
+        ItemStack extractedItem = isDisplayingGhostItem() ? ItemStack.EMPTY : getItemHandler().extractItem(0, amount, false);
+        // Replace the extracted item with a ghost item if applicable
+        displayGhostItem(getPreviouslyStoredGhostItem());
+        return extractedItem;
+    }
+
+    private Offset getOffset(){
+        return new Offset(new BlockPos(pos.getX(),pos.getY() - 1,pos.getZ()), getCrafter().masterPos());
+    }
+
+    private ItemStack getPreviouslyStoredGhostItem(){
+        TileCrafter crafter = getCrafter();
+        if(crafter.getRecipe() != null){
+            Offset offset = getOffset();
+            return RecipeUtil.getVisibleItemStack(crafter.getRecipe().getRequiredInput()[offset.getY()][offset.getX()][offset.getZ()]);
+        }else{
+            return ItemStack.EMPTY;
+        }
     }
 
     public ItemStack getStoredItem(){

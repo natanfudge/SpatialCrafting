@@ -1,6 +1,6 @@
 package fudge.spatialcrafting.client.tile;
 
-import fudge.spatialcrafting.client.RenderUtil;
+import fudge.spatialcrafting.client.util.RenderUtil;
 import fudge.spatialcrafting.common.tile.TileHologram;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
@@ -59,8 +59,11 @@ public class TESRHologram extends TileEntitySpecialRenderer<TileHologram> {
 
             // Attaches texture and renders model
             minecraft.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-            if(tile.isDisplayingGhostItem()) RenderUtil.renderGhostItem(stack, model);
-            else minecraft.getRenderItem().renderItem(stack, model);
+            if (tile.isDisplayingGhostItem()) {
+                RenderUtil.renderGhostItem(stack, model);
+            } else {
+                minecraft.getRenderItem().renderItem(stack, model);
+            }
 
             // Enabled GL stuff must be disabled after.
             GlStateManager.scale(1, 1, 1);
