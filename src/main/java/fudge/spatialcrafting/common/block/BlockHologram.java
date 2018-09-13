@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("deprecation")
 public class BlockHologram extends BlockTileEntity<TileHologram> {
 
+    //TODO add a sound and an animation for the holograms appearing
 
     public static final PropertyBool ACTIVE = PropertyBool.create("active");
     private static final Material HOLOGRAM = new MaterialTransparent(MapColor.AIR);
@@ -149,7 +150,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
 
                 // If there was nothing in there, so we should put an item in there in the case that the player is holding an item.
             } else {
-                if (!crafter.isCrafting()) {
+                if (!crafter.isCrafting() && hologramTile.isEmpty()) {
                     // Stop displaying ghost item. Note that this must be done BEFORE inserting or no item will be inserted.
                     hologramTile.stopDisplayingGhostItem();
 
@@ -175,6 +176,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
         return false;
     }
 
+
     private void extractItem(World world, EntityPlayer player, TileCrafter crafter, TileHologram hologram) {
         // Take item out of the hologram
         ItemStack extractedItemStack = hologram.extractItem(MCConstants.NORMAL_ITEMSTACK_LIMIT);
@@ -188,6 +190,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
             }
         }
     }
+
 
     @Override
     public void onBlockClicked(World world, BlockPos pos, EntityPlayer player) {

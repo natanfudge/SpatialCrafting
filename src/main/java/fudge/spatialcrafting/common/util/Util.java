@@ -49,6 +49,7 @@ public class Util {
      * @throws ClassCastException   if the tile entity type that was requested does not match the one that exists at the specified position
      */
     @Nonnull
+    @SuppressWarnings("unchecked")
     public static <T extends TileEntity> T getTileEntity(@Nonnull IBlockAccess world, @Nonnull BlockPos pos) {
 
         TileEntity tileEntity = world.getTileEntity(pos);
@@ -64,7 +65,7 @@ public class Util {
     }
 
     /**
-     * Trick intellij into not being NPE tricked by the forge objectholder trick
+     * Trick intellij into not being NPE tricked by the forge objectHolder trick
      */
     @SuppressWarnings("ConstantConditions")
     @Nonnull

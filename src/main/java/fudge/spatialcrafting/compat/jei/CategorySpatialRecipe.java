@@ -46,7 +46,7 @@ public class CategorySpatialRecipe implements IRecipeCategory<WrapperSpatialReci
     }
 
     @Override
-    public String getTitle() {
+    public String getTitle()  {
         return new TextComponentTranslation("jei.category.spatial_crafting").getUnformattedComponentText();
     }
 

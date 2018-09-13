@@ -4,7 +4,7 @@ package fudge.spatialcrafting.common.tile;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.minecraft.CraftTweakerMC;
-import fudge.spatialcrafting.common.MCConstants;
+import fudge.spatialcrafting.client.sound.Sounds;
 import fudge.spatialcrafting.common.block.BlockCrafter;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
@@ -22,6 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -31,7 +32,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import static fudge.spatialcrafting.common.MCConstants.NOTIFY_CLIENT;
-import static fudge.spatialcrafting.common.block.BlockCrafter.CRAFT_DURATION_MULTIPLIER;
 import static fudge.spatialcrafting.common.block.BlockHologram.ACTIVE;
 
 public class TileCrafter extends TileEntity implements ITickable {
@@ -420,10 +420,23 @@ public class TileCrafter extends TileEntity implements ITickable {
         return MathUtil.middleOf(edge1, edge2);
     }
 
+    private static final int SOUND_LOOP_TICKS = 27;
+
+    private int counter;
 
     @Override
     public void update() {
         if (!isMaster()) return;
+
+        if(!world.isRemote && isCrafting()){
+            if(counter == SOUND_LOOP_TICKS){
+                counter = 0;
+                world.playSound(null, pos, Sounds.CRAFT_LOOP, SoundCategory.BLOCKS, 0.8f, 0.8f);
+            }else{
+                counter++;
+            }
+
+        }
 
         // Update gets called once before the shared data is synced to the client, meaning it will be null at that time.
         // This is a fix to the errors it causes.
@@ -433,8 +446,10 @@ public class TileCrafter extends TileEntity implements ITickable {
             stopHelp();
 
             if (!world.isRemote) {
+                // server
                 completeCrafting(world);
             } else {
+                // client
                 this.resetCraftingState();
             }
 
@@ -448,23 +463,31 @@ public class TileCrafter extends TileEntity implements ITickable {
         this.resetCraftingState();
 
         // Calculates the point at which the particle will end to decide where to drop the item.
-        Vec3d center = centerOfHolograms();
-        int durationTicks = this.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
-        //TODO change this accordingly to the slamdown
-        double newY = center.y;
-        Vec3d endPos = new Vec3d(center.x, newY, center.z);
+        Vec3d center = centerOfCrafters().add(0,1.5,0);
 
         // Find the correct recipe to craft with
         for (SpatialRecipe recipe : SpatialRecipe.getRecipes()) {
             if (recipe.matches(getHologramInvArr()) && !this.isCrafting()) {
                 // Finally, drop the item on the ground.
-                Util.dropItemStack(world, endPos, recipe.getOutput());
+                Util.dropItemStack(world, center, recipe.getOutput());
             }
         }
 
         // Removes the existing items
         ArrayUtil.innerForEach(getHolograms(), blockPos -> Util.<TileHologram>getTileEntity(world, blockPos).removeItem(1, true));
 
+        // Play end sound
+        world.playSound(null, pos, Sounds.CRAFT_END, SoundCategory.BLOCKS,0.2f, 0.8f);
+
+
+
+
+    }
+
+    public Vec3d centerOfCrafters(){
+        BlockPos[][] crafters = getCrafterBlocks();
+
+        return MathUtil.middleOf(new Vec3d(crafters[0][0]), new Vec3d(crafters[size() - 1][size() - 1]));
 
     }
 

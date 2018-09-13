@@ -45,4 +45,10 @@ public class MathUtil {
 
         return new Vec3d(x, y, z);
     }
+
+
+    public static Vec3d middleOf(Vec3i pos1, Vec3i pos2){
+        return middleOf(new Vec3d(pos1), new Vec3d(pos2));
+    }
+
 }

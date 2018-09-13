@@ -16,21 +16,22 @@ import static fudge.spatialcrafting.common.util.MathUtil.euclideanDistanceOf;
 
 
 @SideOnly(Side.CLIENT)
-//TODO: have the particles slam down at the end
-//TODO sound (also have a BANG when it slams down) - invoker meatball
 public class ParticleCraft extends Particle {
 
     public static final float PHASE_2_Y_END_POS_INCREASE_PER_TICK = 0.5f / TICKS_PER_SECOND;
     public static final float SPEED_BLOCKS_PER_TICK_BASE = 1.0f / TICKS_PER_SECOND;
     public static final double SPEED_BLOCKS_PER_TICKS_INCREASE_PER_TICK = 0.2f / TICKS_PER_SECOND / TICKS_PER_SECOND;
     public static final int PHASE_2_START_TICKS = 5 * TICKS_PER_SECOND;
+    public static final float SLAMDOWN_SPEED_BLOCKS_PER_TICK = 4f / 20;
     private final Vec3d sourcePos;
     private final double endZ;
     private final double endX;
     private final double origEndY;
     private int ticksPassed;
+    private final int craftDuration;
+    private final double craftYEndPos;
 
-    public ParticleCraft(World worldIn, Vec3d startPos, Vec3d origEndPos, int startTimeDelay, int craftTime, TextureAtlasSprite texture) {
+    public ParticleCraft(World worldIn, Vec3d startPos, Vec3d origEndPos, int startTimeDelay, int craftDuration, double craftYEndPos, TextureAtlasSprite texture) {
         super(worldIn, startPos.x, startPos.y, startPos.z, 0, 0, 0);
         this.setParticleTexture(texture);
         this.particleRed = 0.6F;
@@ -43,6 +44,8 @@ public class ParticleCraft extends Particle {
         this.endZ = origEndPos.z;
         this.origEndY = origEndPos.y;
         this.ticksPassed = startTimeDelay;
+        this.craftDuration = craftDuration;
+        this.craftYEndPos = craftYEndPos;
 
 
         this.particleMaxAge = 500;
@@ -55,12 +58,12 @@ public class ParticleCraft extends Particle {
     }
 
     @Override
-    //TODO optimize by making calcuations every second, or when a message is sent
-    //TODO optimize by making the endPos calculations at a single, seperate place (every tick), and then getting the result on each particle. This is probably not much...
+    //optimize by making calcuations every second, or when a message is sent
+    //optimize by making the endPos calculations at a single, seperate place (every tick), and then getting the result on each particle. This is probably not much...
     public void onUpdate() {
 
 
-        final Vec3d endPos = ParticleUtil.calcEndPos(ticksPassed, new Vec3d(endX, origEndY, endZ));
+        final Vec3d endPos = ParticleUtil.calcEndPos(ticksPassed, craftDuration, new Vec3d(endX, origEndY, endZ),craftYEndPos);
         final Vec3d pos = new Vec3d(posX, posY, posZ);
 
         final Vec3d direction = (endPos.subtract(pos)).normalize();
@@ -81,7 +84,7 @@ public class ParticleCraft extends Particle {
             this.setExpired();
         }
 
-        if (this.ticksPassed++ >= 5000) {
+        if (this.ticksPassed++ >= 1000) {
             this.setExpired();
         }
 

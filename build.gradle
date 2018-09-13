@@ -1,17 +1,23 @@
 buildscript {
+    ext.kotlin_version = '1.2.61'
     repositories {
         jcenter()
         maven { url = "http://files.minecraftforge.net/maven" }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 plugins {
     id "org.sonarqube" version "2.6"
     id 'net.ltgt.apt' version '0.10'
 }
+
+plugins {
+}
 apply plugin: 'net.minecraftforge.gradle.forge'
+apply plugin: 'kotlin'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 def MODID = "spatialcrafting"
@@ -50,6 +56,11 @@ repositories{
         url "http://maven.blamejared.com/"
     }
 
+    maven{
+        name "sounds libs"
+        url "https://mvnrepository.com/artifact/com.googlecode.soundlibs/mp3spi"
+    }
+
     mavenCentral()
 
 }
@@ -70,9 +81,12 @@ dependencies {
 
     compile group: 'org.jetbrains', name: 'annotations', version: '13.0'
 
+    //compile group:"com.googlecode.soundlibs", name:"mp3spi",version:"1.9.5-1"
+
     compileOnly 'org.projectlombok:lombok:1.18.2'
 
     apt "org.projectlombok:lombok:1.18.2"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
 
 }

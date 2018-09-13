@@ -1,3 +1,4 @@
+/*
 package fudge.spatialcrafting.network.client;
 
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
@@ -17,11 +18,12 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
+*/
 /**
  * Packet from server to client
  * Hardcoded to CrafterData
- **/
-//TODO: this is not used at all?...
+ **//*
+
 @NoArgsConstructor
 public class PacketUpdateOneSharedData implements IMessage {
 
@@ -70,3 +72,4 @@ public class PacketUpdateOneSharedData implements IMessage {
 
 
 
+*/

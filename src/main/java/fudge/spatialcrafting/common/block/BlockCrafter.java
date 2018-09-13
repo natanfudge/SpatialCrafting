@@ -1,6 +1,7 @@
 package fudge.spatialcrafting.common.block;
 
 import fudge.spatialcrafting.SpatialCrafting;
+import fudge.spatialcrafting.client.sound.Sounds;
 import fudge.spatialcrafting.client.util.ParticleUtil;
 import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
@@ -9,6 +10,7 @@ import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.ArrayUtil;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.common.util.Util;
+import fudge.spatialcrafting.network.NetworkUtil;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketAttemptMultiblock;
 import net.minecraft.block.Block;
@@ -24,10 +26,10 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -116,9 +118,8 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
             CrafterUtil.attemptMultiblock(world, pos, null, size());
 
             // Send this to the client
-            final int RANGE = 64;
-            PacketHandler.getNetwork().sendToAllAround(new PacketAttemptMultiblock(pos),
-                    new NetworkRegistry.TargetPoint(world.provider.getDimension(), pos.getX(), pos.getY(), pos.getZ(), RANGE));
+            PacketHandler.getNetwork().sendToAllAround(new PacketAttemptMultiblock(pos), NetworkUtil.INSTANCE.createTargetPoint(world, pos));
+
         }
 
 
@@ -154,12 +155,18 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
 
     }
 
+    //TODO make the dropped item allign better. maybe  float
+
+
     private void beginCraft(World world, BlockPos pos) {
 
         TileCrafter crafter = Util.getTileEntity(world, pos);
 
         if (world.isRemote) {
             ParticleUtil.playCraftParticles(world, pos);
+        } else {
+            // Normal sound can be done through the server
+              world.playSound(null, pos, Sounds.CRAFT_START, SoundCategory.BLOCKS, 0.8f, 0.8f);
         }
 
         int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
@@ -176,8 +183,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     public void breakBlock(World world, BlockPos placedPos, IBlockState state) {
 
         if (state.getValue(FORMED)) {
-            TileCrafter crafter = (TileCrafter) world.getTileEntity(placedPos);
-            assert crafter != null;
+            TileCrafter crafter = Util.getTileEntity(world,placedPos);
 
             destroyMultiblock(world, crafter);
 

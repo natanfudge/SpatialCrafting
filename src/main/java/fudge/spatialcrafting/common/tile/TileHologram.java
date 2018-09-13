@@ -54,7 +54,7 @@ public class TileHologram extends TileEntity {
     }
 
     public void displayGhostItem(ItemStack item) {
-        if(!isDisplayingGhostItem()) {
+        if(isEmpty()) {
             getItemHandler().insertItem(0, item, false);
             displayingGhostItem = true;
         }
@@ -209,6 +209,11 @@ public class TileHologram extends TileEntity {
         super.handleUpdateTag(data);
         deserialize(data);
     }
+
+    public boolean isEmpty(){
+        return isDisplayingGhostItem() || getItemHandler().extractItem(0, 1, true).equals(ItemStack.EMPTY);
+    }
+
 
     public void removeItem(int amount, boolean informClient) {
         this.getItemHandler().extractItem(0, amount, false);
