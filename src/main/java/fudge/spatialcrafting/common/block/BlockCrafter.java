@@ -7,12 +7,14 @@ import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.TileCrafter;
-import fudge.spatialcrafting.common.util.ArrayUtil;
+import fudge.spatialcrafting.common.tile.util.CraftingInventory;
+import fudge.spatialcrafting.common.tile.util.CubeArr;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.NetworkUtil;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketAttemptMultiblock;
+import kotlin.Unit;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -131,7 +133,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
             if (state.getValue(FORMED) && playerIn.getHeldItem(hand).isEmpty()) {
                 TileCrafter crafter = Util.getTileEntity(world, pos);
 
-                ItemStack[][][] craftingInventory = crafter.getHologramInvArr();
+                CraftingInventory craftingInventory = crafter.getHologramInvArr();
 
                 if (!crafter.isCrafting()) {
                     // Check if any recipe matches, if so, beginCraft the recipe.
@@ -166,7 +168,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
             ParticleUtil.playCraftParticles(world, pos);
         } else {
             // Normal sound can be done through the server
-              world.playSound(null, pos, Sounds.CRAFT_START, SoundCategory.BLOCKS, 0.8f, 0.8f);
+            world.playSound(null, pos, Sounds.CRAFT_START, SoundCategory.BLOCKS, 0.8f, 0.8f);
         }
 
         int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
@@ -183,7 +185,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     public void breakBlock(World world, BlockPos placedPos, IBlockState state) {
 
         if (state.getValue(FORMED)) {
-            TileCrafter crafter = Util.getTileEntity(world,placedPos);
+            TileCrafter crafter = Util.getTileEntity(world, placedPos);
 
             destroyMultiblock(world, crafter);
 
@@ -201,7 +203,9 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         }
 
         // Destroy all holograms in the BlockPos list.
-        ArrayUtil.innerForEach(crafter.getHolograms(), hologramPos -> {
+        CubeArr<BlockPos> holograms = crafter.getHolograms();
+
+        crafter.getHolograms().forEach(hologramPos -> {
             if (world.getBlockState(hologramPos).getBlock() == SCBlocks.HOLOGRAM) {
                 world.setBlockState(hologramPos, Blocks.AIR.getDefaultState(), NOTIFY_CLIENT + BLOCK_UPDATE);
             }
@@ -209,12 +213,14 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
 
 
         // Notify the blocks they are no longer in a multiblock
-        ArrayUtil.innerForEach2D(crafter.getCrafterBlocks(), crafterPos -> {
+        crafter.getCrafterBlocks().forEach(crafterPos -> {
             IBlockState blockState = world.getBlockState(crafterPos);
             if (blockState.getBlock() instanceof BlockCrafter) {
                 world.setBlockState(crafterPos, blockState.withProperty(FORMED, false), MCConstants.NOTIFY_CLIENT);
                 Util.removeTileEntity(world, crafterPos, true);
             }
+
+            return Unit.INSTANCE;
         });
 
         WorldSavedDataCrafters.removeData(world, crafter.masterPos(), true);

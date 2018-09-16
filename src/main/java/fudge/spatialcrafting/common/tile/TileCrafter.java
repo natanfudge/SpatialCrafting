@@ -8,14 +8,13 @@ import fudge.spatialcrafting.client.sound.Sounds;
 import fudge.spatialcrafting.common.block.BlockCrafter;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
-import fudge.spatialcrafting.common.tile.util.CraftersData;
-import fudge.spatialcrafting.common.tile.util.Offset;
-import fudge.spatialcrafting.common.util.ArrayUtil;
+import fudge.spatialcrafting.common.tile.util.*;
 import fudge.spatialcrafting.common.util.MathUtil;
 import fudge.spatialcrafting.common.util.RecipeUtil;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketStopParticles;
+import kotlin.Unit;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
@@ -56,35 +55,32 @@ public class TileCrafter extends TileEntity implements ITickable {
     }
 
     public void setActiveHolograms(int layerToActivate, boolean displayGhostItems) {
-        int crafterSize = size();
 
-        for (int i = 0; i < crafterSize; i++) {
-            for (int j = 0; j < crafterSize; j++) {
-                for (int k = 0; k < crafterSize; k++) {
-                    BlockPos hologramPos = getHolograms()[i][j][k];
-                    IBlockState state = world.getBlockState(hologramPos);
-                    TileHologram hologram = Util.getTileEntity(world, hologramPos);
+        getHolograms().indexedForEach((i, j, k, hologramPos) -> {
 
-                    // If i,j,k are within bounds
-                    if (shouldActivateHologram(layerToActivate, i, j, k)) {
-                        world.setBlockState(hologramPos, state.withProperty(ACTIVE, true), NOTIFY_CLIENT);
+            IBlockState state = world.getBlockState(hologramPos);
+            TileHologram hologram = Util.getTileEntity(world, hologramPos);
 
-                        // Display transparent item if applicable
-                        if (getRecipe() != null && displayGhostItems) {
-                            ItemStack stack = RecipeUtil.getVisibleItemStack(getRecipe().getRequiredInput()[i][j][k]);
-                            hologram.displayGhostItem(stack);
-                        } else {
-                            hologram.stopDisplayingGhostItem();
-                        }
+            // If i,j,k are within bounds
+            if (shouldActivateHologram(layerToActivate, i, j, k)) {
+                world.setBlockState(hologramPos, state.withProperty(ACTIVE, true), NOTIFY_CLIENT);
 
-                    } else if (state.getValue(ACTIVE)) {
-                        world.setBlockState(hologramPos, state.withProperty(ACTIVE, false), NOTIFY_CLIENT);
-                        hologram.stopDisplayingGhostItem();
-                    }
+                // Display transparent item if applicable
+                if (getRecipe() != null && displayGhostItems) {
+                    ItemStack stack = RecipeUtil.getVisibleItemStack(getRecipe().getRequiredInput().get(i, j, k));
+                    hologram.displayGhostItem(stack);
+                } else {
+                    hologram.stopDisplayingGhostItem();
                 }
+
+            } else if (state.getValue(ACTIVE)) {
+                world.setBlockState(hologramPos, state.withProperty(ACTIVE, false), NOTIFY_CLIENT);
+                hologram.stopDisplayingGhostItem();
             }
 
-        }
+            // Weird Java-Kotlin interoperability bug?
+            return Unit.INSTANCE;
+        });
     }
 
 
@@ -97,7 +93,7 @@ public class TileCrafter extends TileEntity implements ITickable {
             //If this is the correct layer and it is in bounds then check if this hologram is required for the recipe, otherwise false.
             if ((layerToActivate == ACTIVATE_ALL || layerToActivate == i) && i < recipeSize && j < recipeSize && k < recipeSize) {
                 // if the recipe is null there then it should not be activated.
-                return getRecipe().getRequiredInput()[i][j][k] != null || !isHelpActive();
+                return !isHelpActive();
             } else {
                 return false;
             }
@@ -128,11 +124,11 @@ public class TileCrafter extends TileEntity implements ITickable {
     private boolean layerEnabled(int layer) {
 
         int size = size();
-        BlockPos[][] holograms = getHolograms()[layer];
+        CubeArr<BlockPos> holograms = getHolograms();
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                BlockPos hologramPos = holograms[i][j];
+                BlockPos hologramPos = holograms.get(layer, i, j);
 
                 if (world.getBlockState(hologramPos).getValue(ACTIVE)) return true;
             }
@@ -148,14 +144,14 @@ public class TileCrafter extends TileEntity implements ITickable {
         if (recipe == null) return false;
 
         int size = recipeSize();
-        BlockPos[][] holograms = getHolograms()[layer];
-        ItemStack[][] itemStacks = getHologramInvArr()[layer];
+        CubeArr<BlockPos> holograms = getHolograms();
+        CraftingInventory itemStacks = getHologramInvArr();
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                BlockPos hologramPos = holograms[i][j];
-                IItemStack stack = CraftTweakerMC.getIItemStack(itemStacks[i][j]);
-                IIngredient requiredStack = recipe.getRequiredInput()[layer][i][j];
+                BlockPos hologramPos = holograms.get(layer, i, j);
+                IItemStack stack = CraftTweakerMC.getIItemStack(itemStacks.get(layer, i, j));
+                IIngredient requiredStack = recipe.getRequiredInput().get(layer, i, j);
 
                 // If the hologram is not active it counts as complete
                 if (world.getBlockState(hologramPos).getValue(ACTIVE) && !RecipeUtil.nullSafeMatch(requiredStack, stack)) {
@@ -180,7 +176,7 @@ public class TileCrafter extends TileEntity implements ITickable {
     private int recipeSize() {
         SpatialRecipe recipe = getRecipe();
         if (recipe != null) {
-            return recipe.getRequiredInput().length;
+            return recipe.getRequiredInput().getCubeSize();
         } else {
             return 0;
         }
@@ -302,65 +298,37 @@ public class TileCrafter extends TileEntity implements ITickable {
         setCraftEndTime(world.getWorldTime() + delay);
     }
 
-    public BlockPos[][] getCrafterBlocks() {
-        int size = size();
-
-        BlockPos[][] positions = new BlockPos[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                positions[i][j] = masterPos().add(i, 0, j);
-            }
-        }
-
-        return positions;
-
+    public CrafterPoses getCrafterBlocks() {
+        return new CrafterPoses(size(), (i, j) -> masterPos().add(i, 0, j));
     }
 
-    public ItemStack[][][] getHologramInvArr() {
+    public CraftingInventory getHologramInvArr() {
 
-        int size = size();
-        ItemStack[][][] returning = new ItemStack[size][size][size];
+        return new CraftingInventory(size(), (i, j, k) -> {
 
-        BlockPos[][][] holograms = getHolograms();
+            CubeArr<BlockPos> holograms = getHolograms();
 
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                for (int k = 0; k < size; k++) {
-                    // Due to the way Minecraft handles nulls in this case,
-                    // if there is an empty space in the blockPos array it will just put in air(which is what we want).
-                    TileHologram hologramTile = Util.getTileEntity(world, holograms[i][j][k]);
+            // Due to the way Minecraft handles nulls in this case,
+            // if there is an empty space in the blockPos array it will just put in air(which is what we want).
+            TileHologram hologramTile = Util.getTileEntity(world, holograms.get(i, j, k));
 
-                    returning[i][j][k] = hologramTile.getStoredItem();
-                }
-            }
-        }
+            return hologramTile.getStoredItem();
 
-        return returning;
+        });
+
     }
 
     /**
      * Returns the holograms bound to this tileCrafter.
      * array[i][j][k] is defined as the hologram which has a offset of y = i+1, x = j, z = k from the masterPos, or: array[y-1][x][z]
      */
-    public BlockPos[][][] getHolograms() {
+    public CubeArr<BlockPos> getHolograms() {
 
         int size = size();
-        BlockPos[][][] holograms = new BlockPos[size][size][size];
+        CrafterPoses crafters = getCrafterBlocks();
 
-
-        BlockPos[][] crafters = getCrafterBlocks();
-
-        ArrayUtil.innerForEach2D(crafters, crafterPos -> {
-            for (int i = 0; i < size; i++) {
-                Offset crafterOffset = new Offset(crafterPos, masterPos());
-
-                // May need to swap this
-                holograms[i][crafterOffset.getX()][crafterOffset.getZ()] = crafterPos.add(0, i + 1, 0);
-            }
-        });
-
-        return holograms;
-
+        CubeArr arr = new CubeArr<>(size, (i, j, k) -> crafters.get(j, k).add(0, i + 1, 0));
+        return arr;
 
     }
 
@@ -410,12 +378,11 @@ public class TileCrafter extends TileEntity implements ITickable {
 
 
     public Vec3d centerOfHolograms() {
-        BlockPos[][][] holograms = getHolograms();
-        int size = holograms.length - 1;
+        CubeArr<BlockPos> holograms = getHolograms();
 
         // Get the farthest away holograms from each other
-        Vec3d edge1 = new Vec3d(holograms[0][0][0]);
-        Vec3d edge2 = new Vec3d(holograms[size][size][size].add(1, 1, 1));
+        Vec3d edge1 = new Vec3d(holograms.firstElement());
+        Vec3d edge2 = new Vec3d(holograms.lastElement().add(1, 1, 1));
 
         return MathUtil.middleOf(edge1, edge2);
     }
@@ -428,11 +395,11 @@ public class TileCrafter extends TileEntity implements ITickable {
     public void update() {
         if (!isMaster()) return;
 
-        if(!world.isRemote && isCrafting()){
-            if(counter == SOUND_LOOP_TICKS){
+        if (!world.isRemote && isCrafting()) {
+            if (counter == SOUND_LOOP_TICKS) {
                 counter = 0;
                 world.playSound(null, pos, Sounds.CRAFT_LOOP, SoundCategory.BLOCKS, 0.8f, 0.8f);
-            }else{
+            } else {
                 counter++;
             }
 
@@ -463,31 +430,30 @@ public class TileCrafter extends TileEntity implements ITickable {
         this.resetCraftingState();
 
         // Calculates the point at which the particle will end to decide where to drop the item.
-        Vec3d center = centerOfCrafters().add(0,1.5,0);
+        Vec3d center = centerOfCrafters().add(0, 1.8, 0);
 
         // Find the correct recipe to craft with
         for (SpatialRecipe recipe : SpatialRecipe.getRecipes()) {
             if (recipe.matches(getHologramInvArr()) && !this.isCrafting()) {
                 // Finally, drop the item on the ground.
-                Util.dropItemStack(world, center, recipe.getOutput());
+                Util.dropItemStack(world, center, recipe.getOutput(), false);
             }
         }
 
         // Removes the existing items
-        ArrayUtil.innerForEach(getHolograms(), blockPos -> Util.<TileHologram>getTileEntity(world, blockPos).removeItem(1, true));
+        getHolograms().forEach(blockPos -> Util.<TileHologram>getTileEntity(world, blockPos).removeItem(1, true));
+
 
         // Play end sound
-        world.playSound(null, pos, Sounds.CRAFT_END, SoundCategory.BLOCKS,0.2f, 0.8f);
-
-
+        world.playSound(null, pos, Sounds.CRAFT_END, SoundCategory.BLOCKS, 0.2f, 0.8f);
 
 
     }
 
-    public Vec3d centerOfCrafters(){
-        BlockPos[][] crafters = getCrafterBlocks();
+    public Vec3d centerOfCrafters() {
+        CrafterPoses crafters = getCrafterBlocks();
 
-        return MathUtil.middleOf(new Vec3d(crafters[0][0]), new Vec3d(crafters[size() - 1][size() - 1]));
+        return MathUtil.middleOf(new Vec3d(crafters.firstCrafter()), (new Vec3d(crafters.lastCrafter())).add(1, 0, 1));
 
     }
 

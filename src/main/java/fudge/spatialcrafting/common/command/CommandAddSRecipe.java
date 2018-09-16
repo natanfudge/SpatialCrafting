@@ -6,6 +6,7 @@ import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.crafting.RecipeAddition;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
+import fudge.spatialcrafting.common.tile.util.CraftingInventory;
 import fudge.spatialcrafting.common.util.ArrayUtil;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
@@ -78,16 +79,16 @@ public class CommandAddSRecipe extends SCCommand {
         }
     }
 
-    private static boolean isValidRecipe(ItemStack[][][] input, ItemStack output, @Nonnull EntityPlayerMP player) {
+    private static boolean isValidRecipe(CraftingInventory input, ItemStack output, @Nonnull EntityPlayerMP player) {
 
-        // If the input is just air
-        if (ArrayUtil.arrEqualsObj(input, Items.AIR, (itemStack, air) -> itemStack.getItem().equals(air))) {
+
+        if (input.isEmpty()) {
             player.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.empty_crafter", 0));
             return false;
         }
 
         // If the player is holding nothing, and the output is just air
-        if (output.getItem().equals(Items.AIR)) {
+        if (output.equals(ItemStack.EMPTY)) {
             player.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.empty_hand", 0));
             return false;
         }
@@ -133,7 +134,7 @@ public class CommandAddSRecipe extends SCCommand {
 
             if (crafter != null) {
 
-                ItemStack[][][] input = crafter.getHologramInvArr();
+                CraftingInventory input= crafter.getHologramInvArr();
 
                 if (isValidRecipe(input, output, player)) {
 
@@ -171,8 +172,7 @@ public class CommandAddSRecipe extends SCCommand {
                     }
 
                     // Writes some code in ZS that adds the corresponding recipe. Who needs programmers in our day and age?
-                    String command = "mods.spatialcrafting.addRecipe(" + recipe.toFormattedString() + ",\t" + CraftTweakerIntegration.itemStackToCTString(
-                            output) + ");\n\n";
+                    String command = "mods.spatialcrafting.addRecipe(" + recipe.toFormattedString() + ");\n\n";
 
                     if (SpatialRecipe.noRecipeConflict(recipe, sender)) {
                         addCrTScript(command);

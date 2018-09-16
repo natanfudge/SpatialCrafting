@@ -35,9 +35,16 @@ public class Util {
      * @param itemStack The itemStack to drop in the world.
      */
     public static void dropItemStack(World world, Vec3d pos, ItemStack itemStack) {
+        dropItemStack(world, pos, itemStack, true);
+    }
+
+    public static void dropItemStack(World world, Vec3d pos, ItemStack itemStack, boolean randomMotion){
         EntityItem itemEntity = new EntityItem(world, pos.x, pos.y, pos.z, itemStack);
+        if(!randomMotion) itemEntity.motionX = itemEntity.motionY = itemEntity.motionZ = 0;
         world.spawnEntity(itemEntity);
     }
+
+
 
 
     /**

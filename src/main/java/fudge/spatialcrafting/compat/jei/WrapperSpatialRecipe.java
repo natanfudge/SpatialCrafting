@@ -2,11 +2,11 @@ package fudge.spatialcrafting.compat.jei;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
+import fudge.spatialcrafting.common.tile.util.RecipeInput;
 import fudge.spatialcrafting.common.util.ArrayUtil;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.common.util.MathUtil;
@@ -63,18 +63,7 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
 
     }
 
-    private static List<List<ItemStack>> fromArray(IIngredient[][][] arr, int layer) {
-        List<List<ItemStack>> list = new ArrayList<>();
-        ArrayUtil.innerForEach2D(arr[layer], ingredient -> {
-            if (ingredient != null) {
-                list.add(Lists.newArrayList(CraftTweakerMC.getItemStacks(ingredient.getItems())));
-            } else {
-                list.add(Collections.singletonList(ItemStack.EMPTY));
-            }
 
-        });
-        return list;
-    }
 
     private List<JeiButton> addButtons() {
         int upY = BUTTON_Y_OFFSET.get(recipeSize());
@@ -228,13 +217,13 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
     }
 
     private int recipeSize() {
-        return recipe.getRequiredInput().length;
+        return recipe.getRequiredInput().getCubeSize();
     }
 
     @Override
     public void getIngredients(@NotNull IIngredients ingredients) {
         ingredients.setOutput(ItemStack.class, recipe.getOutput());
-        ingredients.setInputLists(ItemStack.class, fromArray(recipe.getRequiredInput(), layer));
+        ingredients.setInputLists(ItemStack.class, recipe.getRequiredInput().itemStacksOfLayer(layer));
     }
 
 

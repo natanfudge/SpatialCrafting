@@ -5,7 +5,11 @@ import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import crafttweaker.api.oredict.IOreDictEntry;
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.util.ArrayUtil;
+import fudge.spatialcrafting.common.tile.util.Arr3D;
+import fudge.spatialcrafting.common.tile.util.CraftingInventory;
+import fudge.spatialcrafting.common.tile.util.CubeArr;
+import fudge.spatialcrafting.common.tile.util.RecipeInput;
+import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -28,24 +32,25 @@ public class SpatialRecipe {
     private static final String EXAMPLE_SCRIPT_NAME = "SpatialRecipeExamples.zs";
     private static final String CT_SCRIPTS_FOLDER_NAME = "scripts";
     private static List<SpatialRecipe> recipeList = new ArrayList<>();
-    private final IIngredient[][][] requiredInput;
+    private final RecipeInput requiredInput;
     private final ItemStack output;
 
-    public SpatialRecipe(IIngredient[][][] recipeInput, ItemStack recipeOutput) {
+    public SpatialRecipe(RecipeInput recipeInput, ItemStack recipeOutput) {
         this.requiredInput = recipeInput;
         this.output = recipeOutput;
     }
 
-    @Nullable
-    public static SpatialRecipe getRecipeFromItemStacks(ItemStack[][][] itemStackInput, ItemStack output, RecipeAddition recipeAddition) {
-        // Convert ItemStack array to IIngredient array
-        IIngredient[][][] ingredientInput = new IIngredient[itemStackInput.length][itemStackInput[0].length][itemStackInput[0][0].length];
-        for (int i = 0; i < itemStackInput.length; i++) {
-            for (int j = 0; j < itemStackInput[i].length; j++) {
-                for (int k = 0; k < itemStackInput[i][j].length; k++) {
+    public String toFormattedString(){
+        return getRequiredInput().toFormattedString() + ",\t" + CraftTweakerIntegration.itemStackToCTString(output);
+    }
 
-                    ItemStack requiredInputToAddIS = itemStackInput[i][j][k];
-                    if (requiredInputToAddIS.isEmpty()) continue;
+    @Nullable
+    public static SpatialRecipe getRecipeFromItemStacks(CraftingInventory itemStackInput, ItemStack output, RecipeAddition recipeAddition) {
+        // Convert ItemStack array to IIngredient array
+        RecipeInput ingredientInput = new RecipeInput(itemStackInput.getCubeSize(),
+                (i, j, k) -> {
+                    ItemStack requiredInputToAddIS = itemStackInput.get(i, j, k);
+                    if (requiredInputToAddIS.isEmpty()) return null;
                     IIngredient requiredInputToAdd = null;
 
                     switch (recipeAddition) {
@@ -77,11 +82,8 @@ public class SpatialRecipe {
 
                     }
 
-                    ingredientInput[i][j][k] = requiredInputToAdd;
-
-                }
-            }
-        }
+                    return requiredInputToAdd;
+                });
 
         return new SpatialRecipe(ingredientInput, output);
 
@@ -90,7 +92,8 @@ public class SpatialRecipe {
     public static List<SpatialRecipe> getRecipesForSize(int size) {
         List<SpatialRecipe> recipes = new LinkedList<>();
         for (SpatialRecipe recipe : getRecipes()) {
-            if (recipe.requiredInput.length == size) {
+            //TODO try having the bigger ones apply for the smaller ones too
+            if (recipe.requiredInput.getCubeSize() == size) {
                 recipes.add(recipe);
             }
         }
@@ -113,9 +116,8 @@ public class SpatialRecipe {
 
             // If the input is the same it means there is some kind of conflict.
             // "newIng.contains(oldIng) || oldIng.contains(newIng)" insures the recipes intersect
-            if (ArrayUtil.innerEqualsDifferentSizes(newRecipe.requiredInput,
-                    existingRecipe.requiredInput,
-                    (newIng, oldIng) -> newIng.contains(oldIng) || oldIng.contains(newIng))) {
+            if(newRecipe.requiredInput.equalsDifSize(existingRecipe.requiredInput,
+                    (newIng, oldIng) -> newIng.contains(oldIng) || oldIng.contains(newIng))){
 
                 // Same input same output
                 if (itemStackEquals(newRecipe.output, existingRecipe.output)) {
@@ -146,6 +148,7 @@ public class SpatialRecipe {
         }
     }
 
+    //TODO fix the fact that you can't put potions etc in
     private static boolean itemStackEquals(ItemStack stack1, ItemStack stack2) {
         return stack1.getItem().equals(stack2.getItem()) && stack1.getCount() == stack2.getCount();
     }
@@ -210,7 +213,7 @@ public class SpatialRecipe {
         return getRecipes().get(ID);
     }
 
-    public IIngredient[][][] getRequiredInput() {
+    public RecipeInput getRequiredInput() {
         return requiredInput;
     }
 
@@ -227,8 +230,7 @@ public class SpatialRecipe {
 
         SpatialRecipe other = (SpatialRecipe) otherObj;
 
-        return ArrayUtil.innerEqualsDifferentSizes(this.requiredInput, other.requiredInput, Object::equals) && itemStackEquals(this.output,
-                other.output);
+        return this.requiredInput.equalsDifSize(other.requiredInput) && itemStackEquals(this.output, other.output);
 
     }
 
@@ -240,62 +242,24 @@ public class SpatialRecipe {
     public int hashCode() {
         final int prime = 31;
         int result = Objects.hash(output);
-        result = prime * result + Arrays.hashCode(requiredInput);
+        result = prime * result + requiredInput.hashCode();
         return result;
     }
 
-    public boolean matches(ItemStack[][][] craftingInventory) {
-        return ArrayUtil.innerEqualsDifferentSizes(requiredInput,
-                craftingInventory,
-                (required, actualInput) -> required.matches(CraftTweakerMC.getIItemStack(actualInput)),
-                ItemStack.EMPTY);
+    public boolean matches(CraftingInventory craftingInventory) {
+        return requiredInput.equalsDifSize(craftingInventory.toIItemStackArr(), IIngredient::matches);
 
     }
 
     // Magic function to create code
-    public String toFormattedString() {
-        StringBuilder outputBuilder = new StringBuilder("[");
 
-
-        for (IIngredient[][] arr2D : requiredInput) {
-            outputBuilder.append("\n\t[");
-
-            for (IIngredient[] arr1D : arr2D) {
-                outputBuilder.append("\n\t\t[");
-                for (IIngredient ingredient : arr1D) {
-
-                    if (ingredient != null) {
-                        outputBuilder.append(ingredient.toCommandString());
-                    } else {
-                        outputBuilder.append("      null      ");
-                    }
-
-                    outputBuilder.append(", ");
-
-                }
-
-                // Delete the last ", "
-                outputBuilder.delete(outputBuilder.length() - 2, outputBuilder.length());
-
-                outputBuilder.append("],");
-
-            }
-            // Delete the last ","
-            outputBuilder.deleteCharAt(outputBuilder.length() - 1);
-
-            outputBuilder.append("\n\t],");
-        }
-        outputBuilder.append("\n]");
-
-        return outputBuilder.toString();
-    }
 
     public int getID() {
         return getRecipes().indexOf(this);
     }
 
     public int size() {
-        return getRequiredInput().length;
+        return getRequiredInput().getCubeSize();
     }
 
     public String toString() {

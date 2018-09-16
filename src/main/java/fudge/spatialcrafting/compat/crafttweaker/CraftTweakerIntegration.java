@@ -9,6 +9,7 @@ import crafttweaker.api.minecraft.CraftTweakerMC;
 import crafttweaker.mc1120.CraftTweaker;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
+import fudge.spatialcrafting.common.tile.util.RecipeInput;
 import net.minecraft.item.ItemStack;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
@@ -58,12 +59,12 @@ public final class CraftTweakerIntegration {
 
     // See above for why this exists
     private static class ActionAdd implements IAction {
-        private final IIngredient[][][] input;
+        private final RecipeInput input;
         private final IItemStack output;
 
 
         ActionAdd(IIngredient[][][] recipeInput, IItemStack recipeOutput) {
-            this.input = recipeInput;
+            this.input = RecipeInput.Companion.fromArr(recipeInput);
             this.output = recipeOutput;
         }
 

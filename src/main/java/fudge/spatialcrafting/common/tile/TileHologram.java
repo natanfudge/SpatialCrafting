@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
 
 public class TileHologram extends TileEntity {
 
-    //TODO turn 3d arrays into a 3DArray class
+    //TODO do a vwooooom animation for the holograms appeairng
 
     private static final String INVENTORY_NBT = "inventory";
     private static final String LAST_CHANGE_TIME_NBT = "lastChangeTime";
@@ -192,8 +192,7 @@ public class TileHologram extends TileEntity {
     private ItemStack getPreviouslyStoredGhostItem(){
         TileCrafter crafter = getCrafter();
         if(crafter.getRecipe() != null){
-            Offset offset = getOffset();
-            return RecipeUtil.getVisibleItemStack(crafter.getRecipe().getRequiredInput()[offset.getY()][offset.getX()][offset.getZ()]);
+            return RecipeUtil.getVisibleItemStack(crafter.getRecipe().getRequiredInput().get(getOffset()));
         }else{
             return ItemStack.EMPTY;
         }

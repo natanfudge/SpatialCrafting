@@ -28,7 +28,6 @@ public class PacketHandler {
         registerPacket(new PacketStopParticles.Handler(), PacketStopParticles.class, true);
         registerPacket(new PacketAttemptMultiblock.Handler(), PacketAttemptMultiblock.class, true);
         registerPacket(new PacketRemoveMasterBlock.Handler(), PacketRemoveMasterBlock.class, true);
-     //   registerPacket(new PacketUpdateOneSharedData.Handler(), PacketUpdateOneSharedData.class, true);
         registerPacket(new PacketRemoveTileEntity.Handler(), PacketRemoveTileEntity.class, true);
         registerPacket(new PacketDebugPrint.Handler(), PacketDebugPrint.class, true);
 

@@ -4,7 +4,7 @@ import fudge.spatialcrafting.client.tick.ClientTicker;
 import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.TileHologram;
-import fudge.spatialcrafting.common.util.ArrayUtil;
+import fudge.spatialcrafting.common.tile.util.CrafterPoses;
 import fudge.spatialcrafting.common.util.MathUtil;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.init.Items;
@@ -23,8 +23,6 @@ public class ParticleUtil {
     private static final String TICKER_ID = "ticker_particle_item_dust";
 
     public static void playCraftParticles(World world, BlockPos crafterPos) {
-
-
         TileCrafter crafter = Util.getTileEntity(world, crafterPos);
 
         int size = crafter.size();
@@ -35,9 +33,10 @@ public class ParticleUtil {
         // Send these particle every so often using a ticker
         ClientTicker.addTicker(ticksPassed -> {
 
-
             // Go through each hologram and send particles from it
-            ArrayUtil.innerForEach(crafter.getHolograms(), hologramPos -> {
+            crafter.getHolograms().forEach(hologramPos -> {
+
+
                 TileHologram hologramTile = Util.getTileEntity(world, hologramPos);
                 ItemStack itemStack = hologramTile.getStoredItem();
 
@@ -48,9 +47,9 @@ public class ParticleUtil {
 
                     Vec3d currentEndPos = crafter.centerOfHolograms();
 
-                    BlockPos[][] crafters = crafter.getCrafterBlocks();
+                    CrafterPoses crafters = crafter.getCrafterBlocks();
 
-                    double craftYEndPos = crafters[0][0].getY() + 1.5;
+                    double craftYEndPos =crafters.firstCrafter().getY() + 1.5;
 
 
                     if (durationTicks > getRelativeTicksPassed(ticksPassed, durationTicks, startPos, currentEndPos, craftYEndPos)) {
@@ -117,56 +116,5 @@ public class ParticleUtil {
         ClientTicker.stopTickers(TICKER_ID + tile.masterPos());
     }
 
-    /*class ParticleBuilder{
-        private final World world;
-        private final Vec3d startPos;
-        private Vec3d endPos;
-        private final int startTimeDelay;
-        private final int craftDuration;
-        private final int craftYEndPos;
-        private final ItemStack stack;
-
-        public ParticleBuilder(World world, Vec3d startPos, int startTimeDelay, int craftDuration, int craftYEndPos, ItemStack stack) {
-            this.world = world;
-            this.startPos = startPos;
-            this.startTimeDelay = startTimeDelay;
-            this.craftDuration = craftDuration;
-            this.craftYEndPos = craftYEndPos;
-            this.stack = stack;
-        }
-
-        public World getWorld() {
-            return world;
-        }
-
-        public Vec3d getStartPos() {
-            return startPos;
-        }
-
-        public Vec3d getEndPos() {
-            return endPos;
-        }
-
-        public void setEndPos(Vec3d endPos) {
-            this.endPos = endPos;
-        }
-
-        public int getStartTimeDelay() {
-            return startTimeDelay;
-        }
-
-        public int getCraftDuration() {
-            return craftDuration;
-        }
-
-        public int getCraftYEndPos() {
-            return craftYEndPos;
-        }
-
-        public ItemStack getStack() {
-            return stack;
-        }
-    }
-*/
 
 }

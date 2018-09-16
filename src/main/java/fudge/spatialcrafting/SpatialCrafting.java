@@ -1,12 +1,17 @@
 package fudge.spatialcrafting;
 
 
+import crafttweaker.api.item.IIngredient;
+import crafttweaker.mc1120.item.MCItemStack;
 import fudge.spatialcrafting.client.gui.SpatialCraftingTab;
 import fudge.spatialcrafting.common.command.Commands;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
+import fudge.spatialcrafting.common.tile.util.RecipeInput;
 import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.proxy.IProxy;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;

@@ -23,7 +23,7 @@ public class RecipeUtil {
     /**
      * A workaround to the fact that wildcard metadata itemstacks do not have a model
      */
-    public static ItemStack getVisibleItemStack(IIngredient ingredient){
+    public static ItemStack getVisibleItemStack(@Nullable IIngredient ingredient){
         ItemStack stack = CraftTweakerMC.getItemStack(ingredient);
 
         if(stack.getMetadata() != OreDictionary.WILDCARD_VALUE){

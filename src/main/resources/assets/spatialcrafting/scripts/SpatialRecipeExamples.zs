@@ -22,7 +22,7 @@ val ironBlock = <minecraft:iron_block>;
 val x4Crafter = <spatialcrafting:x4crafter_block>;
 
 # Recipe for the 4x4x4 crafter block
-mods.spatialcrafting.addRecipe([
+spatialcrafting.addRecipe([
 	[
 		[ironBlock, null, ironBlock],
 		[null, null, null],
@@ -47,7 +47,7 @@ val emerBlock = <minecraft:emerald_block>;
 val x5Crafter = <spatialcrafting:x5crafter_block>;
 
 # Recipe for the 5x5x5 crafter block
-mods.spatialcrafting.addRecipe([
+spatialcrafting.addRecipe([
 	[
 		[diamBlock, emerBlock, emerBlock,diamBlock],
 		[emerBlock, null, null, emerBlock],
