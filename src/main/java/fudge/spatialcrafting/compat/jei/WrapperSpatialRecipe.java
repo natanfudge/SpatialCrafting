@@ -1,13 +1,10 @@
 package fudge.spatialcrafting.compat.jei;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import crafttweaker.api.minecraft.CraftTweakerMC;
 import fudge.spatialcrafting.SpatialCrafting;
+import fudge.spatialcrafting.client.tick.ClientTicker;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
-import fudge.spatialcrafting.common.tile.util.RecipeInput;
-import fudge.spatialcrafting.common.util.ArrayUtil;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.common.util.MathUtil;
 import fudge.spatialcrafting.common.util.Util;
@@ -17,6 +14,8 @@ import fudge.spatialcrafting.network.server.PacketStartCraftingHelp;
 import fudge.spatialcrafting.network.server.PacketStopCraftingHelp;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IRecipeWrapper;
+import mezz.jei.gui.recipes.RecipeGuiLogic;
+import mezz.jei.ingredients.Ingredients;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
@@ -27,8 +26,10 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import static fudge.spatialcrafting.SpatialCrafting.MODID;
@@ -62,7 +63,6 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
         buttons = addButtons();
 
     }
-
 
 
     private List<JeiButton> addButtons() {
@@ -241,20 +241,8 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
 
     // Hacky category refreshing
     private void refreshCategory() {
-        try {
-            Class ingredients = Class.forName("mezz.jei.ingredients.Ingredients");
-            IIngredients iingredients = (IIngredients) ingredients.newInstance();
-            getIngredients(iingredients);
-            recipeCategory.setRecipe(null, this, iingredients);
-
-
-        } catch (ClassNotFoundException e) {
-            SpatialCrafting.LOGGER.error("The JEI ingredient class has not been found. This is probably because the name changed!");
-        } catch (IllegalAccessException | InstantiationException e) {
-            SpatialCrafting.LOGGER.error("Error while trying to create a JEI ingredient class");
-        }
-
-
+        // Need to do this with a second delay to not get a retarded CME
+        ClientTicker.scheduleAction(ScJeiPlugin.JEI_GUI::onStateChange, 1, "refresh");
     }
 
     @Override

@@ -139,7 +139,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
                     // Check if any recipe matches, if so, beginCraft the recipe.
                     for (SpatialRecipe recipe : SpatialRecipe.getRecipes()) {
                         if (recipe.matches(craftingInventory)) {
-                            beginCraft(world, pos);
+                            beginCraft(world, pos,recipe);
                         }
                     }
                 }
@@ -160,18 +160,19 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     //TODO make the dropped item allign better. maybe  float
 
 
-    private void beginCraft(World world, BlockPos pos) {
+    private void beginCraft(World world, BlockPos pos, SpatialRecipe recipe) {
 
         TileCrafter crafter = Util.getTileEntity(world, pos);
 
+        int durationTicks = recipe.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
+
         if (world.isRemote) {
-            ParticleUtil.playCraftParticles(world, pos);
+            ParticleUtil.playCraftParticles(world, pos,durationTicks);
         } else {
             // Normal sound can be done through the server
             world.playSound(null, pos, Sounds.CRAFT_START, SoundCategory.BLOCKS, 0.8f, 0.8f);
         }
 
-        int durationTicks = crafter.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
 
         crafter.scheduleCraft(world, durationTicks);
 

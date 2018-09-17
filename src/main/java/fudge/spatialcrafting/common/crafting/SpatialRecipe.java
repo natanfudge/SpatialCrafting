@@ -5,14 +5,14 @@ import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import crafttweaker.api.oredict.IOreDictEntry;
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.tile.util.Arr3D;
 import fudge.spatialcrafting.common.tile.util.CraftingInventory;
-import fudge.spatialcrafting.common.tile.util.CubeArr;
-import fudge.spatialcrafting.common.tile.util.RecipeInput;
 import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.oredict.OreDictionary;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -21,7 +21,10 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 import static fudge.spatialcrafting.SpatialCrafting.MODID;
 import static fudge.spatialcrafting.common.command.CommandAddSRecipe.RECIPES_FILE_NAME;
@@ -40,50 +43,51 @@ public class SpatialRecipe {
         this.output = recipeOutput;
     }
 
-    public String toFormattedString(){
+    public String toFormattedString() {
         return getRequiredInput().toFormattedString() + ",\t" + CraftTweakerIntegration.itemStackToCTString(output);
     }
 
     @Nullable
     public static SpatialRecipe getRecipeFromItemStacks(CraftingInventory itemStackInput, ItemStack output, RecipeAddition recipeAddition) {
         // Convert ItemStack array to IIngredient array
-        RecipeInput ingredientInput = new RecipeInput(itemStackInput.getCubeSize(),
-                (i, j, k) -> {
-                    ItemStack requiredInputToAddIS = itemStackInput.get(i, j, k);
-                    if (requiredInputToAddIS.isEmpty()) return null;
-                    IIngredient requiredInputToAdd = null;
+        RecipeInput ingredientInput = new RecipeInput(itemStackInput.getCubeSize(), (i, j, k) -> {
+            ItemStack requiredInputToAddIS = itemStackInput.get(i, j, k);
+            if (requiredInputToAddIS.isEmpty()) return null;
 
-                    switch (recipeAddition) {
-                        case OREDICT:
-                            List<IOreDictEntry> matchingOreDicts = CraftTweakerMC.getIItemStack(requiredInputToAddIS).getOres();
-                            // Too many oredicts, can't process this addition.
-                            if (matchingOreDicts.size() > 1) {
-                                return null;
-                            }
-                            if (matchingOreDicts.size() == 1) {
-                                requiredInputToAdd = matchingOreDicts.get(0);
-                                break;
-                            }
-                            // If there are no matching oredicts then it will treat it as "EXACT" meaning only a the very specific item will be accepted.
-                        case EXACT:
-                            requiredInputToAdd = CraftTweakerMC.getIItemStack(requiredInputToAddIS);
-                            break;
-                        // Wildcard = we accept any metadata
-                        case WILDCARD:
-                            int count = requiredInputToAddIS.getCount();
-                            int meta;
-                            if (requiredInputToAddIS.getHasSubtypes()) {
-                                meta = OreDictionary.WILDCARD_VALUE;
-                            } else {
-                                meta = 0;
-                            }
-                            requiredInputToAdd = CraftTweakerMC.getIItemStack(new ItemStack(requiredInputToAddIS.getItem(), count, meta));
-                            break;
-
+            switch (recipeAddition) {
+                case OREDICT:
+                    List<IOreDictEntry> matchingOreDicts = CraftTweakerMC.getIItemStack(requiredInputToAddIS).getOres();
+                    // Too many oredicts, can't process this addition.
+                    if (matchingOreDicts.size() > 1) {
+                        return null;
+                    }
+                    if (matchingOreDicts.size() == 1) {
+                        return matchingOreDicts.get(0);
+                    }
+                    // If there are no matching oredicts then it will treat it as "EXACT" meaning only a the very specific item will be accepted.
+                case EXACT:
+                    return CraftTweakerMC.getIItemStack(requiredInputToAddIS);
+                // Wildcard = we accept any metadata
+                case WILDCARD:
+                    int count = requiredInputToAddIS.getCount();
+                    int meta;
+                    if (requiredInputToAddIS.getHasSubtypes()) {
+                        meta = OreDictionary.WILDCARD_VALUE;
+                    } else {
+                        meta = 0;
                     }
 
-                    return requiredInputToAdd;
-                });
+                    // Fix up the itemStack
+                    ItemStack properMetaStack = new ItemStack(requiredInputToAddIS.getItem(), count, meta);
+                    properMetaStack.setTagCompound(requiredInputToAddIS.getTagCompound());
+
+
+                    return CraftTweakerMC.getIItemStack(properMetaStack);
+            }
+
+            throw new RuntimeException("This should never happen!");
+
+        });
 
         return new SpatialRecipe(ingredientInput, output);
 
@@ -116,8 +120,8 @@ public class SpatialRecipe {
 
             // If the input is the same it means there is some kind of conflict.
             // "newIng.contains(oldIng) || oldIng.contains(newIng)" insures the recipes intersect
-            if(newRecipe.requiredInput.equalsDifSize(existingRecipe.requiredInput,
-                    (newIng, oldIng) -> newIng.contains(oldIng) || oldIng.contains(newIng))){
+            if (newRecipe.requiredInput.equalsDifSize(existingRecipe.requiredInput,
+                    (newIng, oldIng) -> newIng.contains(oldIng) || oldIng.contains(newIng))) {
 
                 // Same input same output
                 if (itemStackEquals(newRecipe.output, existingRecipe.output)) {
@@ -148,9 +152,19 @@ public class SpatialRecipe {
         }
     }
 
-    //TODO fix the fact that you can't put potions etc in
     private static boolean itemStackEquals(ItemStack stack1, ItemStack stack2) {
         return stack1.getItem().equals(stack2.getItem()) && stack1.getCount() == stack2.getCount();
+    }
+
+    public void toBytes(ByteBuf buf) {
+        ByteBufUtils.writeTag(buf, requiredInput.toNBT(new NBTTagCompound()));
+        ByteBufUtils.writeItemStack(buf, getOutput());
+    }
+
+    public static SpatialRecipe fromBytes(ByteBuf buf) {
+        RecipeInput input = RecipeInput.Companion.fromNBT(Objects.requireNonNull(ByteBufUtils.readTag(buf)));
+        ItemStack output = ByteBufUtils.readItemStack(buf);
+        return new SpatialRecipe(input, output);
     }
 
     /**

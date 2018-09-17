@@ -22,13 +22,8 @@ public class ParticleUtil {
     private static final int TICKS_BETWEEN_PARTICLES = (int) (0.1f * TICKS_PER_SECOND);
     private static final String TICKER_ID = "ticker_particle_item_dust";
 
-    public static void playCraftParticles(World world, BlockPos crafterPos) {
+    public static void playCraftParticles(World world, BlockPos crafterPos, int durationTicks) {
         TileCrafter crafter = Util.getTileEntity(world, crafterPos);
-
-        int size = crafter.size();
-
-
-        int durationTicks = size * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
 
         // Send these particle every so often using a ticker
         ClientTicker.addTicker(ticksPassed -> {

@@ -13,7 +13,7 @@ spatialcrafting.addRecipe([
 	[
 		[x2Crafter, x2Crafter],
 		[x2Crafter, x2Crafter]
-	],
+	]
 ],	x3Crafter * 9);
 
 
@@ -37,7 +37,7 @@ spatialcrafting.addRecipe([
 		[x3Crafter, x3Crafter, x3Crafter],
 		[x3Crafter, x3Crafter, x3Crafter],
 		[x3Crafter, x3Crafter, x3Crafter]
-	],
+	]
 ],	x4Crafter * 16);
 
 
@@ -71,7 +71,7 @@ spatialcrafting.addRecipe([
 		[x4Crafter, x4Crafter, x4Crafter, x4Crafter],
 		[x4Crafter, x4Crafter, x4Crafter, x4Crafter],
 		[x4Crafter, x4Crafter, x4Crafter, x4Crafter]
-	],
+	]
 ],	x5Crafter * 25);
 
 

@@ -7,9 +7,16 @@ import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import mezz.jei.api.*;
 import mezz.jei.api.ingredients.IModIngredientRegistration;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
+import mezz.jei.gui.recipes.IRecipeGuiLogic;
+import mezz.jei.gui.recipes.RecipeGuiLogic;
+import mezz.jei.gui.recipes.RecipesGui;
+import mezz.jei.startup.ModRegistry;
 import net.minecraft.item.ItemStack;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -41,6 +48,8 @@ public class ScJeiPlugin implements IModPlugin {
 
     }
 
+    //TODO make adding recipes update jei
+
     @Override
     public void register(IModRegistry registry) {
         for (int i = 2; i <= 5; i++) {
@@ -55,13 +64,28 @@ public class ScJeiPlugin implements IModPlugin {
 
         }
 
+        // Cache for later use
+        MOD_REGISTRY = registry;
+
 
     }
+
+    public static void addRecipe(SpatialRecipe recipe){
+        MOD_REGISTRY.addRecipes(Collections.singletonList(recipe), SpatialCrafting.MODID + recipe.size());
+    }
+
+    public static RecipesGui JEI_GUI;
+    public static IModRegistry MOD_REGISTRY;
 
 
     @Override
     public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
-        // No runtime actions needed
+        // Kidnap gui for nefarius uses
+        JEI_GUI = (RecipesGui) jeiRuntime.getRecipesGui();
+
+
+
+
     }
 
 }

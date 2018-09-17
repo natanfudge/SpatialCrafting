@@ -93,7 +93,7 @@ public class TileCrafter extends TileEntity implements ITickable {
             //If this is the correct layer and it is in bounds then check if this hologram is required for the recipe, otherwise false.
             if ((layerToActivate == ACTIVATE_ALL || layerToActivate == i) && i < recipeSize && j < recipeSize && k < recipeSize) {
                 // if the recipe is null there then it should not be activated.
-                return !isHelpActive();
+                return getRecipe().getRequiredInput().get(i, j, k) != null || !isHelpActive();
             } else {
                 return false;
             }
@@ -327,8 +327,8 @@ public class TileCrafter extends TileEntity implements ITickable {
         int size = size();
         CrafterPoses crafters = getCrafterBlocks();
 
-        CubeArr arr = new CubeArr<>(size, (i, j, k) -> crafters.get(j, k).add(0, i + 1, 0));
-        return arr;
+
+        return new CubeArr<>(size, (i, j, k) -> crafters.get(j, k).add(0, i + 1, 0));
 
     }
 

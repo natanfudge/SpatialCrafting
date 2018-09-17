@@ -24,7 +24,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nullable;
@@ -146,7 +145,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
             // Inputs the held item into the hologram / takes it out of the hologram and gives it back to the player
 
             if (heldItem.isEmpty()) {
-                extractItem(world, player, crafter, hologramTile);
+                giveStoredItemToPlayer(world, player, crafter, hologramTile);
 
                 // If there was nothing in there, so we should put an item in there in the case that the player is holding an item.
             } else {
@@ -177,7 +176,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
     }
 
 
-    private void extractItem(World world, EntityPlayer player, TileCrafter crafter, TileHologram hologram) {
+    private void giveStoredItemToPlayer(World world, EntityPlayer player, TileCrafter crafter, TileHologram hologram) {
         // Take item out of the hologram
         ItemStack extractedItemStack = hologram.extractItem(MCConstants.NORMAL_ITEMSTACK_LIMIT);
         ItemHandlerHelper.giveItemToPlayer(player, extractedItemStack);
@@ -202,7 +201,7 @@ public class BlockHologram extends BlockTileEntity<TileHologram> {
         TileCrafter crafter = hologramTile.getCrafter();
 
         if (!player.isSneaking()) {
-            extractItem(world, player, crafter, hologramTile);
+            giveStoredItemToPlayer(world, player, crafter, hologramTile);
         }
     }
 

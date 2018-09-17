@@ -1,12 +1,11 @@
 buildscript {
-    ext.kotlin_version = '1.2.61'
     repositories {
         jcenter()
         maven { url = "http://files.minecraftforge.net/maven" }
     }
     dependencies {
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.70"
     }
 }
 plugins {
@@ -14,8 +13,6 @@ plugins {
     id 'net.ltgt.apt' version '0.10'
 }
 
-plugins {
-}
 apply plugin: 'net.minecraftforge.gradle.forge'
 apply plugin: 'kotlin'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
@@ -36,7 +33,7 @@ minecraft {
     runDir = "run"
 
     // snapshot_YYYYMMDD   snapshot are built nightly.
-    mappings = "snapshot_20180814"
+    mappings = "stable_39"
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
@@ -67,28 +64,45 @@ repositories{
 
 dependencies {
 
+
+
     def mc_version = "1.12.2"
 
     def jei_version ="4.11.0.212"
 
     // compile against the JEI API but do not include it at runtime
+
     deobfProvided "mezz.jei:jei_${mc_version}:${jei_version}:api"
     // at runtime, use the full JEI jar
     runtime "mezz.jei:jei_${mc_version}:${jei_version}"
+
+    compileOnly "mezz.jei:jei_${mc_version}:${jei_version}"
 
     // Compile only since crafttweaker is a faggot
     compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.8.468"
 
     compile group: 'org.jetbrains', name: 'annotations', version: '13.0'
 
-    //compile group:"com.googlecode.soundlibs", name:"mp3spi",version:"1.9.5-1"
-
     compileOnly 'org.projectlombok:lombok:1.18.2'
 
     apt "org.projectlombok:lombok:1.18.2"
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    compile 'junit:junit:4.12'
 
 
+    compile "org.jetbrains.kotlin:kotlin-stdlib:1.2.70"
+
+
+
+
+
+}
+
+idea {
+    module {
+        sourceDirs -= file('src/main')
+        testSourceDirs += file('src/test')
+    }
 }
 
 

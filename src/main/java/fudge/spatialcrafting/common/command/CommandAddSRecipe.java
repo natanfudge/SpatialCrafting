@@ -7,13 +7,10 @@ import fudge.spatialcrafting.common.crafting.RecipeAddition;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.util.CraftingInventory;
-import fudge.spatialcrafting.common.util.ArrayUtil;
 import fudge.spatialcrafting.common.util.CrafterUtil;
-import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumHand;
@@ -134,7 +131,7 @@ public class CommandAddSRecipe extends SCCommand {
 
             if (crafter != null) {
 
-                CraftingInventory input= crafter.getHologramInvArr();
+                CraftingInventory input = crafter.getHologramInvArr();
 
                 if (isValidRecipe(input, output, player)) {
 

@@ -73,8 +73,8 @@ public class CategorySpatialRecipe implements IRecipeCategory<WrapperSpatialReci
         // Display the inputs
         final int DISTANCE_BETWEEN_ITEMS = 18;
 
-        for (int i = 0; i < recipeSize; ++i) {
-            for (int j = 0; j < recipeSize; ++j) {
+        for (int i = 0; i < recipeSize; i++) {
+            for (int j = 0; j < recipeSize; j++) {
                 int index = j + (i * recipeSize);
 
                 final int ITEMS_X_OFFSET = 18;
@@ -85,7 +85,7 @@ public class CategorySpatialRecipe implements IRecipeCategory<WrapperSpatialReci
         final List<Integer> X_OFFSETS = ImmutableList.of(0, 0, 94, 112, 136, 154);
         final int yPosition = 18 * (recipeSize - 1) / 2;
         //Display the output
-        guiItemStacks.init(recipeSize * recipeSize + 1, false, X_OFFSETS.get(recipeSize), yPosition);
+       guiItemStacks.init(recipeSize * recipeSize + 1, false, X_OFFSETS.get(recipeSize), yPosition);
 
 
         guiItemStacks.set(ingredients);

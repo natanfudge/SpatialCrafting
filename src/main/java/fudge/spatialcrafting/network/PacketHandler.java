@@ -30,6 +30,7 @@ public class PacketHandler {
         registerPacket(new PacketRemoveMasterBlock.Handler(), PacketRemoveMasterBlock.class, true);
         registerPacket(new PacketRemoveTileEntity.Handler(), PacketRemoveTileEntity.class, true);
         registerPacket(new PacketDebugPrint.Handler(), PacketDebugPrint.class, true);
+        registerPacket(new PacketAddRecipeToJei.Handler(), PacketAddRecipeToJei.class, true);
 
         registerPacket(new PacketStartCraftingHelp.Handler(), PacketStartCraftingHelp.class, false);
         registerPacket(new PacketSetActiveLayer.Handler(), PacketSetActiveLayer.class, false);

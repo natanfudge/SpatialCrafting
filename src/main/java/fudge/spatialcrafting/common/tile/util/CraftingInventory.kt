@@ -18,6 +18,7 @@ class CraftingInventory(size: Int, init: (Int, Int, Int) -> ItemStack) : CubeArr
 
     }*/
 
+
     override fun isEmpty(): Boolean {
         forEach { if (it != ItemStack.EMPTY) return false }
 

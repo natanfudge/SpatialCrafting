@@ -1,17 +1,13 @@
 package fudge.spatialcrafting;
 
 
-import crafttweaker.api.item.IIngredient;
-import crafttweaker.mc1120.item.MCItemStack;
 import fudge.spatialcrafting.client.gui.SpatialCraftingTab;
 import fudge.spatialcrafting.common.command.Commands;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
-import fudge.spatialcrafting.common.tile.util.RecipeInput;
 import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
+import fudge.spatialcrafting.debug.test.Test;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.proxy.IProxy;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -36,6 +32,7 @@ public class SpatialCrafting {
     private static final String SERVER_PROXY_PATH = "fudge.spatialcrafting.proxy.ServerProxy";
     private static final String CLIENT_PROXY_PATH = "fudge.spatialcrafting.proxy.ClientProxy";
     private static final boolean DEBUG_ACTIVE = true;
+    private static final boolean TEST_ACTIVE = true;
 
     @Mod.Instance(MODID)
     private static SpatialCrafting instance;
@@ -73,6 +70,8 @@ public class SpatialCrafting {
         registerTileEntities();
 
         proxy.init();
+
+       // if(TEST_ACTIVE) Test.Companion.testInit();
 
     }
 

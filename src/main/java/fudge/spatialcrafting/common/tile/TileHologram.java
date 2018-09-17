@@ -191,6 +191,7 @@ public class TileHologram extends TileEntity {
 
     private ItemStack getPreviouslyStoredGhostItem(){
         TileCrafter crafter = getCrafter();
+
         if(crafter.getRecipe() != null){
             return RecipeUtil.getVisibleItemStack(crafter.getRecipe().getRequiredInput().get(getOffset()));
         }else{

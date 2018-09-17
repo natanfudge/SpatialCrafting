@@ -8,8 +8,8 @@ import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import crafttweaker.mc1120.CraftTweaker;
 import fudge.spatialcrafting.SpatialCrafting;
+import fudge.spatialcrafting.common.crafting.RecipeInput;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
-import fudge.spatialcrafting.common.tile.util.RecipeInput;
 import net.minecraft.item.ItemStack;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
@@ -39,6 +39,11 @@ public final class CraftTweakerIntegration {
 
 
     }
+   /*
+    @ZenMethod
+    public static void addRecipe(IIngredient[][][] input, IPotion output){
+
+    }*/
 
     public static String itemStackToCTString(ItemStack itemStack) {
         String output = "<" + itemStack.getItem().getRegistryName();
@@ -75,6 +80,7 @@ public final class CraftTweakerIntegration {
             //TODO IngredientConditions
             //TODO transfomers
             //TODO make it so you can control the crafting time
+            //TODO recipeBuilder
 
 
             SpatialRecipe recipe = new SpatialRecipe(input, CraftTweakerMC.getItemStack(output));

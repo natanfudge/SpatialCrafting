@@ -1,5 +1,6 @@
 package fudge.spatialcrafting.common.tile.util
 
+import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -43,8 +44,30 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
 
     }
 
+    override fun toString(): String {
+        val builder = StringBuilder("{")
+        for(arr2D in wrappedArray){
+            builder.append("{")
+            for(arr1D in arr2D){
+                builder.append("{")
+                for(element in arr1D){
+                    builder.append("$element ,")
+                }
+                builder.removeSuffix(" ,")
+                builder.append("}, ")
+            }
+            builder.removeSuffix(" ,")
+            builder.append("},")
+        }
+        builder.removeSuffix(" ,")
+        builder.append("}")
 
-    operator fun get(height: Int, row: Int, col: Int): T  = wrappedArray[height][row][col]
+        return builder.toString()
+
+    }
+
+
+    open operator fun get(height: Int, row: Int, col: Int): T  = wrappedArray[height][row][col]
 
     private operator fun get(coords: ArrCoords): T  = get(coords.height, coords.row, coords.col)
 
@@ -89,9 +112,9 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
     }
 
 
-    private fun areaIsNull(areaOfArr: Array<*>): Boolean {
+    private fun areaIsNull(areaOfArr: ArrayList<*>): Boolean {
         for (element in areaOfArr) {
-            if (element is Array<*>) {
+            if (element is ArrayList<*>) {
                 for (innerElement in element) {
                     if (innerElement != null) return false
                 }
@@ -104,24 +127,24 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
     }
 
 
-    private inline fun <T1, T2> validate2DBounds(i: Int, arr1: Arr3D<T1>, arr2: Arr3D<T2>, continuer: () -> Unit, returner: (() -> Boolean)) {
+    private inline fun <T1, T2> validate2DBounds(i: Int, arr1: Arr3D<T1>, arr2: Arr3D<T2>, pairIsValid: () -> Unit, returnFalse: (() -> Boolean)) {
         if (i >= arr1.height) {
-            if (areaIsNull(arr2.wrappedArray[i].toArray())) continuer()  // This is fine, this area counts as equal
-            else returner() // Out of bounds and in the other exists something that is not null, then it does not count as equal.
+            if (areaIsNull(arr2.wrappedArray[i])) pairIsValid()  // This is fine, this area counts as equal
+            else returnFalse() // Out of bounds and in the other exists something that is not null, then it does not count as equal.
         }
     }
 
-    private inline fun <T1, T2> validate1DBounds(i: Int, j: Int, arr1: Arr3D<T1>, arr2: Arr3D<T2>, continuer: () -> Unit, returner: (() -> Boolean)) {
+    private inline fun <T1, T2> validate1DBounds(i: Int, j: Int, arr1: Arr3D<T1>, arr2: Arr3D<T2>, pairIsValid: () -> Unit, returnFalse: (() -> Boolean)) {
         if (j >= arr1.length) {
-            if (areaIsNull(arr2.wrappedArray[i][j].toArray())) continuer()  // This is fine, this area counts as equal
-            else returner() // Out of bounds and in the other exists something that is not null, then it does not count as equal.
+            if (areaIsNull(arr2.wrappedArray[i][j])) pairIsValid()  // This is fine, this area counts as equal
+            else returnFalse() // Out of bounds and in the other exists something that is not null, then it does not count as equal.
         }
     }
 
-    private inline fun <T1, T2> validateBounds(i: Int, j: Int, k: Int, arr1: Arr3D<T1>, arr2: Arr3D<T2>, continuer: () -> Unit, returner: (() -> Boolean)) {
+    private inline fun <T1, T2> validateBounds(i: Int, j: Int, k: Int, arr1: Arr3D<T1>, arr2: Arr3D<T2>, pairIsValid: () -> Unit, returnFalse: (() -> Boolean)) {
         if (k >= arr1.width) {
-            if (arr2[i, j, k] == null) continuer()
-            else returner()
+            if (arr2[i, j, k] == null) pairIsValid()
+            else returnFalse()
         }
     }
 
@@ -134,6 +157,9 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
      */
     @JvmOverloads
     fun <T2> equalsDifSize(other: Arr3D<T2>, tester: (element1: T, element2: T2) -> Boolean = { e1, e2 -> e1 == e2 }): Boolean {
+
+        val thisS = this.toString()
+        val otherS = other.toString()
 
         (0..(Math.max(this.height, other.height) - 1)).forEach heightLoop@{ i ->
 
