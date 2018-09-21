@@ -2,7 +2,7 @@ package fudge.spatialcrafting.common.command;
 
 import com.google.common.collect.Lists;
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.MCConstants;
+import fudge.spatialcrafting.common.util.MCConstants;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -18,9 +18,10 @@ public class Commands extends CommandBase {
 
     public Commands() {
         commandList.add(new CommandAddSRecipe());
-        commandList.add(new CommandHelp());
         commandList.add(new CommandDebug());
+        commandList.add(new CommandHelp());
         commandList.add(new CommandLayer());
+        commandList.add(new CommandTest());
     }
 
     public static List<SCCommand> getCommandList() {

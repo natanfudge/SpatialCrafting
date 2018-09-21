@@ -11,8 +11,11 @@ public class CraftersData extends SharedData {
 
     private static final String CRAFT_TIME_NBT = "craftTime";
     private static final String RECIPE_ID_NBT = "recipeID";
+    private static final String ACTIVE_LAYER_NBT = "activeLayer";
     private static final int NULL_RECIPE = -1;
     private long craftEndTime;
+    private byte activeLayer;
+
     @Nullable
     private SpatialRecipe currentHelpRecipe;
 
@@ -33,6 +36,14 @@ public class CraftersData extends SharedData {
         this.craftEndTime = lastChangeTime;
     }
 
+    public byte getActiveLayer() {
+        return activeLayer;
+    }
+
+    public void setActiveLayer(byte activeLayer) {
+        this.activeLayer = activeLayer;
+    }
+
     @Nullable
     public SpatialRecipe getRecipe() {
         return currentHelpRecipe;
@@ -50,6 +61,7 @@ public class CraftersData extends SharedData {
         } else {
             existingData.setInteger(RECIPE_ID_NBT, currentHelpRecipe.getID());
         }
+        existingData.setLong(ACTIVE_LAYER_NBT, activeLayer);
         return existingData;
     }
 
@@ -63,6 +75,8 @@ public class CraftersData extends SharedData {
         } else {
             currentHelpRecipe = SpatialRecipe.fromID(recipeId);
         }
+
+        activeLayer = serializedData.getByte(ACTIVE_LAYER_NBT);
     }
 
 

@@ -1,9 +1,9 @@
 package fudge.spatialcrafting.common.command;
 
 import com.google.common.collect.ImmutableList;
-import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.CrafterUtil;
+import fudge.spatialcrafting.common.util.MCConstants;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -65,7 +65,7 @@ public class CommandLayer extends SCCommand {
                 return;
             }
 
-            crafter.setActiveHolograms(layer - 1);
+            crafter.setActiveLayer(layer - 1);
 
 
         } else {

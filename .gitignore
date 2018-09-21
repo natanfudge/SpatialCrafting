@@ -1,5 +1,5 @@
 /*
-!/main/
+!/src/main/
 !.gitignore
 !gradlew*
 !/gradle/
@@ -11,3 +11,4 @@
 !.gitattributes
 !scripts
 !ASSETS_LICENSE.txt
+

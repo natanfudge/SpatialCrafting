@@ -3,7 +3,6 @@ package fudge.spatialcrafting.network.client;
 import fudge.spatialcrafting.common.block.BlockCrafter;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.network.PacketBlockPos;
-import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.BlockPos;
@@ -18,8 +17,9 @@ import javax.annotation.Nullable;
 
 
 // Packet from server to client
-@NoArgsConstructor
 public class PacketAttemptMultiblock extends PacketBlockPos {
+
+    public PacketAttemptMultiblock() {}
 
     public PacketAttemptMultiblock(BlockPos crafterPos) {
         super(crafterPos);

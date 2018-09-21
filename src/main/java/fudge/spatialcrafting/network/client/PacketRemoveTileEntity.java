@@ -1,7 +1,6 @@
 package fudge.spatialcrafting.network.client;
 
 import fudge.spatialcrafting.network.PacketBlockPos;
-import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -13,8 +12,9 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
 
-@NoArgsConstructor
 public class PacketRemoveTileEntity extends PacketBlockPos {
+
+    public PacketRemoveTileEntity() {}
 
     public PacketRemoveTileEntity(BlockPos tilePos) {
         super(tilePos);

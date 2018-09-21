@@ -2,10 +2,9 @@ package fudge.spatialcrafting.common.block;
 
 import com.google.common.collect.ImmutableList;
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.TileHologram;
-import lombok.experimental.UtilityClass;
+import fudge.spatialcrafting.common.util.MCConstants;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -23,7 +22,6 @@ import static net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
 @ObjectHolder(SpatialCrafting.MODID)
 @Mod.EventBusSubscriber
 public final class SCBlocks {
-
 
     @ObjectHolder(RegistryNames.HOLOGRAM)
     public static final BlockHologram HOLOGRAM = objectHolder();
@@ -80,20 +78,25 @@ public final class SCBlocks {
         blockList.forEach(registry::register);
     }
 
+
+/*    public static void registerForTests(IForgeRegistry<Block> registry){
+        blockList.forEach(registry::register);
+    }*/
+
     @SubscribeEvent
     public static void registerItemBlocks(RegistryEvent.Register<Item> event) {
         IForgeRegistry<Item> registry = event.getRegistry();
         blockList.forEach(block -> registry.register(new ItemBlock(block).setRegistryName(block.getRegistryName())));
     }
 
-    @UtilityClass
-    public static class RegistryNames {
+    public static final class RegistryNames {
 
         public static final String HOLOGRAM = "hologram";
         public static final String X2CRAFTER_BLOCK = "x2crafter_block";
         public static final String X3CRAFTER_BLOCK = "x3crafter_block";
         public static final String X4CRAFTER_BLOCK = "x4crafter_block";
         public static final String X5CRAFTER_BLOCK = "x5crafter_block";
+        private RegistryNames() {}
 
 
     }

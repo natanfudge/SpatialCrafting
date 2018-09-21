@@ -2,6 +2,7 @@ package fudge.spatialcrafting.common.crafting;
 
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.api.item.IIngredient;
+import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import crafttweaker.api.oredict.IOreDictEntry;
 import fudge.spatialcrafting.SpatialCrafting;
@@ -43,10 +44,6 @@ public class SpatialRecipe {
         this.output = recipeOutput;
     }
 
-    public String toFormattedString() {
-        return getRequiredInput().toFormattedString() + ",\t" + CraftTweakerIntegration.itemStackToCTString(output);
-    }
-
     @Nullable
     public static SpatialRecipe getRecipeFromItemStacks(CraftingInventory itemStackInput, ItemStack output, RecipeAddition recipeAddition) {
         // Convert ItemStack array to IIngredient array
@@ -81,6 +78,7 @@ public class SpatialRecipe {
                     ItemStack properMetaStack = new ItemStack(requiredInputToAddIS.getItem(), count, meta);
                     properMetaStack.setTagCompound(requiredInputToAddIS.getTagCompound());
 
+                    IItemStack stack = CraftTweakerMC.getIItemStack(properMetaStack);
 
                     return CraftTweakerMC.getIItemStack(properMetaStack);
             }
@@ -112,7 +110,6 @@ public class SpatialRecipe {
     public static void addRecipe(SpatialRecipe recipe) {
         recipeList.add(recipe);
     }
-
 
     public static boolean noRecipeConflict(SpatialRecipe newRecipe, @Nullable ICommandSender sender) {
 
@@ -154,11 +151,6 @@ public class SpatialRecipe {
 
     private static boolean itemStackEquals(ItemStack stack1, ItemStack stack2) {
         return stack1.getItem().equals(stack2.getItem()) && stack1.getCount() == stack2.getCount();
-    }
-
-    public void toBytes(ByteBuf buf) {
-        ByteBufUtils.writeTag(buf, requiredInput.toNBT(new NBTTagCompound()));
-        ByteBufUtils.writeItemStack(buf, getOutput());
     }
 
     public static SpatialRecipe fromBytes(ByteBuf buf) {
@@ -225,6 +217,15 @@ public class SpatialRecipe {
 
     public static SpatialRecipe fromID(int ID) {
         return getRecipes().get(ID);
+    }
+
+    public String toFormattedString() {
+        return getRequiredInput().toFormattedString() + ",\t" + CraftTweakerIntegration.itemStackToCTString(output);
+    }
+
+    public void toBytes(ByteBuf buf) {
+        ByteBufUtils.writeTag(buf, requiredInput.writeToNBT(new NBTTagCompound()));
+        ByteBufUtils.writeItemStack(buf, getOutput());
     }
 
     public RecipeInput getRequiredInput() {

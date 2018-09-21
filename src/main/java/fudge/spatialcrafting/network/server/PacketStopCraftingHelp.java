@@ -3,7 +3,6 @@ package fudge.spatialcrafting.network.server;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.network.PacketBlockPos;
-import lombok.NoArgsConstructor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -12,8 +11,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import javax.annotation.Nullable;
 
-@NoArgsConstructor
 public class PacketStopCraftingHelp extends PacketBlockPos {
+
+    public PacketStopCraftingHelp() {}
 
 
     public PacketStopCraftingHelp(BlockPos playerPos) {

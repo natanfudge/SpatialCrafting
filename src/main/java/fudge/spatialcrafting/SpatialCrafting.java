@@ -32,7 +32,8 @@ public class SpatialCrafting {
     private static final String SERVER_PROXY_PATH = "fudge.spatialcrafting.proxy.ServerProxy";
     private static final String CLIENT_PROXY_PATH = "fudge.spatialcrafting.proxy.ClientProxy";
     private static final boolean DEBUG_ACTIVE = true;
-    private static final boolean TEST_ACTIVE = true;
+    private static final boolean TEST_ACTIVE = false;
+
 
     @Mod.Instance(MODID)
     private static SpatialCrafting instance;
@@ -62,6 +63,9 @@ public class SpatialCrafting {
         proxy.preInit();
         SpatialRecipe.preInit();
 
+        if (TEST_ACTIVE) Test.INSTANCE.testInit();
+
+
     }
 
     @Mod.EventHandler
@@ -71,7 +75,6 @@ public class SpatialCrafting {
 
         proxy.init();
 
-       // if(TEST_ACTIVE) Test.Companion.testInit();
 
     }
 

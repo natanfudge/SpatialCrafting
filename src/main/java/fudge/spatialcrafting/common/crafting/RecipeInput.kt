@@ -1,145 +1,132 @@
 package fudge.spatialcrafting.common.crafting
 
+import crafttweaker.CraftTweakerAPI
 import crafttweaker.api.item.IIngredient
+import crafttweaker.api.item.IItemStack
 import crafttweaker.api.minecraft.CraftTweakerMC
-import fudge.spatialcrafting.common.crafting.RecipeInput.Companion.EMPTY
+import crafttweaker.api.oredict.IOreDictEntry
 import fudge.spatialcrafting.common.tile.util.CubeArr
 import fudge.spatialcrafting.common.tile.util.Offset
-import net.minecraft.item.Item
+import fudge.spatialcrafting.debug.test.properlyEquals
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.*
+import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.NBTTagList
 import net.minecraftforge.common.util.Constants
-import kotlin.collections.ArrayList
+import net.minecraftforge.oredict.OreDictionary
 
-fun IIngredient.getTag() : NBTTagList{
+fun IIngredient.toNbt(): NBTTagList {
     val tags = NBTTagList()
 
-    this.items.forEach{tags.appendTag(CraftTweakerMC.getItemStack(it).toNBTTagList())}
+    this.items.forEach {
+        val stack = CraftTweakerMC.getItemStack(it)
+        tags.appendTag(stack.writeToNBT(NBTTagCompound()))
+    }
     return tags
 
 }
 
-fun ingredientFromTag(serializedData: NBTTagList) : IIngredient{
-    val list = ArrayList<ArrayList<ItemStack>>(serializedData.tagCount())
+fun List<ItemStack>.properlyEquals(other: List<Any?>): Boolean {
+    if (other.size != this.size) return false
+    for (stackIndex in this.indices) {
+        if (!this[stackIndex].properlyEquals(other[stackIndex])) return false
+    }
 
-    for(nbtListElement in serializedData){
-        val nbtList = nbtListElement as NBTTagList
-        val itemstacks = ArrayList<ItemStack>(nbtList.tagCount())
-        list.add(itemstacks)
-        for(nbt in nbtList){
-            itemstacks.add(itemStackFromTag(nbt as NBTTagList))
+    return true
+}
+
+
+fun ingredientFromNbt(serializedData: NBTTagList): IIngredient? {
+    val list = ArrayList<ItemStack>(serializedData.tagCount())
+
+    for (nbtTagElement in serializedData) {
+        val serializedItemStack = nbtTagElement as NBTTagCompound
+        val itemStack = ItemStack(serializedItemStack)
+        list.add(itemStack)
+    }
+
+    val x = 2
+
+    return when {
+        list.size == 0 -> null
+        list.size == 1 -> {
+            /*val ingredient =*/ CraftTweakerMC.getIIngredient(list[0])
+            //if(ingredient is IItemStack && ingredient.metadata == OreDictionary.WILDCARD_VALUE)
+        }
+        else -> getOreDictEntryFromList(list)
+    }
+
+}
+
+fun getOreDictEntryFromList(list: List<*>): IOreDictEntry? {
+    for (ore in OreDictionary.getOreNames()) {
+        if (OreDictionary.getOres(ore).properlyEquals(list)) {
+            return CraftTweakerAPI.oreDict.get(ore)
         }
     }
-
-    return  CraftTweakerMC.getIIngredient(list)
+    return null
 }
-
-fun itemStackFromTag(serializedData : NBTTagList) : ItemStack{
-    var i = 0
-
-    fun next() = i++
-
-    val id = (serializedData.get(next()) as NBTTagInt).int
-
-    if (id == EMPTY.toInt()) {
-        return ItemStack.EMPTY
-    } else {
-        val count = (serializedData.get(next()) as NBTTagInt).int
-        val metaData = (serializedData.get(next()) as NBTTagInt).int
-        val itemstack = ItemStack(Item.getItemById(id), count, metaData)
-
-        val itemStackTag = serializedData.get(next())
-        val tag = if(itemStackTag is NBTTagInt) null else serializedData.get(next()) as NBTTagCompound
-        itemstack.item.readNBTShareTag(itemstack, tag)
-        return itemstack
-    }
-}
-
-
-fun ItemStack.toNBTTagList(): NBTTagList{
-
-    val data  = NBTTagList()
-
-    if (this.isEmpty) {
-        data.appendTag(NBTTagShort(EMPTY))
-    } else {
-        data.appendTag(NBTTagInt(Item.getIdFromItem(this.item)))
-        data.appendTag(NBTTagInt(this.count) )
-        data.appendTag(NBTTagInt(this.metadata))
-        var nbttagcompound: NBTTagCompound? = null
-
-        if (this.item.isDamageable || this.item.shareTag) {
-            nbttagcompound = this.item.getNBTShareTag(this)
-        }
-
-        data.appendTag(nbttagcompound ?:NBTTagInt(0))
-    }
-
-    return data
-}
-
-
-
-
 
 
 class RecipeInput(size: Int, init: (Int, Int, Int) -> IIngredient?) : CubeArr<IIngredient?>(size, init) {
 
     companion object {
 
-        const val NBT = "recipeInputNbt"
+        const val RECIPE_INPUT_NBT = "recipeInputNbt"
         const val EMPTY = (-1).toShort()
-        const val NULL  = -1
+        const val NULL = -1
 
-        fun fromNBT(serializedData: NBTTagCompound) : RecipeInput{
+        fun fromNBT(serializedData: NBTTagCompound): RecipeInput {
 
-            val dataList = serializedData.getTagList(NBT, Constants.NBT.TAG_LIST)
-            val size = (Math.cbrt(dataList.tagCount().toDouble())).toInt()
-            return RecipeInput(size) init@{i,j,k->
-                val pos = i + size * j + size *size *k
+            //{{{null ,<minecraft:leaves:*>}, {null ,<minecraft:leaves:*>}}, {{null ,null}, {null ,null}}}
 
-                if((((dataList.get(pos) as NBTTagList).get(0)) as NBTTagInt).int == NULL){
-                    return@init null
-                }else{
-                    return@init ingredientFromTag(dataList.get(pos) as NBTTagList)
-                }
+            val recipeInputNbt = serializedData.getTagList(RECIPE_INPUT_NBT, Constants.NBT.TAG_LIST)
+            val size = (Math.cbrt(recipeInputNbt.tagCount().toDouble())).toInt()
 
+            val recipe = RecipeInput(size) init@{ i, j, k ->
+                val retval: IIngredient?
 
+                val pos = (i * size * size) + (j * size) + (k)
+                val ingredientNbt = recipeInputNbt.get(pos) as NBTTagList
+                retval = if (ingredientNbt.isEmpty) null else ingredientFromNbt(ingredientNbt)
+
+                return@init retval
+
+            }
+
+            return RecipeInput(size) init@{ i, j, k ->
+                val pos = (k) + (j * size) + (i * size * size)
+                val ingredientNbt = recipeInputNbt.get(pos) as NBTTagList
+                if (ingredientNbt.isEmpty) return@init null
+                return@init ingredientFromNbt(ingredientNbt)
 
             }
         }
 
-        fun fromArr(arr : Array<Array<Array<IIngredient>>>) : RecipeInput {
+        fun fromArr(arr: Array<Array<Array<IIngredient>>>): RecipeInput {
             return RecipeInput(arr.size) { i, j, k -> arr[i][j][k] }
         }
     }
 
     // Fix for intellij not recognizing the nullability
     @SuppressWarnings("unused")
-    override fun get(height :Int, row:Int, col: Int) = super.get(height,row,col)
+    override fun get(height: Int, row: Int, col: Int) = super.get(height, row, col)
 
 
     //Note: loses some oredict data.
-    fun toNBT(existingData : NBTTagCompound) : NBTTagCompound{
+    fun writeToNBT(existingData: NBTTagCompound): NBTTagCompound {
         val nbtList = NBTTagList()
-        forEach{
-            if(it == null){
-                val nullList = NBTTagList()
-                nullList.appendTag(NBTTagInt(NULL))
-                nbtList.appendTag(nullList)
-            }
-            else nbtList.appendTag(it.getTag())
+        forEach {
+            if (it == null) {
+                nbtList.appendTag(NBTTagList())
+            } else nbtList.appendTag(it.toNbt())
         }
 
-        existingData.setTag(NBT,nbtList)
+        existingData.setTag(RECIPE_INPUT_NBT, nbtList)
+        val s = this.toString()
 
         return existingData
 
     }
-
-
-
-
 
 
     fun toFormattedString(): String {
@@ -199,7 +186,7 @@ class RecipeInput(size: Int, init: (Int, Int, Int) -> IIngredient?) : CubeArr<II
     }
 
     // Note that it's [y,x,z] and not [x,y,z]!
-    fun get(offset : Offset) = get(offset.y,offset.x,offset.z)
+    fun get(offset: Offset) = get(offset.y, offset.x, offset.z)
 
 }
 

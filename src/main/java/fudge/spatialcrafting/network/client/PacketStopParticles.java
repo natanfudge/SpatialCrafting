@@ -4,7 +4,6 @@ import fudge.spatialcrafting.client.util.ParticleUtil;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketBlockPos;
-import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -18,8 +17,9 @@ import javax.annotation.Nullable;
 
 
 // Packet from server to client
-@NoArgsConstructor
 public class PacketStopParticles extends PacketBlockPos {
+
+    public PacketStopParticles() {}
 
 
     public PacketStopParticles(BlockPos masterPos) {

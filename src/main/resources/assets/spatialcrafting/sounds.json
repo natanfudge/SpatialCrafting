@@ -2,18 +2,22 @@
   "craft_end": {
     "category": "crafter",
     "subtitle": "BOOM",
-    "sounds": [ "spatialcrafting:craft_end" ]
+    "sounds": [
+      "spatialcrafting:craft_end"
+    ]
   },
   "craft_start": {
     "category": "crafter",
     "subtitle": "vwom",
-    "sounds": [ "spatialcrafting:craft_start" ]
+    "sounds": [
+      "spatialcrafting:craft_start"
+    ]
   },
   "craft_loop": {
     "category": "crafter",
     "subtitle": "vwoosh",
-    "sounds": [ "spatialcrafting:craft_loop" ]
+    "sounds": [
+      "spatialcrafting:craft_loop"
+    ]
   }
-
-
 }

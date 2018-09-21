@@ -4,7 +4,6 @@ import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.network.PacketBlockPos;
 import io.netty.buffer.ByteBuf;
-import lombok.NoArgsConstructor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -15,10 +14,12 @@ import javax.annotation.Nullable;
 
 
 // Packet from server to client
-@NoArgsConstructor
+
 public class PacketSetActiveLayer extends PacketBlockPos {
 
     private int layerToSet;
+
+    public PacketSetActiveLayer() {}
 
     public PacketSetActiveLayer(BlockPos playerPos, int layer) {
         super(playerPos);
@@ -53,7 +54,7 @@ public class PacketSetActiveLayer extends PacketBlockPos {
                     if (crafter != null) {
                         if (crafter.size() > message.layerToSet) {
                             if (!crafter.isCrafting()) {
-                                crafter.setActiveHolograms(message.layerToSet);
+                                crafter.setActiveLayer(message.layerToSet);
                             }
                         }
                     }

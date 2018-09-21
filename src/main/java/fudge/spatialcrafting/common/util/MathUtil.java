@@ -1,11 +1,12 @@
 package fudge.spatialcrafting.common.util;
 
-import lombok.experimental.UtilityClass;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
-@UtilityClass
-public class MathUtil {
+public final class MathUtil {
+
+    private MathUtil() {}
+
     /**
      * Returns the distance between 2 positions. counts diagonals as 1 distance (rather than 2 or 3)
      */
@@ -47,7 +48,7 @@ public class MathUtil {
     }
 
 
-    public static Vec3d middleOf(Vec3i pos1, Vec3i pos2){
+    public static Vec3d middleOf(Vec3i pos1, Vec3i pos2) {
         return middleOf(new Vec3d(pos1), new Vec3d(pos2));
     }
 

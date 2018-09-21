@@ -10,4 +10,6 @@ public abstract class SCCommand extends CommandBase {
     public int minArgs() {return 0;}
 
     public int maxArgs() {return 0;}
+
+    public boolean showInHelp() {return true;}
 }

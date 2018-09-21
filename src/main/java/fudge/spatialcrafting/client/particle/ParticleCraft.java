@@ -11,7 +11,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
-import static fudge.spatialcrafting.common.MCConstants.TICKS_PER_SECOND;
+import static fudge.spatialcrafting.common.util.MCConstants.TICKS_PER_SECOND;
 import static fudge.spatialcrafting.common.util.MathUtil.euclideanDistanceOf;
 
 
@@ -27,9 +27,9 @@ public class ParticleCraft extends Particle {
     private final double endZ;
     private final double endX;
     private final double origEndY;
-    private int ticksPassed;
     private final int craftDuration;
     private final double craftYEndPos;
+    private int ticksPassed;
 
     public ParticleCraft(World worldIn, Vec3d startPos, Vec3d origEndPos, int startTimeDelay, int craftDuration, double craftYEndPos, TextureAtlasSprite texture) {
         super(worldIn, startPos.x, startPos.y, startPos.z, 0, 0, 0);
@@ -63,7 +63,7 @@ public class ParticleCraft extends Particle {
     public void onUpdate() {
 
 
-        final Vec3d endPos = ParticleUtil.calcEndPos(ticksPassed, craftDuration, new Vec3d(endX, origEndY, endZ),craftYEndPos);
+        final Vec3d endPos = ParticleUtil.calcEndPos(ticksPassed, craftDuration, new Vec3d(endX, origEndY, endZ), craftYEndPos);
         final Vec3d pos = new Vec3d(posX, posY, posZ);
 
         final Vec3d direction = (endPos.subtract(pos)).normalize();

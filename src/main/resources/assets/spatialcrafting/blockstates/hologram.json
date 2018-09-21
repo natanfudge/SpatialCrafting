@@ -2,18 +2,26 @@
   "forge_marker": 1,
   "defaults": {
     "model": "cube_all",
-    "textures":{"all": "spatialcrafting:block/hologram"}
+    "textures": {
+      "all": "spatialcrafting:block/hologram"
+    }
   },
   "variants": {
     "active": {
       "true": {
-        "textures": {"all": "spatialcrafting:block/hologram"}
+        "textures": {
+          "all": "spatialcrafting:block/hologram"
+        }
       },
       "false": {
-        "textures": {"all": "spatialcrafting:block/hologram_off"}
+        "textures": {
+          "all": "spatialcrafting:block/hologram_off"
+        }
       }
     },
-    "inventory": [{}]
+    "inventory": [
+      {}
+    ]
   }
 }
 

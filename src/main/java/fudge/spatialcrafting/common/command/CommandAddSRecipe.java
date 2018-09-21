@@ -2,12 +2,15 @@ package fudge.spatialcrafting.common.command;
 
 import com.google.common.collect.ImmutableList;
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.crafting.RecipeAddition;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.util.CraftingInventory;
 import fudge.spatialcrafting.common.util.CrafterUtil;
+import fudge.spatialcrafting.common.util.MCConstants;
+import fudge.spatialcrafting.common.util.SCConstants;
+import fudge.spatialcrafting.network.PacketHandler;
+import fudge.spatialcrafting.network.client.PacketAddRecipeToJei;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -15,8 +18,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraftforge.fml.common.Loader;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -129,67 +134,33 @@ public class CommandAddSRecipe extends SCCommand {
             EntityPlayerMP player = getCommandSenderAsPlayer(sender);
             ItemStack output = player.getHeldItem(EnumHand.MAIN_HAND);
 
-            if (crafter != null) {
-
-                CraftingInventory input = crafter.getHologramInvArr();
-
-                if (isValidRecipe(input, output, player)) {
-
-                    // Default
-                    RecipeAddition recipeAdditionType = RecipeAddition.WILDCARD;
-
-                    // Do different recipe additions depending on the input
-                    if (words.length >= 2) {
-                        switch (words[1].toLowerCase()) {
-                            case "exact":
-                            case "ex":
-                                recipeAdditionType = RecipeAddition.EXACT;
-                                break;
-                            case "wildcard":
-                            case "*":
-                                recipeAdditionType = RecipeAddition.WILDCARD;
-                                break;
-                            case "oredict":
-                            case "od":
-                                recipeAdditionType = RecipeAddition.OREDICT;
-                                break;
-                            default:
-                                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.invalid_argument", 0));
-                                return;
-
-                        }
-                    }
-
-                    SpatialRecipe recipe = SpatialRecipe.getRecipeFromItemStacks(input, output, recipeAdditionType);
-
-                    // If the user did oredict and there are too many oredicts we face a problem (recipe will be null)
-                    if (recipe == null) {
-                        sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.too_many_oredicts", 0));
-                        return;
-                    }
-
-                    // Writes some code in ZS that adds the corresponding recipe. Who needs programmers in our day and age?
-                    String command = "mods.spatialcrafting.addRecipe(" + recipe.toFormattedString() + ");\n\n";
-
-                    if (SpatialRecipe.noRecipeConflict(recipe, sender)) {
-                        addCrTScript(command);
-                        SpatialRecipe.addRecipe(recipe);
+            if (crafter == null) {
+                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.no_crafters", 0));
+                return;
+            }
 
 
-                        if (output.getCount() == 1) {
-                            sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.success",
-                                    output.getDisplayName()));
-                        } else {
-                            sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.success_num",
-                                    output.getCount(),
-                                    output.getDisplayName()));
-                        }
-                    }
+            CraftingInventory input = crafter.getHologramInvArr();
+
+            if (isValidRecipe(input, output, player)) {
+
+                // Default
+                RecipeAddition recipeAdditionType = getRecipeAdditionType(words,sender);
+                if(recipeAdditionType == null) return;
+
+                SpatialRecipe recipe = SpatialRecipe.getRecipeFromItemStacks(input, output, recipeAdditionType);
+                // If the user did oredict and there are too many oredicts we face a problem (recipe will be null)
+                if (recipe == null) {
+                    sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.too_many_oredicts", 0));
+                    return;
                 }
 
+                // Writes some code in ZS that adds the corresponding recipe. Who needs programmers in our day and age?
+                String command = "mods.spatialcrafting.addRecipe(" + recipe.toFormattedString() + ");\n\n";
 
-            } else {
-                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.no_crafters", 0));
+                if (SpatialRecipe.noRecipeConflict(recipe, sender)) {
+                    addRecipe(sender, player, output, recipe, command);
+                }
             }
 
 
@@ -198,6 +169,53 @@ public class CommandAddSRecipe extends SCCommand {
         }
 
 
+    }
+
+    private void addRecipe(@Nonnull ICommandSender sender, EntityPlayerMP player, ItemStack output, SpatialRecipe recipe, String command) {
+        addCrTScript(command);
+        SpatialRecipe.addRecipe(recipe);
+        if (Loader.isModLoaded(SCConstants.JEI_MOD_ID)) {
+            PacketHandler.getNetwork().sendTo(new PacketAddRecipeToJei(recipe), player);
+        }
+
+
+        if (output.getCount() == 1) {
+            sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.success", output.getDisplayName()));
+        } else {
+            sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.success_num",
+                    output.getCount(),
+                    output.getDisplayName()));
+        }
+    }
+
+    @Nullable
+    private RecipeAddition getRecipeAdditionType(String[] words, ICommandSender sender){
+        // Default
+        RecipeAddition recipeAdditionType = RecipeAddition.WILDCARD;
+
+        // Do different recipe additions depending on the input
+        if (words.length >= 2) {
+            switch (words[1].toLowerCase()) {
+                case "exact":
+                case "ex":
+                    recipeAdditionType = RecipeAddition.EXACT;
+                    break;
+                case "wildcard":
+                case "*":
+                    recipeAdditionType = RecipeAddition.WILDCARD;
+                    break;
+                case "oredict":
+                case "od":
+                    recipeAdditionType = RecipeAddition.OREDICT;
+                    break;
+                default:
+                    sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.invalid_argument", 0));
+                    return null;
+
+            }
+        }
+
+        return recipeAdditionType;
     }
 
     @Override

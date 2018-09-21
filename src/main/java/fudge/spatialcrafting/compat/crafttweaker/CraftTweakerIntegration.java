@@ -11,6 +11,7 @@ import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.crafting.RecipeInput;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import net.minecraft.item.ItemStack;
+import stanhebben.zenscript.annotations.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
 
@@ -26,6 +27,7 @@ public final class CraftTweakerIntegration {
     }
 
 
+    //TODO open issue about wildcardSize if they don't answer
     // ZenMethod means you can call this method in zenscript to do wtf you want
     @ZenMethod
     public static void addRecipe(IIngredient[][][] input, IItemStack output) {

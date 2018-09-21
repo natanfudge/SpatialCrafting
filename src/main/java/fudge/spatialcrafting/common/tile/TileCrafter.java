@@ -30,18 +30,21 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import static fudge.spatialcrafting.common.MCConstants.NOTIFY_CLIENT;
 import static fudge.spatialcrafting.common.block.BlockHologram.ACTIVE;
+import static fudge.spatialcrafting.common.util.MCConstants.NOTIFY_CLIENT;
 
 public class TileCrafter extends TileEntity implements ITickable {
 
     private static final String OFFSET_NBT = "offset";
-    private static final int ACTIVATE_ALL = -1;
+    private static final int ALL_ACTIVE = -1;
+    private static final int SOUND_LOOP_TICKS = 27;
     private Offset offset;
+    private int counter;
 
     public TileCrafter(BlockPos pos, BlockPos masterPos) {
         offset = new Offset(pos, masterPos);
     }
+
 
     public TileCrafter() {}
 
@@ -49,12 +52,12 @@ public class TileCrafter extends TileEntity implements ITickable {
         return getRecipe() != null;
     }
 
-
-    public void setActiveHolograms(int layerToActivate) {
-        setActiveHolograms(layerToActivate, true);
+    public void setActiveLayer(int layerToActivate) {
+        setActiveLayer(layerToActivate, true);
     }
 
-    public void setActiveHolograms(int layerToActivate, boolean displayGhostItems) {
+    public void setActiveLayer(int layerToActivate, boolean displayGhostItems) {
+        getSharedData().setActiveLayer((byte)layerToActivate);
 
         getHolograms().indexedForEach((i, j, k, hologramPos) -> {
 
@@ -83,7 +86,6 @@ public class TileCrafter extends TileEntity implements ITickable {
         });
     }
 
-
     private boolean shouldActivateHologram(int layerToActivate, int i, int j, int k) {
 
         // This is for the purpose of crafting help
@@ -91,7 +93,7 @@ public class TileCrafter extends TileEntity implements ITickable {
             int recipeSize = recipeSize();
 
             //If this is the correct layer and it is in bounds then check if this hologram is required for the recipe, otherwise false.
-            if ((layerToActivate == ACTIVATE_ALL || layerToActivate == i) && i < recipeSize && j < recipeSize && k < recipeSize) {
+            if ((layerToActivate == ALL_ACTIVE || layerToActivate == i) && i < recipeSize && j < recipeSize && k < recipeSize) {
                 // if the recipe is null there then it should not be activated.
                 return getRecipe().getRequiredInput().get(i, j, k) != null || !isHelpActive();
             } else {
@@ -104,11 +106,10 @@ public class TileCrafter extends TileEntity implements ITickable {
             int size = size();
 
             //If this is the correct layer and it is in bounds then return true, otherwise false.
-            return (layerToActivate == ACTIVATE_ALL || layerToActivate == i) && i < size && j < size && k < size;
+            return (layerToActivate == ALL_ACTIVE || layerToActivate == i) && i < size && j < size && k < size;
         }
 
     }
-
 
     /**
      */
@@ -121,24 +122,32 @@ public class TileCrafter extends TileEntity implements ITickable {
         getSharedData().setRecipe(recipe);
     }
 
-    private boolean layerEnabled(int layer) {
+    /*private boolean layerEnabled(int layer) {
 
         int size = size();
         CubeArr<BlockPos> holograms = getHolograms();
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                BlockPos hologramPos = holograms.get(layer, i, j);
+                try {
+                    BlockPos hologramPos = holograms.get(layer, i, j);
 
-                if (world.getBlockState(hologramPos).getValue(ACTIVE)) return true;
+
+                    if (world.getBlockState(hologramPos).getValue(ACTIVE)) return true;
+                } catch (Exception e) {
+                    int x = 2;
+                }
             }
 
         }
 
         return false;
     }
+*/
+    private boolean activeLayerMatchesRecipe() {
+        int layer = getActiveLayer();
+        if(layer == ALL_ACTIVE) return true;
 
-    private boolean layerMatchesRecipe(int layer) {
         SpatialRecipe recipe = getRecipe();
 
         if (recipe == null) return false;
@@ -168,7 +177,7 @@ public class TileCrafter extends TileEntity implements ITickable {
     public void startHelp(SpatialRecipe recipe) {
 
         setRecipe(recipe);
-        setActiveHolograms(0);
+        setActiveLayer(0);
         // In case a layer has already been done
         proceedHelp();
     }
@@ -182,29 +191,25 @@ public class TileCrafter extends TileEntity implements ITickable {
         }
     }
 
+
     public void proceedHelp() {
-        for (int i = 0; i < recipeSize(); i++) {
-            if (layerEnabled(i) && layerMatchesRecipe(i)) {
-                if (i != recipeSize() - 1) {
-                    setActiveHolograms(i + 1);
-
-                    // Recursively activates layers in case multiple layers already match the recipe
-                    proceedHelp();
-                    return;
-                } else {
-                    // Last layer is treated differently
-                    activateAllLayers();
-
-                }
+        int activeLayer = getActiveLayer();
+        if (activeLayerMatchesRecipe()) {
+            if (activeLayer != recipeSize() - 1) {
+                setActiveLayer(activeLayer + 1);
+                // Recursively proceeds help in case multiple layers already match the recipe
+                proceedHelp();
+            } else {
+                // Last layer is treated differently
+                activateAllLayers();
             }
         }
     }
 
 
     public void activateAllLayers() {
-        setActiveHolograms(ACTIVATE_ALL, false);
+        setActiveLayer(ALL_ACTIVE, false);
     }
-
 
     public int size() {
         Block block = world.getBlockState(pos).getBlock();
@@ -235,7 +240,6 @@ public class TileCrafter extends TileEntity implements ITickable {
         return offset.equals(Offset.NONE);
     }
 
-
     public TileCrafter master() {
 
         if (this.isMaster()) return this;
@@ -263,10 +267,13 @@ public class TileCrafter extends TileEntity implements ITickable {
         }
     }
 
+    public int getActiveLayer() {
+        return getSharedData().getActiveLayer();
+    }
+
     public long getCraftEndTime() {
         return getSharedData().getCraftTime();
     }
-
 
     public void setCraftEndTime(long time) {
         getSharedData().setCraftTime(time);
@@ -289,6 +296,7 @@ public class TileCrafter extends TileEntity implements ITickable {
     private boolean craftTimeHasPassed() {
         return getCraftEndTime() != 0 && world.getWorldTime() >= getCraftEndTime();
     }
+
 
     public boolean isCrafting() {
         return getCraftEndTime() != 0;
@@ -376,7 +384,6 @@ public class TileCrafter extends TileEntity implements ITickable {
         return this.serialized(super.getUpdateTag());
     }
 
-
     public Vec3d centerOfHolograms() {
         CubeArr<BlockPos> holograms = getHolograms();
 
@@ -386,10 +393,6 @@ public class TileCrafter extends TileEntity implements ITickable {
 
         return MathUtil.middleOf(edge1, edge2);
     }
-
-    private static final int SOUND_LOOP_TICKS = 27;
-
-    private int counter;
 
     @Override
     public void update() {

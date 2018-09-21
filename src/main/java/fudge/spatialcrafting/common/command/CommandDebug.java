@@ -2,7 +2,7 @@ package fudge.spatialcrafting.common.command;
 
 import com.google.common.collect.ImmutableList;
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.MCConstants;
+import fudge.spatialcrafting.common.util.MCConstants;
 import fudge.spatialcrafting.debug.Debug;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketDebugPrint;
@@ -23,6 +23,10 @@ public class CommandDebug extends SCCommand {
         return "commands.spatialcrafting.debug.description";
     }
 
+    @Override
+    public boolean showInHelp() {
+        return false;
+    }
 
     @Override
     public List<String> getAliases() {

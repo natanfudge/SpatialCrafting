@@ -1,6 +1,5 @@
 package fudge.spatialcrafting.common.tile.util
 
-import java.lang.StringBuilder
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -20,7 +19,7 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
         return true
     }
 
-    override fun iterator(): Iterator<T>  = Iter(this)
+    override fun iterator(): Iterator<T> = Iter(this)
 
 
     override val size: Int
@@ -46,20 +45,23 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
 
     override fun toString(): String {
         val builder = StringBuilder("{")
-        for(arr2D in wrappedArray){
+
+        fun removeLast2Chars() = builder.delete(builder.length - 2, builder.length)
+
+        for (arr2D in wrappedArray) {
             builder.append("{")
-            for(arr1D in arr2D){
+            for (arr1D in arr2D) {
                 builder.append("{")
-                for(element in arr1D){
+                for (element in arr1D) {
                     builder.append("$element ,")
                 }
-                builder.removeSuffix(" ,")
+                removeLast2Chars()
                 builder.append("}, ")
             }
-            builder.removeSuffix(" ,")
-            builder.append("},")
+            removeLast2Chars()
+            builder.append("}, ")
         }
-        builder.removeSuffix(" ,")
+        removeLast2Chars()
         builder.append("}")
 
         return builder.toString()
@@ -67,20 +69,20 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
     }
 
 
-    open operator fun get(height: Int, row: Int, col: Int): T  = wrappedArray[height][row][col]
+    open operator fun get(height: Int, row: Int, col: Int): T = wrappedArray[height][row][col]
 
-    private operator fun get(coords: ArrCoords): T  = get(coords.height, coords.row, coords.col)
+    private operator fun get(coords: ArrCoords): T = get(coords.height, coords.row, coords.col)
 
 
     operator fun set(height: Int, row: Int, col: Int, value: T) {
         wrappedArray[height][row][col] = value
     }
 
-    fun indexedForEach(action: (i:Int,j:Int,k:Int,innerElement: T) -> Unit) {
-        for(i in 0 until height){
-            for(j in 0 until length){
-                for(k in 0 until width){
-                    action(i,j,k,get(i,j,k))
+    fun indexedForEach(action: (height: Int, row: Int, col: Int, innerElement: T) -> Unit) {
+        for (i in 0 until height) {
+            for (j in 0 until length) {
+                for (k in 0 until width) {
+                    action(i, j, k, get(i, j, k))
                 }
             }
         }
@@ -90,20 +92,41 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
         wrappedArray[height].forEach { arr1D -> arr1D.forEach(action) }
     }
 
-    fun firstElement() : T = get(0,0,0)
+    fun firstElement(): T = get(0, 0, 0)
 
-    fun lastElement(): T = get(height - 1, length - 1, width  - 1)
+    fun lastElement(): T = get(height - 1, length - 1, width - 1)
 
-    override fun equals(other: Any?): Boolean {
+/*    override fun equals(other: Any?): Boolean {
         if (other !is Arr3D<*>) return false
         if (other.height != this.height || other.length != this.length || other.width != this.width) return false
 
-        for (i in other.indices) {
-            for (j in other.indices) {
-                for (k in other.indices) {
-
+        for (i in 0 until other.height) {
+            for (j in 0 until other.length) {
+                for (k in 0 until other.width) {
                     if (this[i, j, k] != other[i, j, k]) return false
+                }
+            }
+        }
+        return true
 
+    }*/
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Arr3D<*>){
+            return false
+        }
+        if (other.height != this.height || other.length != this.length || other.width != this.width){
+            return false
+        }
+
+        for (i in 0 until other.height) {
+            for (j in 0 until other.length) {
+                for (k in 0 until other.width) {
+                    if (this[i, j, k] != other[i, j, k]){
+                        val thisOne = this[i, j, k]
+                        val otherOne = other[i, j, k]
+                        return false
+                    }
                 }
             }
         }

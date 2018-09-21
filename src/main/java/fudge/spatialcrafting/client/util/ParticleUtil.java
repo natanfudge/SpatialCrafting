@@ -1,7 +1,6 @@
 package fudge.spatialcrafting.client.util;
 
 import fudge.spatialcrafting.client.tick.ClientTicker;
-import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.TileHologram;
 import fudge.spatialcrafting.common.tile.util.CrafterPoses;
@@ -14,8 +13,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import static fudge.spatialcrafting.client.particle.ParticleCraft.*;
-import static fudge.spatialcrafting.common.MCConstants.TICKS_PER_SECOND;
-import static fudge.spatialcrafting.common.block.BlockCrafter.CRAFT_DURATION_MULTIPLIER;
+import static fudge.spatialcrafting.common.util.MCConstants.TICKS_PER_SECOND;
 
 public class ParticleUtil {
 
@@ -44,7 +42,7 @@ public class ParticleUtil {
 
                     CrafterPoses crafters = crafter.getCrafterBlocks();
 
-                    double craftYEndPos =crafters.firstCrafter().getY() + 1.5;
+                    double craftYEndPos = crafters.firstCrafter().getY() + 1.5;
 
 
                     if (durationTicks > getRelativeTicksPassed(ticksPassed, durationTicks, startPos, currentEndPos, craftYEndPos)) {

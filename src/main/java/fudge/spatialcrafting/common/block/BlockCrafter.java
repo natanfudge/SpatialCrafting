@@ -3,13 +3,13 @@ package fudge.spatialcrafting.common.block;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.client.sound.Sounds;
 import fudge.spatialcrafting.client.util.ParticleUtil;
-import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.util.CraftingInventory;
 import fudge.spatialcrafting.common.tile.util.CubeArr;
 import fudge.spatialcrafting.common.util.CrafterUtil;
+import fudge.spatialcrafting.common.util.MCConstants;
 import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.NetworkUtil;
 import fudge.spatialcrafting.network.PacketHandler;
@@ -37,8 +37,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-import static fudge.spatialcrafting.common.MCConstants.BLOCK_UPDATE;
-import static fudge.spatialcrafting.common.MCConstants.NOTIFY_CLIENT;
+import static fudge.spatialcrafting.common.util.MCConstants.BLOCK_UPDATE;
+import static fudge.spatialcrafting.common.util.MCConstants.NOTIFY_CLIENT;
 
 
 @SuppressWarnings("deprecation")
@@ -139,7 +139,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
                     // Check if any recipe matches, if so, beginCraft the recipe.
                     for (SpatialRecipe recipe : SpatialRecipe.getRecipes()) {
                         if (recipe.matches(craftingInventory)) {
-                            beginCraft(world, pos,recipe);
+                            beginCraft(world, pos, recipe);
                         }
                     }
                 }
@@ -167,7 +167,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         int durationTicks = recipe.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
 
         if (world.isRemote) {
-            ParticleUtil.playCraftParticles(world, pos,durationTicks);
+            ParticleUtil.playCraftParticles(world, pos, durationTicks);
         } else {
             // Normal sound can be done through the server
             world.playSound(null, pos, Sounds.CRAFT_START, SoundCategory.BLOCKS, 0.8f, 0.8f);

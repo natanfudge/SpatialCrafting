@@ -18,7 +18,9 @@
         }
       }
     },
-    "inventory": [{}]
+    "inventory": [
+      {}
+    ]
   }
 }
 

@@ -46,16 +46,18 @@ public class CommandHelp extends SCCommand {
 
 
         Commands.getCommandList().forEach(command -> {
-            TextComponentString name = new TextComponentString(command.getName());
-            name.getStyle().setBold(true);
-            name.getStyle().setUnderlined(true);
-            sender.sendMessage(name);
-            newLine(sender);
+            if (command.showInHelp()) {
+                TextComponentString name = new TextComponentString(command.getName());
+                name.getStyle().setBold(true);
+                name.getStyle().setUnderlined(true);
+                sender.sendMessage(name);
+                newLine(sender);
 
-            sender.sendMessage(new TextComponentTranslation(command.description()));
-            sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.help.usage",
-                    new TextComponentTranslation(command.getUsage(sender))));
-            newLine(sender);
+                sender.sendMessage(new TextComponentTranslation(command.description()));
+                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.help.usage",
+                        new TextComponentTranslation(command.getUsage(sender))));
+                newLine(sender);
+            }
         });
     }
 }

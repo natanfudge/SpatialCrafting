@@ -1,10 +1,9 @@
 package fudge.spatialcrafting.common.tile;
 
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.MCConstants;
 import fudge.spatialcrafting.common.block.BlockCrafter;
 import fudge.spatialcrafting.common.tile.util.Offset;
-import fudge.spatialcrafting.common.util.CrafterUtil;
+import fudge.spatialcrafting.common.util.MCConstants;
 import fudge.spatialcrafting.common.util.RecipeUtil;
 import fudge.spatialcrafting.common.util.Util;
 import net.minecraft.block.state.IBlockState;
@@ -28,8 +27,6 @@ import javax.annotation.Nullable;
 
 public class TileHologram extends TileEntity {
 
-    //TODO do a vwooooom animation for the holograms appeairng
-
     private static final String INVENTORY_NBT = "inventory";
     private static final String LAST_CHANGE_TIME_NBT = "lastChangeTime";
     private static final String MASTER_BLOCK_NBT = "masterBlock";
@@ -48,26 +45,25 @@ public class TileHologram extends TileEntity {
             return 1;
         }
     };
+    private BlockPos masterBlockPos;
 
     public boolean isDisplayingGhostItem() {
         return displayingGhostItem;
     }
 
     public void displayGhostItem(ItemStack item) {
-        if(isEmpty()) {
+        if (isEmpty()) {
             getItemHandler().insertItem(0, item, false);
             displayingGhostItem = true;
         }
     }
 
     public void stopDisplayingGhostItem() {
-        if(isDisplayingGhostItem()) {
+        if (isDisplayingGhostItem()) {
             getItemHandler().extractItem(0, 1, false);
             displayingGhostItem = false;
         }
     }
-
-    private BlockPos masterBlockPos;
 
     public BlockPos getMasterPos() {
         return masterBlockPos;
@@ -185,21 +181,21 @@ public class TileHologram extends TileEntity {
         return extractedItem;
     }
 
-    private Offset getOffset(){
-        return new Offset(new BlockPos(pos.getX(),pos.getY() - 1,pos.getZ()), getCrafter().masterPos());
+    private Offset getOffset() {
+        return new Offset(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()), getCrafter().masterPos());
     }
 
-    private ItemStack getPreviouslyStoredGhostItem(){
+    private ItemStack getPreviouslyStoredGhostItem() {
         TileCrafter crafter = getCrafter();
 
-        if(crafter.getRecipe() != null){
+        if (crafter.getRecipe() != null) {
             return RecipeUtil.getVisibleItemStack(crafter.getRecipe().getRequiredInput().get(getOffset()));
-        }else{
+        } else {
             return ItemStack.EMPTY;
         }
     }
 
-    public ItemStack getStoredItem(){
+    public ItemStack getStoredItem() {
         return isDisplayingGhostItem() ? ItemStack.EMPTY : getItemHandler().getStackInSlot(0);
     }
 
@@ -210,7 +206,7 @@ public class TileHologram extends TileEntity {
         deserialize(data);
     }
 
-    public boolean isEmpty(){
+    public boolean isEmpty() {
         return isDisplayingGhostItem() || getItemHandler().extractItem(0, 1, true).equals(ItemStack.EMPTY);
     }
 

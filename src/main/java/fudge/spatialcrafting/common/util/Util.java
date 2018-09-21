@@ -3,7 +3,6 @@ package fudge.spatialcrafting.common.util;
 
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketRemoveTileEntity;
-import lombok.experimental.UtilityClass;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
@@ -15,8 +14,10 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 
-@UtilityClass
-public class Util {
+
+public final class Util {
+
+    private Util() {}
 
     public static void removeTileEntity(World world, BlockPos pos, boolean syncClient) {
         world.removeTileEntity(pos);
@@ -38,13 +39,11 @@ public class Util {
         dropItemStack(world, pos, itemStack, true);
     }
 
-    public static void dropItemStack(World world, Vec3d pos, ItemStack itemStack, boolean randomMotion){
+    public static void dropItemStack(World world, Vec3d pos, ItemStack itemStack, boolean randomMotion) {
         EntityItem itemEntity = new EntityItem(world, pos.x, pos.y, pos.z, itemStack);
-        if(!randomMotion) itemEntity.motionX = itemEntity.motionY = itemEntity.motionZ = 0;
+        if (!randomMotion) itemEntity.motionX = itemEntity.motionY = itemEntity.motionZ = 0;
         world.spawnEntity(itemEntity);
     }
-
-
 
 
     /**

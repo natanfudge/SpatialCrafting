@@ -8,10 +8,10 @@ import net.minecraft.world.World
 import net.minecraftforge.fml.relauncher.Side
 import net.minecraftforge.fml.relauncher.SideOnly
 
-class ParticleBuilder(val world : World, val endPos : Vec3d, val startTimeDelay : Int, val craftDuration : Int,
-                           val craftYEndPos : Double, val stack : ItemStack){
-    fun shoot(startPos : Vec3d){
-        shootCraftParticle(world,startPos,endPos,startTimeDelay,craftDuration,craftYEndPos, stack)
+class ParticleBuilder(val world: World, val endPos: Vec3d, val startTimeDelay: Int, val craftDuration: Int,
+                      val craftYEndPos: Double, val stack: ItemStack) {
+    fun shoot(startPos: Vec3d) {
+        shootCraftParticle(world, startPos, endPos, startTimeDelay, craftDuration, craftYEndPos, stack)
     }
 }
 

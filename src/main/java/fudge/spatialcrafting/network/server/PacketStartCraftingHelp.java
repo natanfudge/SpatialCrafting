@@ -5,7 +5,6 @@ import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.network.PacketBlockPos;
 import io.netty.buffer.ByteBuf;
-import lombok.NoArgsConstructor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -14,10 +13,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 import javax.annotation.Nullable;
 
-@NoArgsConstructor
 public class PacketStartCraftingHelp extends PacketBlockPos {
 
     private int recipeID;
+
+    public PacketStartCraftingHelp() {}
 
     public PacketStartCraftingHelp(BlockPos masterPos, SpatialRecipe recipe) {
         super(masterPos);

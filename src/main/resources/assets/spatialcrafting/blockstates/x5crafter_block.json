@@ -7,7 +7,7 @@
       "side": "spatialcrafting:block/crafter/x5/side"
     }
   },
-  "variants":{
+  "variants": {
     "formed": {
       "false": {
         "textures": {
@@ -18,7 +18,9 @@
         }
       }
     },
-    "inventory": [{}]
+    "inventory": [
+      {}
+    ]
   }
 }
 

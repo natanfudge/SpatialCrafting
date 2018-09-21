@@ -31,8 +31,8 @@ public final class ClientTicker {
         tickers.add(new Ticker(action, delay, duration, ticks, false, name));
     }
 
-    public static void scheduleAction(Runnable action, int delay,String name){
-        tickers.add( new Ticker(time ->action.run(), delay, delay, ticks, false, name));
+    public static void scheduleAction(Runnable action, int delay, String name) {
+        tickers.add(new Ticker(time -> action.run(), delay, delay, ticks, false, name));
     }
 
     /**

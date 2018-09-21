@@ -1,7 +1,6 @@
 package fudge.spatialcrafting.compat.jei;
 
 import com.google.common.collect.ImmutableList;
-import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.client.tick.ClientTicker;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
@@ -14,8 +13,6 @@ import fudge.spatialcrafting.network.server.PacketStartCraftingHelp;
 import fudge.spatialcrafting.network.server.PacketStopCraftingHelp;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IRecipeWrapper;
-import mezz.jei.gui.recipes.RecipeGuiLogic;
-import mezz.jei.ingredients.Ingredients;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.item.ItemStack;
@@ -26,10 +23,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.client.config.GuiUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import static fudge.spatialcrafting.SpatialCrafting.MODID;
@@ -53,11 +47,9 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
     private final SpatialRecipe recipe;
     private final List<JeiButton> buttons;
     private int layer;
-    private CategorySpatialRecipe recipeCategory;
 
-    public WrapperSpatialRecipe(SpatialRecipe recipe, CategorySpatialRecipe recipeCategory) {
+    public WrapperSpatialRecipe(SpatialRecipe recipe) {
         this.recipe = recipe;
-        this.recipeCategory = recipeCategory;
         layer = 0;
 
         buttons = addButtons();

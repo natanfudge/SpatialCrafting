@@ -46,7 +46,7 @@ public class CategorySpatialRecipe implements IRecipeCategory<WrapperSpatialReci
     }
 
     @Override
-    public String getTitle()  {
+    public String getTitle() {
         return new TextComponentTranslation("jei.category.spatial_crafting").getUnformattedComponentText();
     }
 
@@ -85,7 +85,7 @@ public class CategorySpatialRecipe implements IRecipeCategory<WrapperSpatialReci
         final List<Integer> X_OFFSETS = ImmutableList.of(0, 0, 94, 112, 136, 154);
         final int yPosition = 18 * (recipeSize - 1) / 2;
         //Display the output
-       guiItemStacks.init(recipeSize * recipeSize + 1, false, X_OFFSETS.get(recipeSize), yPosition);
+        guiItemStacks.init(recipeSize * recipeSize + 1, false, X_OFFSETS.get(recipeSize), yPosition);
 
 
         guiItemStacks.set(ingredients);

@@ -8,8 +8,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Nonnull
-@TypeQualifierDefault({ElementType.FIELD,ElementType.METHOD,ElementType.PARAMETER})
+@TypeQualifierDefault({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface EverythingIsNonNullByDefault
-{
+public @interface EverythingIsNonNullByDefault {
 }

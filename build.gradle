@@ -57,7 +57,12 @@ repositories{
         name "sounds libs"
         url "https://mvnrepository.com/artifact/com.googlecode.soundlibs/mp3spi"
     }
+    //TODO do compile/decompile start to turn kotlin into java and get rid of dependency
+    maven {
+        url "http://maven.shadowfacts.net/"
+    }
 
+    jcenter()
     mavenCentral()
 
 }
@@ -70,28 +75,17 @@ dependencies {
 
     def jei_version ="4.11.0.212"
 
-    // compile against the JEI API but do not include it at runtime
-
-    deobfProvided "mezz.jei:jei_${mc_version}:${jei_version}:api"
-    // at runtime, use the full JEI jar
-    runtime "mezz.jei:jei_${mc_version}:${jei_version}"
-
     compileOnly "mezz.jei:jei_${mc_version}:${jei_version}"
 
-    // Compile only since crafttweaker is a faggot
-    compileOnly "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.8.468"
+    compile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.8.468"
 
     compile group: 'org.jetbrains', name: 'annotations', version: '13.0'
 
-    compileOnly 'org.projectlombok:lombok:1.18.2'
-
-    apt "org.projectlombok:lombok:1.18.2"
-
     compile 'junit:junit:4.12'
-
 
     compile "org.jetbrains.kotlin:kotlin-stdlib:1.2.70"
 
+    compileOnly group: "net.shadowfacts", name: "Forgelin", version: "1.+"
 
 
 
@@ -123,9 +117,6 @@ processResources {
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }
-
-    // Access transfo
-    rename '(.+_at.cfg)', 'META-INF/$1'
 
 }
 

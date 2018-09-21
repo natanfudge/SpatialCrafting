@@ -4,7 +4,6 @@ import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.util.CraftersData;
 import fudge.spatialcrafting.common.tile.util.SharedData;
 import io.netty.buffer.ByteBuf;
-import lombok.NoArgsConstructor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
@@ -21,11 +20,12 @@ import java.util.List;
 import java.util.Set;
 
 // Packet from server to client
-@NoArgsConstructor
 public class PacketUpdateAllSharedData implements IMessage {
 
     private static final String DATA_NBT = "data";
     private List<SharedData> allData;
+
+    public PacketUpdateAllSharedData() {}
 
 
     public PacketUpdateAllSharedData(List<SharedData> data) {
