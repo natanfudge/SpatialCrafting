@@ -41,6 +41,7 @@ public class SpatialCrafting {
     @SidedProxy(serverSide = SERVER_PROXY_PATH, clientSide = CLIENT_PROXY_PATH)
     private static IProxy proxy;
 
+
     public static SpatialCrafting instance() {
         return instance;
     }
