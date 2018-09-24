@@ -113,7 +113,7 @@ class ShapedRecipeInput(size: Int, init: (Int, Int, Int) -> IIngredient?) : Cube
         forEach {
             if (it == null) {
                 nbtList.appendTag(NBTTagList())
-            } else nbtList.appendTag(RecipeUtil.IIngredientToNbt(it))
+            } else nbtList.appendTag(RecipeUtil.iIngredientToNbt(it))
         }
 
         existingData.setTag(RECIPE_INPUT_NBT, nbtList)

@@ -19,14 +19,6 @@ class CraftingInventory(size: Int, init: (Int, Int, Int) -> ItemStack) : CubeArr
     fun toIItemStackArr(): CubeArr<IItemStack?> =
             CubeArr(cubeSize) { i, j, k -> CraftTweakerMC.getIItemStack(get(i, j, k)) }
 
-    /*  fun itemStacksOfLayer(layer: Int): Array<Array<ItemStack>> {
-
-          val arr = Array(cubeSize) { ItemStack.EMPTY }
-          return Array(cubeSize) lambda@{
-              return@lambda wrappedArray[layer][it].toArray(arr)
-          }
-
-      }*/
 
 
     override fun isEmpty(): Boolean {

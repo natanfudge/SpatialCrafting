@@ -24,7 +24,6 @@ public final class RecipeUtil {
      */
     public static boolean nullSafeMatch(@Nullable IIngredient ingredient, @Nullable IItemStack stack) {
         if (ingredient == null) return stack == null;
-        boolean matches = ingredient.matches(stack);
         return ingredient.matches(stack);
     }
 
@@ -41,10 +40,10 @@ public final class RecipeUtil {
         }
     }
 
-    public static NBTTagList IIngredientToNbt(IIngredient ingredient) {
+    public static NBTTagList iIngredientToNbt(IIngredient ingredient) {
         NBTTagList tags = new NBTTagList();
 
-        ingredient.getItems().forEach((crtStack) -> {
+        ingredient.getItems().forEach(crtStack -> {
             ItemStack stack = CraftTweakerMC.getItemStack(crtStack);
             tags.appendTag(stack.writeToNBT(new NBTTagCompound()));
         });
@@ -62,7 +61,7 @@ public final class RecipeUtil {
             list.add(itemStack);
         }
 
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             return null;
         } else if (list.size() == 1) {
             return CraftTweakerMC.getIIngredient(list.get(0));

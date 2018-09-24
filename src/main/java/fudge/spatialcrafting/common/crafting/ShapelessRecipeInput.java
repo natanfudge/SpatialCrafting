@@ -6,6 +6,7 @@ import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import fudge.spatialcrafting.common.tile.util.CraftingInventory;
 import fudge.spatialcrafting.common.tile.util.CubeArr;
+import fudge.spatialcrafting.common.util.ImpossibleException;
 import fudge.spatialcrafting.common.util.RecipeUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -76,7 +77,7 @@ public class ShapelessRecipeInput implements IRecipeInput {
             if (ingredient == null) {
                 nbtList.appendTag(new NBTTagList());
             } else {
-                nbtList.appendTag(RecipeUtil.IIngredientToNbt(ingredient));
+                nbtList.appendTag(RecipeUtil.iIngredientToNbt(ingredient));
             }
         }
 
@@ -248,7 +249,7 @@ public class ShapelessRecipeInput implements IRecipeInput {
                 }
             }
 
-            throw new RuntimeException("This shouldn't be possible!");
+            throw new ImpossibleException();
         }
 
     }

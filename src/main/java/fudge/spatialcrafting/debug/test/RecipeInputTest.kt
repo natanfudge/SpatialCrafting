@@ -18,7 +18,6 @@ class RecipeInputTest {
     private val testItem: Item = Item.getItemFromBlock(Blocks.ACACIA_FENCE)
     private val testStack: ItemStack
     private val testIngredient: IIngredient
-    private val testInput = SpatialRecipe.getRecipes()[3].requiredInput
 
     init {
         testStack = ItemStack(testItem, 10, OreDictionary.WILDCARD_VALUE)
@@ -26,9 +25,7 @@ class RecipeInputTest {
     }
 
     fun test() {
-        //testItemStackConversion()
-        //testIIngredientConversion()
-        // testRecipeInputConversion()
+
         println("No test!")
     }
 
@@ -47,7 +44,7 @@ class RecipeInputTest {
 
     @Test
     fun testIIngredientConversion() {
-        val nbt = RecipeUtil.IIngredientToNbt(testIngredient);
+        val nbt = RecipeUtil.iIngredientToNbt(testIngredient);
         val ingredientBack = RecipeUtil.ingredientFromNbt(nbt)
 
         if (testIngredient != ingredientBack) {
@@ -57,59 +54,8 @@ class RecipeInputTest {
         }
     }
 
-    /*  @Test
-      fun testRecipeInputConversion() {
-          val nbt = testInput.writeToNBT(NBTTagCompound())
-          //val inputBack = IRecipeInput.fromNBT(nbt)
-
-          if (testInput != inputBack) {
-              SpatialCrafting.LOGGER.error("testRecipeInputConversion test failed! orig was $testInput and the one returned was $inputBack")
-          } else {
-              SpatialCrafting.LOGGER.info("testRecipeInputConversion test successful!")
-          }
-      }*/
 
 
 }
-
-
-/*
-fun itemStackToOredictIngredient(stack: ItemStack): IIngredient {
-    // if (stack.isEmpty()) return null
-
-    val matchingOreDicts = getOres(stack)
-    // Too many oredicts, can't process this addition.
-    if (matchingOreDicts.size > 1) {
-        null!!
-    }
-    return if (matchingOreDicts.size == 1) {
-        matchingOreDicts[0]
-    } else CraftTweakerMC.getIItemStack(stack)
-}
-
-
-fun getOres(origStack: ItemStack): List<IOreDictEntry> {
-    val result = ArrayList<IOreDictEntry>()
-
-    for (key in OreDictionary.getOreNames()) {
-        for (oredictStack in OreDictionary.getOres(key)) {
-            if (oredictStack.item === origStack.item) {
-                if (oredictStack.itemDamage == OreDictionary.WILDCARD_VALUE || oredictStack.itemDamage == origStack.itemDamage) {
-                    val oredict = CraftTweakerAPI.oreDict.get(key)
-                    fixOredictCount(oredict, origStack)
-                    result.add(oredict)
-                    break
-                }
-            }
-        }
-    }
-
-    return result
-}
-
-
-
-*/
-
 
 

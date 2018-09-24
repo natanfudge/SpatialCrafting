@@ -6,6 +6,7 @@ import crafttweaker.api.minecraft.CraftTweakerMC;
 import crafttweaker.api.oredict.IOreDictEntry;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.tile.util.CraftingInventory;
+import fudge.spatialcrafting.common.util.ImpossibleException;
 import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.command.ICommandSender;
@@ -46,7 +47,7 @@ public class SpatialRecipe {
         this.craftTime = craftTime;
     }
 
-    public static SpatialRecipe getRecipeFromItemStacks(CraftingInventory itemStackInput, ItemStack output, RecipeAddition recipeAddition, int craftTime, boolean shaped) throws UnsupportedOperationException {
+    public static SpatialRecipe getRecipeFromItemStacks(CraftingInventory itemStackInput, ItemStack output, RecipeAddition recipeAddition, int craftTime, boolean shaped){
         // Convert ItemStack array to IIngredient array
 
         IRecipeInput ingredientInput;
@@ -86,7 +87,7 @@ public class SpatialRecipe {
     }
 
     @Nullable
-    private static IIngredient getIngredient(RecipeAddition recipeAddition, ItemStack requiredInputToAddIS) throws UnsupportedOperationException {
+    private static IIngredient getIngredient(RecipeAddition recipeAddition, ItemStack requiredInputToAddIS){
         switch (recipeAddition) {
             case OREDICT:
                 List<IOreDictEntry> matchingOreDicts = CraftTweakerMC.getIItemStack(requiredInputToAddIS).getOres();
@@ -118,7 +119,7 @@ public class SpatialRecipe {
                 return CraftTweakerMC.getIItemStack(properMetaStack);
         }
 
-        throw new RuntimeException("This should never happen!");
+        throw new ImpossibleException();
     }
 
     public static List<SpatialRecipe> getRecipesForSize(int size) {

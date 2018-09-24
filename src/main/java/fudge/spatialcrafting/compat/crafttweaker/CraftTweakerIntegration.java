@@ -68,7 +68,7 @@ public final class CraftTweakerIntegration {
         return output;
     }
 
-    static abstract class ActionAdd implements IAction {
+    abstract static class ActionAdd implements IAction {
         protected final IItemStack output;
         protected final float craftTime;
 

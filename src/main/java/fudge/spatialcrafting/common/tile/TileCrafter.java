@@ -63,8 +63,8 @@ public class TileCrafter extends TileEntity implements ITickable {
                 if (ingredient.hasNewTransformers()) {
                     try {
                         return CraftTweakerMC.getItemStack(ingredient.applyNewTransform(CraftTweakerMC.getIItemStack(untransformedStack)));
-                    } catch (Throwable var7) {
-                        SpatialCrafting.LOGGER.error("Could not execute NewRecipeTransformer on {}:", ingredient.toCommandString(), var7);
+                    } catch (Exception e) {
+                        SpatialCrafting.LOGGER.error("Could not execute NewRecipeTransformer on {}:", ingredient.toCommandString(), e);
                     }
                 }
 

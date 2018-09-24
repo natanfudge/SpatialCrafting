@@ -27,10 +27,6 @@ public class ScJeiPlugin implements IModPlugin {
 
     private static List<CategorySpatialRecipe> recipeCategories = new ArrayList<>(4);
 
-    public static void addRecipe(SpatialRecipe recipe) {
-        MOD_REGISTRY.addRecipes(Collections.singletonList(recipe), SpatialCrafting.MODID + recipe.size());
-    }
-
 
     @Override
     public void registerItemSubtypes(ISubtypeRegistry subtypeRegistry) {
@@ -57,7 +53,6 @@ public class ScJeiPlugin implements IModPlugin {
     @Override
     public void register(IModRegistry registry) {
         for (int i = 2; i <= 5; i++) {
-            int finali = i;
             String UID = SpatialCrafting.MODID + i;
             registry.handleRecipes(SpatialRecipe.class, WrapperSpatialRecipe::new, UID);
             registry.addRecipes(SpatialRecipe.getRecipesForSize(i), UID);
