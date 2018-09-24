@@ -102,7 +102,6 @@ open class Arr3D<T>(val height: Int, val length: Int, val width: Int, init: (i: 
     fun lastElement(): T = get(height - 1, length - 1, width - 1)
 
 
-
     override fun equals(other: Any?): Boolean {
         if (other !is Arr3D<*>) {
             return false

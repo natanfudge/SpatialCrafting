@@ -54,7 +54,7 @@ public class PacketStartCraftingHelp extends PacketBlockPos {
                         if (crafter != null) {
                             crafter.startHelp(SpatialRecipe.fromID(message.recipeID));
                         }
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         SpatialCrafting.LOGGER.error(e);
                     }
 

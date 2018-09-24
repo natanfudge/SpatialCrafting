@@ -47,7 +47,7 @@ public class SpatialRecipe {
         this.craftTime = craftTime;
     }
 
-    public static SpatialRecipe getRecipeFromItemStacks(CraftingInventory itemStackInput, ItemStack output, RecipeAddition recipeAddition, int craftTime, boolean shaped){
+    public static SpatialRecipe getRecipeFromItemStacks(CraftingInventory itemStackInput, ItemStack output, RecipeAddition recipeAddition, int craftTime, boolean shaped) {
         // Convert ItemStack array to IIngredient array
 
         IRecipeInput ingredientInput;
@@ -87,7 +87,7 @@ public class SpatialRecipe {
     }
 
     @Nullable
-    private static IIngredient getIngredient(RecipeAddition recipeAddition, ItemStack requiredInputToAddIS){
+    private static IIngredient getIngredient(RecipeAddition recipeAddition, ItemStack requiredInputToAddIS) {
         switch (recipeAddition) {
             case OREDICT:
                 List<IOreDictEntry> matchingOreDicts = CraftTweakerMC.getIItemStack(requiredInputToAddIS).getOres();

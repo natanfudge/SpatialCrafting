@@ -20,7 +20,6 @@ class CraftingInventory(size: Int, init: (Int, Int, Int) -> ItemStack) : CubeArr
             CubeArr(cubeSize) { i, j, k -> CraftTweakerMC.getIItemStack(get(i, j, k)) }
 
 
-
     override fun isEmpty(): Boolean {
         forEach { if (it != ItemStack.EMPTY) return false }
 

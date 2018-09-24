@@ -451,7 +451,7 @@ public class TileCrafter extends TileEntity implements ITickable {
 
 
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             SpatialCrafting.LOGGER.error(e);
         }
 

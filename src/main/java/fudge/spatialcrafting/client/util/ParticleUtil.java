@@ -19,6 +19,7 @@ public final class ParticleUtil {
 
     private static final int TICKS_BETWEEN_PARTICLES = (int) (0.1f * TICKS_PER_SECOND);
     private static final String TICKER_ID = "ticker_particle_item_dust";
+
     private ParticleUtil() {}
 
     public static void playCraftParticles(World world, BlockPos crafterPos, int durationTicks) {

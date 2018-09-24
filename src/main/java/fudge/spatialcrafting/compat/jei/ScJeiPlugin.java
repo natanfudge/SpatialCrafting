@@ -12,7 +12,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static fudge.spatialcrafting.common.block.SCBlocks.HOLOGRAM;

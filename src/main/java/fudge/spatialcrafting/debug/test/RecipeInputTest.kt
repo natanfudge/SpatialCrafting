@@ -3,7 +3,6 @@ package fudge.spatialcrafting.debug.test
 import crafttweaker.api.item.IIngredient
 import crafttweaker.mc1120.item.MCItemStack
 import fudge.spatialcrafting.SpatialCrafting
-import fudge.spatialcrafting.common.crafting.SpatialRecipe
 import fudge.spatialcrafting.common.util.RecipeUtil
 import net.minecraft.init.Blocks
 import net.minecraft.item.Item
@@ -53,7 +52,6 @@ class RecipeInputTest {
             SpatialCrafting.LOGGER.info("testIIngredientConversion test successful!")
         }
     }
-
 
 
 }
