@@ -413,42 +413,46 @@ public class TileCrafter extends TileEntity implements ITickable {
 
     @Override
     public void update() {
-        if (!isMaster()) return;
+        try {
+            if (!isMaster()) return;
 
-        // Update gets called once before the shared data is synced to the client, meaning it will be null at that time.
-        // This is a fix to the errors it causes.
-        if (WorldSavedDataCrafters.getDataForMasterPos(world, masterPos()) == null) return;
-
-
-        if (!world.isRemote && isCrafting() && !craftTimeAboutToPass()) {
-            if (counter == SOUND_LOOP_TICKS) {
-                counter = 0;
-                world.playSound(null, pos, Sounds.CRAFT_LOOP, SoundCategory.BLOCKS, 0.8f, 0.8f);
-            } else {
-                counter++;
-            }
-
-        }
+            // Update gets called once before the shared data is synced to the client, meaning it will be null at that time.
+            // This is a fix to the errors it causes.
+            if (WorldSavedDataCrafters.getDataForMasterPos(world, masterPos()) == null) return;
 
 
-        if (craftTimeHasPassed()) {
-            EntityPlayer player = world.getPlayerEntityByUUID(Objects.requireNonNull(getCraftingPlayer()));
-            if (player == null) {
-                resetCraftingState();
-                return;
-            }
+            if (!world.isRemote && isCrafting() && !craftTimeAboutToPass()) {
+                if (counter == SOUND_LOOP_TICKS) {
+                    counter = 0;
+                    world.playSound(null, pos, Sounds.CRAFT_LOOP, SoundCategory.BLOCKS, 0.8f, 0.8f);
+                } else {
+                    counter++;
+                }
 
-            stopHelp();
-
-            if (!world.isRemote) {
-                // server
-                completeCrafting(world, player);
-            } else {
-                // client
-                resetCraftingState();
             }
 
 
+            if (craftTimeHasPassed()) {
+                EntityPlayer player = world.getPlayerEntityByUUID(Objects.requireNonNull(getCraftingPlayer()));
+                if (player == null) {
+                    resetCraftingState();
+                    return;
+                }
+
+                stopHelp();
+
+                if (!world.isRemote) {
+                    // server
+                    completeCrafting(world, player);
+                } else {
+                    // client
+                    resetCraftingState();
+                }
+
+
+            }
+        }catch (Exception e){
+            SpatialCrafting.LOGGER.error(e);
         }
 
     }

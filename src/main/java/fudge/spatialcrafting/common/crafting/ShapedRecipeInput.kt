@@ -102,7 +102,6 @@ class ShapedRecipeInput(size: Int, init: (Int, Int, Int) -> IIngredient?) : Cube
     }
 
 
-    //FIXME addrecipe doesn't take item damage into account
     // Fix for intellij not recognizing the nullability
     @SuppressWarnings("unused")
     override fun get(height: Int, row: Int, col: Int) = super<CubeArr>.get(height, row, col)

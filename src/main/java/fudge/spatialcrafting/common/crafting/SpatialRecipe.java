@@ -104,7 +104,7 @@ public class SpatialRecipe {
             case WILDCARD:
                 int count = requiredInputToAddIS.getCount();
                 int meta;
-                if (requiredInputToAddIS.getHasSubtypes()) {
+                if (requiredInputToAddIS.getHasSubtypes() || requiredInputToAddIS.isItemStackDamageable()) {
                     meta = OreDictionary.WILDCARD_VALUE;
                 } else {
                     meta = 0;
