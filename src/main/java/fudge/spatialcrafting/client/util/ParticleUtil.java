@@ -15,58 +15,58 @@ import net.minecraft.world.World;
 import static fudge.spatialcrafting.client.particle.ParticleCraft.*;
 import static fudge.spatialcrafting.common.util.MCConstants.TICKS_PER_SECOND;
 
-public class ParticleUtil {
+public final class ParticleUtil {
 
     private static final int TICKS_BETWEEN_PARTICLES = (int) (0.1f * TICKS_PER_SECOND);
     private static final String TICKER_ID = "ticker_particle_item_dust";
+    private ParticleUtil() {}
 
     public static void playCraftParticles(World world, BlockPos crafterPos, int durationTicks) {
         TileCrafter crafter = Util.getTileEntity(world, crafterPos);
 
         // Send these particle every so often using a ticker
-        ClientTicker.addTicker(ticksPassed -> {
+        ClientTicker.addTicker(ticksPassed ->
 
-            // Go through each hologram and send particles from it
-            crafter.getHolograms().forEach(hologramPos -> {
-
-
-                TileHologram hologramTile = Util.getTileEntity(world, hologramPos);
-                ItemStack itemStack = hologramTile.getStoredItem();
-
-                if (!itemStack.getItem().equals(Items.AIR)) {
-
-                    // Calculate start and end positions
-                    Vec3d startPos = new Vec3d(hologramPos.getX() + 0.2, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.2);
-
-                    Vec3d currentEndPos = crafter.centerOfHolograms();
-
-                    CrafterPoses crafters = crafter.getCrafterBlocks();
-
-                    double craftYEndPos = crafters.firstCrafter().getY() + 1.5;
+                // Go through each hologram and send particles from it
+                crafter.getHolograms().forEach(hologramPos -> {
 
 
-                    if (durationTicks > getRelativeTicksPassed(ticksPassed, durationTicks, startPos, currentEndPos, craftYEndPos)) {
+                    TileHologram hologramTile = Util.getTileEntity(world, hologramPos);
+                    ItemStack itemStack = hologramTile.getStoredItem();
 
-                        ParticleBuilder particleBuilder = new ParticleBuilder(world,
-                                currentEndPos,
-                                ticksPassed,
-                                durationTicks,
-                                craftYEndPos,
-                                itemStack);
+                    if (!itemStack.getItem().equals(Items.AIR)) {
 
-                        // Shot particles from the 4 corners of the hologram
-                        particleBuilder.shoot(startPos);
+                        // Calculate start and end positions
+                        Vec3d startPos = new Vec3d(hologramPos.getX() + 0.2, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.2);
 
-                        particleBuilder.shoot(new Vec3d(hologramPos.getX() + 0.2, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.8));
+                        Vec3d currentEndPos = crafter.centerOfHolograms();
 
-                        particleBuilder.shoot(new Vec3d(hologramPos.getX() + 0.8, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.2));
+                        CrafterPoses crafters = crafter.getCrafterBlocks();
 
-                        particleBuilder.shoot(new Vec3d(hologramPos.getX() + 0.8, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.8));
+                        double craftYEndPos = crafters.firstCrafter().getY() + 1.5;
+
+
+                        if (durationTicks > getRelativeTicksPassed(ticksPassed, durationTicks, startPos, currentEndPos, craftYEndPos)) {
+
+                            ParticleBuilder particleBuilder = new ParticleBuilder(world,
+                                    currentEndPos,
+                                    ticksPassed,
+                                    durationTicks,
+                                    craftYEndPos,
+                                    itemStack);
+
+                            // Shot particles from the 4 corners of the hologram
+                            particleBuilder.shoot(startPos);
+
+                            particleBuilder.shoot(new Vec3d(hologramPos.getX() + 0.2, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.8));
+
+                            particleBuilder.shoot(new Vec3d(hologramPos.getX() + 0.8, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.2));
+
+                            particleBuilder.shoot(new Vec3d(hologramPos.getX() + 0.8, hologramPos.getY() + 0.5, hologramPos.getZ() + 0.8));
+                        }
+
                     }
-
-                }
-            });
-        }, TICKS_BETWEEN_PARTICLES, durationTicks, TICKER_ID + Util.<TileCrafter>getTileEntity(world, crafterPos).masterPos());
+                }), TICKS_BETWEEN_PARTICLES, durationTicks, TICKER_ID + Util.<TileCrafter>getTileEntity(world, crafterPos).masterPos());
 
     }
 

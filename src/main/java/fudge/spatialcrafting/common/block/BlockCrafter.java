@@ -138,7 +138,6 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
                 if (!crafter.isCrafting()) {
                     // Check if any recipe matches, if so, startCraft the recipe.
                     for (SpatialRecipe recipe : SpatialRecipe.getRecipes()) {
-                        //TODO fix the fact shapeless doesn't work if it isn't in order
                         if (recipe.matches(craftingInventory)) {
                             startCraft(world, pos, recipe, playerIn);
                         }

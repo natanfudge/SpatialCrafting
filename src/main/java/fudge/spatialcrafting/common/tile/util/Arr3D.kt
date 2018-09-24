@@ -1,14 +1,5 @@
 package fudge.spatialcrafting.common.tile.util
 
-import crafttweaker.api.item.IItemCondition
-import crafttweaker.api.item.IItemStack
-import crafttweaker.api.item.IngredientItem
-import crafttweaker.api.minecraft.CraftTweakerMC.getItemStack
-import crafttweaker.mc1120.item.MCItemStack
-import fudge.spatialcrafting.SpatialCrafting
-import fudge.spatialcrafting.common.util.ReflectionUtil
-import net.minecraft.item.ItemStack
-import net.minecraftforge.oredict.OreDictionary
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -227,73 +218,6 @@ open class Arr3D<T>(val height: Int, val length: Int, val width: Int, init: (i: 
         }
 
         return true
-    }
-
-    fun MCItemStack.test(item: MCItemStack): Boolean {
-
-        val internal = getItemStack(item)
-        val stack = this.internal as ItemStack
-
-        /*if (!internal.isEmpty()){
-            if(internal.getItem() === stack.getItem()){
-                if(internal.getCount() >= stack.getCount()){
-                    *//*val test1 = stack.getItemDamage() == OreDictionary.WILDCARD_VALUE
-                    val test2 = stack.getItemDamage() == internal.getItemDamage()
-                    val test3 = !stack.getHasSubtypes() && !stack.getItem().isDamageable()
-
-                    if( test1|| test2 || (test3)) {
-                        return true
-                    }*//*
-
-                    if(stack.getItemDamage() == OreDictionary.WILDCARD_VALUE || stack.getItemDamage() == internal.getItemDamage() || (!stack.getHasSubtypes() && !stack.getItem().isDamageable())) {
-                        return true
-                    }
-
-                }
-            }
-        }*/
-
-        val test1 = !internal.isEmpty
-        val test2 = !stack.isEmpty
-        val test3 = internal.item === stack.item
-        val test4 = internal.count >= stack.count
-        val test5 = stack.itemDamage == OreDictionary.WILDCARD_VALUE
-        val test6 = stack.itemDamage == internal.itemDamage
-        val test7 = !stack.hasSubtypes && !stack.item.isDamageable()
-
-        return !internal.isEmpty && !stack.isEmpty && internal.item === stack.item && (internal.count >= stack.count) && (stack.itemDamage == OreDictionary.WILDCARD_VALUE || stack.itemDamage == internal.itemDamage || !stack.hasSubtypes && !stack.item.isDamageable)
-
-    }
-
-    fun IngredientItem.test(item: IItemStack): Boolean {
-        val thisItem: IItemStack = ReflectionUtil.getPrivateField(IngredientItem::class.java, this, "item")
-        val conditions: Array<IItemCondition> = ReflectionUtil.getPrivateField(IngredientItem::class.java, this, "conditions")
-
-        if (!thisItem.test(item))
-            return false
-
-        for (condition in conditions) {
-            if (!condition.matches(item))
-                return false
-        }
-
-        return true
-    }
-
-
-    fun IItemStack.test(item: IItemStack): Boolean {
-        val internal = getItemStack(item)
-        val stack: ItemStack = ReflectionUtil.getPrivateField(MCItemStack::class.java, this as MCItemStack, "stack")
-
-        SpatialCrafting.LOGGER.info("empty1 :{}", internal.isEmpty)
-        SpatialCrafting.LOGGER.info("empty2 :{}", stack.isEmpty)
-        SpatialCrafting.LOGGER.info("item :{}", internal.item !== stack.item)
-        SpatialCrafting.LOGGER.info("damage1 :{}", stack.itemDamage != OreDictionary.WILDCARD_VALUE)
-        SpatialCrafting.LOGGER.info("damage2 :{}", stack.itemDamage != internal.itemDamage)
-        SpatialCrafting.LOGGER.info("subtypes :{}", stack.hasSubtypes)
-        SpatialCrafting.LOGGER.info("damageable :{}", stack.item.isDamageable)
-
-        return !internal.isEmpty && !stack.isEmpty && internal.item === stack.item && (stack.itemDamage == OreDictionary.WILDCARD_VALUE || stack.itemDamage == internal.itemDamage || !stack.hasSubtypes && !stack.item.isDamageable)
     }
 
 

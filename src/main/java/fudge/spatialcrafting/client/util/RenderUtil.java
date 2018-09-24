@@ -6,7 +6,9 @@ import net.minecraft.client.renderer.RenderItem;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.item.ItemStack;
 
-public class RenderUtil {
+public final class RenderUtil {
+
+    private RenderUtil() {}
 
     // Copied from RenderItem::renderItem to allow for different alpha
     public static void renderGhostItem(ItemStack stack, IBakedModel model) {

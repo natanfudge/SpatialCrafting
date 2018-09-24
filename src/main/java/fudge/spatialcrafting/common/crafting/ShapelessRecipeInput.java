@@ -18,10 +18,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static fudge.spatialcrafting.common.crafting.RecipeInputSerialization.RECIPE_INPUT_NBT;
+import static fudge.spatialcrafting.common.crafting.RecipeInputSerialization.SHAPED_NBT;
+
 public class ShapelessRecipeInput implements IRecipeInput {
 
     private final List<IIngredient> ingredients;
     private final int layerSize;
+
     public ShapelessRecipeInput(IIngredient[] ingredients) {
         this(Arrays.asList(ingredients));
     }

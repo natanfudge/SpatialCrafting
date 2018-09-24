@@ -121,12 +121,12 @@ public class CommandAddSRecipe extends SCCommand {
 
     @Override
     public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args) {
-        AddSpatialRecipe(server, sender, args, true);
+        addSpatialRecipe(server, sender, args, true);
 
 
     }
 
-    public void AddSpatialRecipe(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args, boolean shaped) {
+    public void addSpatialRecipe(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args, boolean shaped) {
         // Only works in single player
         if (server.isDedicatedServer()) {
             sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.dedis_only", 0));
@@ -168,22 +168,7 @@ public class CommandAddSRecipe extends SCCommand {
                 }
 
 
-                try {
-                    SpatialRecipe recipe = SpatialRecipe.getRecipeFromItemStacks(input, output, recipeAdditionType, craftTime, shaped);
-
-                    // Writes some code in ZS that adds the corresponding recipe. Who needs programmers in our day and age?
-                    final String METHOD_NAME = shaped ? "addRecipe" : "addShapeless";
-                    String command = "mods.spatialcrafting." + METHOD_NAME + "(" + recipe.toFormattedString(customTime) + ");\n\n";
-
-                    if (SpatialRecipe.noRecipeConflict(recipe, sender)) {
-                        addRecipe(sender, player, output, recipe, command, shaped);
-                    }
-
-
-                } catch (UnsupportedOperationException e) {
-                    // If the user did oredict and there are too many oredicts we face a problem (recipe will be null)
-                    sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.too_many_oredicts", 0));
-                }
+                validateRecipeAndAdd(sender, shaped, player, output, input, recipeAdditionType, craftTime, customTime);
 
 
             }
@@ -191,6 +176,25 @@ public class CommandAddSRecipe extends SCCommand {
 
         } catch (PlayerNotFoundException e) {
             SpatialCrafting.LOGGER.error("You're not supposed to use this with a command block!", e);
+        }
+    }
+
+    private void validateRecipeAndAdd(@Nonnull ICommandSender sender, boolean shaped, EntityPlayerMP player, ItemStack output, CraftingInventory input, RecipeAddition recipeAdditionType, int craftTime, boolean customTime) {
+        try {
+            SpatialRecipe recipe = SpatialRecipe.getRecipeFromItemStacks(input, output, recipeAdditionType, craftTime, shaped);
+
+            // Writes some code in ZS that adds the corresponding recipe. Who needs programmers in our day and age?
+            final String METHOD_NAME = shaped ? "addRecipe" : "addShapeless";
+            String command = "mods.spatialcrafting." + METHOD_NAME + "(" + recipe.toFormattedString(customTime) + ");\n\n";
+
+            if (SpatialRecipe.noRecipeConflict(recipe, sender)) {
+                addRecipe(sender, player, output, recipe, command, shaped);
+            }
+
+
+        } catch (UnsupportedOperationException e) {
+            // If the user did oredict and there are too many oredicts we face a problem (recipe will be null)
+            sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.too_many_oredicts", 0));
         }
     }
 

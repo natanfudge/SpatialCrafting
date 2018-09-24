@@ -49,7 +49,7 @@ public class CommandAddShapeless extends SCCommand {
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
         SCCommand command = Commands.getCommand("addrecipe");
         if (command instanceof CommandAddSRecipe) {
-            ((CommandAddSRecipe) command).AddSpatialRecipe(server, sender, args, false);
+            ((CommandAddSRecipe) command).addSpatialRecipe(server, sender, args, false);
         } else {
             SpatialCrafting.LOGGER.error("Couldn't find add recipe command!", new NullPointerException());
         }

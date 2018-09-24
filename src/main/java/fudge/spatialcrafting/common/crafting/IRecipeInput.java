@@ -13,19 +13,6 @@ import java.util.List;
 
 public interface IRecipeInput {
 
-    String RECIPE_INPUT_NBT = "recipeInput";
-    String SHAPED_NBT = "shaped";
-
-    static IRecipeInput fromNBT(NBTTagCompound serializedData) {
-        boolean shaped = serializedData.getBoolean(SHAPED_NBT);
-        if (shaped) {
-            return ShapedRecipeInput.Companion.fromNBT(serializedData);
-        } else {
-            return ShapelessRecipeInput.fromNBT(serializedData);
-        }
-
-
-    }
 
     @Nullable
     IIngredient get(int height, int row, int col);

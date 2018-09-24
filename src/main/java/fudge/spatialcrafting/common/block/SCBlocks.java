@@ -80,10 +80,6 @@ public final class SCBlocks {
     }
 
 
-/*    public static void registerForTests(IForgeRegistry<Block> registry){
-        blockList.forEach(registry::register);
-    }*/
-
     @SubscribeEvent
     public static void registerItemBlocks(RegistryEvent.Register<Item> event) {
         IForgeRegistry<Item> registry = event.getRegistry();

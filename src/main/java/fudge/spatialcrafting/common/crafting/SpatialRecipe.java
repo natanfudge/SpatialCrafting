@@ -182,7 +182,7 @@ public class SpatialRecipe {
     }
 
     public static SpatialRecipe fromBytes(ByteBuf buf) {
-        IRecipeInput input = IRecipeInput.fromNBT(Objects.requireNonNull(ByteBufUtils.readTag(buf)));
+        IRecipeInput input = RecipeInputSerialization.fromNBT(Objects.requireNonNull(ByteBufUtils.readTag(buf)));
         ItemStack output = ByteBufUtils.readItemStack(buf);
         int duration = buf.readInt();
         return new SpatialRecipe(input, output, duration);
