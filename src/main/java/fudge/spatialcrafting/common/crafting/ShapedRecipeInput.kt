@@ -4,6 +4,7 @@ import crafttweaker.api.item.IIngredient
 import crafttweaker.api.item.IItemStack
 import crafttweaker.api.minecraft.CraftTweakerMC
 import fudge.spatialcrafting.common.crafting.RecipeInputSerialization.RECIPE_INPUT_NBT
+import fudge.spatialcrafting.common.crafting.RecipeInputSerialization.SHAPED_NBT
 import fudge.spatialcrafting.common.tile.util.CraftingInventory
 import fudge.spatialcrafting.common.tile.util.CubeArr
 import fudge.spatialcrafting.common.util.RecipeUtil
@@ -116,6 +117,7 @@ class ShapedRecipeInput(size: Int, init: (Int, Int, Int) -> IIngredient?) : Cube
         }
 
         existingData.setTag(RECIPE_INPUT_NBT, nbtList)
+        existingData.setBoolean(SHAPED_NBT, true)
 
         return existingData
 

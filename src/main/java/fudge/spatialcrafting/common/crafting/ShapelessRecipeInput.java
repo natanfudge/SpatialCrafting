@@ -125,7 +125,6 @@ public class ShapelessRecipeInput implements IRecipeInput {
 
     }
 
-    //FIXME flowers turn into dead bushes
     @Override
     public int ingredientAmount() {
         return ingredients.size();

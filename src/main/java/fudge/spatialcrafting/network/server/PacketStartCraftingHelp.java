@@ -1,5 +1,6 @@
 package fudge.spatialcrafting.network.server;
 
+import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.CrafterUtil;
@@ -48,9 +49,13 @@ public class PacketStartCraftingHelp extends PacketBlockPos {
             serverWorld.addScheduledTask((new Runnable() {
                 @Override
                 public void run() {
-                    TileCrafter crafter = CrafterUtil.getClosestMasterBlock(serverWorld, message.pos);
-                    if (crafter != null) {
-                        crafter.startHelp(SpatialRecipe.fromID(message.recipeID));
+                    try {
+                        TileCrafter crafter = CrafterUtil.getClosestMasterBlock(serverWorld, message.pos);
+                        if (crafter != null) {
+                            crafter.startHelp(SpatialRecipe.fromID(message.recipeID));
+                        }
+                    }catch (Exception e){
+                        SpatialCrafting.LOGGER.error(e);
                     }
 
                 }
