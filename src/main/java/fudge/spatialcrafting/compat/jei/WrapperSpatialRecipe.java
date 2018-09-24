@@ -44,9 +44,12 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
     private static final ResourceLocation HELP_OFF_LOCATION = new ResourceLocation(MODID, "textures/gui/button/plus_off.png");
 
     private static final int LAYERS_X = 1;
+    private static final List<Integer> Y_OFFSETS = ImmutableList.of(0, 0, 26, 36, 46, 56);
+    private static final List<Integer> X_OFFSETS = ImmutableList.of(0, 0, 62, 81, 102, 120);
     private final SpatialRecipe recipe;
     private final List<JeiButton> buttons;
     private int layer;
+
 
     public WrapperSpatialRecipe(SpatialRecipe recipe) {
         this.recipe = recipe;
@@ -55,7 +58,6 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
         buttons = addButtons();
 
     }
-
 
     private List<JeiButton> addButtons() {
         int upY = BUTTON_Y_OFFSET.get(recipeSize());
@@ -176,7 +178,6 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
         return ImmutableList.of(upButton, downButton, helpButton);
     }
 
-
     private boolean nearestCrafterMatches(Minecraft minecraft) {
         TileCrafter crafter = CrafterUtil.getClosestMasterBlock(minecraft.world, minecraft.player.getPosition());
         return crafter != null && crafterMatches(crafter);
@@ -218,7 +219,6 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
         ingredients.setInputLists(ItemStack.class, recipe.getRequiredInput().itemStackOfLayer(layer));
     }
 
-
     @Override
     public boolean handleClick(Minecraft minecraft, int mouseX, int mouseY, int mouseButton) {
         buttons.forEach(button -> button.handleClick(minecraft, mouseX, mouseY));
@@ -251,9 +251,9 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
 
         String craftTimeInfo;
         // Remove ".0"
-        if((int)time == time){
-            craftTimeInfo = Integer.toString((int)time) + "s";
-        }else{
+        if ((int) time == time) {
+            craftTimeInfo = Integer.toString((int) time) + "s";
+        } else {
             craftTimeInfo = Float.toString(time) + "s";
         }
 
@@ -262,10 +262,6 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
 
 
     }
-
-    private static final List<Integer> Y_OFFSETS = ImmutableList.of(0,0,26,36,46,56);
-    private static final List<Integer> X_OFFSETS = ImmutableList.of(0,0,62,81,102,120);
-
 
     private void drawString(int x, int y, int color, String text) {
         Minecraft minecraft = Minecraft.getMinecraft();

@@ -12,7 +12,6 @@ import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Commands extends CommandBase {
@@ -24,9 +23,9 @@ public class Commands extends CommandBase {
             new CommandTest());
 
     @Nullable
-    public static SCCommand getCommand(String alias){
-        for(SCCommand command : commandList){
-            if(command.getAliases().contains(alias)) return command;
+    public static SCCommand getCommand(String alias) {
+        for (SCCommand command : commandList) {
+            if (command.getAliases().contains(alias)) return command;
         }
 
         return null;
@@ -41,7 +40,7 @@ public class Commands extends CommandBase {
 
         SCCommand command = getCommand(words[0]);
 
-        if(command != null){
+        if (command != null) {
             if (command.checkPermission(server, sender)) {
                 try {
                     if (argAmountValid(words.length - 1, command, sender)) {
@@ -55,7 +54,7 @@ public class Commands extends CommandBase {
             } else {
                 sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.no_permission", 0));
             }
-        }else{
+        } else {
             sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.no_such_command", 0));
         }
 

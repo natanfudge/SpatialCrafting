@@ -74,7 +74,6 @@ public final class RecipeUtil {
     }
 
 
-
     @Nullable
     public static IOreDictEntry getOreDictEntryFromList(List<?> list) {
         for (String ore : OreDictionary.getOreNames()) {

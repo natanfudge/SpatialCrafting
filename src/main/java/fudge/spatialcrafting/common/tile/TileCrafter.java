@@ -54,12 +54,33 @@ public class TileCrafter extends TileEntity implements ITickable {
 
     public TileCrafter() {}
 
-    public boolean isHelpActive() {
-        return getRecipe() != null;
+    private static CubeArr<ItemStack> transformInventory(SpatialRecipe recipe, CraftingInventory inventory, EntityPlayer player) {
+        return new CubeArr<>(inventory.getCubeSize(), (i, j, k) -> {
+            IIngredient ingredient = recipe.getRequiredInput().get(i, j, k);
+            CubeArr<IItemStack> iItemStacks = inventory.toIItemStackArr();
+            ItemStack untransformedStack = recipe.getRequiredInput().getCorrespondingStack(inventory, iItemStacks, i, j, k);
+            if (ingredient != null) {
+                if (ingredient.hasNewTransformers()) {
+                    try {
+                        return CraftTweakerMC.getItemStack(ingredient.applyNewTransform(CraftTweakerMC.getIItemStack(untransformedStack)));
+                    } catch (Throwable var7) {
+                        SpatialCrafting.LOGGER.error("Could not execute NewRecipeTransformer on {}:", ingredient.toCommandString(), var7);
+                    }
+                }
+
+                if (ingredient.hasTransformers()) {
+                    return CraftTweakerMC.getItemStack(ingredient.applyTransform(CraftTweakerMC.getIItemStack(untransformedStack),
+                            CraftTweakerMC.getIPlayer(player)));
+                }
+            }
+
+            return ItemStack.EMPTY;
+
+        });
     }
 
-    public void setActiveLayer(int layerToActivate) {
-        setActiveLayer(layerToActivate, true);
+    public boolean isHelpActive() {
+        return getRecipe() != null;
     }
 
     @Nullable
@@ -260,6 +281,10 @@ public class TileCrafter extends TileEntity implements ITickable {
         return getSharedData().getActiveLayer();
     }
 
+    public void setActiveLayer(int layerToActivate) {
+        setActiveLayer(layerToActivate, true);
+    }
+
     public long getCraftEndTime() {
         return getSharedData().getCraftTime();
     }
@@ -289,7 +314,6 @@ public class TileCrafter extends TileEntity implements ITickable {
     private boolean craftTimeAboutToPass() {
         return getCraftEndTime() != 0 && world.getWorldTime() + 30 >= getCraftEndTime();
     }
-
 
     public boolean isCrafting() {
         return getCraftEndTime() != 0;
@@ -474,35 +498,9 @@ public class TileCrafter extends TileEntity implements ITickable {
 
     }
 
-    private static CubeArr<ItemStack> transformInventory(SpatialRecipe recipe, CraftingInventory inventory, EntityPlayer player) {
-        return new CubeArr<>(inventory.getCubeSize(), (i, j, k) -> {
-            IIngredient ingredient = recipe.getRequiredInput().get(i, j, k);
-            CubeArr<IItemStack> iItemStacks = inventory.toIItemStackArr();
-            ItemStack untransformedStack = recipe.getRequiredInput().getCorrespondingStack(inventory, iItemStacks, i, j, k);
-            if (ingredient != null) {
-                if (ingredient.hasNewTransformers()) {
-                    try {
-                        return CraftTweakerMC.getItemStack(ingredient.applyNewTransform(CraftTweakerMC.getIItemStack(untransformedStack)));
-                    } catch (Throwable var7) {
-                        SpatialCrafting.LOGGER.error("Could not execute NewRecipeTransformer on {}:", ingredient.toCommandString(), var7);
-                    }
-                }
-
-                if (ingredient.hasTransformers()) {
-                    return CraftTweakerMC.getItemStack(ingredient.applyTransform(CraftTweakerMC.getIItemStack(untransformedStack),
-                            CraftTweakerMC.getIPlayer(player)));
-                }
-            }
-
-            return ItemStack.EMPTY;
-
-        });
-    }
-
     /*
 
      */
-
 
     public Vec3d centerOfCrafters() {
         CrafterPoses crafters = getCrafterBlocks();

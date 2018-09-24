@@ -6,8 +6,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.IForgeRegistry;
 
 @Mod.EventBusSubscriber
@@ -16,6 +14,7 @@ public final class Sounds {
     public static SoundEvent CRAFT_END;
     public static SoundEvent CRAFT_START;
     public static SoundEvent CRAFT_LOOP;
+
     private Sounds() {}
 
     @SubscribeEvent
@@ -40,6 +39,7 @@ public final class Sounds {
         public static String CRAFT_END = "craft_end";
         public static String CRAFT_LOOP = "craft_loop";
         public static String CRAFT_START = "craft_start";
+
         private RegistryNames() {}
     }
 

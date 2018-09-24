@@ -9,8 +9,8 @@ class CraftingInventory(size: Int, init: (Int, Int, Int) -> ItemStack) : CubeArr
     var stackAmount = 0
 
     init {
-        forEach{
-            if(!it.isEmpty){
+        forEach {
+            if (!it.isEmpty) {
                 stackAmount++
             }
         }

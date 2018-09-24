@@ -16,6 +16,7 @@ public final class MCConstants {
     public static final int LOWEST = 0;
     public static final int NORMAL_ITEMSTACK_LIMIT = 64;
     public static final int TICKS_PER_SECOND = 20;
+
     private MCConstants() {}
 
 

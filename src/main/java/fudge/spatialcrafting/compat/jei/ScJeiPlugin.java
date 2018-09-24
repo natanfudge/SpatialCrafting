@@ -24,7 +24,6 @@ public class ScJeiPlugin implements IModPlugin {
     public static RecipesGui JEI_GUI;
     public static IModRegistry MOD_REGISTRY;
     public static IRecipeRegistry RECIPE_REGISTRY;
-    //public static IIngredientRegistry INGREDIENT_REGISTRY;
 
     private static List<CategorySpatialRecipe> recipeCategories = new ArrayList<>(4);
 

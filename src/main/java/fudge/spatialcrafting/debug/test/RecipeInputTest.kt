@@ -3,7 +3,6 @@ package fudge.spatialcrafting.debug.test
 import crafttweaker.api.item.IIngredient
 import crafttweaker.mc1120.item.MCItemStack
 import fudge.spatialcrafting.SpatialCrafting
-import fudge.spatialcrafting.common.crafting.IRecipeInput
 import fudge.spatialcrafting.common.crafting.SpatialRecipe
 import fudge.spatialcrafting.common.util.RecipeUtil
 import net.minecraft.init.Blocks
@@ -58,17 +57,17 @@ class RecipeInputTest {
         }
     }
 
-  /*  @Test
-    fun testRecipeInputConversion() {
-        val nbt = testInput.writeToNBT(NBTTagCompound())
-        //val inputBack = IRecipeInput.fromNBT(nbt)
+    /*  @Test
+      fun testRecipeInputConversion() {
+          val nbt = testInput.writeToNBT(NBTTagCompound())
+          //val inputBack = IRecipeInput.fromNBT(nbt)
 
-        if (testInput != inputBack) {
-            SpatialCrafting.LOGGER.error("testRecipeInputConversion test failed! orig was $testInput and the one returned was $inputBack")
-        } else {
-            SpatialCrafting.LOGGER.info("testRecipeInputConversion test successful!")
-        }
-    }*/
+          if (testInput != inputBack) {
+              SpatialCrafting.LOGGER.error("testRecipeInputConversion test failed! orig was $testInput and the one returned was $inputBack")
+          } else {
+              SpatialCrafting.LOGGER.info("testRecipeInputConversion test successful!")
+          }
+      }*/
 
 
 }

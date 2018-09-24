@@ -3,12 +3,10 @@ package fudge.spatialcrafting.common.crafting
 import crafttweaker.api.item.IIngredient
 import crafttweaker.api.item.IItemStack
 import crafttweaker.api.minecraft.CraftTweakerMC
-import fudge.spatialcrafting.SpatialCrafting
 import fudge.spatialcrafting.common.tile.util.CraftingInventory
 import fudge.spatialcrafting.common.tile.util.CubeArr
 import fudge.spatialcrafting.common.util.RecipeUtil
 import fudge.spatialcrafting.common.util.RecipeUtil.ingredientFromNbt
-import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
@@ -16,7 +14,7 @@ import net.minecraftforge.common.util.Constants
 
 
 class ShapedRecipeInput(size: Int, init: (Int, Int, Int) -> IIngredient?) : CubeArr<IIngredient?>(size, init), IRecipeInput {
-    override fun getCorrespondingStack(inventory: CraftingInventory, iitemstacks:CubeArr<IItemStack>, i: Int, j: Int, k: Int): ItemStack {
+    override fun getCorrespondingStack(inventory: CraftingInventory, iitemstacks: CubeArr<IItemStack>, i: Int, j: Int, k: Int): ItemStack {
         return inventory[i, j, k]
     }
 

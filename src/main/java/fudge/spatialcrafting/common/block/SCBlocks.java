@@ -5,20 +5,15 @@ import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.TileHologram;
 import fudge.spatialcrafting.common.util.MCConstants;
-import mezz.jei.api.ingredients.IIngredientBlacklist;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.item.ItemStack;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static fudge.spatialcrafting.common.util.Util.objectHolder;
@@ -45,7 +40,6 @@ public final class SCBlocks {
             createBlock(new BlockCrafter(3), RegistryNames.X3CRAFTER_BLOCK),
             createBlock(new BlockCrafter(4), RegistryNames.X4CRAFTER_BLOCK),
             createBlock(new BlockCrafter(5), RegistryNames.X5CRAFTER_BLOCK));
-
 
 
     private SCBlocks() {}
@@ -103,6 +97,7 @@ public final class SCBlocks {
         public static final String X3CRAFTER_BLOCK = "x3crafter_block";
         public static final String X4CRAFTER_BLOCK = "x4crafter_block";
         public static final String X5CRAFTER_BLOCK = "x5crafter_block";
+
         private RegistryNames() {}
 
 

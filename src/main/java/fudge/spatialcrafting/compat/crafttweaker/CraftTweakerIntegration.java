@@ -8,15 +8,12 @@ import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import crafttweaker.mc1120.CraftTweaker;
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.crafting.IRecipeInput;
 import fudge.spatialcrafting.common.crafting.ShapedRecipeInput;
 import fudge.spatialcrafting.common.crafting.ShapelessRecipeInput;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.util.MCConstants;
 import fudge.spatialcrafting.common.util.SCConstants;
 import net.minecraft.item.ItemStack;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import stanhebben.zenscript.annotations.Optional;
 import stanhebben.zenscript.annotations.ZenClass;
 import stanhebben.zenscript.annotations.ZenMethod;
@@ -90,16 +87,10 @@ public final class CraftTweakerIntegration {
         }
 
 
-
-
         @Override
         public String describe() {
             return "Adding Spatial Crafting Recipe for " + CraftTweakerMC.getItemStack(output).getDisplayName();
         }
-
-
-
-
 
 
     }
@@ -116,19 +107,19 @@ public final class CraftTweakerIntegration {
 
         @Override
         public void apply() {
-            if(input.length == input[0].length && input[0].length == input[0][0].length) {
+            if (input.length == input[0].length && input[0].length == input[0][0].length) {
 
                 int time = craftTime == 0 ? input.length * SCConstants.DEFAULT_CRAFT_TIME_MULTIPLIER : Math.round(craftTime * MCConstants.TICKS_PER_SECOND);
                 SpatialRecipe recipe = new SpatialRecipe(ShapedRecipeInput.Companion.fromArr(input), CraftTweakerMC.getItemStack(output), time);
                 super.apply(recipe);
-            }else{
+            } else {
                 CraftTweakerAPI.logError("Can't add recipe for " + output.toString() + " because the input is not a cube array");
             }
         }
     }
 
     // See above for why this exists
-     static class AddShapeless extends ActionAdd {
+    static class AddShapeless extends ActionAdd {
         private final IIngredient[] input;
 
 
@@ -140,16 +131,13 @@ public final class CraftTweakerIntegration {
         @Override
         public void apply() {
             double sizeD = Math.cbrt(input.length);
-            int size = sizeD == ((int)sizeD) ? (int)sizeD : ((int)sizeD) + 1;
+            int size = sizeD == ((int) sizeD) ? (int) sizeD : ((int) sizeD) + 1;
             int time = craftTime == 0 ? size * SCConstants.DEFAULT_CRAFT_TIME_MULTIPLIER : Math.round(craftTime * MCConstants.TICKS_PER_SECOND);
             SpatialRecipe recipe = new SpatialRecipe(new ShapelessRecipeInput(input), CraftTweakerMC.getItemStack(output), time);
             super.apply(recipe);
 
         }
     }
-
-
-
 
 
 }

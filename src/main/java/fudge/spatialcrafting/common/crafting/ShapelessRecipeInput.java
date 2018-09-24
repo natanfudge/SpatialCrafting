@@ -20,13 +20,8 @@ import java.util.List;
 
 public class ShapelessRecipeInput implements IRecipeInput {
 
-    List<IIngredient> getIngredients() {
-        return ingredients;
-    }
-
     private final List<IIngredient> ingredients;
     private final int layerSize;
-
     public ShapelessRecipeInput(IIngredient[] ingredients) {
         this(Arrays.asList(ingredients));
     }
@@ -36,20 +31,8 @@ public class ShapelessRecipeInput implements IRecipeInput {
         layerSize = Math.max(2, ceil(Math.cbrt(ingredients.size())));
     }
 
-
     private static int ceil(double num) {
         return (int) num == num ? (int) num : (int) num + 1;
-    }
-
-    @Override
-    @Nullable
-    public IIngredient get(int height, int row, int col) {
-        int pos = col + row * layerSize + height * layerSize * layerSize;
-        if (pos < ingredients.size()) {
-            return ingredients.get(pos);
-        } else {
-            return null;
-        }
     }
 
     public static IRecipeInput fromNBT(NBTTagCompound serializedData) {
@@ -66,6 +49,20 @@ public class ShapelessRecipeInput implements IRecipeInput {
         return new ShapelessRecipeInput(ingredients);
     }
 
+    List<IIngredient> getIngredients() {
+        return ingredients;
+    }
+
+    @Override
+    @Nullable
+    public IIngredient get(int height, int row, int col) {
+        int pos = col + row * layerSize + height * layerSize * layerSize;
+        if (pos < ingredients.size()) {
+            return ingredients.get(pos);
+        } else {
+            return null;
+        }
+    }
 
     @Override
     public NBTTagCompound writeToNBT(NBTTagCompound existingData) {
@@ -253,32 +250,16 @@ public class ShapelessRecipeInput implements IRecipeInput {
 
     }
 
-    private int ingredientAmountOfLayer(int layer) {
-        int pos = layer * layerSize * layerSize;
-
-        // Magic math to figure it out with iterating through it
-        return Math.max(0, Math.min(ingredientAmount() - pos + 1, layerSize * layerSize));
-    }
-
-    private static int itemStackAmountOfLayer(CraftingInventory inventory, int layer) {
-        int amount = 0;
-        for (int i = 0; i < inventory.getCubeSize(); i++) {
-            for (int j = 0; j < inventory.getCubeSize(); j++) {
-                ItemStack stack = inventory.get(layer, i, j);
-                if (!stack.isEmpty()) {
-                    amount++;
-                }
-                //     ItemStack stack = inventory.get(layer, i, j);
-
-            }
-        }
-        return amount;
-    }
 
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof ShapelessRecipeInput)) return false;
 
         return this.ingredients.equals(((ShapelessRecipeInput) other).ingredients);
+    }
+
+    @Override
+    public int hashCode() {
+        return ingredients.hashCode();
     }
 }

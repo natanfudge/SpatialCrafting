@@ -75,7 +75,7 @@ public class SpatialRecipe {
     }
 
     @Nullable
-    public static SpatialRecipe getMatchingRecipe(CraftingInventory inventory){
+    public static SpatialRecipe getMatchingRecipe(CraftingInventory inventory) {
         for (SpatialRecipe recipe : getRecipes()) {
             if (recipe.matches(inventory)) {
                 return recipe;

@@ -1,8 +1,6 @@
 package fudge.spatialcrafting.common.command;
 
 import com.google.common.collect.ImmutableList;
-import crafttweaker.api.item.IIngredient;
-import crafttweaker.mc1120.brackets.BracketHandlerItem;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.crafting.RecipeAddition;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
@@ -11,7 +9,6 @@ import fudge.spatialcrafting.common.tile.util.CraftingInventory;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.common.util.MCConstants;
 import fudge.spatialcrafting.common.util.SCConstants;
-import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketAddRecipeToJei;
 import net.minecraft.command.ICommandSender;
@@ -22,7 +19,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.Loader;
-import org.apache.http.conn.UnsupportedSchemeException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -125,7 +121,7 @@ public class CommandAddSRecipe extends SCCommand {
 
     @Override
     public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args) {
-        AddSpatialRecipe(server, sender, args,true);
+        AddSpatialRecipe(server, sender, args, true);
 
 
     }
@@ -176,15 +172,15 @@ public class CommandAddSRecipe extends SCCommand {
                     SpatialRecipe recipe = SpatialRecipe.getRecipeFromItemStacks(input, output, recipeAdditionType, craftTime, shaped);
 
                     // Writes some code in ZS that adds the corresponding recipe. Who needs programmers in our day and age?
-                    final String METHOD_NAME = shaped? "addRecipe" : "addShapeless";
-                    String command = "mods.spatialcrafting." + METHOD_NAME+ "(" + recipe.toFormattedString(customTime) + ");\n\n";
+                    final String METHOD_NAME = shaped ? "addRecipe" : "addShapeless";
+                    String command = "mods.spatialcrafting." + METHOD_NAME + "(" + recipe.toFormattedString(customTime) + ");\n\n";
 
                     if (SpatialRecipe.noRecipeConflict(recipe, sender)) {
-                        addRecipe(sender, player, output, recipe, command,shaped);
+                        addRecipe(sender, player, output, recipe, command, shaped);
                     }
 
 
-                }catch (UnsupportedOperationException e){
+                } catch (UnsupportedOperationException e) {
                     // If the user did oredict and there are too many oredicts we face a problem (recipe will be null)
                     sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.too_many_oredicts", 0));
                 }
@@ -207,17 +203,21 @@ public class CommandAddSRecipe extends SCCommand {
         }
 
 
-        if(shaped) {
+        if (shaped) {
             if (output.getCount() == 1) {
                 sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.success", output.getDisplayName()));
             } else {
-                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.success_num", output.getCount(), output.getDisplayName()));
+                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.success_num",
+                        output.getCount(),
+                        output.getDisplayName()));
             }
-        }else{
+        } else {
             if (output.getCount() == 1) {
                 sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_shapeless.success", output.getDisplayName()));
             } else {
-                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_shapeless.success_num", output.getCount(), output.getDisplayName()));
+                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_shapeless.success_num",
+                        output.getCount(),
+                        output.getDisplayName()));
             }
         }
     }

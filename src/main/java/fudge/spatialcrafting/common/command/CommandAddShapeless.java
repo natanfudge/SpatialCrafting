@@ -3,21 +3,21 @@ package fudge.spatialcrafting.common.command;
 import com.google.common.collect.ImmutableList;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.util.MCConstants;
-import fudge.spatialcrafting.debug.Debug;
-import fudge.spatialcrafting.network.PacketHandler;
-import fudge.spatialcrafting.network.client.PacketDebugPrint;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.PlayerNotFoundException;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.World;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
 public class CommandAddShapeless extends SCCommand {
 
-    private static final List<String> ALIASES = ImmutableList.of("addshapeless","as","asl","addshapelessrecipe","addrecipeshapeless","asr","aslr");
+    private static final List<String> ALIASES = ImmutableList.of("addshapeless",
+            "as",
+            "asl",
+            "addshapelessrecipe",
+            "addrecipeshapeless",
+            "asr",
+            "aslr");
 
     @Override
     public String description() {
@@ -48,9 +48,9 @@ public class CommandAddShapeless extends SCCommand {
     @Override
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) {
         SCCommand command = Commands.getCommand("addrecipe");
-        if(command instanceof CommandAddSRecipe){
+        if (command instanceof CommandAddSRecipe) {
             ((CommandAddSRecipe) command).AddSpatialRecipe(server, sender, args, false);
-        }else{
+        } else {
             SpatialCrafting.LOGGER.error("Couldn't find add recipe command!", new NullPointerException());
         }
 

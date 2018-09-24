@@ -15,6 +15,7 @@ public final class PacketHandler {
 
     private static SimpleNetworkWrapper network;
     private static int packetId = 0;
+
     private PacketHandler() {}
 
     private static int nextID() {

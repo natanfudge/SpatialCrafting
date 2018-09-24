@@ -2,11 +2,9 @@ package fudge.spatialcrafting.network.client;
 
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
-import fudge.spatialcrafting.common.util.RecipeUtil;
 import fudge.spatialcrafting.compat.jei.ScJeiPlugin;
 import fudge.spatialcrafting.compat.jei.WrapperSpatialRecipe;
 import io.netty.buffer.ByteBuf;
-import mezz.jei.JustEnoughItems;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -15,7 +13,6 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 
 
 // Packet from server to client
@@ -53,14 +50,13 @@ public class PacketAddRecipeToJei implements IMessage {
                 public void run() {
                     String categoryUID = SpatialCrafting.MODID + message.recipe.size();
                     //noinspection deprecation
-                    ScJeiPlugin.RECIPE_REGISTRY.addRecipe(new WrapperSpatialRecipe(message.recipe),categoryUID);
+                    ScJeiPlugin.RECIPE_REGISTRY.addRecipe(new WrapperSpatialRecipe(message.recipe), categoryUID);
                 }
             }));
 
             return null;
         }
     }
-
 
 
 }
