@@ -53,11 +53,7 @@ repositories{
         url "http://maven.blamejared.com/"
     }
 
-    maven{
-        name "sounds libs"
-        url "https://mvnrepository.com/artifact/com.googlecode.soundlibs/mp3spi"
-    }
-    //TODO do compile/decompile start to turn kotlin into java and get rid of dependency
+
     maven {
         url "http://maven.shadowfacts.net/"
     }
@@ -77,7 +73,7 @@ dependencies {
 
     compileOnly "mezz.jei:jei_${mc_version}:${jei_version}"
 
-    compile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.8.468"
+    compile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.9.6"
 
     compile group: 'org.jetbrains', name: 'annotations', version: '13.0'
 

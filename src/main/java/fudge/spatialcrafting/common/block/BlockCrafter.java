@@ -7,7 +7,6 @@ import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.tile.util.CraftingInventory;
-import fudge.spatialcrafting.common.tile.util.CubeArr;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.common.util.MCConstants;
 import fudge.spatialcrafting.common.util.Util;
@@ -127,19 +126,21 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
 
     }
 
+    //TODO add jei-like recipe help that switches through stuff
     @Override
     public boolean onBlockActivated(World world, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         try {
             if (state.getValue(FORMED) && playerIn.getHeldItem(hand).isEmpty()) {
                 TileCrafter crafter = Util.getTileEntity(world, pos);
 
-                CraftingInventory craftingInventory = crafter.getHologramInvArr();
+                CraftingInventory craftingInventory = crafter.getCraftingInventory();
 
                 if (!crafter.isCrafting()) {
-                    // Check if any recipe matches, if so, beginCraft the recipe.
+                    // Check if any recipe matches, if so, startCraft the recipe.
                     for (SpatialRecipe recipe : SpatialRecipe.getRecipes()) {
+                        //TODO fix the fact shapeless doesn't work if it isn't in order
                         if (recipe.matches(craftingInventory)) {
-                            beginCraft(world, pos, recipe);
+                            startCraft(world, pos, recipe, playerIn);
                         }
                     }
                 }
@@ -160,11 +161,11 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
     //TODO make the dropped item allign better. maybe  float
 
 
-    private void beginCraft(World world, BlockPos pos, SpatialRecipe recipe) {
+    private void startCraft(World world, BlockPos pos, SpatialRecipe recipe, EntityPlayer player) {
 
         TileCrafter crafter = Util.getTileEntity(world, pos);
 
-        int durationTicks = recipe.size() * CRAFT_DURATION_MULTIPLIER * MCConstants.TICKS_PER_SECOND;
+        int durationTicks = recipe.getCraftTime();
 
         if (world.isRemote) {
             ParticleUtil.playCraftParticles(world, pos, durationTicks);
@@ -173,7 +174,7 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
             world.playSound(null, pos, Sounds.CRAFT_START, SoundCategory.BLOCKS, 0.8f, 0.8f);
         }
 
-
+        crafter.setCraftingPlayer(player.getUniqueID());
         crafter.scheduleCraft(world, durationTicks);
 
         crafter.activateAllLayers();
@@ -204,8 +205,6 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
         }
 
         // Destroy all holograms in the BlockPos list.
-        CubeArr<BlockPos> holograms = crafter.getHolograms();
-
         crafter.getHolograms().forEach(hologramPos -> {
             if (world.getBlockState(hologramPos).getBlock() == SCBlocks.HOLOGRAM) {
                 world.setBlockState(hologramPos, Blocks.AIR.getDefaultState(), NOTIFY_CLIENT + BLOCK_UPDATE);

@@ -15,6 +15,7 @@ import static fudge.spatialcrafting.common.util.MCConstants.TICKS_PER_SECOND;
 import static fudge.spatialcrafting.common.util.MathUtil.euclideanDistanceOf;
 
 
+//TODO particle improvement : when they reach the top, the particle stop appearing and they start circling that spot. Then after a bit they fall down quickly and explode to the sides.
 @SideOnly(Side.CLIENT)
 public class ParticleCraft extends Particle {
 
@@ -80,7 +81,7 @@ public class ParticleCraft extends Particle {
         this.prevPosZ = this.posZ;
 
 
-        if (euclideanDistanceOf(endPos, pos) < 0.1) {
+        if (euclideanDistanceOf(endPos, pos) </* 0.1 + */speed) {
             this.setExpired();
         }
 

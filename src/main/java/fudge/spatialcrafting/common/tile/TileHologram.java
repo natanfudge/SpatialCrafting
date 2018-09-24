@@ -53,6 +53,7 @@ public class TileHologram extends TileEntity {
 
     public void displayGhostItem(ItemStack item) {
         if (isEmpty()) {
+            if(isDisplayingGhostItem()) stopDisplayingGhostItem();
             getItemHandler().insertItem(0, item, false);
             displayingGhostItem = true;
         }

@@ -6,7 +6,17 @@ import net.minecraft.item.ItemStack
 
 class CraftingInventory(size: Int, init: (Int, Int, Int) -> ItemStack) : CubeArr<ItemStack>(size, init) {
 
-    fun toIItemStackArr(): CubeArr<IItemStack> =
+    var stackAmount = 0
+
+    init {
+        forEach{
+            if(!it.isEmpty){
+                stackAmount++
+            }
+        }
+    }
+
+    fun toIItemStackArr(): CubeArr<IItemStack?> =
             CubeArr(cubeSize) { i, j, k -> CraftTweakerMC.getIItemStack(get(i, j, k)) }
 
     /*  fun itemStacksOfLayer(layer: Int): Array<Array<ItemStack>> {

@@ -4,11 +4,14 @@ package fudge.spatialcrafting.common.tile;
 import crafttweaker.api.item.IIngredient;
 import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.minecraft.CraftTweakerMC;
+import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.client.sound.Sounds;
 import fudge.spatialcrafting.common.block.BlockCrafter;
+import fudge.spatialcrafting.common.crafting.IRecipeInput;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
 import fudge.spatialcrafting.common.tile.util.*;
+import fudge.spatialcrafting.common.util.MCConstants;
 import fudge.spatialcrafting.common.util.MathUtil;
 import fudge.spatialcrafting.common.util.RecipeUtil;
 import fudge.spatialcrafting.common.util.Util;
@@ -17,6 +20,7 @@ import fudge.spatialcrafting.network.client.PacketStopParticles;
 import kotlin.Unit;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -29,6 +33,8 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.UUID;
 
 import static fudge.spatialcrafting.common.block.BlockHologram.ACTIVE;
 import static fudge.spatialcrafting.common.util.MCConstants.NOTIFY_CLIENT;
@@ -56,8 +62,17 @@ public class TileCrafter extends TileEntity implements ITickable {
         setActiveLayer(layerToActivate, true);
     }
 
+    @Nullable
+    public UUID getCraftingPlayer() {
+        return getSharedData().getCraftingPlayer();
+    }
+
+    public void setCraftingPlayer(@Nullable UUID craftingPlayer) {
+        getSharedData().setCraftingPlayer(craftingPlayer);
+    }
+
     public void setActiveLayer(int layerToActivate, boolean displayGhostItems) {
-        getSharedData().setActiveLayer((byte)layerToActivate);
+        getSharedData().setActiveLayer((byte) layerToActivate);
 
         getHolograms().indexedForEach((i, j, k, hologramPos) -> {
 
@@ -122,55 +137,29 @@ public class TileCrafter extends TileEntity implements ITickable {
         getSharedData().setRecipe(recipe);
     }
 
-    /*private boolean layerEnabled(int layer) {
-
-        int size = size();
-        CubeArr<BlockPos> holograms = getHolograms();
-
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                try {
-                    BlockPos hologramPos = holograms.get(layer, i, j);
-
-
-                    if (world.getBlockState(hologramPos).getValue(ACTIVE)) return true;
-                } catch (Exception e) {
-                    int x = 2;
-                }
-            }
-
-        }
-
-        return false;
-    }
-*/
     private boolean activeLayerMatchesRecipe() {
         int layer = getActiveLayer();
-        if(layer == ALL_ACTIVE) return true;
+        if (layer == ALL_ACTIVE) return true;
 
         SpatialRecipe recipe = getRecipe();
 
         if (recipe == null) return false;
 
-        int size = recipeSize();
+        int size = size();
         CubeArr<BlockPos> holograms = getHolograms();
-        CraftingInventory itemStacks = getHologramInvArr();
+        CraftingInventory itemStacks = getCraftingInventory();
+        IRecipeInput input = recipe.getRequiredInput();
 
+        boolean[][] hologramsActive = new boolean[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                BlockPos hologramPos = holograms.get(layer, i, j);
-                IItemStack stack = CraftTweakerMC.getIItemStack(itemStacks.get(layer, i, j));
-                IIngredient requiredStack = recipe.getRequiredInput().get(layer, i, j);
-
-                // If the hologram is not active it counts as complete
-                if (world.getBlockState(hologramPos).getValue(ACTIVE) && !RecipeUtil.nullSafeMatch(requiredStack, stack)) {
-                    return false;
-                }
+                // Determine which holograms are active
+                hologramsActive[i][j] = world.getBlockState(holograms.get(layer, i, j)).getValue(ACTIVE);
 
             }
         }
 
-        return true;
+        return input.matchesLayer(itemStacks, layer, hologramsActive);
 
     }
 
@@ -185,7 +174,7 @@ public class TileCrafter extends TileEntity implements ITickable {
     private int recipeSize() {
         SpatialRecipe recipe = getRecipe();
         if (recipe != null) {
-            return recipe.getRequiredInput().getCubeSize();
+            return recipe.size();
         } else {
             return 0;
         }
@@ -297,6 +286,10 @@ public class TileCrafter extends TileEntity implements ITickable {
         return getCraftEndTime() != 0 && world.getWorldTime() >= getCraftEndTime();
     }
 
+    private boolean craftTimeAboutToPass() {
+        return getCraftEndTime() != 0 && world.getWorldTime() + 30 >= getCraftEndTime();
+    }
+
 
     public boolean isCrafting() {
         return getCraftEndTime() != 0;
@@ -310,7 +303,7 @@ public class TileCrafter extends TileEntity implements ITickable {
         return new CrafterPoses(size(), (i, j) -> masterPos().add(i, 0, j));
     }
 
-    public CraftingInventory getHologramInvArr() {
+    public CraftingInventory getCraftingInventory() {
 
         return new CraftingInventory(size(), (i, j, k) -> {
 
@@ -398,7 +391,12 @@ public class TileCrafter extends TileEntity implements ITickable {
     public void update() {
         if (!isMaster()) return;
 
-        if (!world.isRemote && isCrafting()) {
+        // Update gets called once before the shared data is synced to the client, meaning it will be null at that time.
+        // This is a fix to the errors it causes.
+        if (WorldSavedDataCrafters.getDataForMasterPos(world, masterPos()) == null) return;
+
+
+        if (!world.isRemote && isCrafting() && !craftTimeAboutToPass()) {
             if (counter == SOUND_LOOP_TICKS) {
                 counter = 0;
                 world.playSound(null, pos, Sounds.CRAFT_LOOP, SoundCategory.BLOCKS, 0.8f, 0.8f);
@@ -408,19 +406,22 @@ public class TileCrafter extends TileEntity implements ITickable {
 
         }
 
-        // Update gets called once before the shared data is synced to the client, meaning it will be null at that time.
-        // This is a fix to the errors it causes.
-        if (WorldSavedDataCrafters.getDataForMasterPos(world, masterPos()) == null) return;
 
         if (craftTimeHasPassed()) {
+            EntityPlayer player = world.getPlayerEntityByUUID(Objects.requireNonNull(getCraftingPlayer()));
+            if (player == null) {
+                resetCraftingState();
+                return;
+            }
+
             stopHelp();
 
             if (!world.isRemote) {
                 // server
-                completeCrafting(world);
+                completeCrafting(world, player);
             } else {
                 // client
-                this.resetCraftingState();
+                resetCraftingState();
             }
 
 
@@ -428,30 +429,80 @@ public class TileCrafter extends TileEntity implements ITickable {
 
     }
 
-    private void completeCrafting(World world) {
+    private void completeCrafting(World world, EntityPlayer player) {
 
         this.resetCraftingState();
 
         // Calculates the point at which the particle will end to decide where to drop the item.
         Vec3d center = centerOfCrafters().add(0, 1.8, 0);
 
+        CraftingInventory craftingInventory = getCraftingInventory();
+
         // Find the correct recipe to craft with
-        for (SpatialRecipe recipe : SpatialRecipe.getRecipes()) {
-            if (recipe.matches(getHologramInvArr()) && !this.isCrafting()) {
-                // Finally, drop the item on the ground.
-                Util.dropItemStack(world, center, recipe.getOutput(), false);
-            }
+        SpatialRecipe recipe = SpatialRecipe.getMatchingRecipe(craftingInventory);
+        if (recipe != null) {
+
+            // Finally, drop the item on the ground.
+            Util.dropItemStack(world, center, recipe.getOutput(), false);
+
+            CubeArr<BlockPos> holograms = getHolograms();
+
+            CubeArr<ItemStack> transformedInventory = transformInventory(recipe, craftingInventory, player);
+            holograms.indexedForEach((i, j, k, hologramPos) -> {
+                ItemStack transformedStack = transformedInventory.get(i, j, k);
+
+                TileHologram hologram = Util.getTileEntity(world, Objects.requireNonNull(hologramPos));
+
+                // Remove items from all holograms. Transform them instead if applicable.
+                hologram.removeItem(1, false);
+                if (!transformedStack.isEmpty()) {
+                    hologram.insertItem(transformedStack);
+                }
+                IBlockState state = world.getBlockState(hologramPos);
+                world.notifyBlockUpdate(new BlockPos(hologramPos), state, state, MCConstants.NOTIFY_CLIENT);
+
+                return Unit.INSTANCE;
+            });
+
+
+            // Play end sound
+            world.playSound(null, pos, Sounds.CRAFT_END, SoundCategory.BLOCKS, 0.2f, 0.8f);
+        } else {
+            SpatialCrafting.LOGGER.error(new NullPointerException("Couldn't find recipe to complete crafting with!"));
         }
-
-        // Removes the existing items
-        getHolograms().forEach(blockPos -> Util.<TileHologram>getTileEntity(world, blockPos).removeItem(1, true));
-
-
-        // Play end sound
-        world.playSound(null, pos, Sounds.CRAFT_END, SoundCategory.BLOCKS, 0.2f, 0.8f);
 
 
     }
+
+    private static CubeArr<ItemStack> transformInventory(SpatialRecipe recipe, CraftingInventory inventory, EntityPlayer player) {
+        return new CubeArr<>(inventory.getCubeSize(), (i, j, k) -> {
+            IIngredient ingredient = recipe.getRequiredInput().get(i, j, k);
+            CubeArr<IItemStack> iItemStacks = inventory.toIItemStackArr();
+            ItemStack untransformedStack = recipe.getRequiredInput().getCorrespondingStack(inventory, iItemStacks, i, j, k);
+            if (ingredient != null) {
+                if (ingredient.hasNewTransformers()) {
+                    try {
+                        return CraftTweakerMC.getItemStack(ingredient.applyNewTransform(CraftTweakerMC.getIItemStack(untransformedStack)));
+                    } catch (Throwable var7) {
+                        SpatialCrafting.LOGGER.error("Could not execute NewRecipeTransformer on {}:", ingredient.toCommandString(), var7);
+                    }
+                }
+
+                if (ingredient.hasTransformers()) {
+                    return CraftTweakerMC.getItemStack(ingredient.applyTransform(CraftTweakerMC.getIItemStack(untransformedStack),
+                            CraftTweakerMC.getIPlayer(player)));
+                }
+            }
+
+            return ItemStack.EMPTY;
+
+        });
+    }
+
+    /*
+
+     */
+
 
     public Vec3d centerOfCrafters() {
         CrafterPoses crafters = getCrafterBlocks();

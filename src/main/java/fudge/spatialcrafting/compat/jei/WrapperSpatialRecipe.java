@@ -209,13 +209,13 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
     }
 
     private int recipeSize() {
-        return recipe.getRequiredInput().getCubeSize();
+        return recipe.getRequiredInput().layerSize();
     }
 
     @Override
     public void getIngredients(@NotNull IIngredients ingredients) {
         ingredients.setOutput(ItemStack.class, recipe.getOutput());
-        ingredients.setInputLists(ItemStack.class, recipe.getRequiredInput().itemStacksOfLayer(layer));
+        ingredients.setInputLists(ItemStack.class, recipe.getRequiredInput().itemStackOfLayer(layer));
     }
 
 
@@ -241,18 +241,39 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
     public void drawInfo(Minecraft minecraft, int recipeWidth, int recipeHeight, int mouseX, int mouseY) {
         buttons.forEach(button -> button.draw(minecraft, mouseX, mouseY));
 
-        final int STRING_X_OFFSET = LAYERS_X + 3;
-        final int STRING_Y_OFFSET = BUTTON_Y_OFFSET.get(recipeSize()) - 9;
+        final int LAYER_X_OFFSET = LAYERS_X + 3;
+        final int LAYER_Y_OFFSET = BUTTON_Y_OFFSET.get(recipeSize()) - 9;
 
         // Draw layer number string
-        String label = Integer.toString(layer + 1);
+        drawString(LAYER_X_OFFSET, LAYER_Y_OFFSET, 0x00_00_99_FF, Integer.toString(layer + 1));
+
+        float time = recipe.getCraftTime() / 20f;
+
+        String craftTimeInfo;
+        // Remove ".0"
+        if((int)time == time){
+            craftTimeInfo = Integer.toString((int)time) + "s";
+        }else{
+            craftTimeInfo = Float.toString(time) + "s";
+        }
+
+
+        drawString(X_OFFSETS.get(recipeSize()), Y_OFFSETS.get(recipeSize()), 0xff_ff_ff_ff, craftTimeInfo);
+
+
+    }
+
+    private static final List<Integer> Y_OFFSETS = ImmutableList.of(0,0,26,36,46,56);
+    private static final List<Integer> X_OFFSETS = ImmutableList.of(0,0,62,81,102,120);
+
+
+    private void drawString(int x, int y, int color, String text) {
+        Minecraft minecraft = Minecraft.getMinecraft();
+
         GlStateManager.pushMatrix();
         GlStateManager.translate(0, 0, 150);
-        final int COLOR = 0x00_00_99_FF;
-        minecraft.fontRenderer.drawString(label, STRING_X_OFFSET, STRING_Y_OFFSET, COLOR, true);
+        minecraft.fontRenderer.drawString(text, x, y, color, true);
         GlStateManager.popMatrix();
-
-
     }
 
 

@@ -75,6 +75,11 @@ spatialcrafting.addRecipe([
 ],	x5Crafter * 25);
 
 
+//Do
+mods.jei.JEI.hide(<spatialcrafting:hologram>);
+
+
+
 
 
 

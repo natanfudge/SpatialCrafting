@@ -5,6 +5,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.UUID;
 
 
 public class CraftersData extends SharedData {
@@ -12,9 +14,14 @@ public class CraftersData extends SharedData {
     private static final String CRAFT_TIME_NBT = "craftTime";
     private static final String RECIPE_ID_NBT = "recipeID";
     private static final String ACTIVE_LAYER_NBT = "activeLayer";
+    private static final String PLAYER_NBT = "player";
     private static final int NULL_RECIPE = -1;
+    private static final UUID NULL_PLAYER = new UUID( 0xFFFFFFFF_FFFFFFFFL,  0xFFFFFFFF_FFFFFFFFL);
+
     private long craftEndTime;
     private byte activeLayer;
+    @Nullable
+    private UUID craftingPlayer;
 
     @Nullable
     private SpatialRecipe currentHelpRecipe;
@@ -23,6 +30,14 @@ public class CraftersData extends SharedData {
         super(pos);
     }
 
+    @Nullable
+    public UUID getCraftingPlayer() {
+        return craftingPlayer;
+    }
+
+    public void setCraftingPlayer(@Nullable UUID craftingPlayer) {
+        this.craftingPlayer = craftingPlayer;
+    }
 
     public CraftersData(NBTTagCompound nbt) {
         super(nbt);
@@ -62,6 +77,12 @@ public class CraftersData extends SharedData {
             existingData.setInteger(RECIPE_ID_NBT, currentHelpRecipe.getID());
         }
         existingData.setLong(ACTIVE_LAYER_NBT, activeLayer);
+        if(craftingPlayer != null){
+            existingData.setUniqueId(PLAYER_NBT, craftingPlayer);
+        }else{
+            existingData.setUniqueId(RECIPE_ID_NBT, NULL_PLAYER);
+        }
+
         return existingData;
     }
 
@@ -77,6 +98,13 @@ public class CraftersData extends SharedData {
         }
 
         activeLayer = serializedData.getByte(ACTIVE_LAYER_NBT);
+
+        UUID playerUuid = serializedData.getUniqueId(PLAYER_NBT);
+        if(playerUuid == NULL_PLAYER){
+            craftingPlayer = null;
+        }else{
+            craftingPlayer = playerUuid;
+        }
     }
 
 

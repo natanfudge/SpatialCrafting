@@ -2,7 +2,6 @@ package fudge.spatialcrafting.common.crafting;
 
 import crafttweaker.CraftTweakerAPI;
 import crafttweaker.api.item.IIngredient;
-import crafttweaker.api.item.IItemStack;
 import crafttweaker.api.minecraft.CraftTweakerMC;
 import crafttweaker.api.oredict.IOreDictEntry;
 import fudge.spatialcrafting.SpatialCrafting;
@@ -29,73 +28,103 @@ import java.util.Objects;
 
 import static fudge.spatialcrafting.SpatialCrafting.MODID;
 import static fudge.spatialcrafting.common.command.CommandAddSRecipe.RECIPES_FILE_NAME;
+import static fudge.spatialcrafting.common.util.MCConstants.TICKS_PER_SECOND;
 
 public class SpatialRecipe {
 
-    //TODO: add unshaped crafting
     private static final String EXAMPLE_SCRIPT_NAME = "SpatialRecipeExamples.zs";
     private static final String CT_SCRIPTS_FOLDER_NAME = "scripts";
-    private static List<SpatialRecipe> recipeList = new ArrayList<>();
-    private final RecipeInput requiredInput;
+    private static final List<SpatialRecipe> recipeList = new ArrayList<>();
+    private final IRecipeInput requiredInput;
     private final ItemStack output;
+    //in TICKS
+    private int craftTime;
 
-    public SpatialRecipe(RecipeInput recipeInput, ItemStack recipeOutput) {
+    public SpatialRecipe(IRecipeInput recipeInput, ItemStack recipeOutput, int craftTime) {
         this.requiredInput = recipeInput;
         this.output = recipeOutput;
+        this.craftTime = craftTime;
+    }
+
+    public static SpatialRecipe getRecipeFromItemStacks(CraftingInventory itemStackInput, ItemStack output, RecipeAddition recipeAddition, int craftTime, boolean shaped) throws UnsupportedOperationException {
+        // Convert ItemStack array to IIngredient array
+
+        IRecipeInput ingredientInput;
+
+        if (shaped) {
+            ingredientInput = new ShapedRecipeInput(itemStackInput.getCubeSize(), (i, j, k) -> {
+                ItemStack stack = itemStackInput.get(i, j, k);
+                if (stack.isEmpty()) return null;
+
+                return getIngredient(recipeAddition, stack);
+
+            });
+        } else {
+            ArrayList<IIngredient> ingredients = new ArrayList<>();
+            for (ItemStack stack : itemStackInput) {
+                if (!stack.isEmpty()) {
+                    ingredients.add(getIngredient(recipeAddition, stack));
+                }
+            }
+
+            ingredientInput = new ShapelessRecipeInput(ingredients);
+        }
+
+        return new SpatialRecipe(ingredientInput, output, craftTime);
+
     }
 
     @Nullable
-    public static SpatialRecipe getRecipeFromItemStacks(CraftingInventory itemStackInput, ItemStack output, RecipeAddition recipeAddition) {
-        // Convert ItemStack array to IIngredient array
-        RecipeInput ingredientInput = new RecipeInput(itemStackInput.getCubeSize(), (i, j, k) -> {
-            ItemStack requiredInputToAddIS = itemStackInput.get(i, j, k);
-            if (requiredInputToAddIS.isEmpty()) return null;
-
-            switch (recipeAddition) {
-                case OREDICT:
-                    List<IOreDictEntry> matchingOreDicts = CraftTweakerMC.getIItemStack(requiredInputToAddIS).getOres();
-                    // Too many oredicts, can't process this addition.
-                    if (matchingOreDicts.size() > 1) {
-                        return null;
-                    }
-                    if (matchingOreDicts.size() == 1) {
-                        return matchingOreDicts.get(0);
-                    }
-                    // If there are no matching oredicts then it will treat it as "EXACT" meaning only a the very specific item will be accepted.
-                case EXACT:
-                    return CraftTweakerMC.getIItemStack(requiredInputToAddIS);
-                // Wildcard = we accept any metadata
-                case WILDCARD:
-                    int count = requiredInputToAddIS.getCount();
-                    int meta;
-                    if (requiredInputToAddIS.getHasSubtypes()) {
-                        meta = OreDictionary.WILDCARD_VALUE;
-                    } else {
-                        meta = 0;
-                    }
-
-                    // Fix up the itemStack
-                    ItemStack properMetaStack = new ItemStack(requiredInputToAddIS.getItem(), count, meta);
-                    properMetaStack.setTagCompound(requiredInputToAddIS.getTagCompound());
-
-                    IItemStack stack = CraftTweakerMC.getIItemStack(properMetaStack);
-
-                    return CraftTweakerMC.getIItemStack(properMetaStack);
+    public static SpatialRecipe getMatchingRecipe(CraftingInventory inventory){
+        for (SpatialRecipe recipe : getRecipes()) {
+            if (recipe.matches(inventory)) {
+                return recipe;
             }
+        }
 
-            throw new RuntimeException("This should never happen!");
+        return null;
+    }
 
-        });
+    @Nullable
+    private static IIngredient getIngredient(RecipeAddition recipeAddition, ItemStack requiredInputToAddIS) throws UnsupportedOperationException {
+        switch (recipeAddition) {
+            case OREDICT:
+                List<IOreDictEntry> matchingOreDicts = CraftTweakerMC.getIItemStack(requiredInputToAddIS).getOres();
+                // Too many oredicts, can't process this addition.
+                if (matchingOreDicts.size() > 1) {
+                    throw new UnsupportedOperationException("Cannot process this recipe addition!");
+                }
+                if (matchingOreDicts.size() == 1) {
+                    return matchingOreDicts.get(0);
+                }
+                // If there are no matching oredicts then it will treat it as "EXACT" meaning only a the very specific item will be accepted.
+            case EXACT:
+                return CraftTweakerMC.getIItemStack(requiredInputToAddIS);
+            // Wildcard = we accept any metadata
+            case WILDCARD:
+                int count = requiredInputToAddIS.getCount();
+                int meta;
+                if (requiredInputToAddIS.getHasSubtypes()) {
+                    meta = OreDictionary.WILDCARD_VALUE;
+                } else {
+                    meta = 0;
+                }
 
-        return new SpatialRecipe(ingredientInput, output);
+                // Fix up the itemStack
+                ItemStack properMetaStack = new ItemStack(requiredInputToAddIS.getItem(), count, meta);
+                properMetaStack.setTagCompound(requiredInputToAddIS.getTagCompound());
 
+
+                return CraftTweakerMC.getIItemStack(properMetaStack);
+        }
+
+        throw new RuntimeException("This should never happen!");
     }
 
     public static List<SpatialRecipe> getRecipesForSize(int size) {
         List<SpatialRecipe> recipes = new LinkedList<>();
         for (SpatialRecipe recipe : getRecipes()) {
-            //TODO try having the bigger ones apply for the smaller ones too
-            if (recipe.requiredInput.getCubeSize() == size) {
+            if (recipe.requiredInput.layerSize() == size) {
                 recipes.add(recipe);
             }
         }
@@ -117,8 +146,7 @@ public class SpatialRecipe {
 
             // If the input is the same it means there is some kind of conflict.
             // "newIng.contains(oldIng) || oldIng.contains(newIng)" insures the recipes intersect
-            if (newRecipe.requiredInput.equalsDifSize(existingRecipe.requiredInput,
-                    (newIng, oldIng) -> newIng.contains(oldIng) || oldIng.contains(newIng))) {
+            if (newRecipe.requiredInput.intersectsWith(existingRecipe.requiredInput)) {
 
                 // Same input same output
                 if (itemStackEquals(newRecipe.output, existingRecipe.output)) {
@@ -154,9 +182,10 @@ public class SpatialRecipe {
     }
 
     public static SpatialRecipe fromBytes(ByteBuf buf) {
-        RecipeInput input = RecipeInput.Companion.fromNBT(Objects.requireNonNull(ByteBufUtils.readTag(buf)));
+        IRecipeInput input = IRecipeInput.fromNBT(Objects.requireNonNull(ByteBufUtils.readTag(buf)));
         ItemStack output = ByteBufUtils.readItemStack(buf);
-        return new SpatialRecipe(input, output);
+        int duration = buf.readInt();
+        return new SpatialRecipe(input, output, duration);
     }
 
     /**
@@ -219,16 +248,29 @@ public class SpatialRecipe {
         return getRecipes().get(ID);
     }
 
-    public String toFormattedString() {
-        return getRequiredInput().toFormattedString() + ",\t" + CraftTweakerIntegration.itemStackToCTString(output);
+    //TODO Make it so holograms can store more than 1
+
+    public int getCraftTime() {
+        return craftTime;
+    }
+
+    public void setCraftTime(int craftTime) {
+        this.craftTime = craftTime;
+    }
+
+    public String toFormattedString(boolean customTime) {
+        String returning = getRequiredInput().toFormattedString() + ",\t" + CraftTweakerIntegration.itemStackToCTString(output);
+        if (customTime) returning += ",\t" + getCraftTime() / TICKS_PER_SECOND;
+        return returning;
     }
 
     public void toBytes(ByteBuf buf) {
         ByteBufUtils.writeTag(buf, requiredInput.writeToNBT(new NBTTagCompound()));
         ByteBufUtils.writeItemStack(buf, getOutput());
+        buf.writeInt(craftTime);
     }
 
-    public RecipeInput getRequiredInput() {
+    public IRecipeInput getRequiredInput() {
         return requiredInput;
     }
 
@@ -245,7 +287,7 @@ public class SpatialRecipe {
 
         SpatialRecipe other = (SpatialRecipe) otherObj;
 
-        return this.requiredInput.equalsDifSize(other.requiredInput) && itemStackEquals(this.output, other.output);
+        return this.requiredInput.isEquivalentTo(other.requiredInput) && itemStackEquals(this.output, other.output);
 
     }
 
@@ -262,8 +304,7 @@ public class SpatialRecipe {
     }
 
     public boolean matches(CraftingInventory craftingInventory) {
-        return requiredInput.equalsDifSize(craftingInventory.toIItemStackArr(), IIngredient::matches);
-
+        return requiredInput.matches(craftingInventory);
     }
 
     // Magic function to create code
@@ -274,7 +315,7 @@ public class SpatialRecipe {
     }
 
     public int size() {
-        return getRequiredInput().getCubeSize();
+        return getRequiredInput().layerSize();
     }
 
     public String toString() {

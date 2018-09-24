@@ -1,9 +1,18 @@
 package fudge.spatialcrafting.common.tile.util
 
+import crafttweaker.api.item.IItemCondition
+import crafttweaker.api.item.IItemStack
+import crafttweaker.api.item.IngredientItem
+import crafttweaker.api.minecraft.CraftTweakerMC.getItemStack
+import crafttweaker.mc1120.item.MCItemStack
+import fudge.spatialcrafting.SpatialCrafting
+import fudge.spatialcrafting.common.util.ReflectionUtil
+import net.minecraft.item.ItemStack
+import net.minecraftforge.oredict.OreDictionary
 import java.util.*
 import kotlin.collections.ArrayList
 
-open class Arr3D<T>(private val height: Int, private val length: Int, private val width: Int, init: (i: Int, j: Int, k: Int) -> T) : Collection<T> {
+open class Arr3D<T>(val height: Int, val length: Int, val width: Int, init: (i: Int, j: Int, k: Int) -> T) : Collection<T> {
     override operator fun contains(element: T): Boolean {
         forEach { if (it != element) return false }
         return true
@@ -17,6 +26,10 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
     override fun isEmpty(): Boolean {
         forEach { if (it != null) return false }
         return true
+    }
+
+    fun dimsEqual(other: Arr3D<*>): Boolean {
+        return other.length == this.length && other.width == this.width && other.height == this.height
     }
 
     override fun iterator(): Iterator<T> = Iter(this)
@@ -78,6 +91,7 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
         wrappedArray[height][row][col] = value
     }
 
+
     fun indexedForEach(action: (height: Int, row: Int, col: Int, innerElement: T) -> Unit) {
         for (i in 0 until height) {
             for (j in 0 until length) {
@@ -112,19 +126,17 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
     }*/
 
     override fun equals(other: Any?): Boolean {
-        if (other !is Arr3D<*>){
+        if (other !is Arr3D<*>) {
             return false
         }
-        if (other.height != this.height || other.length != this.length || other.width != this.width){
+        if (other.height != this.height || other.length != this.length || other.width != this.width) {
             return false
         }
 
         for (i in 0 until other.height) {
             for (j in 0 until other.length) {
                 for (k in 0 until other.width) {
-                    if (this[i, j, k] != other[i, j, k]){
-                        val thisOne = this[i, j, k]
-                        val otherOne = other[i, j, k]
+                    if (this[i, j, k] != other[i, j, k]) {
                         return false
                     }
                 }
@@ -181,9 +193,6 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
     @JvmOverloads
     fun <T2> equalsDifSize(other: Arr3D<T2>, tester: (element1: T, element2: T2) -> Boolean = { e1, e2 -> e1 == e2 }): Boolean {
 
-        val thisS = this.toString()
-        val otherS = other.toString()
-
         (0..(Math.max(this.height, other.height) - 1)).forEach heightLoop@{ i ->
 
             // Out of bounds handling
@@ -208,6 +217,7 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
                     if (thisElement == null && otherElement == null) return@colLoop
                     if (thisElement == null || otherElement == null) return false
 
+
                     // Finally the test
                     if (!tester(thisElement, otherElement)) return false
 
@@ -218,6 +228,74 @@ open class Arr3D<T>(private val height: Int, private val length: Int, private va
 
         return true
     }
+
+    fun MCItemStack.test(item: MCItemStack): Boolean {
+
+        val internal = getItemStack(item)
+        val stack = this.internal as ItemStack
+
+        /*if (!internal.isEmpty()){
+            if(internal.getItem() === stack.getItem()){
+                if(internal.getCount() >= stack.getCount()){
+                    *//*val test1 = stack.getItemDamage() == OreDictionary.WILDCARD_VALUE
+                    val test2 = stack.getItemDamage() == internal.getItemDamage()
+                    val test3 = !stack.getHasSubtypes() && !stack.getItem().isDamageable()
+
+                    if( test1|| test2 || (test3)) {
+                        return true
+                    }*//*
+
+                    if(stack.getItemDamage() == OreDictionary.WILDCARD_VALUE || stack.getItemDamage() == internal.getItemDamage() || (!stack.getHasSubtypes() && !stack.getItem().isDamageable())) {
+                        return true
+                    }
+
+                }
+            }
+        }*/
+
+        val test1 = !internal.isEmpty
+        val test2 = !stack.isEmpty
+        val test3 = internal.item === stack.item
+        val test4 = internal.count >= stack.count
+        val test5 = stack.itemDamage == OreDictionary.WILDCARD_VALUE
+        val test6 = stack.itemDamage == internal.itemDamage
+        val test7 = !stack.hasSubtypes && !stack.item.isDamageable()
+
+        return !internal.isEmpty && !stack.isEmpty && internal.item === stack.item && (internal.count >= stack.count) && (stack.itemDamage == OreDictionary.WILDCARD_VALUE || stack.itemDamage == internal.itemDamage || !stack.hasSubtypes && !stack.item.isDamageable)
+
+    }
+
+    fun IngredientItem.test(item: IItemStack): Boolean {
+        val thisItem: IItemStack = ReflectionUtil.getPrivateField(IngredientItem::class.java, this, "item")
+        val conditions: Array<IItemCondition> = ReflectionUtil.getPrivateField(IngredientItem::class.java, this, "conditions")
+
+        if (!thisItem.test(item))
+            return false
+
+        for (condition in conditions) {
+            if (!condition.matches(item))
+                return false
+        }
+
+        return true
+    }
+
+
+    fun IItemStack.test(item: IItemStack): Boolean {
+        val internal = getItemStack(item)
+        val stack: ItemStack = ReflectionUtil.getPrivateField(MCItemStack::class.java, this as MCItemStack, "stack")
+
+        SpatialCrafting.LOGGER.info("empty1 :{}", internal.isEmpty)
+        SpatialCrafting.LOGGER.info("empty2 :{}", stack.isEmpty)
+        SpatialCrafting.LOGGER.info("item :{}", internal.item !== stack.item)
+        SpatialCrafting.LOGGER.info("damage1 :{}", stack.itemDamage != OreDictionary.WILDCARD_VALUE)
+        SpatialCrafting.LOGGER.info("damage2 :{}", stack.itemDamage != internal.itemDamage)
+        SpatialCrafting.LOGGER.info("subtypes :{}", stack.hasSubtypes)
+        SpatialCrafting.LOGGER.info("damageable :{}", stack.item.isDamageable)
+
+        return !internal.isEmpty && !stack.isEmpty && internal.item === stack.item && (stack.itemDamage == OreDictionary.WILDCARD_VALUE || stack.itemDamage == internal.itemDamage || !stack.hasSubtypes && !stack.item.isDamageable)
+    }
+
 
     fun toList(): ArrayList<T> {
         val list = ArrayList<T>(size)

@@ -1,6 +1,8 @@
 package fudge.spatialcrafting.common.command;
 
 import com.google.common.collect.ImmutableList;
+import crafttweaker.api.item.IIngredient;
+import crafttweaker.mc1120.brackets.BracketHandlerItem;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.crafting.RecipeAddition;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
@@ -9,6 +11,7 @@ import fudge.spatialcrafting.common.tile.util.CraftingInventory;
 import fudge.spatialcrafting.common.util.CrafterUtil;
 import fudge.spatialcrafting.common.util.MCConstants;
 import fudge.spatialcrafting.common.util.SCConstants;
+import fudge.spatialcrafting.compat.crafttweaker.CraftTweakerIntegration;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketAddRecipeToJei;
 import net.minecraft.command.ICommandSender;
@@ -19,6 +22,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.common.Loader;
+import org.apache.http.conn.UnsupportedSchemeException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -37,7 +41,8 @@ public class CommandAddSRecipe extends SCCommand {
     public static final String RECIPES_FILE_NAME = "___generated_spatial_recipes___.zs";
     private static final List<String> ALIASES = ImmutableList.of("addrecipe", "ar");
 
-    private static void addCrTScript(String command) {
+
+    private static void addZsScript(String command) {
         try {
             final String SCRIPTS_DIR_NAME = "scripts";
             final String SC_DIR_NAME = "spatialcrafting";
@@ -115,12 +120,17 @@ public class CommandAddSRecipe extends SCCommand {
     @Override
     @Nonnull
     public String getUsage(@Nonnull ICommandSender sender) {
-        return "/sc addrecipe [exact/wildcard/oredict]";
+        return "/sc addrecipe [exact/wildcard/oredict] [craftTime]";
     }
 
     @Override
-    public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] words) {
+    public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args) {
+        AddSpatialRecipe(server, sender, args,true);
 
+
+    }
+
+    public void AddSpatialRecipe(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] args, boolean shaped) {
         // Only works in single player
         if (server.isDedicatedServer()) {
             sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.dedis_only", 0));
@@ -140,56 +150,80 @@ public class CommandAddSRecipe extends SCCommand {
             }
 
 
-            CraftingInventory input = crafter.getHologramInvArr();
+            CraftingInventory input = crafter.getCraftingInventory();
 
             if (isValidRecipe(input, output, player)) {
 
-                // Default
-                RecipeAddition recipeAdditionType = getRecipeAdditionType(words,sender);
-                if(recipeAdditionType == null) return;
+                RecipeAddition recipeAdditionType = getRecipeAdditionType(args, sender);
+                if (recipeAdditionType == null) return;
 
-                SpatialRecipe recipe = SpatialRecipe.getRecipeFromItemStacks(input, output, recipeAdditionType);
-                // If the user did oredict and there are too many oredicts we face a problem (recipe will be null)
-                if (recipe == null) {
+                // Default craft time
+                int craftTime = input.getCubeSize() * SCConstants.DEFAULT_CRAFT_TIME_MULTIPLIER;
+
+                boolean customTime = false;
+                if (args.length >= 3) {
+                    try {
+                        craftTime = Math.round(Float.parseFloat(args[2]) * MCConstants.TICKS_PER_SECOND);
+                        customTime = true;
+                    } catch (NumberFormatException e) {
+                        sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.layer.not_a_number", args[2]));
+                        return;
+                    }
+                }
+
+
+                try {
+                    SpatialRecipe recipe = SpatialRecipe.getRecipeFromItemStacks(input, output, recipeAdditionType, craftTime, shaped);
+
+                    // Writes some code in ZS that adds the corresponding recipe. Who needs programmers in our day and age?
+                    final String METHOD_NAME = shaped? "addRecipe" : "addShapeless";
+                    String command = "mods.spatialcrafting." + METHOD_NAME+ "(" + recipe.toFormattedString(customTime) + ");\n\n";
+
+                    if (SpatialRecipe.noRecipeConflict(recipe, sender)) {
+                        addRecipe(sender, player, output, recipe, command,shaped);
+                    }
+
+
+                }catch (UnsupportedOperationException e){
+                    // If the user did oredict and there are too many oredicts we face a problem (recipe will be null)
                     sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.too_many_oredicts", 0));
-                    return;
                 }
 
-                // Writes some code in ZS that adds the corresponding recipe. Who needs programmers in our day and age?
-                String command = "mods.spatialcrafting.addRecipe(" + recipe.toFormattedString() + ");\n\n";
 
-                if (SpatialRecipe.noRecipeConflict(recipe, sender)) {
-                    addRecipe(sender, player, output, recipe, command);
-                }
             }
 
 
         } catch (PlayerNotFoundException e) {
             SpatialCrafting.LOGGER.error("You're not supposed to use this with a command block!", e);
         }
-
-
     }
 
-    private void addRecipe(@Nonnull ICommandSender sender, EntityPlayerMP player, ItemStack output, SpatialRecipe recipe, String command) {
-        addCrTScript(command);
+
+    private void addRecipe(@Nonnull ICommandSender sender, EntityPlayerMP player, ItemStack output, SpatialRecipe recipe, String command, boolean shaped) {
+        addZsScript(command);
         SpatialRecipe.addRecipe(recipe);
         if (Loader.isModLoaded(SCConstants.JEI_MOD_ID)) {
             PacketHandler.getNetwork().sendTo(new PacketAddRecipeToJei(recipe), player);
         }
 
 
-        if (output.getCount() == 1) {
-            sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.success", output.getDisplayName()));
-        } else {
-            sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.success_num",
-                    output.getCount(),
-                    output.getDisplayName()));
+        if(shaped) {
+            if (output.getCount() == 1) {
+                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.success", output.getDisplayName()));
+            } else {
+                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_recipe.success_num", output.getCount(), output.getDisplayName()));
+            }
+        }else{
+            if (output.getCount() == 1) {
+                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_shapeless.success", output.getDisplayName()));
+            } else {
+                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.add_shapeless.success_num", output.getCount(), output.getDisplayName()));
+            }
         }
     }
 
     @Nullable
-    private RecipeAddition getRecipeAdditionType(String[] words, ICommandSender sender){
+    private RecipeAddition getRecipeAdditionType(String[] words, ICommandSender sender) {
         // Default
         RecipeAddition recipeAdditionType = RecipeAddition.WILDCARD;
 
@@ -236,6 +270,8 @@ public class CommandAddSRecipe extends SCCommand {
 
     @Override
     public int maxArgs() {
-        return 1;
+        return 2;
     }
+
+
 }

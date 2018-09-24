@@ -1,5 +1,6 @@
 package fudge.spatialcrafting.common.command;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.common.util.MCConstants;
@@ -10,18 +11,25 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentTranslation;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Commands extends CommandBase {
-    private static List<SCCommand> commandList = new ArrayList<>();
+    private static List<SCCommand> commandList = ImmutableList.of(new CommandAddSRecipe(),
+            new CommandAddShapeless(),
+            new CommandDebug(),
+            new CommandHelp(),
+            new CommandLayer(),
+            new CommandTest());
 
-    public Commands() {
-        commandList.add(new CommandAddSRecipe());
-        commandList.add(new CommandDebug());
-        commandList.add(new CommandHelp());
-        commandList.add(new CommandLayer());
-        commandList.add(new CommandTest());
+    @Nullable
+    public static SCCommand getCommand(String alias){
+        for(SCCommand command : commandList){
+            if(command.getAliases().contains(alias)) return command;
+        }
+
+        return null;
     }
 
     public static List<SCCommand> getCommandList() {
@@ -31,31 +39,26 @@ public class Commands extends CommandBase {
     @Override
     public void execute(@Nonnull MinecraftServer server, @Nonnull ICommandSender sender, @Nonnull String[] words) {
 
-        // Look for the command in the map to see if we can execute it.
-        boolean exists = false;
-        for (SCCommand command : getCommandList()) {
-            List<String> aliases = command.getAliases();
+        SCCommand command = getCommand(words[0]);
 
-            if (aliases.contains(words[0].toLowerCase())) {
-                exists = true;
-                if (command.checkPermission(server, sender)) {
-                    try {
-                        if (argAmountValid(words.length - 1, command, sender)) {
-                            command.execute(server, sender, words);
-                        } else {
-                            sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.help.usage", command.getUsage(sender)));
-                        }
-                    } catch (CommandException e) {
-                        SpatialCrafting.LOGGER.error(e);
+        if(command != null){
+            if (command.checkPermission(server, sender)) {
+                try {
+                    if (argAmountValid(words.length - 1, command, sender)) {
+                        command.execute(server, sender, words);
+                    } else {
+                        sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.help.usage", command.getUsage(sender)));
                     }
-                } else {
-                    sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.no_permission", 0));
+                } catch (CommandException e) {
+                    SpatialCrafting.LOGGER.error(e);
                 }
+            } else {
+                sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.no_permission", 0));
             }
-        }
-        if (!exists) {
+        }else{
             sender.sendMessage(new TextComponentTranslation("commands.spatialcrafting.no_such_command", 0));
         }
+
 
     }
 

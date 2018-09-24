@@ -59,7 +59,7 @@ public class SpatialCrafting {
 
         PacketHandler.registerPackets();
 
-        CraftTweakerIntegration.init();
+        CraftTweakerIntegration.preInit();
 
         proxy.preInit();
         SpatialRecipe.preInit();

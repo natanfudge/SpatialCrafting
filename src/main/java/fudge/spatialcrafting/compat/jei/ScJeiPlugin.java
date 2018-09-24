@@ -8,12 +8,14 @@ import mezz.jei.api.*;
 import mezz.jei.api.ingredients.IModIngredientRegistration;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
 import mezz.jei.gui.recipes.RecipesGui;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static fudge.spatialcrafting.common.block.SCBlocks.HOLOGRAM;
 
 
 @JEIPlugin
@@ -22,6 +24,8 @@ public class ScJeiPlugin implements IModPlugin {
     public static RecipesGui JEI_GUI;
     public static IModRegistry MOD_REGISTRY;
     public static IRecipeRegistry RECIPE_REGISTRY;
+    //public static IIngredientRegistry INGREDIENT_REGISTRY;
+
     private static List<CategorySpatialRecipe> recipeCategories = new ArrayList<>(4);
 
     public static void addRecipe(SpatialRecipe recipe) {
@@ -49,7 +53,6 @@ public class ScJeiPlugin implements IModPlugin {
 
         recipeCategories.forEach(registry::addRecipeCategories);
 
-
     }
 
     @Override
@@ -69,16 +72,20 @@ public class ScJeiPlugin implements IModPlugin {
         // Cache for later use
         MOD_REGISTRY = registry;
 
+        // Remove hologram from jei
+        registry.getJeiHelpers().getIngredientBlacklist().addIngredientToBlacklist(new ItemStack(Item.getItemFromBlock(HOLOGRAM)));
+
 
     }
 
     @Override
     public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
-        // Kidnap gui for nefarius uses
+        // Kidnap gui and recipe registry for nefarius uses
         JEI_GUI = (RecipesGui) jeiRuntime.getRecipesGui();
         RECIPE_REGISTRY = jeiRuntime.getRecipeRegistry();
 
 
     }
+
 
 }

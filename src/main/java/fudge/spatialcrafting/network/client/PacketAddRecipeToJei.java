@@ -52,6 +52,7 @@ public class PacketAddRecipeToJei implements IMessage {
                 @SideOnly(Side.CLIENT)
                 public void run() {
                     String categoryUID = SpatialCrafting.MODID + message.recipe.size();
+                    //noinspection deprecation
                     ScJeiPlugin.RECIPE_REGISTRY.addRecipe(new WrapperSpatialRecipe(message.recipe),categoryUID);
                 }
             }));
@@ -60,29 +61,6 @@ public class PacketAddRecipeToJei implements IMessage {
         }
     }
 
-
-    /*
-    [12:16:34] [main/FATAL]: Error executing task
-java.util.concurrent.ExecutionException: java.lang.NullPointerException
-	at java.util.concurrent.FutureTask.report(FutureTask.java:122) ~[?:1.8.0_51]
-	at java.util.concurrent.FutureTask.get(FutureTask.java:192) ~[?:1.8.0_51]
-	at net.minecraft.util.Util.func_181617_a(SourceFile:47) [h.class:?]
-	at net.minecraft.client.Minecraft.func_71411_J(Minecraft.java:1086) [bib.class:?]
-	at net.minecraft.client.Minecraft.func_99999_d(Minecraft.java:397) [bib.class:?]
-	at net.minecraft.client.main.Main.main(SourceFile:123) [Main.class:?]
-	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[?:1.8.0_51]
-	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62) ~[?:1.8.0_51]
-	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[?:1.8.0_51]
-	at java.lang.reflect.Method.invoke(Method.java:497) ~[?:1.8.0_51]
-	at net.minecraft.launchwrapper.Launch.launch(Launch.java:135) [launchwrapper-1.12.jar:?]
-	at net.minecraft.launchwrapper.Launch.main(Launch.java:28) [launchwrapper-1.12.jar:?]
-Caused by: java.lang.NullPointerException
-	at fudge.spatialcrafting.network.client.PacketAddRecipeToJei$Handler$1.run(PacketAddRecipeToJei.java:58) ~[PacketAddRecipeToJei$Handler$1.class:?]
-	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511) ~[?:1.8.0_51]
-	at java.util.concurrent.FutureTask.run(FutureTask.java:266) ~[?:1.8.0_51]
-	at net.minecraft.util.Util.func_181617_a(SourceFile:46) ~[h.class:?]
-	... 9 more
-     */
 
 
 }

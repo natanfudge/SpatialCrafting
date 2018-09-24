@@ -22,7 +22,7 @@ commands.spatialcrafting.too_little_args=This command requires at least %d argum
 commands.spatialcrafting.too_many_args=This command only requires %d arguments.
 commands.spatialcrafting.no_args=This command does not require any arguments.
 
-commands.spatialcrafting.add_recipe.description=Adds a spatial recipe. You must first place the recipe's input in a nearby crafter and hold the recipe's output in your hand.
+commands.spatialcrafting.add_recipe.description=Adds a shaped spatial recipe. You must first place the recipe's input in a nearby crafter and hold the recipe's output in your hand.
 commands.spatialcrafting.add_recipe.no_crafters=There are no crafters in this dimension!
 commands.spatialcrafting.add_recipe.empty_crafter=You must supply the nearest crafter with inputs.
 commands.spatialcrafting.add_recipe.empty_hand=You must hold an item as an output.
@@ -32,6 +32,10 @@ commands.spatialcrafting.add_recipe.success_num=Spatial recipe for %d %s added s
 commands.spatialcrafting.add_recipe.too_many_words=Add recipe only accepts one additional argument.
 commands.spatialcrafting.add_recipe.invalid_argument=Invalid Argument for adding a recipe. See CraftTweaker wiki (mods -> Spatial Crafting) for details.
 commands.spatialcrafting.add_recipe.too_many_oredicts=One of the given items have multiple matching ore dictionaries. You will have to add the ore dict you want manually.
+
+commands.spatialcrafting.add_shapeless.description=Same as Add Spatial Recipe but adds a shapeless recipe instead of a shaped one.
+commands.spatialcrafting.add_shapeless.success=Shapeless Spatial recipe for %s added successfully!
+commands.spatialcrafting.add_shapeless.success_num=Shapeless Spatial recipe for %d %s added successfully!
 
 commands.spatialcrafting.help.description=Prints all command info.
 commands.spatialcrafting.help.optional=Parameters marked with [ ] are optional!
