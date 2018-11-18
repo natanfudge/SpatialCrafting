@@ -1,7 +1,6 @@
 package fudge.spatialcrafting.common.data;
 
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.tile.util.SharedData;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketDebugPrint;
 import fudge.spatialcrafting.network.client.PacketUpdateAllSharedData;
@@ -37,6 +36,10 @@ public final class WorldSaveDataSync {
 
     private static void sync(EntityPlayer player) {
         World world = player.world;
+
+        //TODO remove
+      //  SpatialCrafting.LOGGER.error("Syncing in world " + world);
+
         if (!world.isRemote) {
             List<SharedData> data = WorldSavedDataCrafters.getAllData(world);
             PacketHandler.getNetwork().sendTo(new PacketUpdateAllSharedData(data), (EntityPlayerMP) player);

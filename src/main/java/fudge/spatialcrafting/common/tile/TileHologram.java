@@ -158,7 +158,7 @@ public class TileHologram extends TileEntity {
     @Override
     public <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
         if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-            return (T) inventory;
+            return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(inventory);
         } else {
             return super.getCapability(capability, facing);
         }

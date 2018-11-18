@@ -173,9 +173,13 @@ public class BlockCrafter extends BlockTileEntity<TileCrafter> {
             world.playSound(null, pos, Sounds.CRAFT_START, SoundCategory.BLOCKS, 0.8f, 0.8f);
         }
 
+        CraftingInventory craftingInventory = crafter.getCraftingInventory();
+
+        // Find the correct recipe to craft with
+        crafter.setRecipe(SpatialRecipe.getMatchingRecipe(craftingInventory));
+
         crafter.setCraftingPlayer(player.getUniqueID());
         crafter.scheduleCraft(world, durationTicks);
-
         crafter.activateAllLayers();
 
 

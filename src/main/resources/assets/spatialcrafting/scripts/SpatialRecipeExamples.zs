@@ -14,7 +14,7 @@ spatialcrafting.addRecipe([
 		[x2Crafter, x2Crafter],
 		[x2Crafter, x2Crafter]
 	]
-],	x3Crafter * 9);
+],	x3Crafter * 9,10,20000);
 
 
 
@@ -38,7 +38,7 @@ spatialcrafting.addRecipe([
 		[x3Crafter, x3Crafter, x3Crafter],
 		[x3Crafter, x3Crafter, x3Crafter]
 	]
-],	x4Crafter * 16);
+],	x4Crafter * 16,15,30000);
 
 
 
@@ -72,11 +72,8 @@ spatialcrafting.addRecipe([
 		[x4Crafter, x4Crafter, x4Crafter, x4Crafter],
 		[x4Crafter, x4Crafter, x4Crafter, x4Crafter]
 	]
-],	x5Crafter * 25);
+],	x5Crafter * 25,20,40000);
 
-
-//Do
-mods.jei.JEI.hide(<spatialcrafting:hologram>);
 
 
 

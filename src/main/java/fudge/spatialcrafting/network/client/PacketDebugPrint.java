@@ -26,6 +26,7 @@ public class PacketDebugPrint implements IMessage {
     @Override
     public void toBytes(ByteBuf buf) {
         // No data needed
+
     }
 
 

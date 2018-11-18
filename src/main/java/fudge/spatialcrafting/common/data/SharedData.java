@@ -1,15 +1,39 @@
-package fudge.spatialcrafting.common.tile.util;
+package fudge.spatialcrafting.common.data;
 
+import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.storage.WorldSavedData;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
+import java.io.File;
+import java.io.FileOutputStream;
 
 /**
  * Currently hardcoded for CraftersData
  */
+@Mod.EventBusSubscriber
 public abstract class SharedData {
 
-    private static final String MASTER_POS_NBT = "masterPos";
+
+        private static final String MASTER_POS_NBT = "masterPos";
     private BlockPos masterPos;
+    protected boolean dirty;
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
+    }
+
+    public void markDirty(){
+        setDirty(true);
+    }
 
     public SharedData(BlockPos pos) {
         masterPos = pos;
@@ -43,6 +67,7 @@ public abstract class SharedData {
 
     public void setMasterPos(BlockPos pos) {
         masterPos = pos;
+        markDirty();
     }
 
 

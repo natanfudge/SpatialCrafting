@@ -1,8 +1,8 @@
 package fudge.spatialcrafting.common.data;
 
 import fudge.spatialcrafting.SpatialCrafting;
-import fudge.spatialcrafting.common.tile.util.CraftersData;
-import fudge.spatialcrafting.common.tile.util.SharedData;
+import fudge.spatialcrafting.common.tile.TileCrafter;
+import fudge.spatialcrafting.common.util.Util;
 import fudge.spatialcrafting.network.PacketHandler;
 import fudge.spatialcrafting.network.client.PacketRemoveMasterBlock;
 import net.minecraft.nbt.NBTTagCompound;
@@ -69,6 +69,7 @@ public class WorldSavedDataCrafters extends WorldSavedData {
         return instance;
     }
 
+
     public static List<BlockPos> getMasterBlocks(World world) {
         List<BlockPos> masterBlocks = new LinkedList<>();
 
@@ -77,11 +78,11 @@ public class WorldSavedDataCrafters extends WorldSavedData {
         return masterBlocks;
     }
 
-    public static void addData(World world, BlockPos pos) {
+    public static void addData(World world, BlockPos pos, int crafterSize) {
         WorldSavedDataCrafters instance = getInstance(world);
         // For some reason allSharedData becomes null sometimes, this fixes it but it shouldn't be like this...
         if (instance.allSharedData == null) instance.allSharedData = new ArrayList<>();
-        SharedData data = new CraftersData(pos);
+        SharedData data = new CraftersData(pos, crafterSize);
         instance.allSharedData.add(data);
 
         instance.markDirty();
@@ -148,7 +149,20 @@ public class WorldSavedDataCrafters extends WorldSavedData {
     @Override
     public void readFromNBT(@NotNull NBTTagCompound serializedData) {
         deserialize(serializedData);
+    }
 
+
+
+    @Override
+    public boolean isDirty() {
+        boolean anyDirty = false;
+        for (SharedData data : allSharedData) {
+            if (data.isDirty()) {
+                anyDirty = true;
+                data.setDirty(false);
+            }
+        }
+        return anyDirty || super.isDirty();
     }
 
 

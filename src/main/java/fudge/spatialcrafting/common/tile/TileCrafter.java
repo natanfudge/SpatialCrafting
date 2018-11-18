@@ -7,10 +7,15 @@ import crafttweaker.api.minecraft.CraftTweakerMC;
 import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.client.sound.Sounds;
 import fudge.spatialcrafting.common.block.BlockCrafter;
+import fudge.spatialcrafting.common.config.ScConfig;
 import fudge.spatialcrafting.common.crafting.IRecipeInput;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
+import fudge.spatialcrafting.common.data.CraftersData;
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
-import fudge.spatialcrafting.common.tile.util.*;
+import fudge.spatialcrafting.common.tile.util.CrafterPoses;
+import fudge.spatialcrafting.common.tile.util.CraftingInventory;
+import fudge.spatialcrafting.common.tile.util.CubeArr;
+import fudge.spatialcrafting.common.tile.util.Offset;
 import fudge.spatialcrafting.common.util.MCConstants;
 import fudge.spatialcrafting.common.util.MathUtil;
 import fudge.spatialcrafting.common.util.RecipeUtil;
@@ -24,11 +29,15 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 
 import javax.annotation.Nonnull;
@@ -39,13 +48,24 @@ import java.util.UUID;
 import static fudge.spatialcrafting.common.block.BlockHologram.ACTIVE;
 import static fudge.spatialcrafting.common.util.MCConstants.NOTIFY_CLIENT;
 
+/**
+ * A class that handles all the logic of an ALREADY FORMED crafter block. A normal crafter block does not have a tile entity.
+ * This means that for example in a 3x3 formed multiblock there will be 9 instances of this class, one of which is a master crafter.
+ * Some things are handled for each crafter (as in, they will happen 9 times in that example) but most things are handled
+ * only ONCE by checking if the crafter is the master crafter.
+ */
 public class TileCrafter extends TileEntity implements ITickable {
 
     private static final String OFFSET_NBT = "offset";
     private static final int ALL_ACTIVE = -1;
     private static final int SOUND_LOOP_TICKS = 27;
+
     private Offset offset;
     private int counter;
+
+    //TODO convert to shared data after you figure out how it works
+    // private int energy = 0;
+
 
     public TileCrafter(BlockPos pos, BlockPos masterPos) {
         offset = new Offset(pos, masterPos);
@@ -77,6 +97,11 @@ public class TileCrafter extends TileEntity implements ITickable {
             return ItemStack.EMPTY;
 
         });
+
+    }
+
+    private IEnergyStorage getEnergyHandler() {
+        return getSharedData().getEnergyHandler();
     }
 
     public boolean isHelpActive() {
@@ -147,8 +172,21 @@ public class TileCrafter extends TileEntity implements ITickable {
 
     }
 
-    /**
-     */
+    @Override
+    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
+        return (ScConfig.General.requireEnergy && capability == CapabilityEnergy.ENERGY) || super.hasCapability(capability, facing);
+    }
+
+    @Nullable
+    @Override
+    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
+        if (capability == CapabilityEnergy.ENERGY && ScConfig.General.requireEnergy) {
+            return CapabilityEnergy.ENERGY.cast(getEnergyHandler());
+        } else {
+            return super.getCapability(capability, facing);
+        }
+    }
+
     @Nullable
     public SpatialRecipe getRecipe() {
         return getSharedData().getRecipe();
@@ -411,9 +449,13 @@ public class TileCrafter extends TileEntity implements ITickable {
         return MathUtil.middleOf(edge1, edge2);
     }
 
+
+    //TODO change "Craft end time" system to a progress bar based system
     @Override
     public void update() {
+
         try {
+            // Needs to only run once
             if (!isMaster()) return;
 
             // Update gets called once before the shared data is synced to the client, meaning it will be null at that time.
@@ -421,43 +463,83 @@ public class TileCrafter extends TileEntity implements ITickable {
             if (WorldSavedDataCrafters.getDataForMasterPos(world, masterPos()) == null) return;
 
 
-            if (!world.isRemote && isCrafting() && !craftTimeAboutToPass()) {
-                if (counter == SOUND_LOOP_TICKS) {
-                    counter = 0;
-                    world.playSound(null, pos, Sounds.CRAFT_LOOP, SoundCategory.BLOCKS, 0.8f, 0.8f);
-                } else {
-                    counter++;
-                }
+            // Handle sound
+            playCraftSound();
 
+            // Handle energy usage
+            if (!world.isRemote && ScConfig.General.requireEnergy && isCrafting()) {
+                handleEnergyUsage();
             }
 
+            checkIfTimeIsUp();
 
-            if (craftTimeHasPassed()) {
-                EntityPlayer player = world.getPlayerEntityByUUID(Objects.requireNonNull(getCraftingPlayer()));
-                if (player == null) {
-                    resetCraftingState();
-                    return;
-                }
-
-                stopHelp();
-
-                if (!world.isRemote) {
-                    // server
-                    completeCrafting(world, player);
-                } else {
-                    // client
-                    resetCraftingState();
-                }
-
-
-            }
         } catch (Exception e) {
             SpatialCrafting.LOGGER.error(e);
         }
 
     }
 
+
+    private void handleEnergyUsage() {
+
+        SpatialRecipe recipe = getRecipe();
+        if(recipe != null) {
+            long energyUsage = recipe.getEnergyCost() / recipe.getCraftTime();
+
+            if (getEnergy() < energyUsage) this.resetCraftingState(true);
+
+            extractEnergy((int) energyUsage);
+        }else{
+            SpatialCrafting.LOGGER.error(new NullPointerException("Couldn't find recipe to extract energy with!"));
+        }
+    }
+
+    public int extractEnergy(int amount) {
+        return getEnergyHandler().extractEnergy(amount, false);
+    }
+
+    public int getEnergy() {
+        return getEnergyHandler().getEnergyStored();
+    }
+
+    private void checkIfTimeIsUp() {
+        if (craftTimeHasPassed()) {
+            EntityPlayer player = world.getPlayerEntityByUUID(Objects.requireNonNull(getCraftingPlayer()));
+            if (player == null) {
+                resetCraftingState();
+                return;
+            }
+
+
+            if (!world.isRemote) {
+                // server
+                completeCrafting(world, player);
+            } else {
+                // client
+                resetCraftingState();
+            }
+
+            stopHelp();
+
+
+        }
+    }
+
+    private void playCraftSound() {
+        if (!world.isRemote && isCrafting() && !craftTimeAboutToPass()) {
+            if (counter == SOUND_LOOP_TICKS) {
+                counter = 0;
+                world.playSound(null, pos, Sounds.CRAFT_LOOP, SoundCategory.BLOCKS, 0.8f, 0.8f);
+            } else {
+                counter++;
+            }
+
+        }
+    }
+
     private void completeCrafting(World world, EntityPlayer player) {
+
+        SpatialRecipe recipe = getRecipe();
 
         this.resetCraftingState();
 
@@ -467,7 +549,7 @@ public class TileCrafter extends TileEntity implements ITickable {
         CraftingInventory craftingInventory = getCraftingInventory();
 
         // Find the correct recipe to craft with
-        SpatialRecipe recipe = SpatialRecipe.getMatchingRecipe(craftingInventory);
+       // SpatialRecipe recipe = SpatialRecipe.getMatchingRecipe(craftingInventory);
         if (recipe != null) {
 
             // Finally, drop the item on the ground.
@@ -476,21 +558,7 @@ public class TileCrafter extends TileEntity implements ITickable {
             CubeArr<BlockPos> holograms = getHolograms();
 
             CubeArr<ItemStack> transformedInventory = transformInventory(recipe, craftingInventory, player);
-            holograms.indexedForEach((i, j, k, hologramPos) -> {
-                ItemStack transformedStack = transformedInventory.get(i, j, k);
-
-                TileHologram hologram = Util.getTileEntity(world, Objects.requireNonNull(hologramPos));
-
-                // Remove items from all holograms. Transform them instead if applicable.
-                hologram.removeItem(1, false);
-                if (!transformedStack.isEmpty()) {
-                    hologram.insertItem(transformedStack);
-                }
-                IBlockState state = world.getBlockState(hologramPos);
-                world.notifyBlockUpdate(new BlockPos(hologramPos), state, state, MCConstants.NOTIFY_CLIENT);
-
-                return Unit.INSTANCE;
-            });
+            consumeInventory(world, holograms, transformedInventory);
 
 
             // Play end sound
@@ -502,9 +570,24 @@ public class TileCrafter extends TileEntity implements ITickable {
 
     }
 
-    /*
+    private void consumeInventory(World world, CubeArr<BlockPos> holograms, CubeArr<ItemStack> transformedInventory) {
+        holograms.indexedForEach((i, j, k, hologramPos) -> {
+            ItemStack transformedStack = transformedInventory.get(i, j, k);
 
-     */
+            TileHologram hologram = Util.getTileEntity(world, Objects.requireNonNull(hologramPos));
+
+            // Remove items from all holograms. Transform them instead if applicable.
+            hologram.removeItem(1, false);
+            if (!transformedStack.isEmpty()) {
+                hologram.insertItem(transformedStack);
+            }
+            IBlockState state = world.getBlockState(hologramPos);
+            world.notifyBlockUpdate(new BlockPos(hologramPos), state, state, MCConstants.NOTIFY_CLIENT);
+
+            return Unit.INSTANCE;
+        });
+    }
+
 
     public Vec3d centerOfCrafters() {
         CrafterPoses crafters = getCrafterBlocks();

@@ -30,7 +30,7 @@ public final class CrafterUtil {
 
         BlockPos masterPos = getMasterPosFromList(crafterList);
 
-        WorldSavedDataCrafters.addData(world, masterPos);
+        WorldSavedDataCrafters.addData(world, masterPos, crafterSize);
 
 
         for (BlockPos crafterPos : crafterList) {

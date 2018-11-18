@@ -34,20 +34,20 @@ public final class CraftTweakerIntegration {
 
     // ZenMethod means you can call this method in zenscript to do wtf you want
     @ZenMethod
-    public static void addRecipe(IIngredient[][][] input, IItemStack output, @Optional float craftTime) {
+    public static void addRecipe(IIngredient[][][] input, IItemStack output, @Optional float craftTime ,@Optional long energyCost) {
 
         // This is a workaround to have crafttweaker properly compile the zs files
         // Theoretically you can do the fixing loop here and then do:
         //  SpatialRecipe.addRecipe(new SpatialRecipe(fixedInput, fixedOutput)));
         // without implementing IAction.
         // But that wouldn't be caught in zenscript's try/catches and wouldn't print to the log.
-        CraftTweaker.LATE_ACTIONS.add(new AddShaped(input, output, craftTime));
+        CraftTweaker.LATE_ACTIONS.add(new AddShaped(input, output, craftTime,energyCost));
 
     }
 
     @ZenMethod
-    public static void addShapeless(IIngredient[] input, IItemStack output, @Optional float craftTime) {
-        CraftTweaker.LATE_ACTIONS.add(new AddShapeless(input, output, craftTime));
+    public static void addShapeless(IIngredient[] input, IItemStack output, @Optional float craftTime, @Optional long energyCost) {
+        CraftTweaker.LATE_ACTIONS.add(new AddShapeless(input, output, craftTime,energyCost));
     }
 
 
@@ -71,11 +71,13 @@ public final class CraftTweakerIntegration {
     abstract static class ActionAdd implements IAction {
         protected final IItemStack output;
         protected final float craftTime;
+        protected final long energyCost;
 
 
-        ActionAdd(IItemStack recipeOutput, float craftTime) {
+        ActionAdd(IItemStack recipeOutput, float craftTime, long energyCost) {
             this.output = recipeOutput;
             this.craftTime = craftTime;
+            this.energyCost = energyCost;
         }
 
         // This runs at post init together with all other crafttweaker recipes additions.
@@ -100,8 +102,8 @@ public final class CraftTweakerIntegration {
         private final IIngredient[][][] input;
 
 
-        AddShaped(IIngredient[][][] recipeInput, IItemStack recipeOutput, float craftTime) {
-            super(recipeOutput, craftTime);
+        AddShaped(IIngredient[][][] recipeInput, IItemStack recipeOutput, float craftTime, long energyCost) {
+            super(recipeOutput, craftTime,energyCost);
             this.input = recipeInput;
         }
 
@@ -110,7 +112,8 @@ public final class CraftTweakerIntegration {
             if (input.length == input[0].length && input[0].length == input[0][0].length) {
 
                 int time = craftTime == 0 ? input.length * SCConstants.DEFAULT_CRAFT_TIME_MULTIPLIER : Math.round(craftTime * MCConstants.TICKS_PER_SECOND);
-                SpatialRecipe recipe = new SpatialRecipe(ShapedRecipeInput.Companion.fromArr(input), CraftTweakerMC.getItemStack(output), time);
+                long energyCost = this.energyCost == 0 ? SpatialRecipe.DEFAULT_ENERGY_COST : this.energyCost;
+                SpatialRecipe recipe = new SpatialRecipe(ShapedRecipeInput.Companion.fromArr(input), CraftTweakerMC.getItemStack(output), time,energyCost);
                 super.apply(recipe);
             } else {
                 CraftTweakerAPI.logError("Can't add recipe for " + output.toString() + " because the input is not a cube array");
@@ -123,8 +126,8 @@ public final class CraftTweakerIntegration {
         private final IIngredient[] input;
 
 
-        AddShapeless(IIngredient[] recipeInput, IItemStack recipeOutput, float craftTime) {
-            super(recipeOutput, craftTime);
+        AddShapeless(IIngredient[] recipeInput, IItemStack recipeOutput, float craftTime, long energyCost) {
+            super(recipeOutput, craftTime,energyCost);
             this.input = recipeInput;
         }
 
@@ -133,7 +136,8 @@ public final class CraftTweakerIntegration {
             double sizeD = Math.cbrt(input.length);
             int size = sizeD == ((int) sizeD) ? (int) sizeD : ((int) sizeD) + 1;
             int time = craftTime == 0 ? size * SCConstants.DEFAULT_CRAFT_TIME_MULTIPLIER : Math.round(craftTime * MCConstants.TICKS_PER_SECOND);
-            SpatialRecipe recipe = new SpatialRecipe(new ShapelessRecipeInput(input), CraftTweakerMC.getItemStack(output), time);
+            long energyCost = this.energyCost == 0 ? SpatialRecipe.DEFAULT_ENERGY_COST : this.energyCost;
+            SpatialRecipe recipe = new SpatialRecipe(new ShapelessRecipeInput(input), CraftTweakerMC.getItemStack(output), time,energyCost);
             super.apply(recipe);
 
         }

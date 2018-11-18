@@ -36,18 +36,26 @@ public class SpatialRecipe {
     private static final String EXAMPLE_SCRIPT_NAME = "SpatialRecipeExamples.zs";
     private static final String CT_SCRIPTS_FOLDER_NAME = "scripts";
     private static final List<SpatialRecipe> recipeList = new ArrayList<>();
+    public static final int DEFAULT_ENERGY_COST = 10000;
     private final IRecipeInput requiredInput;
     private final ItemStack output;
     //in TICKS
     private int craftTime;
+    private long energyCost;
 
-    public SpatialRecipe(IRecipeInput recipeInput, ItemStack recipeOutput, int craftTime) {
+    public SpatialRecipe(IRecipeInput recipeInput, ItemStack recipeOutput, int craftTime, long energyCost) {
         this.requiredInput = recipeInput;
         this.output = recipeOutput;
         this.craftTime = craftTime;
+        this.energyCost = energyCost;
     }
 
-    public static SpatialRecipe getRecipeFromItemStacks(CraftingInventory itemStackInput, ItemStack output, RecipeAddition recipeAddition, int craftTime, boolean shaped) {
+    public long getEnergyCost() {
+        return energyCost;
+    }
+
+
+    public static SpatialRecipe getRecipeFromItemStacks(CraftingInventory itemStackInput, ItemStack output, RecipeAddition recipeAddition, int craftTime, boolean shaped, int energyCost) {
         // Convert ItemStack array to IIngredient array
 
         IRecipeInput ingredientInput;
@@ -71,7 +79,7 @@ public class SpatialRecipe {
             ingredientInput = new ShapelessRecipeInput(ingredients);
         }
 
-        return new SpatialRecipe(ingredientInput, output, craftTime);
+        return new SpatialRecipe(ingredientInput, output, craftTime,energyCost);
 
     }
 
@@ -186,7 +194,8 @@ public class SpatialRecipe {
         IRecipeInput input = RecipeInputSerialization.fromNBT(Objects.requireNonNull(ByteBufUtils.readTag(buf)));
         ItemStack output = ByteBufUtils.readItemStack(buf);
         int duration = buf.readInt();
-        return new SpatialRecipe(input, output, duration);
+        long energyCost = buf.readLong();
+        return new SpatialRecipe(input, output, duration,energyCost);
     }
 
     /**
@@ -269,6 +278,7 @@ public class SpatialRecipe {
         ByteBufUtils.writeTag(buf, requiredInput.writeToNBT(new NBTTagCompound()));
         ByteBufUtils.writeItemStack(buf, getOutput());
         buf.writeInt(craftTime);
+        buf.writeLong(energyCost);
     }
 
     public IRecipeInput getRequiredInput() {
@@ -307,8 +317,6 @@ public class SpatialRecipe {
     public boolean matches(CraftingInventory craftingInventory) {
         return requiredInput.matches(craftingInventory);
     }
-
-    // Magic function to create code
 
 
     public int getID() {

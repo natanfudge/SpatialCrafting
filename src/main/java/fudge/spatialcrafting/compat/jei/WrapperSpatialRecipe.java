@@ -1,7 +1,9 @@
 package fudge.spatialcrafting.compat.jei;
 
 import com.google.common.collect.ImmutableList;
+import fudge.spatialcrafting.SpatialCrafting;
 import fudge.spatialcrafting.client.tick.ClientTicker;
+import fudge.spatialcrafting.common.config.ScConfig;
 import fudge.spatialcrafting.common.crafting.SpatialRecipe;
 import fudge.spatialcrafting.common.tile.TileCrafter;
 import fudge.spatialcrafting.common.util.CrafterUtil;
@@ -44,8 +46,11 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
     private static final ResourceLocation HELP_OFF_LOCATION = new ResourceLocation(MODID, "textures/gui/button/plus_off.png");
 
     private static final int LAYERS_X = 1;
-    private static final List<Integer> Y_OFFSETS = ImmutableList.of(0, 0, 26, 36, 46, 56);
-    private static final List<Integer> X_OFFSETS = ImmutableList.of(0, 0, 62, 81, 102, 120);
+    private static final List<Integer> TIME_Y = ImmutableList.of(0, 0, 26, 36, 46, 56);
+    private static final List<Integer> TIME_X = ImmutableList.of(0, 0, 62, 81, 102, 120);
+    private static final int ENERGY_Y = -12;
+    private static final List<Integer> ENERGY_X = ImmutableList.of(0, 0, 17, 23, 33, 41);
+
     private final SpatialRecipe recipe;
     private final List<JeiButton> buttons;
     private int layer;
@@ -257,8 +262,18 @@ public class WrapperSpatialRecipe implements IRecipeWrapper {
             craftTimeInfo = Float.toString(time) + "s";
         }
 
+        // Draw craft time
+        drawString(TIME_X.get(recipeSize()), TIME_Y.get(recipeSize()), 0xff_ff_ff_ff, craftTimeInfo);
 
-        drawString(X_OFFSETS.get(recipeSize()), Y_OFFSETS.get(recipeSize()), 0xff_ff_ff_ff, craftTimeInfo);
+
+
+        if(ScConfig.General.requireEnergy) {
+            // Draw FE cost
+            String energyInfo = Long.toString(recipe.getEnergyCost()) + " FE";
+            drawString(ENERGY_X.get(recipeSize()), ENERGY_Y, 0xff_ff_ff_ff, energyInfo);
+        }
+
+
 
 
     }

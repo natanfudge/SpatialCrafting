@@ -168,7 +168,7 @@ public class CommandAddSRecipe extends SCCommand {
                 }
 
 
-                validateRecipeAndAdd(sender, shaped, player, output, input, recipeAdditionType, craftTime, customTime);
+                validateRecipeAndAdd(sender, shaped, player, output, input, recipeAdditionType, craftTime, customTime,SpatialRecipe.DEFAULT_ENERGY_COST);
 
 
             }
@@ -179,9 +179,9 @@ public class CommandAddSRecipe extends SCCommand {
         }
     }
 
-    private void validateRecipeAndAdd(@Nonnull ICommandSender sender, boolean shaped, EntityPlayerMP player, ItemStack output, CraftingInventory input, RecipeAddition recipeAdditionType, int craftTime, boolean customTime) {
+    private void validateRecipeAndAdd(@Nonnull ICommandSender sender, boolean shaped, EntityPlayerMP player, ItemStack output, CraftingInventory input, RecipeAddition recipeAdditionType, int craftTime, boolean customTime, int customEnergyCost) {
         try {
-            SpatialRecipe recipe = SpatialRecipe.getRecipeFromItemStacks(input, output, recipeAdditionType, craftTime, shaped);
+            SpatialRecipe recipe = SpatialRecipe.getRecipeFromItemStacks(input, output, recipeAdditionType, craftTime, shaped,customEnergyCost);
 
             // Writes some code in ZS that adds the corresponding recipe. Who needs programmers in our day and age?
             final String METHOD_NAME = shaped ? "addRecipe" : "addShapeless";

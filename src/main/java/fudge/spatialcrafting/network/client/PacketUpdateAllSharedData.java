@@ -1,8 +1,8 @@
 package fudge.spatialcrafting.network.client;
 
 import fudge.spatialcrafting.common.data.WorldSavedDataCrafters;
-import fudge.spatialcrafting.common.tile.util.CraftersData;
-import fudge.spatialcrafting.common.tile.util.SharedData;
+import fudge.spatialcrafting.common.data.CraftersData;
+import fudge.spatialcrafting.common.data.SharedData;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
@@ -35,7 +35,6 @@ public class PacketUpdateAllSharedData implements IMessage {
     @Override
     public void toBytes(ByteBuf buffer) {
 
-        // PacketBuffers are easier to use
         NBTTagCompound allSerializedData = new NBTTagCompound();
 
         for (int i = 0; i < allData.size(); i++) {

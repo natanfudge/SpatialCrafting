@@ -16,6 +16,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Contract;
 
 import static fudge.spatialcrafting.common.block.SCBlocks.registerTileEntities;
 
@@ -25,14 +26,15 @@ public class SpatialCrafting {
 
     public static final String MODID = "spatialcrafting";
     public static final String NAME = "Spatial Crafting";
-    public static final String VERSION = "1.12.2-0.4.0.0";
+    public static final String VERSION = "1.12.2-0.5.1.0";
     public static final SpatialCraftingTab SPATIAL_CRAFTING_TAB = new SpatialCraftingTab();
 
     public static final Logger LOGGER = LogManager.getLogger(NAME);
     private static final String SERVER_PROXY_PATH = "fudge.spatialcrafting.proxy.ServerProxy";
     private static final String CLIENT_PROXY_PATH = "fudge.spatialcrafting.proxy.ClientProxy";
-    private static final boolean DEBUG_ACTIVE = true;
+    private static final boolean DEBUG_ACTIVE = false;
     private static final boolean TEST_ACTIVE = false;
+
 
 
     @Mod.Instance(MODID)
@@ -66,7 +68,6 @@ public class SpatialCrafting {
 
         if (TEST_ACTIVE) Test.INSTANCE.testInit();
 
-
     }
 
     @Mod.EventHandler
@@ -75,7 +76,6 @@ public class SpatialCrafting {
         registerTileEntities();
 
         proxy.init();
-
 
     }
 
