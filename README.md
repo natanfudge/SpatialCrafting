@@ -20,6 +20,9 @@ Then, hold the item (or any amount of that item) that you want to be the output 
 Finally, <b>type /sc addrecipe (or /sc ar) to add the recipe</b>.  
 
 If you want to add a shapeless recipe type "/sc addshapeless" or "/sc as" instead.
+
+## Config
+By default Spatial Crafting does not require energy. Energy cost can be enabled in the config, and there are already recipes that support it. 
   
 ## Adding More Advanced Recipes
 
