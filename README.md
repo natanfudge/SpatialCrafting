@@ -19,7 +19,7 @@ First, insert a nearby crafter with the items that you want to serve as the inpu
 Then, hold the item (or any amount of that item) that you want to be the output for the recipe in your main hand.  
 Finally, <b>type /sc addrecipe (or /sc ar) to add the recipe</b>.  
 
-If you want to add a shapeless recipe type "/sc addshapeless" or "/sc as" instead.
+If you want to add a shapeless recipe <b>type /sc addshapeless</b> or /sc as instead.
 
 ## Config
 By default Spatial Crafting does not require energy. Energy cost can be enabled in the config, and there are already recipes that support it. 
