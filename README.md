@@ -53,4 +53,4 @@ spatialcrafting.addRecipe([
 	]
 ],	stone * 9, 10.5,20000);
 ```
-This will add a 2x2 recipe in which the first layer contains 4 stone, and the second layer contains 2 iron blocks and 2 stone. 
+This will add a 2x2 recipe in which the first layer contains 4 stone, and the second layer contains 2 iron blocks and 2 stone. The output will be 9 stone, it will take 10.5 seconds to craft and cost 20,000 FE.
