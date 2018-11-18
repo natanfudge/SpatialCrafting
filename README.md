@@ -22,7 +22,7 @@ Finally, <b>type /sc addrecipe (or /sc ar) to add the recipe</b>.
 If you want to add a shapeless recipe <b>type /sc addshapeless</b> or /sc as instead.
 
 ## Config
-By default Spatial Crafting does not require energy. Energy cost can be enabled in the config, and there are already recipes that support it. 
+By default Spatial Crafting does not require energy. Energy cost can be enabled in the config, and there are already recipes that support it. If you can't see the energy status on the crafters, go into the waila config, then to modules/capability and enable "Show energy data".
   
 ## Adding More Advanced Recipes
 
