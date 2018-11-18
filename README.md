@@ -19,4 +19,38 @@ First, insert a nearby crafter with the items that you want to serve as the inpu
 Then, hold the item (or any amount of that item) that you want to be the output for the recipe in your main hand.  
 Finally, <b>type /sc addrecipe (or /sc ar) to add the recipe</b>.  
 
+If you want to add a shapeless recipe type "/sc addshapeless" or "/sc as" instead.
   
+## Adding More Advanced Recipes
+
+Adding recipes using the "ar" commands has some limitations. You cannot choose how much time it takes to craft the item, how much energy the recipe costs (if energy usage is enabled), and some other things that CraftTweaker enables. 
+A better way of adding recipes is by writing a [CraftTweaker](https://crafttweaker.readthedocs.io/en/latest/) script. Go into your minecraft folder, then to scripts/spatialcrafting. You will see a file named SpatialRecipeExamples.zs with some examples of how to add recipes. You can either add extra recipes to this file or create another file in the scripts folder with a .zs extension to add recipes to.
+
+This process might be difficult for some, so if you are experiencing any problems you can ask questions in the [Spatial Crafting Discord Server](https://discord.gg/CFaCu97).
+To add a recipe, the file needs to have this at the top:
+```
+import mods.spatialcrafting;
+```
+Then decide what ingredients you will use in your recipe, for example:
+```
+val stone = <minecraft:stone:*>;
+val ironBlock = <minecraft:iron_block>;
+```
+Then add the actual command that will add the recipe. The syntax for it goes like this: (Parameters enclosed with [] are optional)
+```
+spatialcrafting.addRecipe(<recipe input array>, <recipe output>, [recipe craft time], [recipe energy cost]);
+```
+For example:
+```
+spatialcrafting.addRecipe([
+	[
+		[stone, stone],
+		[stone, stone]
+	],
+	[
+		[ironBlock, stone],
+		[stone, ironBlock]
+	]
+],	stone * 9, 10.5,20000);
+```
+This will add a 2x2 recipe in which the first layer contains 4 stone, and the second layer contains 2 iron blocks and 2 stone. 
