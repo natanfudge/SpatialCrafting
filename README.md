@@ -27,7 +27,8 @@ By default Spatial Crafting does not require energy. Energy cost can be enabled 
 ## Adding More Advanced Recipes
 
 Adding recipes using the "ar" commands has some limitations. You cannot choose how much time it takes to craft the item, how much energy the recipe costs (if energy usage is enabled), and some other things that CraftTweaker enables. 
-A better way of adding recipes is by writing a [CraftTweaker](https://crafttweaker.readthedocs.io/en/latest/) script. Go into your minecraft folder, then to scripts/spatialcrafting. You will see a file named SpatialRecipeExamples.zs with some examples of how to add recipes. You can either add extra recipes to this file or create another file in the scripts folder with a .zs extension to add recipes to.
+A better way of adding recipes is by writing a [CraftTweaker](https://crafttweaker.readthedocs.io/en/latest/) script.
+Go into your minecraft folder, then to scripts/spatialcrafting. You will see a file named SpatialRecipeExamples.zs with some examples of how to add recipes. You can either add extra recipes to this file or create another file in the scripts folder with a .zs extension to add recipes to.
 
 This process might be difficult for some, so if you are experiencing any problems you can ask questions in the [Spatial Crafting Discord Server](https://discord.gg/CFaCu97).
 To add a recipe, the file needs to have this at the top:
