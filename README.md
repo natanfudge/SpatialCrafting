@@ -8,7 +8,7 @@ In order to make bigger recipes, you will need the next levels of crafters - loo
 
 ## Crafting Items
 
-To craft items, insert the required items for the spatial recipe in the holograms by right clicking on them, and then right click nay  crafter block. You can take items out by either right clicking with an open hand, or left clicking.  
+To craft items, insert the required items for the spatial recipe in the holograms by right clicking on them, and then right click any  crafter block. You can take items out by either right clicking with an open hand, or left clicking.  
 For this step JEI is highly recommended! Simply look up the recipe (for the bigger crafters, for example) in JEI. When near a crafter, you can <b>press "start crafting help" to automaticly configure to holograms to allow for easy inserations</b> for that recipe.  
 JEI shows each layer of the recipe individually (from bottom to top - layer 1 will be the lowest layer and so on). <b>Use the buttons near the recipe to traverse the layers of the recipe</b>. This will also configure the nearest crafter to activate the relevent layer.
 
