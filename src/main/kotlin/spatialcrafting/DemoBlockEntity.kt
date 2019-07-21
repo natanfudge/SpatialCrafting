@@ -6,9 +6,9 @@ import net.minecraft.nbt.CompoundTag
 
 import java.util.function.Supplier
 
-val DEMO_BLOCK_ENTITY_TYPE = BlockEntityType.Builder.create(Supplier { DemoBlockEntity() }, EXAMPLE_BLOCK).build(null)
+val DemoBlockEntityType = BlockEntityType.Builder.create(Supplier { DemoBlockEntity() }, CrafterPieceX2).build(null)
 
-class DemoBlockEntity : BlockEntity(DEMO_BLOCK_ENTITY_TYPE) {
+class DemoBlockEntity : BlockEntity(DemoBlockEntityType) {
 
     // Store the current value of the number
     private var number = 7

@@ -17,7 +17,7 @@
   "entrypoints": {
     "main": [
       {
-        "value": "spatialcrafting.ExampleModKt::init"
+        "value": "spatialcrafting.SpatialCraftingKt::init"
       }
     ]
   },
