@@ -2,7 +2,6 @@
   "schemaVersion": 1,
   "id": "spatialcrafting",
   "version": "${version}",
-
   "name": "Example Mod",
   "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
@@ -12,20 +11,22 @@
     "homepage": "https://fabricmc.net/",
     "sources": "https://github.com/FabricMC/fabric-example-mod"
   },
-
   "license": "CC0-1.0",
   "icon": "assets/spatialcrafting/icon.png",
-
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      {
+        "value": "spatialcrafting.ExampleModKt::init"
+      }
     ]
   },
   "mixins": [
     "spatialcrafting.mixins.json"
   ],
-
+  "requires": {
+    "fabric-language-kotlin": ">=1.3.30"
+  },
   "depends": {
     "fabricloader": ">=0.4.0",
     "fabric": "*"
