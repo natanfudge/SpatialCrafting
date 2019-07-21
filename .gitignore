@@ -1,6 +1,25 @@
-BON-2.4.0.15-bin.jar
-out/
+# gradle
+
 .gradle/
 build/
+out/
+classes/
+
+# idea
+
 .idea/
+*.iml
+*.ipr
+*.iws
+
+# vscode
+
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+
+# fabric
+
 run/
