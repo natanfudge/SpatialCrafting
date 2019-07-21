@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "spatialcrafting:block/example_block" }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "spatialcrafting:block/example_block"
+  }
+}
