@@ -1,3 +1,12 @@
 {
-  "item.spatialcrafting.fabric_item": "Fabric Item Of Doom"
+  "item.spatialcrafting.fabric_item": "Fabric Item Of Doom",
+  "block.spatialcrafting.x2crafter_piece": "Wood-carved Crafter",
+  "block.spatialcrafting.x2crafter_piece.info": "Place 4 of these in a 2x2 pattern to form the multiblock",
+  "block.spatialcrafting.x3crafter_piece": "Stone-formed crafter",
+  "block.spatialcrafting.x3crafter_piece.info": "Place 9 of these in a 3x3 pattern to form the multiblock",
+  "block.spatialcrafting.x4crafter_piece": "Ironforged crafter",
+  "block.spatialcrafting.x4crafter_piece.info": "Place 16 of these in a 4x4 pattern to form the multiblock",
+  "block.spatialcrafting.x5crafter_piece": "Gem-infused Crafter",
+  "block.spatialcrafting.x5crafter_piece.info": "Place 25 of these in a 5x5 pattern to form the multiblock",
+  "itemGroup.spatialcrafting.spatial_crafting": "Spatial Crafting"
 }

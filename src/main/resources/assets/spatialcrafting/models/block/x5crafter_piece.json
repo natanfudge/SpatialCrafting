@@ -1,0 +1,7 @@
+{
+  "parent": "block/cube_top",
+  "textures": {
+    "top": "spatialcrafting:block/crafter/x5/top",
+    "side": "spatialcrafting:block/crafter/x5/side"
+  }
+}

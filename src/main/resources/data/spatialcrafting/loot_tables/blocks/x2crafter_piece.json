@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "spatialcrafting:example_block"
+          "name": "spatialcrafting:x2crafter_piece"
         }
       ],
       "conditions": [
