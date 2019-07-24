@@ -12,13 +12,11 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 import spatialcrafting.util.*
-import kotlin.contracts.contract
 import net.fabricmc.fabric.api.server.PlayerStream
-import net.minecraft.util.PacketByteBuf
-import net.fabricmc.fabric.api.network.PacketContext
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
+import net.minecraft.text.TranslatableText
 
 
 val craftersPieces = listOf(
@@ -29,9 +27,9 @@ val craftersPieces = listOf(
 )
 
 fun BlockEntity?.assertIsCrafterBE(): CrafterPieceEntity {
-    contract {
-        returns() implies (this@assertIsCrafterBE is CrafterPieceEntity)
-    }
+//    contract {
+//        returns() implies (this@assertIsCrafterBE is CrafterPieceEntity)
+//    }
     if (this !is CrafterPieceEntity) error("BlockEntity at location ${this?.pos} is not a Crafter Piece Entity as expected.\nRather, it is '$this'.")
     return this
 }
@@ -41,8 +39,8 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
 
     override fun createBlockEntity(var1: BlockView?) = CrafterPieceEntity()
 
-    override fun buildTooltip(itemStack_1: ItemStack?, blockView_1: BlockView?, list_1: MutableList<Text>?, tooltipContext_1: TooltipContext?) {
-        list_1?.add(LiteralText("Block Tooltip"))
+    override fun buildTooltip(itemstack: ItemStack?, blockView: BlockView?, tooltip: MutableList<Text>, tooltipContext: TooltipContext?) {
+        tooltip.add(TranslatableText("block.spatialcrafting.crafter_piece.tooltip", size * size, size, size))
     }
 
 
@@ -114,6 +112,7 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
     private fun logMultiblockCreation(multiblock: CrafterMultiblock) {
         logDebug("Building multiblock. Locations:\n [${multiblock.logString()}]")
     }
+
     private fun logMultiblockDestruction(multiblock: CrafterMultiblock) {
         logDebug("Destroying multiblock. Locations:\n [${multiblock.logString()}]")
     }

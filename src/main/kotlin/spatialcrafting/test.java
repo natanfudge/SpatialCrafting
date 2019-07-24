@@ -7,6 +7,8 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.world.World;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 class test extends Item {
@@ -17,7 +19,9 @@ class test extends Item {
 
     @Override
     public void appendTooltip(ItemStack itemStack, World world, List<Text> tooltip, TooltipContext tooltipContext) {
-        tooltip.add(new TranslatableText("tutorial.my_tooltip"));
+        int currentDay = 4;
+        int currentMonth = 7;
+        tooltip.add(new TranslatableText("item.tutorial.fabric_item.tooltip", currentDay, currentMonth));
     }
 }
 

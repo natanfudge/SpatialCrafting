@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "spatialcrafting",
   "version": "${version}",
-  "name": "Example Mod",
+  "name": "Spatial Crafting",
   "description": "This is an example description! Tell everyone what your mod is about!",
   "authors": [
     "Me!"

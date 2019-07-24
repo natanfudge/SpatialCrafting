@@ -13,31 +13,24 @@ import spatialcrafting.util.ModInitializationContext
 import spatialcrafting.util.initializeMod
 import spatialcrafting.util.itemStack
 
+//TODO: tooltips for indiviual crafters
+//TODO: holograms
+//TODO: crafting
+//TODO: sounds and particles
+//TODO: power consumption
+//TODO: config file
+//TODO: Recipe generator GUI
+//TODO: rei integration
+
+
 const val ModId = "spatialcrafting"
 
 val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
         Identifier(ModId, "spatial_crafting")
 ) {
-    //TODO: ask why this is a lambda
     craftersPieces[0].itemStack
 }
 
-//class X : Block {
-//    override fun buildTooltip(itemStack_1: ItemStack?, blockView_1: BlockView?, list_1: MutableList<Text>?, tooltipContext_1: TooltipContext?) {
-//        super.buildTooltip(itemStack_1, blockView_1, list_1, tooltipContext_1)
-//    }
-//}
-
-fun syncNoLongerMultiblock(context: PacketContext, multiblock: CrafterMultiblock) {
-
-}
-
-
-//object Packets {
-//    val noLongerMultiblockPacket = id("sync_crafter_piece_removed")
-//    val syncCrafterPiecePlaced = id("sync_crafter_piece_placed")
-//    val test = id("test")
-//}
 
 fun id(identifier: String): Identifier {
     return Identifier(ModId, identifier)
