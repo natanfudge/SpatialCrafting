@@ -1,12 +1,11 @@
 package spatialcrafting
 
 import net.fabricmc.fabric.api.network.PacketContext
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
-import spatialcrafting.util.sendMessage
-import spatialcrafting.util.name
 import spatialcrafting.util.sendPacket
 import java.util.stream.Stream
 
@@ -29,20 +28,20 @@ object Packets {
         fun use(context: PacketContext, packet: T)
     }
 
-    data class AssignMultiblockState(val multiblock: CrafterMultiblock, val masterEntityLocation: BlockPos) : Packet {
-        companion object : PacketManager<AssignMultiblockState> {
+    data class CreateMultiblock(val multiblock: CrafterMultiblock, val masterEntityLocation: BlockPos) : Packet {
+        companion object : PacketManager<CreateMultiblock> {
             override val id: String
                 get() = "assign_multiblock_state"
 
-            override fun fromBuf(buf: PacketByteBuf): AssignMultiblockState = AssignMultiblockState(
+            override fun fromBuf(buf: PacketByteBuf): CreateMultiblock = CreateMultiblock(
                     buf.readCompoundTag()?.toCrafterMultiblock()
                             ?: error("A compound was not written to the PacketByteBuf!"),
                     buf.readBlockPos()
             )
 
-            override fun use(context: PacketContext, packet: AssignMultiblockState) {
-                CrafterPieceEntity.assignMultiblockState(context.player.world, packet.masterEntityLocation, packet.multiblock)
-                context.player.sendMessage("Multiblock!")
+            override fun use(context: PacketContext, packet: CreateMultiblock) {
+                CrafterPiece.createMultiblock(context.player.world, packet.masterEntityLocation, packet.multiblock)
+
             }
 
         }
@@ -53,19 +52,18 @@ object Packets {
         }
     }
 
-    data class UnassignMultiblockState(val multiblock: CrafterMultiblock) : Packet {
-        companion object : PacketManager<UnassignMultiblockState> {
+    data class DestroyMultiblock(val multiblock: CrafterMultiblock) : Packet {
+        companion object : PacketManager<DestroyMultiblock> {
             override val id: String
                 get() = "unassign_multiblock_state"
 
-            override fun fromBuf(buf: PacketByteBuf): UnassignMultiblockState = UnassignMultiblockState(
+            override fun fromBuf(buf: PacketByteBuf): DestroyMultiblock = DestroyMultiblock(
                     buf.readCompoundTag()?.toCrafterMultiblock()
                             ?: error("A compound was not written to the PacketByteBuf!")
             )
 
-            override fun use(context: PacketContext, packet: UnassignMultiblockState) {
-                CrafterPieceEntity.unassignMultiblockState(context.player.world, packet.multiblock)
-                context.player.sendMessage("No More multiblock!")
+            override fun use(context: PacketContext, packet: DestroyMultiblock) {
+                CrafterPiece.destroyMultiblock(context.player.world, packet.multiblock)
             }
 
         }
@@ -74,8 +72,6 @@ object Packets {
             buf.writeCompoundTag(multiblock.toTag())
         }
     }
-
-
 
 
 }

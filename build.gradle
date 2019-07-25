@@ -10,7 +10,7 @@ buildscript{
 }
 
 plugins {
-    id 'fabric-loom' version '0.2.4-SNAPSHOT'
+    id 'fabric-loom' version '0.2.5-SNAPSHOT'
     id 'maven-publish'
 }
 
@@ -24,7 +24,6 @@ group = project.maven_group
 minecraft {
 }
 sourceSets {
-//    main.kotlin.srcDirs += 'src/main/java'
     main.java.srcDirs += 'src/main/kotlin'
 }
 

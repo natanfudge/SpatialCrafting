@@ -5,7 +5,6 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
@@ -14,7 +13,6 @@ import net.minecraft.world.World
 import spatialcrafting.util.*
 import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.client.item.TooltipContext
-import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 
@@ -26,25 +24,73 @@ val craftersPieces = listOf(
         CrafterPiece(5)
 )
 
-fun BlockEntity?.assertIsCrafterBE(): CrafterPieceEntity {
-//    contract {
-//        returns() implies (this@assertIsCrafterBE is CrafterPieceEntity)
-//    }
-    if (this !is CrafterPieceEntity) error("BlockEntity at location ${this?.pos} is not a Crafter Piece Entity as expected.\nRather, it is '$this'.")
-    return this
+fun <T> BlockEntity?.assertIs(): T {
+    return (this as? T)
+            ?: error("BlockEntity at location ${this?.pos} is not a Crafter Piece Entity as expected.\nRather, it is '$this'.")
+//    if (this !is T)
+//    return this
 }
 
-private fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIsCrafterBE()
+//data class HologramSpaceResult(val )
+
+fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>()
 class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEntityProvider {
+
+
+    companion object {
+        private fun thereIsSpaceForHolograms(world: World, multiblock: CrafterMultiblock): Boolean =
+                multiblock.hologramLocations.all {
+                    val isAir = world.getBlock(it) is AirBlock
+                    if (isAir) true
+                    else {
+                        if (world.isServer) logDebug("Refusing to create multiblock due to ${world.getBlock(it)} existing in a required hologram space $it.")
+                        false
+                    }
+                }
+
+
+        private fun CrafterMultiblock.logString() = "Size = $multiblockSize, Locations = \n" + locations.groupBy { it.x }
+                .entries
+                .joinToString("\n") { column -> column.value.joinToString(", ") { it.xz } }
+
+        fun createMultiblock(world: World, masterPos: BlockPos, multiblock: CrafterMultiblock) {
+            if (thereIsSpaceForHolograms(world, multiblock)) {
+                logDebug("Building multiblock. [${multiblock.logString()}]")
+                CrafterPieceEntity.assignMultiblockState(world, masterPos, multiblock)
+
+                for (hologramPos in multiblock.hologramLocations) {
+                    world.setBlock(HologramBlock, pos = hologramPos)
+                }
+
+
+            }
+            else {
+                //TODO: show an indicator that there is no space
+            }
+
+        }
+
+        fun destroyMultiblock(world: World, multiblock: CrafterMultiblock) {
+            if (world.isServer) logDebug("Destroying multiblock. [${multiblock.logString()}]")
+            CrafterPieceEntity.unassignMultiblockState(world, multiblock)
+
+            for (hologramPos in multiblock.hologramLocations) {
+                world.setBlockState(hologramPos, HologramBlock.defaultState.with(HologramIndestructible, false))
+                world.setBlock(Blocks.AIR, pos = hologramPos)
+            }
+
+        }
+    }
 
     override fun createBlockEntity(var1: BlockView?) = CrafterPieceEntity()
 
-    override fun buildTooltip(itemstack: ItemStack?, blockView: BlockView?, tooltip: MutableList<Text>, tooltipContext: TooltipContext?) {
-        tooltip.add(TranslatableText("block.spatialcrafting.crafter_piece.tooltip", size * size, size, size))
+    override fun buildTooltip(itemstack: ItemStack, blockView: BlockView?, tooltip: MutableList<Text>, tooltipContext: TooltipContext) {
+        tooltip.add(TranslatableText("block.spatialcrafting.crafter_piece.tooltip_1", size * size, size, size))
+        tooltip.add(TranslatableText("block.spatialcrafting.crafter_piece.tooltip_2"))
     }
 
 
-    private fun World.holdsCompatibleCrafterPiece(blockPos: BlockPos) = getBlockAtLocation(blockPos).let {
+    private fun World.holdsCompatibleCrafterPiece(blockPos: BlockPos) = getBlock(blockPos).let {
         it is CrafterPiece && it.size == this@CrafterPiece.size
     }
 
@@ -52,13 +98,14 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
     override fun onBlockRemoved(blockState: BlockState, world: World, pos: BlockPos, blockState_2: BlockState?, boolean_1: Boolean) {
         assert(world.isServer)
         val multiblock = world.getCrafterEntity(pos).multiblockIn ?: return
-        logMultiblockDestruction(multiblock)
-        unformMultiblock(world, multiblock)
+        destroyMultiblockFromServer(world, multiblock)
+        super.onBlockRemoved(blockState, world, pos, blockState_2, boolean_1)
     }
 
-    private fun unformMultiblock(world: World, multiblock: CrafterMultiblock) {
-        CrafterPieceEntity.unassignMultiblockState(world, multiblock)
-        PlayerStream.all(world.server).sendPacket(Packets.UnassignMultiblockState, Packets.UnassignMultiblockState(
+    private fun destroyMultiblockFromServer(world: World, multiblock: CrafterMultiblock) {
+        assert(world.isServer)
+        destroyMultiblock(world, multiblock)
+        PlayerStream.all(world.server).sendPacket(Packets.DestroyMultiblock, Packets.DestroyMultiblock(
                 multiblock
         ))
     }
@@ -77,17 +124,18 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
         if (world.isClient) return
         val northernEasternCrafter = getNorthernEasternCrafter(world, blockPos)
         val multiblock = attemptToFormMultiblock(world, northernEasternCrafter) ?: return
-        logMultiblockCreation(multiblock)
-        formMultiblock(world, northernEasternCrafter, multiblock)
+
+        createMultiblockFromServer(world, northernEasternCrafter, multiblock)
     }
 
-    private fun formMultiblock(world: World, northernEasternCrafter: BlockPos, multiblock: CrafterMultiblock) {
-        CrafterPieceEntity.assignMultiblockState(
+    private fun createMultiblockFromServer(world: World, northernEasternCrafter: BlockPos, multiblock: CrafterMultiblock) {
+        assert(world.isServer)
+        createMultiblock(
                 world = world,
                 masterPos = northernEasternCrafter,
                 multiblock = multiblock
         )
-        PlayerStream.all(world.server).sendPacket(Packets.AssignMultiblockState, Packets.AssignMultiblockState(
+        PlayerStream.all(world.server).sendPacket(Packets.CreateMultiblock, Packets.CreateMultiblock(
                 multiblock = multiblock,
                 masterEntityLocation = northernEasternCrafter
         ))
@@ -99,7 +147,7 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
         for ((westDistance, southDistance) in (0 to 0) until (size to size)) {
             val location = northernEasternCrafterPos.west(westDistance).south(southDistance)
             if (!world.holdsCompatibleCrafterPiece(location)) {
-                logDebug("Refusing to build multiblock due to ${world.getBlockAtLocation(location)} existing in required position ${location.xz}")
+                logDebug("Refusing to build multiblock due to ${world.getBlock(location)} existing in required position ${location.xz}")
                 return null // All nearby blocks must be crafter pieces
             }
             blocks.add(location)
@@ -109,17 +157,6 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
         return CrafterMultiblock(blocks, size)
     }
 
-    private fun logMultiblockCreation(multiblock: CrafterMultiblock) {
-        logDebug("Building multiblock. Locations:\n [${multiblock.logString()}]")
-    }
-
-    private fun logMultiblockDestruction(multiblock: CrafterMultiblock) {
-        logDebug("Destroying multiblock. Locations:\n [${multiblock.logString()}]")
-    }
-
-    private fun CrafterMultiblock.logString() = locations.groupBy { it.x }
-            .entries
-            .joinToString("\n") { column -> column.value.joinToString(", ") { it.xz } }
 
     private fun getNorthernEasternCrafter(world: World, blockPos: BlockPos): BlockPos {
         var currentBlock = blockPos
@@ -144,48 +181,3 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
 
 }
 
-private const val locationKey = "location"
-private const val sizeKey = "size"
-
-data class CrafterMultiblock(
-        /**
-         * This is the northern-eastern most block's location.
-         */
-        val locations: List<BlockPos>,
-        val size: Int
-) : Serializable<CrafterMultiblock> {
-    override fun toTag(): CompoundTag = CompoundTag().apply {
-        locations.forEachIndexed { i, blockPos ->
-            putBlockPos(blockPos, locationKey + i)
-        }
-
-        putInt(sizeKey, size)
-    }
-
-    fun getCrafterEntities(world: World): List<CrafterPieceEntity> = locations.map {
-        world.getCrafterEntity(it)
-    }
-
-
-}
-
-fun totalPieceAmount(multiblockSize: Int) = multiblockSize * multiblockSize
-
-fun CompoundTag.toCrafterMultiblock(): CrafterMultiblock? {
-    val size = getInt(sizeKey)
-
-    val locations = (0 until totalPieceAmount(size)).mapNotNull { i ->
-        getBlockPos(locationKey + i)
-    }
-
-    // If it's empty it means everything is null
-    return if (locations.isEmpty()) return null
-    else CrafterMultiblock(locations, size)
-}
-
-/**
- * Gets the tag with the key and then deserializes it
- */
-fun CompoundTag.toCrafterMultiblock(key: String): CrafterMultiblock? {
-    return this.transformCompoundTag(key) { this.toCrafterMultiblock() }
-}

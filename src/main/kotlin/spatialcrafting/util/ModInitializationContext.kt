@@ -35,7 +35,7 @@ class ModInitializationContext(private val modId: String) {
 
     fun BlockEntityType<*>.register(id: String): BlockEntityType<*> = register(Registry.BLOCK_ENTITY, id)
     fun Item.register(id: String): Item = register(Registry.ITEM, id)
-    fun Block.register(id: String): Block = register(Registry.BLOCK, id)
+    private fun Block.register(id: String): Block = register(Registry.BLOCK, id)
 
 
     fun registerServerToClientPacket(packetId: Identifier, packetConsumer: (PacketContext, PacketByteBuf) -> Unit) =

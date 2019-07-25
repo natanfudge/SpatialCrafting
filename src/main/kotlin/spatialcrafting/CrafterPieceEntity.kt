@@ -1,6 +1,7 @@
 package spatialcrafting
 
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
+import net.minecraft.block.AirBlock
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
@@ -39,6 +40,8 @@ val CrafterBlockEntityType = Builders.blockEntityType(craftersPieces) { CrafterP
 
 class CrafterPieceEntity : BlockEntity(CrafterBlockEntityType), BlockEntityClientSerializable {
     companion object {
+
+
         fun assignMultiblockState(world: World, masterPos: BlockPos, multiblock: CrafterMultiblock) {
             for (crafterEntity in multiblock.getCrafterEntities(world)) {
                 with(crafterEntity) {
@@ -52,8 +55,8 @@ class CrafterPieceEntity : BlockEntity(CrafterBlockEntityType), BlockEntityClien
             // The block which was destroyed will give a null block entity, so we need to ignore it.
             multiblock.locations.mapNotNull {
                 world.getBlockEntity(it)
-            }.forEach {crafterEntity ->
-                with(crafterEntity.assertIsCrafterBE()) {
+            }.forEach { crafterEntity ->
+                with(crafterEntity.assertIs<CrafterPieceEntity>()) {
                     setMasterEntityPos(null)
                     if (isMaster) setMultiblockIn(null)
                 }
@@ -107,7 +110,7 @@ class CrafterPieceEntity : BlockEntity(CrafterBlockEntityType), BlockEntityClien
     private val masterEntity: CrafterPieceEntity?
         get() = masterEntityPos?.let { masterPos ->
             if (isMaster) this
-            else world?.getBlockEntity(masterPos).assertIsCrafterBE()
+            else world?.getCrafterEntity(masterPos)
         }
 
     /**
