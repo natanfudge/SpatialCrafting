@@ -15,6 +15,7 @@ import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
+import spatialcrafting.hologram.HologramBlock
 
 
 val craftersPieces = listOf(

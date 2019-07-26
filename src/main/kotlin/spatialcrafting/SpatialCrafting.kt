@@ -1,7 +1,12 @@
 package spatialcrafting
 
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
+import net.fabricmc.fabric.api.client.render.BlockEntityRendererRegistry
 import net.minecraft.util.Identifier
+import spatialcrafting.hologram.HologramBlock
+import spatialcrafting.hologram.HologramBlockEntity
+import spatialcrafting.hologram.HologramBlockEntityRenderer
+import spatialcrafting.hologram.HologramBlockEntityType
 import spatialcrafting.util.ModInitializationContext
 import spatialcrafting.util.initializeMod
 import spatialcrafting.util.itemStack
@@ -37,6 +42,8 @@ fun init() = initializeMod(ModId) {
     CrafterBlockEntityType.register("crafter_piece_entity")
     HologramBlockEntityType.register("hologram_entity")
     HologramBlock.registerWithBlockItem(HologramId, group = SpatialCraftingItemGroup)
+
+    BlockEntityRendererRegistry.INSTANCE.register(HologramBlockEntity::class.java, HologramBlockEntityRenderer())
 
     registerServerToClientPacket(Packets.CreateMultiblock)
     registerServerToClientPacket(Packets.DestroyMultiblock)

@@ -1,4 +1,4 @@
-package spatialcrafting
+package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.AttributeList
 import alexiil.mc.lib.attributes.AttributeProvider
@@ -6,8 +6,6 @@ import net.minecraft.block.*
 import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.entity.EntityContext
 import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.state.StateFactory
-import net.minecraft.state.property.BooleanProperty
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
@@ -15,7 +13,9 @@ import net.minecraft.util.shape.VoxelShape
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 import net.minecraft.block.BlockState
+import net.minecraft.client.render.block.entity.BlockEntityRenderer
 import net.minecraft.world.IWorld
+import spatialcrafting.assertIs
 import spatialcrafting.util.*
 
 
