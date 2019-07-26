@@ -1,5 +1,7 @@
 package spatialcrafting
 
+import alexiil.mc.lib.attributes.AttributeList
+import alexiil.mc.lib.attributes.AttributeProvider
 import net.minecraft.block.*
 import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.entity.EntityContext
@@ -12,8 +14,10 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
-import spatialcrafting.util.Builders
-import spatialcrafting.util.setBlock
+import net.minecraft.block.BlockState
+import net.minecraft.world.IWorld
+import spatialcrafting.util.*
+
 
 private const val Unbreakable = -1.0f
 private const val Indestructible = 3600000.0f
@@ -33,7 +37,20 @@ private val HologramSettings = Builders.blockSettings(
 )
 val HologramIndestructible = BooleanProperty.of("destructible")
 
-object HologramBlock : Block(HologramSettings), BlockEntityProvider {
+object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributeProvider {
+    override fun addAllAttributes(
+            world: World,
+            pos: BlockPos,
+            state: BlockState,
+            to: AttributeList<*>
+    ) {
+        world.getBlockEntity(pos).let {
+            if (it is HologramBlockEntity) {
+                it.registerInventory(to)
+            }
+        }
+
+    }
     // This must be set to false to make be able to remove an hologram
 
 
@@ -46,7 +63,6 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider {
     override fun appendProperties(stateFactory: StateFactory.Builder<Block, BlockState>) {
         stateFactory.add(HologramIndestructible)
     }
-
 
 
     //TODO: add blockState and document in wiki
@@ -70,13 +86,64 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider {
 //        return BlockRenderType.INVISIBLE
     }
 
-    override fun activate(blockState_1: BlockState?, world_1: World?, blockPos_1: BlockPos?, playerEntity_1: PlayerEntity?, hand_1: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
-        //TODO: insert item into hologram
-        return super.activate(blockState_1, world_1, blockPos_1, playerEntity_1, hand_1, blockHitResult_1)
+    override fun activate(blockState: BlockState, world: World, pos: BlockPos, player: PlayerEntity?, hand: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
+        if (player == null || hand == null) return false
+
+        val hologramEntity = world.getHologramEntity(pos)
+
+        if (player.isHoldingItemIn(hand)) {
+            if (hologramEntity.isEmpty()) {
+                hologramEntity.insertItem(player.getStackInHand(hand))
+                player.getStackInHand(hand).count--
+                logDebug {
+                    "Inserted item into hologram. New Content: " + hologramEntity.getItem()
+                }
+            }
+        }
+
+        if (!hologramEntity.isEmpty()) {
+            if (world.isClient) player.sendMessage("Item in hologram: ${hologramEntity.getItem()}")
+        }
+
+//        //TODO: insert item into hologram
+//        val insertAttribute = ItemAttributes.INSERTABLE.get(world, pos)
+//        val extractAttribute = ItemAttributes.EXTRACTABLE.get(world, pos)
+//
+//        val stackInHologram = extractAttribute.
+//
+//        val heldStack = player.getStackInHand(hand)
+//
+//        //TODO: convert into player.holdsItemIn
+//        if (heldStack.count > 0) {
+//
+//        }
+//        else {
+//
+//        }
+//
+//        val currentStack = attribute.
+//        val playerStack = player.mainHandStack.count--
+//        playerStack.count--
+//        attribute.insert(ItemStack(playerStack.item, 1))
+////        player.inventory.removeOne(playerStack)
+////        player.inventory.mainHandStack.
+
+        return true
+    }
+
+    override fun onBroken(world: IWorld, pos: BlockPos, blockState: BlockState) {
+       world.setBlock(HologramBlock, pos)
+    }
+
+    override fun onBreak(world: World, pos: BlockPos, blockState: BlockState?, player: PlayerEntity?) {
+//        world.setBlock(HologramBlock, pos)
+        giveItemInHologramToPlayer(player, world, pos)
+//        world.getHologramEntity(pos).dropInventory()
     }
 
     override fun onBlockRemoved(stateBefore: BlockState, world: World, pos: BlockPos, stateAfter: BlockState, boolean_1: Boolean) {
-        ensureBlockIsNotManuallyDestructible(stateAfter, stateBefore, world, pos)
+//        give
+//        ensureBlockIsNotManuallyDestructible(stateAfter, stateBefore, world, pos)
     }
 
     /**
@@ -85,18 +152,23 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider {
     private fun ensureBlockIsNotManuallyDestructible(stateAfter: BlockState, stateBefore: BlockState, world: World, pos: BlockPos) {
         if (
                 stateAfter.block !is HologramBlock // No need to put a new hologram block if afterwards there will be a hologram
-                && !(stateAfter.isAir && !stateBefore.get(HologramIndestructible))) // This is the situation in which we explicitly remove the hologram when the multiblock is destroyed. In that case we shouldn't put a new hologram.
-        {
+                && !(stateAfter.isAir && !stateBefore.get(HologramIndestructible)) // This is the situation in which we explicitly remove the hologram when the multiblock is destroyed. In that case we shouldn't put a new hologram.
+        ) {
             world.setBlock(HologramBlock, pos)
             world.getHologramEntity(pos).dropInventory()
         }
     }
 
-    fun World.getHologramEntity(pos :BlockPos) = getBlockEntity(pos).assertIs<HologramBlockEntity>()
+    private fun World.getHologramEntity(pos: BlockPos) = getBlockEntity(pos).assertIs<HologramBlockEntity>()
 
-    override fun onBlockBreakStart(blockState: BlockState, world: World, pos: BlockPos, playerEntity_1: PlayerEntity?) {
-        world.getHologramEntity(pos).dropInventory()
-        val x = 2
+    override fun onBlockBreakStart(blockState: BlockState, world: World, pos: BlockPos, player: PlayerEntity?) {
+        giveItemInHologramToPlayer(player, world, pos)
+    }
+
+    private fun giveItemInHologramToPlayer(player: PlayerEntity?, world: World, pos: BlockPos) {
+        if (player == null) return
+        val itemInHologram = world.getHologramEntity(pos).extractItem()
+        player.giveItemStack(itemInHologram)
     }
 
 

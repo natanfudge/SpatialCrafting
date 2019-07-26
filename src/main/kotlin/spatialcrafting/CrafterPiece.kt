@@ -43,7 +43,7 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
                     val isAir = world.getBlock(it) is AirBlock
                     if (isAir) true
                     else {
-                        if (world.isServer) logDebug("Refusing to create multiblock due to ${world.getBlock(it)} existing in a required hologram space $it.")
+                        if (world.isServer) logDebug { "Refusing to create multiblock due to ${world.getBlock(it)} existing in a required hologram space $it." }
                         false
                     }
                 }
@@ -55,7 +55,7 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
 
         fun createMultiblock(world: World, masterPos: BlockPos, multiblock: CrafterMultiblock) {
             if (thereIsSpaceForHolograms(world, multiblock)) {
-                logDebug("Building multiblock. [${multiblock.logString()}]")
+                logDebug { "Building multiblock. [${multiblock.logString()}]" }
                 CrafterPieceEntity.assignMultiblockState(world, masterPos, multiblock)
 
                 for (hologramPos in multiblock.hologramLocations) {
@@ -71,7 +71,7 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
         }
 
         fun destroyMultiblock(world: World, multiblock: CrafterMultiblock) {
-            if (world.isServer) logDebug("Destroying multiblock. [${multiblock.logString()}]")
+            if (world.isServer) logDebug { "Destroying multiblock. [${multiblock.logString()}]" }
             CrafterPieceEntity.unassignMultiblockState(world, multiblock)
 
             for (hologramPos in multiblock.hologramLocations) {
@@ -147,7 +147,7 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
         for ((westDistance, southDistance) in (0 to 0) until (size to size)) {
             val location = northernEasternCrafterPos.west(westDistance).south(southDistance)
             if (!world.holdsCompatibleCrafterPiece(location)) {
-                logDebug("Refusing to build multiblock due to ${world.getBlock(location)} existing in required position ${location.xz}")
+                logDebug { "Refusing to build multiblock due to ${world.getBlock(location)} existing in required position ${location.xz}" }
                 return null // All nearby blocks must be crafter pieces
             }
             blocks.add(location)

@@ -142,7 +142,8 @@ class CrafterPieceEntity : BlockEntity(CrafterBlockEntityType), BlockEntityClien
         }
 
 
-        logDebug("Loading CrafterPieceEntity at pos ${pos.xz}. MasterPos = ${masterEntityPos?.xz}")
+        logDebug{"Loading CrafterPieceEntity at pos ${pos.xz}. MasterPos = ${masterEntityPos?.xz}"}
     }
 
 }
+

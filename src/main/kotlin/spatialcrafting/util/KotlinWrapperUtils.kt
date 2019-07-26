@@ -5,30 +5,42 @@ import io.netty.buffer.Unpooled
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.block.Block
+import net.minecraft.block.BlockState
 import net.minecraft.block.Material
 import net.minecraft.block.MaterialColor
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.block.piston.PistonBehavior
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemConvertible
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.Tag
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.util.Hand
 import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import java.util.stream.Stream
 
 
 fun World.getBlock(location: BlockPos): Block = getBlockState(location).block
 val World.isServer get() = !isClient
-
 /**
  * Replaces the block in the [pos] with the specified [block], using the default [BlockState].
  */
-fun World.setBlock(block: Block, pos: BlockPos) = world.setBlockState(pos, block.defaultState)
+fun IWorld.setBlock(block: Block, pos: BlockPos) : Boolean = world.setBlockState(pos, block.defaultState)
+
+
+
+fun PlayerEntity.isHoldingItemIn(hand: Hand): Boolean = !getStackInHand(hand).isEmpty
+
+/**
+ * Creates a new [ItemStack] with the specified [count].
+ */
+fun ItemStack.copy(count: Int) = copy().apply { this.count = count }
 
 
 /**

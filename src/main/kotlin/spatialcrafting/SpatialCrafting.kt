@@ -1,8 +1,6 @@
 package spatialcrafting
 
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
-import net.minecraft.block.Block
-import net.minecraft.block.Material
 import net.minecraft.util.Identifier
 import spatialcrafting.util.ModInitializationContext
 import spatialcrafting.util.initializeMod
@@ -19,18 +17,18 @@ import spatialcrafting.util.itemStack
 
 const val ModId = "spatialcrafting"
 
+const val HologramId = "hologram"
+
 private val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
         Identifier(ModId, "spatial_crafting")
 ) { craftersPieces[0].itemStack }
-object MyBlocks{
-    val MY_BLOCK_INSTANCE = MyBlock(Block.Settings.of(Material.STONE))
-}
 
+fun id(str: String) = Identifier(ModId, str)
 
 @Suppress("unused")
 fun init() = initializeMod(ModId) {
     FabricItem.register("fabric_item")
-    HologramBlock.registerWithBlockItem("hologram", group = SpatialCraftingItemGroup)
+
     for (crafterPiece in craftersPieces) {
         crafterPiece.registerWithBlockItem(id = "x${crafterPiece.size}crafter_piece",
                 group = SpatialCraftingItemGroup
@@ -38,7 +36,8 @@ fun init() = initializeMod(ModId) {
     }
     CrafterBlockEntityType.register("crafter_piece_entity")
     HologramBlockEntityType.register("hologram_entity")
-    MyBlocks.MY_BLOCK_INSTANCE.registerWithBlockItem(id = "test")
+    HologramBlock.registerWithBlockItem(HologramId, group = SpatialCraftingItemGroup)
+
     registerServerToClientPacket(Packets.CreateMultiblock)
     registerServerToClientPacket(Packets.DestroyMultiblock)
 }
