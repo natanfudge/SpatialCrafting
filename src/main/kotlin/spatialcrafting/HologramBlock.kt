@@ -35,7 +35,6 @@ private val HologramSettings = Builders.blockSettings(
         pistonBehavior = PistonBehavior.IGNORE,
         replaceable = false
 )
-val HologramIndestructible = BooleanProperty.of("destructible")
 
 object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributeProvider {
     override fun addAllAttributes(
@@ -54,15 +53,9 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     // This must be set to false to make be able to remove an hologram
 
 
-    init {
-        defaultState = stateFactory.defaultState.with(HologramIndestructible, true)
-    }
 
     override fun createBlockEntity(var1: BlockView?) = HologramBlockEntity()
 
-    override fun appendProperties(stateFactory: StateFactory.Builder<Block, BlockState>) {
-        stateFactory.add(HologramIndestructible)
-    }
 
 
     //TODO: add blockState and document in wiki
@@ -105,29 +98,6 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
             if (world.isClient) player.sendMessage("Item in hologram: ${hologramEntity.getItem()}")
         }
 
-//        //TODO: insert item into hologram
-//        val insertAttribute = ItemAttributes.INSERTABLE.get(world, pos)
-//        val extractAttribute = ItemAttributes.EXTRACTABLE.get(world, pos)
-//
-//        val stackInHologram = extractAttribute.
-//
-//        val heldStack = player.getStackInHand(hand)
-//
-//        //TODO: convert into player.holdsItemIn
-//        if (heldStack.count > 0) {
-//
-//        }
-//        else {
-//
-//        }
-//
-//        val currentStack = attribute.
-//        val playerStack = player.mainHandStack.count--
-//        playerStack.count--
-//        attribute.insert(ItemStack(playerStack.item, 1))
-////        player.inventory.removeOne(playerStack)
-////        player.inventory.mainHandStack.
-
         return true
     }
 
@@ -136,28 +106,15 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     }
 
     override fun onBreak(world: World, pos: BlockPos, blockState: BlockState?, player: PlayerEntity?) {
-//        world.setBlock(HologramBlock, pos)
         giveItemInHologramToPlayer(player, world, pos)
-//        world.getHologramEntity(pos).dropInventory()
     }
 
     override fun onBlockRemoved(stateBefore: BlockState, world: World, pos: BlockPos, stateAfter: BlockState, boolean_1: Boolean) {
-//        give
-//        ensureBlockIsNotManuallyDestructible(stateAfter, stateBefore, world, pos)
+        world.getHologramEntity(pos).dropInventory()
+        super.onBlockRemoved(stateBefore,world,pos,stateAfter,boolean_1)
     }
 
-    /**
-     * This is a workaround for the block not being destructible in creative
-     */
-    private fun ensureBlockIsNotManuallyDestructible(stateAfter: BlockState, stateBefore: BlockState, world: World, pos: BlockPos) {
-        if (
-                stateAfter.block !is HologramBlock // No need to put a new hologram block if afterwards there will be a hologram
-                && !(stateAfter.isAir && !stateBefore.get(HologramIndestructible)) // This is the situation in which we explicitly remove the hologram when the multiblock is destroyed. In that case we shouldn't put a new hologram.
-        ) {
-            world.setBlock(HologramBlock, pos)
-            world.getHologramEntity(pos).dropInventory()
-        }
-    }
+
 
     private fun World.getHologramEntity(pos: BlockPos) = getBlockEntity(pos).assertIs<HologramBlockEntity>()
 

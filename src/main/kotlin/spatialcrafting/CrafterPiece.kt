@@ -75,7 +75,6 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
             CrafterPieceEntity.unassignMultiblockState(world, multiblock)
 
             for (hologramPos in multiblock.hologramLocations) {
-                world.setBlockState(hologramPos, HologramBlock.defaultState.with(HologramIndestructible, false))
                 world.setBlock(Blocks.AIR, pos = hologramPos)
             }
 

@@ -10,6 +10,11 @@ import net.minecraft.nbt.CompoundTag
 import spatialcrafting.util.copy
 import net.minecraft.command.arguments.ItemStackArgumentType.itemStack
 import net.minecraft.entity.ItemEntity
+import net.minecraft.predicate.entity.DistancePredicate.y
+import net.minecraft.util.math.BlockPos
+import net.minecraft.world.World
+
+
 
 
 val HologramBlockEntityType = Builders.blockEntityType(HologramBlock) { HologramBlockEntity() }
@@ -50,13 +55,18 @@ class HologramBlockEntity : BlockEntity(HologramBlockEntityType), BlockEntityCli
         inventory.fromTag(tag.getCompound("inventory"));
     }
 
+//    fun dropItemStack(world: World, pos: BlockPos, itemStack: ItemStack, randomMotion: Boolean = true) {
+//        val itemEntity = ItemEntity(world, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), getItem())
+////        if (!randomMotion) {
+////            itemEntity.motionZ = 0
+////            itemEntity.motionY = itemEntity.motionZ
+////            itemEntity.motionX = itemEntity.motionY
+////        }
+//        world.spawnEntity(itemEntity)
+//    }
+
     fun dropInventory() {
         val itemEntity = ItemEntity(world, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), getItem())
-        if (!randomMotion) {
-            itemEntity.motionZ = 0
-            itemEntity.motionY = itemEntity.motionZ
-            itemEntity.motionX = itemEntity.motionY
-        }
         world!!.spawnEntity(itemEntity)
     }
 
