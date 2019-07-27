@@ -1,10 +1,13 @@
 package spatialcrafting
 
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
+import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
+import spatialcrafting.crafter.CrafterBlockEntityType
+import spatialcrafting.crafter.craftersPieces
 import spatialcrafting.docs.ExampleBlock
 import spatialcrafting.docs.DemoBlockEntity
 import spatialcrafting.docs.MyBlockEntityRenderer
@@ -15,9 +18,8 @@ import spatialcrafting.util.kotlinwrappers.Builders
 import spatialcrafting.util.kotlinwrappers.ModInitializationContext
 import spatialcrafting.util.kotlinwrappers.ModInit
 import spatialcrafting.util.kotlinwrappers.itemStack
-
+//TODO: check if hoppers can insert in holograms
 //TODO: crafter recipe
-//TODO: add reload to docs
 //TODO: holograms
 //TODO: crafting
 //TODO: sounds and particles
@@ -65,14 +67,18 @@ fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
 
     register(Packets.CreateMultiblock)
     register(Packets.DestroyMultiblock)
+    register(Packets.UpdateHologramContent)
 
 
+    //TODO: remove this after writing docs
     Registry.register(Registry.BLOCK, "tutorial:example_block", MyMod.MY_BLOCK)
     Registry.ITEM.add(Identifier("tutorial", "example_block"),
             BlockItem(MyMod.MY_BLOCK, Item.Settings().group(SpatialCraftingItemGroup)))
     Registry.register(Registry.BLOCK_ENTITY, "tutorial:example_block_entity", MyMod.MyBlockEntityType)
 
     register(MyBlockEntityRenderer())
+
+//    LootTableLoadingCallback
 //    MyBlockEntityRenderer.register()
 
 

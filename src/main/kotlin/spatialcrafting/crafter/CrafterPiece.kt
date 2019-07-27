@@ -1,4 +1,4 @@
-package spatialcrafting
+package spatialcrafting.crafter
 
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
@@ -15,8 +15,9 @@ import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
+import spatialcrafting.Packets
 import spatialcrafting.hologram.HologramBlock
-import spatialcrafting.util.kotlinwrappers.Builders
+import spatialcrafting.sendPacket
 import spatialcrafting.util.kotlinwrappers.getBlock
 import spatialcrafting.util.kotlinwrappers.isServer
 import spatialcrafting.util.kotlinwrappers.setBlock

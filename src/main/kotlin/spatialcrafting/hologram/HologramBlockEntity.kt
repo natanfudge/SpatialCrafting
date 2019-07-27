@@ -4,27 +4,45 @@ import alexiil.mc.lib.attributes.AttributeList
 import net.minecraft.block.entity.BlockEntity
 import alexiil.mc.lib.attributes.item.impl.SimpleFixedItemInv
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
+import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.entity.ItemEntity
+import spatialcrafting.Packets
+import spatialcrafting.sendPacket
 import spatialcrafting.util.kotlinwrappers.Builders
 import spatialcrafting.util.kotlinwrappers.copy
+import spatialcrafting.util.kotlinwrappers.isServer
 
 
 val HologramBlockEntityType = Builders.blockEntityType(HologramBlock) { HologramBlockEntity() }
 
 class HologramBlockEntity : BlockEntity(HologramBlockEntityType), BlockEntityClientSerializable {
+
     companion object {
         private object Keys {
             const val Inventory = "inventory"
             const val LastChangeTime = "last_change_time"
         }
-
     }
 
 
+    val inventory = HologramInventory().also {
+        // Since inventory is only changed at server side we need to send a packet to the client
+        // Note: this will be called again in the client after we do that, so we need to ignore it that time.
+        it.setOwnerListener { inv, slot, previousStack, currentStack ->
+            if (world!!.isClient) return@setOwnerListener
 
-    private val inventory = SimpleFixedItemInv(1)
+            if (!previousStack.isItemEqual(currentStack)) {
+                PlayerStream.watching(this).sendPacket(Packets.UpdateHologramContent,
+                        Packets.UpdateHologramContent(
+                                this.pos, currentStack
+                        )
+                )
+            }
+        }
+    }
+
 
     /**
      * This is just used for client sided rendering of the block so the items in the holograms don't move in sync.
@@ -52,6 +70,7 @@ class HologramBlockEntity : BlockEntity(HologramBlockEntityType), BlockEntityCli
      * Inserts only one of the itemStack
      */
     fun insertItem(itemStack: ItemStack) {
+        markDirty()
         assert(isEmpty())
         lastChangeTime = world!!.time
         inventory.insert(itemStack.copy(count = 1))
@@ -62,7 +81,7 @@ class HologramBlockEntity : BlockEntity(HologramBlockEntityType), BlockEntityCli
     /**
      * May return an empty stack
      */
-    fun extractItem(): ItemStack = inventory.extract(1)
+    fun extractItem(): ItemStack = inventory.extract(1).also { markDirty() }
 
     fun isEmpty() = getItem().isEmpty
 

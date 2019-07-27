@@ -1,7 +1,6 @@
-package spatialcrafting
+package spatialcrafting.crafter
 
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
-import net.minecraft.block.AirBlock
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
@@ -127,10 +126,10 @@ class CrafterPieceEntity : BlockEntity(CrafterBlockEntityType), BlockEntityClien
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
         if (isMaster) {
-            tag.put(Keys.multiblock, multiblockIn?.toTag())
+            tag.put(Companion.Keys.multiblock, multiblockIn?.toTag())
         }
 
-        if (masterEntityPos != null) tag.putBlockPos(Keys.masterEntity,masterEntityPos)
+        if (masterEntityPos != null) tag.putBlockPos(Companion.Keys.masterEntity,masterEntityPos)
         return tag
 
     }
@@ -139,9 +138,9 @@ class CrafterPieceEntity : BlockEntity(CrafterBlockEntityType), BlockEntityClien
     // Deserialize the BlockEntity
     override fun fromTag(tag: CompoundTag) {
         super.fromTag(tag)
-        masterEntityPos = tag.getBlockPos(Keys.masterEntity)
+        masterEntityPos = tag.getBlockPos(Companion.Keys.masterEntity)
         if (isMaster) {
-            multiblockIn = tag.toCrafterMultiblock(key = Keys.multiblock)
+            multiblockIn = tag.toCrafterMultiblock(key = Companion.Keys.multiblock)
         }
 
 

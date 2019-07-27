@@ -2,6 +2,7 @@ package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.AttributeList
 import alexiil.mc.lib.attributes.AttributeProvider
+import alexiil.mc.lib.attributes.item.compat.SidedInventoryFixedWrapper
 import net.minecraft.block.*
 import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.entity.EntityContext
@@ -13,9 +14,9 @@ import net.minecraft.util.shape.VoxelShape
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 import net.minecraft.block.BlockState
-import net.minecraft.client.render.block.entity.BlockEntityRenderer
+import net.minecraft.inventory.SidedInventory
 import net.minecraft.world.IWorld
-import spatialcrafting.assertIs
+import spatialcrafting.crafter.assertIs
 import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.Builders
 import spatialcrafting.util.kotlinwrappers.isHoldingItemIn
@@ -39,7 +40,11 @@ private val HologramSettings = Builders.blockSettings(
         replaceable = false
 )
 
-object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributeProvider {
+object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributeProvider, InventoryProvider {
+    override fun getInventory(blockState: BlockState?, world: IWorld, pos: BlockPos): SidedInventory {
+        return HologramInventoryWrapper(world.getHologramEntity(pos).inventory)
+    }
+
     override fun addAllAttributes(
             world: World,
             pos: BlockPos,
@@ -114,7 +119,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     }
 
 
-    private fun World.getHologramEntity(pos: BlockPos) = getBlockEntity(pos).assertIs<HologramBlockEntity>()
+    private fun IWorld.getHologramEntity(pos: BlockPos) = getBlockEntity(pos).assertIs<HologramBlockEntity>()
 
     override fun onBlockBreakStart(blockState: BlockState, world: World, pos: BlockPos, player: PlayerEntity?) {
         giveItemInHologramToPlayer(player, world, pos)

@@ -1,4 +1,4 @@
-package spatialcrafting
+package spatialcrafting.crafter
 
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
