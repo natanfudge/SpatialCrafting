@@ -2,14 +2,13 @@ package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.AttributeList
 import net.minecraft.block.entity.BlockEntity
-import spatialcrafting.util.Builders
 import alexiil.mc.lib.attributes.item.impl.SimpleFixedItemInv
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import spatialcrafting.util.copy
 import net.minecraft.entity.ItemEntity
-import kotlin.properties.Delegates
+import spatialcrafting.util.kotlinwrappers.Builders
+import spatialcrafting.util.kotlinwrappers.copy
 
 
 val HologramBlockEntityType = Builders.blockEntityType(HologramBlock) { HologramBlockEntity() }
@@ -24,13 +23,13 @@ class HologramBlockEntity : BlockEntity(HologramBlockEntityType), BlockEntityCli
     }
 
 
-    //TODO: document BLOCK ENTITY RENDERER
+
     private val inventory = SimpleFixedItemInv(1)
 
     /**
      * This is just used for client sided rendering of the block so the items in the holograms don't move in sync.
      */
-    var lastChangeTime: Long by Delegates.notNull()
+    var lastChangeTime: Long = 0
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
@@ -70,21 +69,10 @@ class HologramBlockEntity : BlockEntity(HologramBlockEntityType), BlockEntityCli
     fun registerInventory(to: AttributeList<*>) = inventory.offerSelfAsAttribute(to, null, null)
 
 
-//    fun dropItemStack(world: World, pos: BlockPos, itemStack: ItemStack, randomMotion: Boolean = true) {
-//        val itemEntity = ItemEntity(world, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), getItem())
-////        if (!randomMotion) {
-////            itemEntity.motionZ = 0
-////            itemEntity.motionY = itemEntity.motionZ
-////            itemEntity.motionX = itemEntity.motionY
-////        }
-//        world.spawnEntity(itemEntity)
-//    }
-
     fun dropInventory() {
         val itemEntity = ItemEntity(world, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), getItem())
         world!!.spawnEntity(itemEntity)
     }
 
-    //TODO: store 1 inventory slot and save/load to disk
 }
 

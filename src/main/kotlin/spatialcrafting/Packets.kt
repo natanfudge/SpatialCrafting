@@ -1,18 +1,19 @@
 package spatialcrafting
 
 import net.fabricmc.fabric.api.network.PacketContext
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
-import spatialcrafting.util.sendPacket
+import spatialcrafting.util.kotlinwrappers.sendPacket
 import java.util.stream.Stream
 
 /**
  * Sends a packet from the server to the client for all the players in the stream.
  */
-fun <T : Packets.Packet> Stream<ServerPlayerEntity>.sendPacket(packetManager: Packets.PacketManager<T>, packet: T) {
+fun <T : Packets.Packet, U : PlayerEntity> Stream<U>.sendPacket(packetManager: Packets.PacketManager<T>, packet: T) {
     sendPacket(packetId = Identifier(ModId, packetManager.id), packetBuilder = { packet.addToByteBuf(this) })
 }
 

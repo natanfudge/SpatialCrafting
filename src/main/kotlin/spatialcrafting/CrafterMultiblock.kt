@@ -4,9 +4,10 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.util.Serializable
-import spatialcrafting.util.getBlockPos
-import spatialcrafting.util.putBlockPos
-import spatialcrafting.util.transformCompoundTag
+import spatialcrafting.util.kotlinwrappers.getBlockPos
+import spatialcrafting.util.kotlinwrappers.putBlockPos
+import spatialcrafting.util.kotlinwrappers.transformCompoundTag
+
 
 private const val sizeKey = "size"
 private const val locationKey = "location"
@@ -20,7 +21,7 @@ data class CrafterMultiblock(
 ) : Serializable<CrafterMultiblock> {
     override fun toTag(): CompoundTag = CompoundTag().apply {
         locations.forEachIndexed { i, blockPos ->
-            putBlockPos(blockPos, locationKey + i)
+            putBlockPos(locationKey + i, blockPos)
         }
 
         putInt(sizeKey, multiblockSize)

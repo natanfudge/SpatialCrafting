@@ -17,6 +17,9 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderer
 import net.minecraft.world.IWorld
 import spatialcrafting.assertIs
 import spatialcrafting.util.*
+import spatialcrafting.util.kotlinwrappers.Builders
+import spatialcrafting.util.kotlinwrappers.isHoldingItemIn
+import spatialcrafting.util.kotlinwrappers.setBlock
 
 
 private const val Unbreakable = -1.0f
@@ -53,12 +56,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     // This must be set to false to make be able to remove an hologram
 
 
-
     override fun createBlockEntity(var1: BlockView?) = HologramBlockEntity()
-
-
-
-    //TODO: add blockState and document in wiki
 
 
     override fun getRenderLayer(): BlockRenderLayer {
@@ -87,7 +85,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
         if (player.isHoldingItemIn(hand)) {
             if (hologramEntity.isEmpty()) {
                 hologramEntity.insertItem(player.getStackInHand(hand))
-                player.getStackInHand(hand).count--
+                if (!player.isCreative) player.getStackInHand(hand).count--
                 logDebug {
                     "Inserted item into hologram. New Content: " + hologramEntity.getItem()
                 }
@@ -102,18 +100,18 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     }
 
     override fun onBroken(world: IWorld, pos: BlockPos, blockState: BlockState) {
-       world.setBlock(HologramBlock, pos)
+        world.setBlock(HologramBlock, pos)
     }
 
     override fun onBreak(world: World, pos: BlockPos, blockState: BlockState?, player: PlayerEntity?) {
-        giveItemInHologramToPlayer(player, world, pos)
+        // This is to make it so in creative mod you won't get unnecessary items
+        world.getHologramEntity(pos).extractItem()
     }
 
     override fun onBlockRemoved(stateBefore: BlockState, world: World, pos: BlockPos, stateAfter: BlockState, boolean_1: Boolean) {
         world.getHologramEntity(pos).dropInventory()
-        super.onBlockRemoved(stateBefore,world,pos,stateAfter,boolean_1)
+        super.onBlockRemoved(stateBefore, world, pos, stateAfter, boolean_1)
     }
-
 
 
     private fun World.getHologramEntity(pos: BlockPos) = getBlockEntity(pos).assertIs<HologramBlockEntity>()

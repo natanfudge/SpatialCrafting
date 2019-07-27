@@ -7,6 +7,9 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.util.*
+import spatialcrafting.util.kotlinwrappers.Builders
+import spatialcrafting.util.kotlinwrappers.getBlockPos
+import spatialcrafting.util.kotlinwrappers.putBlockPos
 
 //
 //private data class CrafterPieceEntityData(var multiblockIn: CrafterMultiblock? = null, var masterEntityPos: BlockPos? = null) {
@@ -127,7 +130,7 @@ class CrafterPieceEntity : BlockEntity(CrafterBlockEntityType), BlockEntityClien
             tag.put(Keys.multiblock, multiblockIn?.toTag())
         }
 
-        if (masterEntityPos != null) tag.putBlockPos(masterEntityPos, Keys.masterEntity)
+        if (masterEntityPos != null) tag.putBlockPos(Keys.masterEntity,masterEntityPos)
         return tag
 
     }

@@ -16,6 +16,10 @@ import net.minecraft.client.item.TooltipContext
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import spatialcrafting.hologram.HologramBlock
+import spatialcrafting.util.kotlinwrappers.Builders
+import spatialcrafting.util.kotlinwrappers.getBlock
+import spatialcrafting.util.kotlinwrappers.isServer
+import spatialcrafting.util.kotlinwrappers.setBlock
 
 
 val craftersPieces = listOf(
@@ -28,14 +32,33 @@ val craftersPieces = listOf(
 fun <T> BlockEntity?.assertIs(): T {
     return (this as? T)
             ?: error("BlockEntity at location ${this?.pos} is not a Crafter Piece Entity as expected.\nRather, it is '$this'.")
-//    if (this !is T)
-//    return this
 }
+//
+//private val ironMaterial = Builders.material(
+//        materialColor = MaterialColor.WHITE,
+//        isSolid = true,
+//        requiresTool = true,
+//
+//        )
 
-//data class HologramSpaceResult(val )
+//private val crafterMaterial = mapOf(
+//        2 to Material.WOOD,
+//        3 to Material.STONE,
+//        4 to Material.METAL,
+//        5 to Material.METAL
+//)
+
 
 fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>()
-class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEntityProvider {
+class CrafterPiece(val size: Int) : Block(Settings.copy(
+        when (size) {
+            2 -> Blocks.OAK_LOG
+            3 -> Blocks.STONE
+            4 -> Blocks.IRON_BLOCK
+            5 -> Blocks.DIAMOND_BLOCK
+            else -> error("unexpected size")
+        }
+)), BlockEntityProvider {
 
 
     companion object {
@@ -105,7 +128,7 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
     private fun destroyMultiblockFromServer(world: World, multiblock: CrafterMultiblock) {
         assert(world.isServer)
         destroyMultiblock(world, multiblock)
-        PlayerStream.all(world.server).sendPacket(Packets.DestroyMultiblock, Packets.DestroyMultiblock(
+        PlayerStream.watching(world,multiblock.locations[0]).sendPacket(Packets.DestroyMultiblock, Packets.DestroyMultiblock(
                 multiblock
         ))
     }
@@ -135,7 +158,7 @@ class CrafterPiece(val size: Int) : Block(Settings.of(Material.STONE)), BlockEnt
                 masterPos = northernEasternCrafter,
                 multiblock = multiblock
         )
-        PlayerStream.all(world.server).sendPacket(Packets.CreateMultiblock, Packets.CreateMultiblock(
+        PlayerStream.watching(world,multiblock.locations[0]).sendPacket(Packets.CreateMultiblock, Packets.CreateMultiblock(
                 multiblock = multiblock,
                 masterEntityLocation = northernEasternCrafter
         ))

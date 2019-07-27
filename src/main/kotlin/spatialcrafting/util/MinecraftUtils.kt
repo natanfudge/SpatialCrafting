@@ -26,7 +26,6 @@ fun World.name() = if(isClient) "Client" else "Server"
 //
 //fun CompoundTag.putBlockPos(pos: IdentifiedValue<BlockPos>) = putBlockPos(pos.value, pos.identifier)
 //fun CompoundTag.getBlockPos(identified: IdentifiedValue<BlockPos>): BlockPos? = getBlockPos(identified.identifier)
-////TODO: look at this further
 //class Identified {
 //    operator fun getValue(thisRef: Any?, property: KProperty<*>): IdentifiedValue {
 //        return "$thisRef, thank you for delegating '${property.name}' to me!"

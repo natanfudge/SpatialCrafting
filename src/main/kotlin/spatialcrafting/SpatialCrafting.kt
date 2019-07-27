@@ -1,16 +1,23 @@
 package spatialcrafting
 
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
-import net.fabricmc.fabric.api.client.render.BlockEntityRendererRegistry
+import net.minecraft.item.BlockItem
+import net.minecraft.item.Item
 import net.minecraft.util.Identifier
+import net.minecraft.util.registry.Registry
+import spatialcrafting.docs.ExampleBlock
+import spatialcrafting.docs.DemoBlockEntity
+import spatialcrafting.docs.MyBlockEntityRenderer
 import spatialcrafting.hologram.HologramBlock
-import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.HologramBlockEntityRenderer
 import spatialcrafting.hologram.HologramBlockEntityType
-import spatialcrafting.util.ModInitializationContext
-import spatialcrafting.util.initializeMod
-import spatialcrafting.util.itemStack
+import spatialcrafting.util.kotlinwrappers.Builders
+import spatialcrafting.util.kotlinwrappers.ModInitializationContext
+import spatialcrafting.util.kotlinwrappers.ModInit
+import spatialcrafting.util.kotlinwrappers.itemStack
 
+//TODO: crafter recipe
+//TODO: add reload to docs
 //TODO: holograms
 //TODO: crafting
 //TODO: sounds and particles
@@ -19,10 +26,13 @@ import spatialcrafting.util.itemStack
 //TODO: Recipe generator GUI
 //TODO: rei integration
 
+object MyMod {
+    val MY_BLOCK = ExampleBlock()
+    val MyBlockEntityType = Builders.blockEntityType(MyMod.MY_BLOCK) { DemoBlockEntity() }
+}
 
 const val ModId = "spatialcrafting"
 
-const val HologramId = "hologram"
 
 private val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
         Identifier(ModId, "spatial_crafting")
@@ -31,25 +41,44 @@ private val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
 fun id(str: String) = Identifier(ModId, str)
 
 @Suppress("unused")
-fun init() = initializeMod(ModId) {
-    FabricItem.register("fabric_item")
-
-    for (crafterPiece in craftersPieces) {
-        crafterPiece.registerWithBlockItem(id = "x${crafterPiece.size}crafter_piece",
-                group = SpatialCraftingItemGroup
-        )
+fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
+    registering(Registry.ITEM) {
+        FabricItem named "fabric_item"
     }
-    CrafterBlockEntityType.register("crafter_piece_entity")
-    HologramBlockEntityType.register("hologram_entity")
-    HologramBlock.registerWithBlockItem(HologramId, group = SpatialCraftingItemGroup)
 
-    BlockEntityRendererRegistry.INSTANCE.register(HologramBlockEntity::class.java, HologramBlockEntityRenderer())
+    registeringWithItemBlocks {
+        for (crafterPiece in craftersPieces) {
+            crafterPiece named "x${crafterPiece.size}crafter_piece"
+        }
+    }
 
-    registerServerToClientPacket(Packets.CreateMultiblock)
-    registerServerToClientPacket(Packets.DestroyMultiblock)
+    registering(Registry.BLOCK) {
+        HologramBlock named "hologram"
+    }
+
+    registering(Registry.BLOCK_ENTITY) {
+        CrafterBlockEntityType named "crafter_piece_entity"
+        HologramBlockEntityType named "hologram_entity"
+    }
+
+    register(HologramBlockEntityRenderer)
+
+    register(Packets.CreateMultiblock)
+    register(Packets.DestroyMultiblock)
+
+
+    Registry.register(Registry.BLOCK, "tutorial:example_block", MyMod.MY_BLOCK)
+    Registry.ITEM.add(Identifier("tutorial", "example_block"),
+            BlockItem(MyMod.MY_BLOCK, Item.Settings().group(SpatialCraftingItemGroup)))
+    Registry.register(Registry.BLOCK_ENTITY, "tutorial:example_block_entity", MyMod.MyBlockEntityType)
+
+    register(MyBlockEntityRenderer())
+//    MyBlockEntityRenderer.register()
+
+
 }
 
-fun <T : Packets.Packet> ModInitializationContext.registerServerToClientPacket(manager: Packets.PacketManager<T>) {
+fun <T : Packets.Packet> ModInitializationContext.register(manager: Packets.PacketManager<T>) {
     registerServerToClientPacket(manager.id) { packetContext, packetByteBuf ->
         manager.use(packetContext, manager.fromBuf(packetByteBuf))
     }
