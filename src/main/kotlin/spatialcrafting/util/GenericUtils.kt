@@ -19,7 +19,8 @@ operator fun Pair<Int, Int>.rangeTo(that: Pair<Int, Int>) = object : Iterable<Pa
             if (j == n) {
                 j = 0
                 i++
-            } else {
+            }
+            else {
                 j++
             }
 
@@ -29,3 +30,15 @@ operator fun Pair<Int, Int>.rangeTo(that: Pair<Int, Int>) = object : Iterable<Pa
 }
 
 infix fun Pair<Int, Int>.until(that: Pair<Int, Int>) = this..Pair(that.first - 1, that.second - 1)
+
+/**
+ * Appends all elements yielded from results of [transform] function being invoked on each element of original collection, to the given [destination].
+ */
+inline fun <T, R> Iterable<T>.flatMapIndexed(transform: (Int, T) -> Iterable<R>): List<R> {
+    val destination = ArrayList<R>()
+    var index = 0
+    for (item in this)
+        destination.addAll(transform(index++, item))
+
+    return destination
+}

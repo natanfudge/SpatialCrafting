@@ -1,0 +1,33 @@
+{
+  "type": "spatialcrafting:shaped",
+  "amar": "boo",
+  "pattern": [
+    [
+      "WWW",
+      "WRW",
+      "WWW"
+    ],
+    [
+      "WWW",
+      "WRW",
+      "WWW"
+    ],
+    [
+      "WWW",
+      "WRW",
+      "WWW"
+    ]
+  ],
+  "key": {
+    "W": {
+      "tag": "minecraft:logs"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "item": "spatialcrafting:x2crafter_piece",
+    "count": 4
+  }
+}

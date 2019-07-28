@@ -3,6 +3,8 @@ package spatialcrafting.crafter
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import spatialcrafting.hologram.HologramBlockEntity
+import spatialcrafting.recipe.ComponentPosition
 import spatialcrafting.util.Serializable
 import spatialcrafting.util.kotlinwrappers.getBlockPos
 import spatialcrafting.util.kotlinwrappers.putBlockPos
@@ -32,10 +34,32 @@ data class CrafterMultiblock(
         world.getCrafterEntity(it)
     }
 
+    fun getHologramEntities(world: World) = hologramLocations.map { world.getBlockEntity(it) as HologramBlockEntity }
+
+    val totalHologramAmount = multiblockSize * multiblockSize
+
     val hologramLocations: List<BlockPos>
         get() = this.locations.flatMap { pos ->
             (1..multiblockSize).map { pos.up(it) }
         }
+
+    fun getInventory(world: World): CrafterMultiblockInventory {
+        val entities = getHologramEntities(world)
+        // The 'x' 'y' 'z' coordinates of a ComponentPosition are offset based, meaning they range from 0 to 4,
+        // based on how big the multiblock is.
+        // So we will try to get the '(0,0,0)' position to gain perspective, which will be the one with the lowest x,y,z.
+
+        val originPos = entities.minBy { it.pos.x + it.pos.y + it.pos.z }!!.pos
+
+        val components = entities.map {
+            CrafterMultiblockInventorySlot(
+                    position = ComponentPosition(x = it.pos.x - originPos.x, y = it.pos.y - originPos.y, z = it.pos.z - originPos.z),
+                    itemStack = it.getItem()
+            )
+        }
+
+        return CrafterMultiblockInventory(components)
+    }
 
 
 }

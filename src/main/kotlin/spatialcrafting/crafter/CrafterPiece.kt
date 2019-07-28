@@ -1,5 +1,6 @@
 package spatialcrafting.crafter
 
+import alexiil.mc.lib.attributes.item.impl.SimpleFixedItemInv
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.LivingEntity
@@ -13,13 +14,20 @@ import net.minecraft.world.World
 import spatialcrafting.util.*
 import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.client.item.TooltipContext
+import net.minecraft.inventory.BasicInventory
+import net.minecraft.inventory.Inventory
+import net.minecraft.item.Items
+import net.minecraft.recipe.AbstractCookingRecipe
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import spatialcrafting.Packets
 import spatialcrafting.hologram.HologramBlock
+import spatialcrafting.hologram.HologramInventoryWrapper
+import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.sendPacket
 import spatialcrafting.util.kotlinwrappers.getBlock
 import spatialcrafting.util.kotlinwrappers.isServer
+import spatialcrafting.util.kotlinwrappers.itemStack
 import spatialcrafting.util.kotlinwrappers.setBlock
 
 
@@ -139,6 +147,11 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         if (!world.isClient && hand == Hand.MAIN_HAND) {
             placedBy.sendMessage("${pos.xz}. Formed = ${world.getCrafterEntity(pos).multiblockIn != null}")
         }
+        if(world.isClient) return true
+        val multiblockIn = world.getCrafterEntity(pos).multiblockIn ?: return false
+        //TODO: send a message to start crafting
+        val match = world.recipeManager.getFirstMatch(SpatialRecipe.Type,
+                CrafterMultiblockInventoryWrapper(multiblockIn.getInventory(world)), world)
 
         return false
     }

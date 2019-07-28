@@ -14,6 +14,7 @@ import net.minecraft.util.shape.VoxelShape
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 import net.minecraft.block.BlockState
+import net.minecraft.client.sound.MusicTracker
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.world.IWorld
 import spatialcrafting.crafter.assertIs
@@ -39,6 +40,7 @@ private val HologramSettings = Builders.blockSettings(
         pistonBehavior = PistonBehavior.IGNORE,
         replaceable = false
 )
+
 
 object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributeProvider, InventoryProvider {
     override fun getInventory(blockState: BlockState?, world: IWorld, pos: BlockPos): SidedInventory {

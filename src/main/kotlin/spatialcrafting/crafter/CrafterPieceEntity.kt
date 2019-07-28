@@ -38,11 +38,10 @@ import spatialcrafting.util.kotlinwrappers.putBlockPos
 //    }
 //}
 
-val CrafterBlockEntityType = Builders.blockEntityType(craftersPieces) { CrafterPieceEntity() }
 
-class CrafterPieceEntity : BlockEntity(CrafterBlockEntityType), BlockEntityClientSerializable {
+class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
     companion object {
-
+        val Type = Builders.blockEntityType(craftersPieces) { CrafterPieceEntity() }
 
         fun assignMultiblockState(world: World, masterPos: BlockPos, multiblock: CrafterMultiblock) {
             for (crafterEntity in multiblock.getCrafterEntities(world)) {
@@ -129,7 +128,7 @@ class CrafterPieceEntity : BlockEntity(CrafterBlockEntityType), BlockEntityClien
             tag.put(Companion.Keys.multiblock, multiblockIn?.toTag())
         }
 
-        if (masterEntityPos != null) tag.putBlockPos(Companion.Keys.masterEntity,masterEntityPos)
+        if (masterEntityPos != null) tag.putBlockPos(Companion.Keys.masterEntity, masterEntityPos)
         return tag
 
     }
@@ -144,7 +143,7 @@ class CrafterPieceEntity : BlockEntity(CrafterBlockEntityType), BlockEntityClien
         }
 
 
-        logDebug{"Loading CrafterPieceEntity at pos ${pos.xz}. MasterPos = ${masterEntityPos?.xz}"}
+        logDebug { "Loading CrafterPieceEntity at pos ${pos.xz}. MasterPos = ${masterEntityPos?.xz}" }
     }
 
 }

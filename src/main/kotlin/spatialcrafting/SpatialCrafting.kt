@@ -4,21 +4,23 @@ import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.fabricmc.fabric.api.loot.v1.event.LootTableLoadingCallback
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
+import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.RecipeSerializer
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
-import spatialcrafting.crafter.CrafterBlockEntityType
+import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.crafter.craftersPieces
 import spatialcrafting.docs.ExampleBlock
 import spatialcrafting.docs.DemoBlockEntity
 import spatialcrafting.docs.MyBlockEntityRenderer
 import spatialcrafting.hologram.HologramBlock
+import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.HologramBlockEntityRenderer
-import spatialcrafting.hologram.HologramBlockEntityType
+import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.util.kotlinwrappers.Builders
 import spatialcrafting.util.kotlinwrappers.ModInitializationContext
 import spatialcrafting.util.kotlinwrappers.ModInit
 import spatialcrafting.util.kotlinwrappers.itemStack
-//TODO: check if hoppers can insert in holograms
 //TODO: crafter recipe
 //TODO: holograms
 //TODO: crafting
@@ -59,8 +61,16 @@ fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
     }
 
     registering(Registry.BLOCK_ENTITY) {
-        CrafterBlockEntityType named "crafter_piece_entity"
-        HologramBlockEntityType named "hologram_entity"
+        CrafterPieceEntity.Type named "crafter_piece_entity"
+        HologramBlockEntity.Type named "hologram_entity"
+    }
+
+    registering(Registry.RECIPE_SERIALIZER){
+        SpatialRecipe.Serializer named "shaped"
+    }
+
+    registering(Registry.RECIPE_TYPE){
+        SpatialRecipe.Type named SpatialRecipe.Type.Id
     }
 
     register(HologramBlockEntityRenderer)
@@ -83,6 +93,10 @@ fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
 
 
 }
+
+//fun <S : RecipeSerializer<T>, T : Recipe<*>> register(string_1: String, recipeSerializer_1: S): S {
+//    return Registry.register(Registry.RECIPE_SERIALIZER, string_1, recipeSerializer_1) as RecipeSerializer<*>
+//}
 
 fun <T : Packets.Packet> ModInitializationContext.register(manager: Packets.PacketManager<T>) {
     registerServerToClientPacket(manager.id) { packetContext, packetByteBuf ->

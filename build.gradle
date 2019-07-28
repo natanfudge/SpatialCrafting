@@ -50,7 +50,7 @@ dependencies {
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modCompile "alexiil.mc.lib:libblockattributes-items:0.4.9"
+    modCompile "alexiil.mc.lib:libblockattributes-items:${project.lba_version}"
 
 
     // Dev environment
@@ -58,6 +58,7 @@ dependencies {
     modCompile "me.shedaniel:RoughlyEnoughItems:2.9.6+build.138"
     modCompile "mcp.mobius.waila:Hwyla:1.14.2-1.9.17-66"
     modCompile "com.jamieswhiteshirt:developer-mode:1.0.14"
+    modCompile "gamemodeoverhaul:GamemodeOverhaul:1.0.1.0"
 //	compileOnly(group: "net.fabricmc", name: "fabric-language-kotlin", version: fabric_language_kotlin_version)
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
@@ -117,8 +118,8 @@ publishing {
         // mavenLocal()
     }
 }
-compileKotlin {
-    kotlinOptions {
-        freeCompilerArgs = ["-XXLanguage:+InlineClasses"]
-    }
-}
+//compileKotlin {
+//    kotlinOptions {
+//        freeCompilerArgs = ["-XXLanguage:+InlineClasses"]
+//    }
+//}

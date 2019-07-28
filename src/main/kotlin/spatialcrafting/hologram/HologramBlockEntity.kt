@@ -15,11 +15,12 @@ import spatialcrafting.util.kotlinwrappers.copy
 import spatialcrafting.util.kotlinwrappers.isServer
 
 
-val HologramBlockEntityType = Builders.blockEntityType(HologramBlock) { HologramBlockEntity() }
 
-class HologramBlockEntity : BlockEntity(HologramBlockEntityType), BlockEntityClientSerializable {
+
+class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
 
     companion object {
+        val Type = Builders.blockEntityType(HologramBlock) { HologramBlockEntity() }
         private object Keys {
             const val Inventory = "inventory"
             const val LastChangeTime = "last_change_time"

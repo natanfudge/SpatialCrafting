@@ -1,0 +1,15 @@
+{
+  "type": "spatialcrafting:shaped",
+  "key": {
+    "W": {
+      "tag": "minecraft:logs"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "item": "spatialcrafting:x2crafter_piece",
+    "count": 4
+  }
+}
