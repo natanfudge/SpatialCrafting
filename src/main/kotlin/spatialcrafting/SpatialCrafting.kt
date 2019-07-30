@@ -22,6 +22,7 @@ import spatialcrafting.util.kotlinwrappers.ModInitializationContext
 import spatialcrafting.util.kotlinwrappers.ModInit
 import spatialcrafting.util.kotlinwrappers.itemStack
 //TODO: crafter recipe
+//TODO: remove packets to safe place, don't quite remove.
 //TODO: holograms
 //TODO: crafting
 //TODO: sounds and particles
@@ -75,30 +76,15 @@ fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
 
     register(HologramBlockEntityRenderer)
 
-    register(Packets.CreateMultiblock)
-    register(Packets.DestroyMultiblock)
+//    register(Packets.CreateMultiblock)
+//    register(Packets.DestroyMultiblock)
+    register(Packets.StartCraftingParticles)
     register(Packets.UpdateHologramContent)
-
-
-    //TODO: remove this after writing docs
-    Registry.register(Registry.BLOCK, "tutorial:example_block", MyMod.MY_BLOCK)
-    Registry.ITEM.add(Identifier("tutorial", "example_block"),
-            BlockItem(MyMod.MY_BLOCK, Item.Settings().group(SpatialCraftingItemGroup)))
-    Registry.register(Registry.BLOCK_ENTITY, "tutorial:example_block_entity", MyMod.MyBlockEntityType)
-
-    register(MyBlockEntityRenderer())
-
-//    LootTableLoadingCallback
-//    MyBlockEntityRenderer.register()
-
 
 }
 
-//fun <S : RecipeSerializer<T>, T : Recipe<*>> register(string_1: String, recipeSerializer_1: S): S {
-//    return Registry.register(Registry.RECIPE_SERIALIZER, string_1, recipeSerializer_1) as RecipeSerializer<*>
-//}
 
-fun <T : Packets.Packet> ModInitializationContext.register(manager: Packets.PacketManager<T>) {
+fun <T : Packets.Packet<T>> ModInitializationContext.register(manager: Packets.PacketManager<T>) {
     registerServerToClientPacket(manager.id) { packetContext, packetByteBuf ->
         manager.use(packetContext, manager.fromBuf(packetByteBuf))
     }

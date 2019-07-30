@@ -2,20 +2,10 @@
   "type": "spatialcrafting:shaped",
   "pattern": [
     [
-      "WWW",
-      "WRW",
-      "WWW"
-    ],
-    [
-      "WWW",
-      "WRW",
-      "WWW"
-    ],
-    [
-      "WWW",
-      "WRW",
-      "WWW"
+      "   ",
+      " "
     ]
+
   ],
   "key": {
     "W": {

@@ -4,20 +4,13 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 
 
-private const val xKey = "x"
-private const val yKey = "y"
-private const val zKey = "z"
 /**
  * Puts the [BlockPos]'s information with the specified [key].
  * Retrieve the [BlockPos] from a [CompoundTag] by using [getBlockPos] with the same [key].
  */
 fun CompoundTag.putBlockPos(key: String, pos: BlockPos?) {
     if (pos == null) return
-    putCompoundTag(key) {
-        putInt(xKey, pos.x)
-        putInt(yKey, pos.y)
-        putInt(zKey, pos.z)
-    }
+    putLong(key,pos.asLong())
 }
 
 /**
@@ -25,13 +18,7 @@ fun CompoundTag.putBlockPos(key: String, pos: BlockPos?) {
  *
  * Returns null if there is no [BlockPos] with the specified [key] in the [CompoundTag] (or if null was inserted).
  */
-fun CompoundTag.getBlockPos(key: String): BlockPos? = transformCompoundTag(key) {
-    BlockPos(
-            getInt(xKey),
-            getInt(yKey),
-            getInt(zKey)
-    )
-}
+fun CompoundTag.getBlockPos(key: String): BlockPos? = BlockPos.fromLong(getLong(key))
 
 /**
  * Constructs a [CompoundTag] on the spot and puts it with the specified [key].

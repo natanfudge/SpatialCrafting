@@ -57,7 +57,7 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
             multiblock.locations.mapNotNull {
                 world.getBlockEntity(it)
             }.forEach { crafterEntity ->
-                with(crafterEntity.assertIs<CrafterPieceEntity>()) {
+                with(crafterEntity.assertIs<CrafterPieceEntity>(crafterEntity.pos)) {
                     setMasterEntityPos(null)
                     if (isMaster) setMultiblockIn(null)
                 }
@@ -138,6 +138,8 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
     override fun fromTag(tag: CompoundTag) {
         super.fromTag(tag)
         masterEntityPos = tag.getBlockPos(Companion.Keys.masterEntity)
+        // Minecraft gives BlockPos(0,0,0) when there is no pos with that key.
+        if(masterEntityPos == BlockPos(0,0,0)) masterEntityPos = null
         if (isMaster) {
             multiblockIn = tag.toCrafterMultiblock(key = Companion.Keys.multiblock)
         }

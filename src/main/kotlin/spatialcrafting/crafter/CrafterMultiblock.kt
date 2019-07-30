@@ -44,19 +44,19 @@ data class CrafterMultiblock(
         }
 
     fun getInventory(world: World): CrafterMultiblockInventory {
-        val entities = getHologramEntities(world)
+        val entities = getHologramEntities(world).filter { !it.getItem().isEmpty }
         // The 'x' 'y' 'z' coordinates of a ComponentPosition are offset based, meaning they range from 0 to 4,
         // based on how big the multiblock is.
         // So we will try to get the '(0,0,0)' position to gain perspective, which will be the one with the lowest x,y,z.
 
-        val originPos = entities.minBy { it.pos.x + it.pos.y + it.pos.z }!!.pos
+        val originPos = entities.minBy { it.pos.x + it.pos.y + it.pos.z }?.pos ?: return CrafterMultiblockInventory(listOf())
 
         val components = entities.map {
             CrafterMultiblockInventorySlot(
                     position = ComponentPosition(x = it.pos.x - originPos.x, y = it.pos.y - originPos.y, z = it.pos.z - originPos.z),
                     itemStack = it.getItem()
             )
-        }
+        }.sortedByXYZ()
 
         return CrafterMultiblockInventory(components)
     }

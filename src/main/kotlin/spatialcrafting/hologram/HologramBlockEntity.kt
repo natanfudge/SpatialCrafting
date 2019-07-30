@@ -12,15 +12,15 @@ import spatialcrafting.Packets
 import spatialcrafting.sendPacket
 import spatialcrafting.util.kotlinwrappers.Builders
 import spatialcrafting.util.kotlinwrappers.copy
+import spatialcrafting.util.kotlinwrappers.dropItemStack
 import spatialcrafting.util.kotlinwrappers.isServer
-
-
 
 
 class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
 
     companion object {
         val Type = Builders.blockEntityType(HologramBlock) { HologramBlockEntity() }
+
         private object Keys {
             const val Inventory = "inventory"
             const val LastChangeTime = "last_change_time"
@@ -35,11 +35,7 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
             if (world!!.isClient) return@setOwnerListener
 
             if (!previousStack.isItemEqual(currentStack)) {
-                PlayerStream.watching(this).sendPacket(Packets.UpdateHologramContent,
-                        Packets.UpdateHologramContent(
-                                this.pos, currentStack
-                        )
-                )
+                PlayerStream.watching(this).sendPacket(Packets.UpdateHologramContent(this.pos, currentStack))
             }
         }
     }
@@ -89,10 +85,7 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
     fun registerInventory(to: AttributeList<*>) = inventory.offerSelfAsAttribute(to, null, null)
 
 
-    fun dropInventory() {
-        val itemEntity = ItemEntity(world, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), getItem())
-        world!!.spawnEntity(itemEntity)
-    }
+    fun dropInventory() = world!!.dropItemStack(getItem(), pos)
 
 }
 

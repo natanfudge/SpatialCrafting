@@ -1,0 +1,21 @@
+{
+  "type": "spatialcrafting:shaped",
+  "pattern": [
+    [
+      "SS",
+      "SS"
+    ],
+    [
+      "CC",
+      "CC"
+    ]
+  ],
+  "key": {
+    "S": {"item": "minecrafasewt:stone"},
+    "C": {"item": "spatialcrafting:x2crafter_piece"}
+  },
+  "result": {
+    "item": "spatialcrafting:x3crafter_piece",
+    "count": 9
+  }
+}

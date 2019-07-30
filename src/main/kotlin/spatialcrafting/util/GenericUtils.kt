@@ -1,5 +1,7 @@
 package spatialcrafting.util
 
+import kotlin.math.max
+
 infix fun IntRange.by(range: IntRange): List<Pair<Int, Int>> = this.flatMap { x -> range.map { y -> Pair(x, y) } }
 fun IntRange.squared() = this by this
 
@@ -29,6 +31,8 @@ operator fun Pair<Int, Int>.rangeTo(that: Pair<Int, Int>) = object : Iterable<Pa
     }
 }
 
+fun max(num1: Int, num2: Int, num3: Int): Int = max(max(num1, num2), num3)
+
 infix fun Pair<Int, Int>.until(that: Pair<Int, Int>) = this..Pair(that.first - 1, that.second - 1)
 
 /**
@@ -42,3 +46,13 @@ inline fun <T, R> Iterable<T>.flatMapIndexed(transform: (Int, T) -> Iterable<R>)
 
     return destination
 }
+
+//TODO: turn this off in production
+const val assertionsEnabled = true
+
+inline fun assert(message: String = "Assertion failure", test: () -> Boolean) {
+    if (assertionsEnabled && !test()) throw AssertionError(message)
+}
+
+val Int.d get() = this.toDouble()
+val Int.f get() = this.toFloat()

@@ -1,7 +1,11 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package spatialcrafting.util
 
 import net.minecraft.entity.LivingEntity
+import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.recipe.Ingredient
 import net.minecraft.text.LiteralText
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
@@ -16,7 +20,9 @@ fun LivingEntity?.sendMessage(message: String) {
     this.sendMessage(LiteralText(message))
 }
 
-fun World.name() = if(isClient) "Client" else "Server"
+
+
+inline fun Ingredient.matches(itemStack : ItemStack) = method_8093(itemStack)
 
 
 //class IdentifiedValue<T>(var value: T, val identifier: String)

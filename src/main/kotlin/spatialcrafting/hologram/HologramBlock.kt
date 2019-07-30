@@ -99,10 +99,6 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
             }
         }
 
-        if (!hologramEntity.isEmpty()) {
-            if (world.isClient) player.sendMessage("Item in hologram: ${hologramEntity.getItem()}")
-        }
-
         return true
     }
 
@@ -121,7 +117,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     }
 
 
-    private fun IWorld.getHologramEntity(pos: BlockPos) = getBlockEntity(pos).assertIs<HologramBlockEntity>()
+    private fun IWorld.getHologramEntity(pos: BlockPos) = getBlockEntity(pos).assertIs<HologramBlockEntity>(pos)
 
     override fun onBlockBreakStart(blockState: BlockState, world: World, pos: BlockPos, player: PlayerEntity?) {
         giveItemInHologramToPlayer(player, world, pos)

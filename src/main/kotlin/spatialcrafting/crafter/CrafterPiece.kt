@@ -1,6 +1,9 @@
 package spatialcrafting.crafter
 
 import alexiil.mc.lib.attributes.item.impl.SimpleFixedItemInv
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.LivingEntity
@@ -20,15 +23,15 @@ import net.minecraft.item.Items
 import net.minecraft.recipe.AbstractCookingRecipe
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
+import net.minecraft.util.math.Vec3d
 import spatialcrafting.Packets
+import spatialcrafting.client.shootCraftParticle
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.hologram.HologramInventoryWrapper
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.sendPacket
-import spatialcrafting.util.kotlinwrappers.getBlock
-import spatialcrafting.util.kotlinwrappers.isServer
-import spatialcrafting.util.kotlinwrappers.itemStack
-import spatialcrafting.util.kotlinwrappers.setBlock
+import spatialcrafting.util.kotlinwrappers.*
+import java.util.*
 
 
 val craftersPieces = listOf(
@@ -38,9 +41,10 @@ val craftersPieces = listOf(
         CrafterPiece(5)
 )
 
-fun <T> BlockEntity?.assertIs(): T {
+fun <T> BlockEntity?.assertIs(pos: BlockPos): T {
     return (this as? T)
-            ?: error("BlockEntity at location ${this?.pos} is not a Crafter Piece Entity as expected.\nRather, it is '$this'.")
+            ?: error("BlockEntity at location $pos is not a Crafter Piece Entity as expected.\nRather, it is '${this
+                    ?: "air"}'.")
 }
 //
 //private val ironMaterial = Builders.material(
@@ -58,7 +62,7 @@ fun <T> BlockEntity?.assertIs(): T {
 //)
 
 
-fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>()
+fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>(pos)
 class CrafterPiece(val size: Int) : Block(Settings.copy(
         when (size) {
             2 -> Blocks.OAK_LOG
@@ -129,6 +133,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
     override fun onBlockRemoved(blockState: BlockState, world: World, pos: BlockPos, blockState_2: BlockState?, boolean_1: Boolean) {
         assert(world.isServer)
+        val entity = world.getCrafterEntity(pos)
         val multiblock = world.getCrafterEntity(pos).multiblockIn ?: return
         destroyMultiblockFromServer(world, multiblock)
         super.onBlockRemoved(blockState, world, pos, blockState_2, boolean_1)
@@ -137,21 +142,51 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
     private fun destroyMultiblockFromServer(world: World, multiblock: CrafterMultiblock) {
         assert(world.isServer)
         destroyMultiblock(world, multiblock)
-        PlayerStream.watching(world,multiblock.locations[0]).sendPacket(Packets.DestroyMultiblock, Packets.DestroyMultiblock(
-                multiblock
-        ))
+//        PlayerStream.watching(world,multiblock.locations[0]).sendPacket(Packets.DestroyMultiblock, Packets.DestroyMultiblock(
+//                multiblock
+//        ))
+    }
+
+    override fun onScheduledTick(blockState_1: BlockState?, world_1: World?, blockPos_1: BlockPos?, random_1: Random?) {
+        println("done!")
     }
 
 
-    override fun activate(blockState_1: BlockState, world: World, pos: BlockPos, placedBy: PlayerEntity?, hand: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
+    override fun activate(blockState_1: BlockState, world: World, pos: BlockPos, placedBy: PlayerEntity?, hand: Hand, blockHitResult_1: BlockHitResult?): Boolean {
+
+
         if (!world.isClient && hand == Hand.MAIN_HAND) {
             placedBy.sendMessage("${pos.xz}. Formed = ${world.getCrafterEntity(pos).multiblockIn != null}")
         }
-        if(world.isClient) return true
+        if (world.isClient) return false
+        if (hand == Hand.OFF_HAND) return false
+
+//        GlobalScope.launch {
+//            delay(1000)
+//            world.setBlockState(pos.south().south(), Blocks.JUKEBOX.defaultState)
+//        }
         val multiblockIn = world.getCrafterEntity(pos).multiblockIn ?: return false
-        //TODO: send a message to start crafting
+
+        PlayerStream.watching(world.getBlockEntity(pos)).sendPacket(
+                Packets.StartCraftingParticles(multiblockIn)
+        )
+
+
+//        val  = multiblockIn.getInventory(world)
+//        world.blockTickScheduler.schedule(pos,this,20)
+
+
         val match = world.recipeManager.getFirstMatch(SpatialRecipe.Type,
-                CrafterMultiblockInventoryWrapper(multiblockIn.getInventory(world)), world)
+                CrafterMultiblockInventoryWrapper(multiblockIn.getInventory(world)), world).orElse(null)
+                ?:
+                //TODO: provide feedback that it didn't complete
+                return false
+
+        //TODO: delay craft
+
+        //TODO remove contents of holograms
+        //TODO drop somewhere else, and later
+//        world.dropItemStack(match.output, pos)
 
         return false
     }
@@ -172,10 +207,10 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
                 masterPos = northernEasternCrafter,
                 multiblock = multiblock
         )
-        PlayerStream.watching(world,multiblock.locations[0]).sendPacket(Packets.CreateMultiblock, Packets.CreateMultiblock(
-                multiblock = multiblock,
-                masterEntityLocation = northernEasternCrafter
-        ))
+//        PlayerStream.watching(world,multiblock.locations[0]).sendPacket(Packets.CreateMultiblock, Packets.CreateMultiblock(
+//                multiblock = multiblock,
+//                masterEntityLocation = northernEasternCrafter
+//        ))
     }
 
 
