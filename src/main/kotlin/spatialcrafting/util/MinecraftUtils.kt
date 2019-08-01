@@ -3,16 +3,23 @@
 package spatialcrafting.util
 
 import net.minecraft.entity.LivingEntity
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.recipe.Ingredient
+import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvent
 import net.minecraft.text.LiteralText
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
-import kotlin.reflect.KProperty
+import kotlin.math.roundToInt
 
 
 val BlockPos.xz get() = "($x,$z)"
+
+fun World.play(soundEvent: SoundEvent,at: BlockPos,
+                    ofCategory: SoundCategory,toPlayer: PlayerEntity? = null,  volumeMultiplier: Float = 1.0f, pitchMultiplier: Float = 1.0f) : Unit
+        = playSound(toPlayer, at,soundEvent, ofCategory, volumeMultiplier, pitchMultiplier)
 
 fun LivingEntity?.sendMessage(message: String) {
 //    println(message)
@@ -20,9 +27,8 @@ fun LivingEntity?.sendMessage(message: String) {
     this.sendMessage(LiteralText(message))
 }
 
-
-
-inline fun Ingredient.matches(itemStack : ItemStack) = method_8093(itemStack)
+fun Vec3d.toBlockPos() = BlockPos(x.roundToInt(), y.roundToInt(), z.roundToInt())
+inline fun Ingredient.matches(itemStack: ItemStack) = method_8093(itemStack)
 
 
 //class IdentifiedValue<T>(var value: T, val identifier: String)

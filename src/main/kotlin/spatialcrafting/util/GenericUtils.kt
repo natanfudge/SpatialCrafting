@@ -54,5 +54,9 @@ inline fun assert(message: String = "Assertion failure", test: () -> Boolean) {
     if (assertionsEnabled && !test()) throw AssertionError(message)
 }
 
+//inline fun<T> min(comparable: Comparable<T>)
+
 val Int.d get() = this.toDouble()
+val Long.d get() = this.toDouble()
 val Int.f get() = this.toFloat()
+val Float.d get() = this.toDouble()

@@ -1,0 +1,9 @@
+{
+  "my_sound": {
+    "category": "my_sounds",
+    "subtitle": "*punch*",
+    "sounds": [
+      "tutorial:my_sound"
+    ]
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "type": "spatialcrafting:shaped",
+  "pattern": [
+    [
+      "DEED",
+      "E  E",
+      "E  E",
+      "DEED"
+    ],
+    [
+      " DD ",
+      "D  D",
+      "D  D",
+      " DD "
+    ],
+     [
+      " DD ",
+      "D  D",
+      "D  D",
+      " DD "
+    ],
+    [
+      "CCCC",
+      "CCCC",
+      "CCCC",
+      "CCCC"
+    ]
+  ],
+  "key": {
+    "D": {
+      "item": "minecraft:diamond_block"
+    },
+    "E": {
+      "item": "minecraft:emerald_block"
+    },
+    "C": {
+      "item": "spatialcrafting:x4crafter_piece"
+    }
+  },
+  "result": {
+    "item": "spatialcrafting:x5crafter_piece",
+    "count": 16
+  }
+}

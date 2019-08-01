@@ -1,19 +1,18 @@
 package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.AttributeList
-import net.minecraft.block.entity.BlockEntity
-import alexiil.mc.lib.attributes.item.impl.SimpleFixedItemInv
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
 import net.fabricmc.fabric.api.server.PlayerStream
+import net.minecraft.block.entity.BlockEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
-import net.minecraft.entity.ItemEntity
 import spatialcrafting.Packets
+import spatialcrafting.crafter.CrafterMultiblock
+import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.sendPacket
 import spatialcrafting.util.kotlinwrappers.Builders
 import spatialcrafting.util.kotlinwrappers.copy
 import spatialcrafting.util.kotlinwrappers.dropItemStack
-import spatialcrafting.util.kotlinwrappers.isServer
 
 
 class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
@@ -31,7 +30,7 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
     val inventory = HologramInventory().also {
         // Since inventory is only changed at server side we need to send a packet to the client
         // Note: this will be called again in the client after we do that, so we need to ignore it that time.
-        it.setOwnerListener { inv, slot, previousStack, currentStack ->
+        it.setOwnerListener { _, _, previousStack, currentStack ->
             if (world!!.isClient) return@setOwnerListener
 
             if (!previousStack.isItemEqual(currentStack)) {
@@ -86,6 +85,28 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
 
 
     fun dropInventory() = world!!.dropItemStack(getItem(), pos)
+
+    /**
+     * Returns null specifically on the client when no craft has occurred.
+     */
+    fun getMultiblock(): CrafterMultiblock? {
+        // We just go down until we find a crafter
+        var currentPos = pos.down()
+        while (true) {
+            val entityBelow = world!!.getBlockEntity(currentPos)
+            if (entityBelow !is HologramBlockEntity) {
+                if (entityBelow is CrafterPieceEntity) {
+                    return entityBelow.multiblockIn
+                }
+                else {
+                    error("Looked down below a hologram, and instead of finding a crafter entity, a $entityBelow was found!")
+                }
+            }
+            currentPos = currentPos.down()
+        }
+
+
+    }
 
 }
 

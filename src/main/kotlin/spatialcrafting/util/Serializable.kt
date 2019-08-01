@@ -3,8 +3,8 @@ package spatialcrafting.util
 import net.minecraft.nbt.CompoundTag
 
 interface Serializable<T> {
-//    fun addToTag(tag: CompoundTag, key: String) : CompoundTag
-    fun toTag() : CompoundTag
+    //    fun addToTag(tag: CompoundTag, key: String) : CompoundTag
+    fun toTag(): CompoundTag
 
 }
 

@@ -1,5 +1,7 @@
 {
   "variants": {
-    "": { "model": "spatialcrafting:block/hologram" }
+    "": {
+      "model": "spatialcrafting:block/hologram"
+    }
   }
 }

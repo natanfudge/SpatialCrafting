@@ -2,26 +2,23 @@ package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.AttributeList
 import alexiil.mc.lib.attributes.AttributeProvider
-import alexiil.mc.lib.attributes.item.compat.SidedInventoryFixedWrapper
 import net.minecraft.block.*
 import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.entity.EntityContext
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.inventory.SidedInventory
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.world.BlockView
-import net.minecraft.world.World
-import net.minecraft.block.BlockState
-import net.minecraft.client.sound.MusicTracker
-import net.minecraft.inventory.SidedInventory
 import net.minecraft.world.IWorld
+import net.minecraft.world.World
 import spatialcrafting.crafter.assertIs
-import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.Builders
 import spatialcrafting.util.kotlinwrappers.isHoldingItemIn
 import spatialcrafting.util.kotlinwrappers.setBlock
+import spatialcrafting.util.logDebug
 
 
 private const val Unbreakable = -1.0f
@@ -107,12 +104,27 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     }
 
     override fun onBreak(world: World, pos: BlockPos, blockState: BlockState?, player: PlayerEntity?) {
-        // This is to make it so in creative mod you won't get unnecessary items
-        world.getHologramEntity(pos).extractItem()
+        val hologramEntity = world.getHologramEntity(pos)
+        // This is to make it so in creative mod you won't get unnecessary items. (onBlockRemoved is called afterwards)
+        val extractedItem = hologramEntity.extractItem()
+        // Cancel crafting if needed
+        if (!extractedItem.isEmpty) {
+            val multiblock = hologramEntity.getMultiblock() ?:
+                    if (world.isClient) return //specifically when no craft has occurred. The client won't have information in that case
+                    else error("A hologram should always have a multiblock," +
+                                " and yet when looking at a crafter piece below he did not have a multiblock instance.")
+
+
+            multiblock.setNotCrafting(world)
+
+//            PlayerStream.watching(hologramEntity).sendPacket(Packets.CancelCraftingParticles(multiblock.crafterLocations[0]))
+        }
     }
 
     override fun onBlockRemoved(stateBefore: BlockState, world: World, pos: BlockPos, stateAfter: BlockState, boolean_1: Boolean) {
+        // Only happens when the entire multiblock is destroyed or in creative mode.
         world.getHologramEntity(pos).dropInventory()
+
         super.onBlockRemoved(stateBefore, world, pos, stateAfter, boolean_1)
     }
 

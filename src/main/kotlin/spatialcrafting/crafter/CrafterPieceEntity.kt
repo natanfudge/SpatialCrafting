@@ -5,10 +5,11 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
-import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.Builders
 import spatialcrafting.util.kotlinwrappers.getBlockPos
 import spatialcrafting.util.kotlinwrappers.putBlockPos
+import spatialcrafting.util.logDebug
+import spatialcrafting.util.xz
 
 //
 //private data class CrafterPieceEntityData(var multiblockIn: CrafterMultiblock? = null, var masterEntityPos: BlockPos? = null) {
@@ -39,7 +40,7 @@ import spatialcrafting.util.kotlinwrappers.putBlockPos
 //}
 
 
-class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
+class CrafterPieceEntity : BlockEntity(Type)/*, BlockEntityClientSerializable */{
     companion object {
         val Type = Builders.blockEntityType(craftersPieces) { CrafterPieceEntity() }
 
@@ -54,7 +55,7 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
 
         fun unassignMultiblockState(world: World, multiblock: CrafterMultiblock) {
             // The block which was destroyed will give a null block entity, so we need to ignore it.
-            multiblock.locations.mapNotNull {
+            multiblock.crafterLocations.mapNotNull {
                 world.getBlockEntity(it)
             }.forEach { crafterEntity ->
                 with(crafterEntity.assertIs<CrafterPieceEntity>(crafterEntity.pos)) {
@@ -70,10 +71,6 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
         }
     }
 
-
-    override fun toClientTag(tag: CompoundTag): CompoundTag = this.toTag(tag)
-
-    override fun fromClientTag(tag: CompoundTag) = this.fromTag(tag)
 
     fun setMultiblockIn(multiblock: CrafterMultiblock?) {
         assert(!isMaster) { "Only the master should be assigned the multiblock" }
@@ -121,11 +118,16 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
         get() = masterEntityPos == pos
 
 
+//    override fun toClientTag(tag: CompoundTag): CompoundTag = this.toTag(tag)
+//
+//    override fun fromClientTag(tag: CompoundTag) = this.fromTag(tag)
+
+    // Right now we cancel crafting particles when the user leaves so there is no need to keep multiblock information on the client.
     // Serialize the BlockEntity
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
         if (isMaster) {
-            tag.put(Companion.Keys.multiblock, multiblockIn?.toTag())
+            tag.put(Keys.multiblock, multiblockIn?.toTag())
         }
 
         if (masterEntityPos != null) tag.putBlockPos(Companion.Keys.masterEntity, masterEntityPos)
@@ -137,11 +139,11 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
     // Deserialize the BlockEntity
     override fun fromTag(tag: CompoundTag) {
         super.fromTag(tag)
-        masterEntityPos = tag.getBlockPos(Companion.Keys.masterEntity)
+        masterEntityPos = tag.getBlockPos(Keys.masterEntity)
         // Minecraft gives BlockPos(0,0,0) when there is no pos with that key.
-        if(masterEntityPos == BlockPos(0,0,0)) masterEntityPos = null
+        if (masterEntityPos == BlockPos(0, 0, 0)) masterEntityPos = null
         if (isMaster) {
-            multiblockIn = tag.toCrafterMultiblock(key = Companion.Keys.multiblock)
+            multiblockIn = tag.addCrafterMultiblock(key = Companion.Keys.multiblock)
         }
 
 

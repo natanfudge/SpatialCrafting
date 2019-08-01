@@ -11,8 +11,12 @@
     ]
   ],
   "key": {
-    "S": {"item": "minecraft:stone"},
-    "C": {"item": "spatialcrafting:x2crafter_piece"}
+    "S": {
+      "item": "minecraft:stone"
+    },
+    "C": {
+      "item": "spatialcrafting:x2crafter_piece"
+    }
   },
   "result": {
     "item": "spatialcrafting:x3crafter_piece",

@@ -1,36 +1,32 @@
 package spatialcrafting.crafter
 
-import alexiil.mc.lib.attributes.item.impl.SimpleFixedItemInv
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
+import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
+import net.minecraft.sound.SoundCategory
+import net.minecraft.text.Text
+import net.minecraft.text.TranslatableText
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
-import spatialcrafting.util.*
-import net.fabricmc.fabric.api.server.PlayerStream
-import net.minecraft.client.item.TooltipContext
-import net.minecraft.inventory.BasicInventory
-import net.minecraft.inventory.Inventory
-import net.minecraft.item.Items
-import net.minecraft.recipe.AbstractCookingRecipe
-import net.minecraft.text.Text
-import net.minecraft.text.TranslatableText
-import net.minecraft.util.math.Vec3d
 import spatialcrafting.Packets
-import spatialcrafting.client.shootCraftParticle
+import spatialcrafting.client.*
 import spatialcrafting.hologram.HologramBlock
-import spatialcrafting.hologram.HologramInventoryWrapper
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.sendPacket
-import spatialcrafting.util.kotlinwrappers.*
+import spatialcrafting.util.*
+import spatialcrafting.util.kotlinwrappers.dropItemStack
+import spatialcrafting.util.kotlinwrappers.getBlock
+import spatialcrafting.util.kotlinwrappers.isServer
+import spatialcrafting.util.kotlinwrappers.setBlock
 import java.util.*
 
 
@@ -46,20 +42,6 @@ fun <T> BlockEntity?.assertIs(pos: BlockPos): T {
             ?: error("BlockEntity at location $pos is not a Crafter Piece Entity as expected.\nRather, it is '${this
                     ?: "air"}'.")
 }
-//
-//private val ironMaterial = Builders.material(
-//        materialColor = MaterialColor.WHITE,
-//        isSolid = true,
-//        requiresTool = true,
-//
-//        )
-
-//private val crafterMaterial = mapOf(
-//        2 to Material.WOOD,
-//        3 to Material.STONE,
-//        4 to Material.METAL,
-//        5 to Material.METAL
-//)
 
 
 fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>(pos)
@@ -86,7 +68,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
                 }
 
 
-        private fun CrafterMultiblock.logString() = "Size = $multiblockSize, Locations = \n" + locations.groupBy { it.x }
+        private fun CrafterMultiblock.logString() = "Size = $multiblockSize, Locations = \n" + crafterLocations.groupBy { it.x }
                 .entries
                 .joinToString("\n") { column -> column.value.joinToString(", ") { it.xz } }
 
@@ -133,7 +115,6 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
     override fun onBlockRemoved(blockState: BlockState, world: World, pos: BlockPos, blockState_2: BlockState?, boolean_1: Boolean) {
         assert(world.isServer)
-        val entity = world.getCrafterEntity(pos)
         val multiblock = world.getCrafterEntity(pos).multiblockIn ?: return
         destroyMultiblockFromServer(world, multiblock)
         super.onBlockRemoved(blockState, world, pos, blockState_2, boolean_1)
@@ -147,46 +128,90 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 //        ))
     }
 
-    override fun onScheduledTick(blockState_1: BlockState?, world_1: World?, blockPos_1: BlockPos?, random_1: Random?) {
-        println("done!")
-    }
+    /**
+     * Called when crafting is done
+     */
+    override fun onScheduledTick(blockState: BlockState?, world: World, pos: BlockPos, random: Random?) {
+        logDebug { "Scheduling ended at world time ${world.time}" }
+        val multiblock = world.getCrafterEntity(pos).multiblockIn ?: return
+        // In case it was canceled
+        val craftEndTime = multiblock.craftEndTime ?: return
 
+        // For some reason this gets called when the world loads for no reasons os we need to do this
+        if (craftEndTime > world.durationTime) {
+            logDebug { "Scheduling popped too early at ${world.durationTime} when it was supposed to pop at $craftEndTime. Rescheduling." }
+            world.blockTickScheduler.schedule(pos, this, craftEndTime - world.durationTime)
+            return
+        }
+
+        val craftedRecipeOptional = world.recipeManager.getFirstMatch(SpatialRecipe.Type,
+                CrafterMultiblockInventoryWrapper(multiblock.getInventory(world)), world)
+        val craftedRecipe = craftedRecipeOptional
+                // Can sometimes be null when the playing is loading
+                .orElse(null) ?: return
+
+        world.play(Sounds.CraftEnd, at = pos, ofCategory = SoundCategory.BLOCKS)
+
+        multiblock.setNotCrafting(world)
+
+        world.dropItemStack(craftedRecipe.output, multiblock.centerOfHolograms().toBlockPos())
+
+        for (hologram in multiblock.getHologramEntities(world)) {
+            hologram.extractItem()
+        }
+
+    }
+    //TODO: document sounds
 
     override fun activate(blockState_1: BlockState, world: World, pos: BlockPos, placedBy: PlayerEntity?, hand: Hand, blockHitResult_1: BlockHitResult?): Boolean {
 
 
-        if (!world.isClient && hand == Hand.MAIN_HAND) {
-            placedBy.sendMessage("${pos.xz}. Formed = ${world.getCrafterEntity(pos).multiblockIn != null}")
-        }
-        if (world.isClient) return false
         if (hand == Hand.OFF_HAND) return false
 
-//        GlobalScope.launch {
-//            delay(1000)
-//            world.setBlockState(pos.south().south(), Blocks.JUKEBOX.defaultState)
-//        }
+        if (world.isClient) return false
+        // Prevent it being called twice
+
+
         val multiblockIn = world.getCrafterEntity(pos).multiblockIn ?: return false
+        if (multiblockIn.isCrafting) return false
+
+
+        val matches = world.recipeManager.getAllMatches(SpatialRecipe.Type,
+                CrafterMultiblockInventoryWrapper(multiblockIn.getInventory(world)), world)
+
+        //TODO: provide feedback that no recipe matched
+        if (matches.isEmpty()) return false
+        if (matches.size > 1) {
+            println("[Spatial Crafting] WARNING: THERE IS MORE THAN ONE RECIPE THAT MATCHES THE SAME INPUT!" +
+                    "ONLY THE FIRST RECIPE WILL BE USED! The recipes are: \n$matches")
+        }
+
+        val craftDuration = 15.seconds
+        val endTime = world.durationTime + craftDuration
+
+        multiblockIn.setIsCrafting(world, craftEndTime = endTime)
+        world.play(Sounds.CraftStart, at = pos, ofCategory = SoundCategory.BLOCKS)
+
+        GlobalScope.launch {
+            while (multiblockIn.isCrafting) {
+                // We do the min here so in case the time remaining is not exactly the duration time it still stops when the crafting ends.
+                delay(min(multiblockIn.craftEndTime!! - world.durationTime, Sounds.CraftLoopDuration))
+                world.play(Sounds.CraftLoop, at = pos, ofCategory = SoundCategory.BLOCKS)
+//                world.sound
+            }
+        }
 
         PlayerStream.watching(world.getBlockEntity(pos)).sendPacket(
-                Packets.StartCraftingParticles(multiblockIn)
+                Packets.StartCraftingParticles(multiblockIn, craftDuration)
         )
 
+        // Schedule the crafting to end
+        world.blockTickScheduler.schedule(pos, this, craftDuration)
 
-//        val  = multiblockIn.getInventory(world)
-//        world.blockTickScheduler.schedule(pos,this,20)
+        logDebug {
+            "Scheduling craft at ${world.time} scheduled to end at $endTime"
+        }
 
-
-        val match = world.recipeManager.getFirstMatch(SpatialRecipe.Type,
-                CrafterMultiblockInventoryWrapper(multiblockIn.getInventory(world)), world).orElse(null)
-                ?:
-                //TODO: provide feedback that it didn't complete
-                return false
-
-        //TODO: delay craft
-
-        //TODO remove contents of holograms
-        //TODO drop somewhere else, and later
-//        world.dropItemStack(match.output, pos)
 
         return false
     }
@@ -226,7 +251,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
         }
 
-        return CrafterMultiblock(blocks, size)
+        return CrafterMultiblock(blocks, size, craftEndTime = null)
     }
 
 

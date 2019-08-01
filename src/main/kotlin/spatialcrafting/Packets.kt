@@ -1,19 +1,24 @@
 package spatialcrafting
 
+import io.netty.buffer.Unpooled
 import net.fabricmc.fabric.api.network.PacketContext
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
-import spatialcrafting.client.ParticleUtil
-import spatialcrafting.client.seconds
+import spatialcrafting.client.Duration
+import spatialcrafting.client.playCraftParticles
+import spatialcrafting.client.readDuration
+import spatialcrafting.client.writeDuration
 import spatialcrafting.crafter.CrafterMultiblock
-import spatialcrafting.crafter.CrafterPiece
+import spatialcrafting.crafter.CrafterPieceEntity
+import spatialcrafting.crafter.getCrafterEntity
 import spatialcrafting.crafter.toCrafterMultiblock
 import spatialcrafting.hologram.HologramBlockEntity
-import spatialcrafting.util.kotlinwrappers.sendPacket
 import spatialcrafting.util.kotlinwrappers.world
+import spatialcrafting.util.logDebug
 import java.util.stream.Stream
 
 /**
@@ -22,6 +27,20 @@ import java.util.stream.Stream
 fun <T : Packets.Packet<T>, U : PlayerEntity> Stream<U>.sendPacket(packet: T) {
     sendPacket(packetId = Identifier(ModId, packet.manager.id), packetBuilder = { packet.addToByteBuf(this) })
 }
+
+
+/**
+ * Sends a packet from the server to the client for all the players in the stream.
+ * @param packetBuilder Put the information you wish to send here
+ */
+private fun <T : PlayerEntity> Stream<T>.sendPacket(packetId: Identifier, packetBuilder: PacketByteBuf.() -> Unit) {
+    val packet = PacketByteBuf(Unpooled.buffer()).apply(packetBuilder)
+    for (player in this) {
+        ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, packetId, packet)
+    }
+}
+
+
 
 
 object Packets {
@@ -109,17 +128,23 @@ object Packets {
         }
     }
 
-    data class StartCraftingParticles(val multiblock: CrafterMultiblock) : Packet<StartCraftingParticles> {
+    data class StartCraftingParticles(val multiblock: CrafterMultiblock, val duration: Duration) : Packet<StartCraftingParticles> {
         override val manager: PacketManager<StartCraftingParticles>
             get() = StartCraftingParticles
 
         companion object : PacketManager<StartCraftingParticles> {
             override fun fromBuf(buf: PacketByteBuf): StartCraftingParticles {
-                return StartCraftingParticles(buf.readCompoundTag()!!.toCrafterMultiblock()!!)
+                return StartCraftingParticles(buf.readCompoundTag()!!.toCrafterMultiblock()!!, buf.readDuration())
             }
 
             override fun use(context: PacketContext, packet: StartCraftingParticles) {
-                ParticleUtil.playCraftParticles(context.world, packet.multiblock, 10.seconds)
+                // We do this so we can later change the state of the multiblock through one of the crafter entities,
+                // so we can tell the client to cancel the particles.
+                CrafterPieceEntity.assignMultiblockState(context.world,
+                        masterPos = packet.multiblock.crafterLocations[0],
+                        multiblock = packet.multiblock)
+
+                playCraftParticles(context.world, packet.multiblock, packet.duration)
             }
 
 
@@ -129,9 +154,44 @@ object Packets {
 
         override fun addToByteBuf(buf: PacketByteBuf) {
             buf.writeCompoundTag(multiblock.toTag())
+            buf.writeDuration(duration)
         }
 
     }
+
+//    data class CancelCraftingParticles(val oneOfTheMultiblockCraftersPos: BlockPos) : Packet<CancelCraftingParticles> {
+//        companion object : PacketManager<CancelCraftingParticles> {
+//            override val id: String
+//                get() = "cancel_crafting_particles"
+//
+//            override fun fromBuf(buf: PacketByteBuf): CancelCraftingParticles {
+//                return CancelCraftingParticles(buf.readBlockPos())
+//            }
+//
+//            override fun use(context: PacketContext, packet: CancelCraftingParticles) {
+//                val multiblock = context.world.getCrafterEntity(packet.oneOfTheMultiblockCraftersPos).multiblockIn
+//                if (multiblock == null) {
+//                    logDebug {
+//                        "Assuming the player left the game before the CancelCraftingParticles packet has reached him because" +
+//                                "There is no multiblock data stored on his client for pos ${packet.oneOfTheMultiblockCraftersPos}."
+//                    }
+//                    return
+//                }
+//
+//                multiblock.cancelCrafting(context.world)
+//
+//            }
+//
+//        }
+//
+//        override fun addToByteBuf(buf: PacketByteBuf) {
+//            buf.writeBlockPos(oneOfTheMultiblockCraftersPos)
+//        }
+//
+//        override val manager: PacketManager<CancelCraftingParticles>
+//            get() = CancelCraftingParticles
+//
+//    }
 
 
 }

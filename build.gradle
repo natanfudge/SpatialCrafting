@@ -53,6 +53,8 @@ dependencies {
     modCompile "alexiil.mc.lib:libblockattributes-items:${project.lba_version}"
 
 
+
+
     // Dev environment
     modCompile(group: "net.fabricmc", name: "fabric-language-kotlin", version: fabric_language_kotlin_version)
     modCompile "me.shedaniel:RoughlyEnoughItems:2.9.6+build.138"

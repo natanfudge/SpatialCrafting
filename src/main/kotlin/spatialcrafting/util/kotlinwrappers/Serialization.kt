@@ -10,7 +10,7 @@ import net.minecraft.util.math.BlockPos
  */
 fun CompoundTag.putBlockPos(key: String, pos: BlockPos?) {
     if (pos == null) return
-    putLong(key,pos.asLong())
+    putLong(key, pos.asLong())
 }
 
 /**

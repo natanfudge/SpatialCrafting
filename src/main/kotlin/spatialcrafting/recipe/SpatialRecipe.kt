@@ -5,17 +5,20 @@ import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonSyntaxException
 import net.minecraft.item.ItemStack
-import net.minecraft.recipe.*
+import net.minecraft.recipe.Ingredient
+import net.minecraft.recipe.Recipe
+import net.minecraft.recipe.RecipeSerializer
+import net.minecraft.recipe.RecipeType
 import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.registry.Registry
 import net.minecraft.world.World
-import spatialcrafting.crafter.*
+import spatialcrafting.crafter.CopyableWithPosition
+import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
+import spatialcrafting.crafter.sortedByXYZ
 import spatialcrafting.util.assert
 import spatialcrafting.util.flatMapIndexed
 import spatialcrafting.util.matches
-import spatialcrafting.util.max
-import java.lang.Exception
 
 //TODO: add craft time and energy costsw
 data class SpatialRecipe(
@@ -80,7 +83,7 @@ data class SpatialRecipe(
 //    """.trimIndent()
 
     object Type : RecipeType<SpatialRecipe> {
-        const val Id = "spatial_crafting"
+        const val Id = "shaped"
         override fun toString() = Id
     }
 
@@ -147,7 +150,6 @@ data class SpatialRecipe(
 
         @Suppress("SENSELESS_COMPARISON")
         private fun validateJson(json: SpatialRecipeJsonFormat) {
-            //TODO: validate that the input is not empty, and test.
             val missingField = when {
                 json.result == null -> "result"
                 json.result.item == null -> "result item"

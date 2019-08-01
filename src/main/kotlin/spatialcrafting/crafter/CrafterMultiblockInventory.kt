@@ -1,11 +1,10 @@
 package spatialcrafting.crafter
 
 import net.minecraft.item.ItemStack
-import net.minecraft.recipe.Ingredient
 import spatialcrafting.recipe.ComponentPosition
 
 data class CrafterMultiblockInventory(private val slots: List<CrafterMultiblockInventorySlot>)
-    : List<CrafterMultiblockInventorySlot> by slots{
+    : List<CrafterMultiblockInventorySlot> by slots {
 }
 
 data class CrafterMultiblockInventorySlot(override val position: ComponentPosition, val itemStack: ItemStack)
@@ -19,6 +18,6 @@ interface CopyableWithPosition<out T> where  T : CopyableWithPosition<T> {
 
 }
 
-fun <T: CopyableWithPosition<T>>List<T>.sortedByXYZ()=
-    sortedBy { it.position.x }.sortedBy { it.position.y }.sortedBy { it.position.z }
+fun <T : CopyableWithPosition<T>> List<T>.sortedByXYZ() =
+        sortedBy { it.position.x }.sortedBy { it.position.y }.sortedBy { it.position.z }
 

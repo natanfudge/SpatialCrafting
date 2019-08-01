@@ -7,7 +7,7 @@ import net.minecraft.entity.player.PlayerEntity
 /**
  * For interfacing with vanilla
  */
-class HologramInventoryWrapper(inv : FixedItemInv) : SidedInventoryFixedWrapper(inv) {
+class HologramInventoryWrapper(inv: FixedItemInv) : SidedInventoryFixedWrapper(inv) {
     override fun canPlayerUseInv(player: PlayerEntity) = true
 
 }
