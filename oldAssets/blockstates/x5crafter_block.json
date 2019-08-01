@@ -1,0 +1,26 @@
+{
+  "forge_marker": 1,
+  "defaults": {
+    "model": "cube_top",
+    "textures": {
+      "top": "spatialcrafting:block/crafter/x5/top",
+      "side": "spatialcrafting:block/crafter/x5/side"
+    }
+  },
+  "variants": {
+    "formed": {
+      "false": {
+        "textures": {
+        }
+      },
+      "true": {
+        "textures": {
+        }
+      }
+    },
+    "inventory": [
+      {}
+    ]
+  }
+}
+

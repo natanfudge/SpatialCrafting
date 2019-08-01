@@ -1,0 +1,69 @@
+
+#Blocks
+tile.spatialcrafting.sensor.name=Sensor
+tile.spatialcrafting.x2crafter_block.name=Wood-carved Crafter
+tile.spatialcrafting.x2crafter_block.info=Place 4 of these in a 2x2 pattern to form the multiblock
+tile.spatialcrafting.x3crafter_block.name=Stone-formed crafter
+tile.spatialcrafting.x3crafter_block.info=Place 9 of these in a 3x3 pattern to form the multiblock
+tile.spatialcrafting.x4crafter_block.name=Ironforged crafter
+tile.spatialcrafting.x4crafter_block.info=Place 16 of these in a 4x4 pattern to form the multiblock
+tile.spatialcrafting.x5crafter_block.name=Gem-infused Crafter
+tile.spatialcrafting.x5crafter_block.info=Place 25 of these in a 5x5 pattern to form the multiblock
+
+
+#Messages
+tile.spatialcrafting.blockcrafter.no_space=Not enough space to form multiblock
+
+#Commands
+commands.spatialcrafting.no_permission=You don't have the required permission to invoke this command.
+commands.spatialcrafting.no_such_command=There is no such Spatial Crafting command. Try /sc help for the list of commands.
+commands.spatialcrafting.arg_amount_wrong=This command requires %d arguments.
+commands.spatialcrafting.too_little_args=This command requires at least %d arguments.
+commands.spatialcrafting.too_many_args=This command only requires %d arguments.
+commands.spatialcrafting.no_args=This command does not require any arguments.
+
+commands.spatialcrafting.add_recipe.description=Adds a shaped spatial recipe. You must first place the recipe's input in a nearby crafter and hold the recipe's output in your hand.
+commands.spatialcrafting.add_recipe.no_crafters=There are no crafters in this dimension!
+commands.spatialcrafting.add_recipe.empty_crafter=You must supply the nearest crafter with inputs.
+commands.spatialcrafting.add_recipe.empty_hand=You must hold an item as an output.
+commands.spatialcrafting.add_recipe.dedis_only=What are you doing trying to add recipes in a server? You need the same script files for both the clients and the server. If you REALY want to do this anyway tell the mod author.
+commands.spatialcrafting.add_recipe.success=Spatial recipe for %s added successfully!
+commands.spatialcrafting.add_recipe.success_num=Spatial recipe for %d %s added successfully!
+commands.spatialcrafting.add_recipe.too_many_words=Add recipe only accepts one additional argument.
+commands.spatialcrafting.add_recipe.invalid_argument=Invalid Argument for adding a recipe. See CraftTweaker wiki (mods -> Spatial Crafting) for details.
+commands.spatialcrafting.add_recipe.too_many_oredicts=One of the given items have multiple matching ore dictionaries. You will have to add the ore dict you want manually.
+
+commands.spatialcrafting.add_shapeless.description=Same as Add Spatial Recipe but adds a shapeless recipe instead of a shaped one.
+commands.spatialcrafting.add_shapeless.success=Shapeless Spatial recipe for %s added successfully!
+commands.spatialcrafting.add_shapeless.success_num=Shapeless Spatial recipe for %d %s added successfully!
+
+commands.spatialcrafting.help.description=Prints all command info.
+commands.spatialcrafting.help.optional=Parameters marked with [ ] are optional!
+commands.spatialcrafting.help.usage=Usage: %s
+
+commands.spatialcrafting.debug.description=Prints debug info to the console.
+
+commands.spatialcrafting.layer.description=Sets the currently active layer of holograms in the nearest crafter multiblock.
+commands.spatialcrafting.layer.not_a_number='%s' is not a valid number.
+commands.spatialcrafting.layer.non_positive=The layer must be a positive number.
+commands.spatialcrafting.layer.too_small=The nearest crafter multiblock does not have that many layers.
+
+#Recipes
+recipes.spatialcrafting.add_recipe.recipe_exists=That spatial recipe already exists!
+recipes.spatialcrafting.add_recipe.output_conflict=Recipe conflict: An existing spatial recipe has the same input but a different output!
+
+#GUI
+itemGroup.spatialcrafting=Spatial Crafting
+
+#JEI
+jei.category.spatial_crafting=Spatial Crafting
+jei.wrapper.helpButton.description=Start Crafting Help
+jei.wrapper.helpButton.description_active=Stop Crafting Help
+jei.wrapper.helpButton.error.no_crafters=No nearby crafter multiblocks
+jei.wrapper.helpButton.error.crafter_too_small=Nearest crafter is too small
+
+
+#Should not appear at all in waila!
+tile.spatialcrafting.hologram.name=Hologram
+
+
