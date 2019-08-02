@@ -12,10 +12,7 @@ import spatialcrafting.client.Duration
 import spatialcrafting.client.playCraftParticles
 import spatialcrafting.client.readDuration
 import spatialcrafting.client.writeDuration
-import spatialcrafting.crafter.CrafterMultiblock
-import spatialcrafting.crafter.CrafterPieceEntity
-import spatialcrafting.crafter.getCrafterEntity
-import spatialcrafting.crafter.toCrafterMultiblock
+import spatialcrafting.crafter.*
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.util.kotlinwrappers.world
 import spatialcrafting.util.logDebug
@@ -109,7 +106,7 @@ object Packets {
                     UpdateHologramContent(buf.readBlockPos(), buf.readItemStack())
 
             override fun use(context: PacketContext, packet: UpdateHologramContent) {
-                val hologram = context.world.getBlockEntity(packet.hologramPos) as HologramBlockEntity
+                val hologram = context.world.getBlockEntity(packet.hologramPos).assertIs<HologramBlockEntity>(packet.hologramPos)
                 if (packet.newItem.isEmpty) {
                     hologram.extractItem()
                 }

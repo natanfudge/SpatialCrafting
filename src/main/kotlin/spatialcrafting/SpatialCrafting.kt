@@ -10,6 +10,8 @@ import spatialcrafting.docs.ExampleMod
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.HologramBlockEntityRenderer
+import spatialcrafting.recipe.ShapedSpatialRecipe
+import spatialcrafting.recipe.ShapelessSpatialRecipe
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.util.kotlinwrappers.ModInit
 import spatialcrafting.util.kotlinwrappers.ModInitializationContext
@@ -18,17 +20,17 @@ import spatialcrafting.util.kotlinwrappers.itemStack
 //TODO: remember to handle changes in state in kapt project
 //TODO: remember to test nullable values in kapt project
 
-
-//TODO: sounds and document
-//TODO: power consumption and recipe time cost
+//TODO: power consumption
 //TODO: config file: sounds power multiplier, can store energy
 //TODO: Recipe generator GUI
 //TODO: rei integration
+//TODO: test putting items in differnet locations in large crafter with small recipe
 //TODO: test on server
-
+//TODO: ask to add to AOF
 
 const val ModId = "spatialcrafting"
 
+const val MaxCrafterSize = 5
 
 private val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
         Identifier(ModId, "spatial_crafting")
@@ -36,7 +38,7 @@ private val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
 
 fun id(str: String) = Identifier(ModId, str)
 
-
+//TODO: ListTag.value -> ListTag.tags
 @Suppress("unused")
 fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
     registering(Registry.ITEM) {
@@ -60,7 +62,8 @@ fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
     }
 
     registering(Registry.RECIPE_SERIALIZER) {
-        SpatialRecipe.Serializer named "shaped"
+        ShapedSpatialRecipe.Serializer named "shaped"
+        ShapelessSpatialRecipe named "shapeless"
     }
 
     registering(Registry.RECIPE_TYPE) {

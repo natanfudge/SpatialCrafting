@@ -12,144 +12,140 @@ import net.minecraft.recipe.RecipeType
 import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.registry.Registry
-import net.minecraft.world.World
-import spatialcrafting.crafter.CopyableWithPosition
+import spatialcrafting.MaxCrafterSize
+import spatialcrafting.client.Duration
+import spatialcrafting.client.seconds
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
-import spatialcrafting.util.assert
 import spatialcrafting.util.flatMapIndexed
-import spatialcrafting.util.matches
+import spatialcrafting.util.max
 
-//TODO: add craft time and energy costsw
-data class SpatialRecipe(
-        private val components: List<RecipeComponent>,
+
+abstract class SpatialRecipe(
+
         private val output: ItemStack,
-        private val id: Identifier
+        private val id: Identifier,
+        protected val minimumCrafterSize: Int,
+         val energyCost: Long,
+         val craftTime: Duration
 ) : Recipe<CrafterMultiblockInventoryWrapper> {
 
-    override fun craft(var1: CrafterMultiblockInventoryWrapper): ItemStack {
-        return ItemStack.EMPTY
-    }
+    override fun craft(var1: CrafterMultiblockInventoryWrapper): ItemStack = ItemStack.EMPTY
 
     override fun getId() = id
 
     override fun getType() = Type
 
-    override fun fits(var1: Int, var2: Int): Boolean {
-        return false
-    }
-
-    override fun getSerializer() = Serializer
+    override fun fits(var1: Int, var2: Int) = false
 
     override fun getOutput() = output
 
-    override fun matches(inventoryWrapper: CrafterMultiblockInventoryWrapper, world: World): Boolean {
-        if (inventoryWrapper.size != this.components.size) return false
-        val inventory = inventoryWrapper.normalizePositions()
-        val recipe = components.normalizePositions()
-
-        // Make sure they have been sorted before, as it's a requirement.
-        assert { inventory.sortedByXYZ() == inventory && recipe.sortedByXYZ() == recipe }
-
-
-        return inventory.zip(recipe).all { it.second.ingredient.matches(it.first.itemStack) }
-
-    }
-
-    /**
-     * This basically moves the positions to the corner, so no matter how the slots are positioned in space,
-     * what matters is the shape. This allows smallers recipes to be crafted on bigger crafters, and generally
-     * makes things easier for the player.
-     */
-    fun <T : CopyableWithPosition<T>> List<CopyableWithPosition<T>>.normalizePositions(): List<T> {
-        // Reference positions, to see how much we need to move all of the positions.
-        // If a recipe is in the corner already, all of the values will be 0 and there will no movement.
-        // But, if a recipe is slightly to the left, it will move it to the right slightly.
-        val originX = minBy { it.position.x }!!.position.x
-        val originY = minBy { it.position.y }!!.position.y
-        val originZ = minBy { it.position.z }!!.position.z
-        return map {
-            it.copy(
-                    ComponentPosition(
-                            x = it.position.x - originX, y = it.position.y - originY, z = it.position.z - originZ
-                    )
-            )
-        }
-    }
-
-
-//    fun errorString(ingredientKey :String) = """
-//        ingredient key '$ingredientKey' is not defined. Please define it in the 'key' section.
-//    """.trimIndent()
 
     object Type : RecipeType<SpatialRecipe> {
-        const val Id = "shaped"
+        const val Id = "spatial_crafting"
         override fun toString() = Id
     }
 
-    companion object Serializer : RecipeSerializer<SpatialRecipe> {
+    abstract class Serializer<T : SpatialRecipe> : RecipeSerializer<SpatialRecipe> {
+        companion object {
+            const val defaultEnergyCost = 1000L
+            val defaultCraftTimes = mapOf<Int, Duration>(
+                    1 to 10.seconds,
+                    2 to 10.seconds,
+                    3 to 15.seconds,
+                    4 to 20.seconds,
+                    5 to 25.seconds
+            )
+        }
+
         override fun write(var1: PacketByteBuf?, var2: SpatialRecipe?) {
             TODO("not implemented")
         }
 
-        override fun read(id: Identifier, jsonObject: JsonObject): SpatialRecipe {
-            val json = deserializeJson(jsonObject)
+        override fun read(var1: Identifier?, var2: PacketByteBuf?): SpatialRecipe {
+            TODO("not implemented")
+        }
 
-            validateJson(json)
+        abstract fun build(components: List<ShapedRecipeComponent>,
+                           id: Identifier, output: ItemStack, minimumCrafterSize: Int, energyCost: Long, craftTime: Duration): T
+
+        override fun read(id: Identifier, jsonObject: JsonObject): SpatialRecipe {
+//            var recipe: T? = null
+//            val millis = measureTimeMillis {
+            val recipe = readMeasured(jsonObject, id)
+//            }
+//            logDebug {
+//                "Serializing $id took $millis millseconds."
+//            }
+            return recipe
+        }
+
+        private fun readMeasured(jsonObject: JsonObject, id: Identifier): T {
+            val json = deserializeJson(jsonObject,id)
+
+            validateJson(json,id)
             val ingredients = json.key.mapValues { Ingredient.fromJson(it.value) }
             val components = json.pattern.flatMapIndexed { y, layer ->
                 layer.flatMapIndexed { x, row ->
                     row.mapIndexed { z, ingredientKey ->
                         if (ingredientKey == ' ') return@mapIndexed null
-                        RecipeComponent(
+                        ShapedRecipeComponent(
                                 ComponentPosition(x, y, z),
                                 ingredient = ingredients[ingredientKey.toString()]
-                                        ?: throwNoIngredientWithKeyError(ingredientKey, json.key)
+                                        ?: throwNoIngredientWithKeyError(ingredientKey, json.key,id)
                         )
                     }.filterNotNull()
                 }
             }.sortedByXYZ()
 
             if (components.isEmpty()) {
-                throw SpatialRecipeSyntaxException("The pattern must not be empty (this pattern is invalid: ${json.pattern} ).")
+                throw SpatialRecipeSyntaxException("The pattern must not be empty (this pattern is invalid: ${json.pattern} ).",id)
             }
 
             val outputItem = Registry.ITEM.getOrEmpty(Identifier(json.result.item))
-                    .orElseThrow { noItemError(json) }
+                    .orElseThrow { noItemError(json,id) }
 
 
             val output = ItemStack(outputItem, json.result.count ?: 1)
 
+            // The default is that the minimum craft size based on how far spread the components are. If he wants a smaller size
+            // If he groups them together he gets a smaller size and if he puts them farther apart he gets a bigger size.
+            val recipeSize = max(
+                    components.maxBy { it.position.x }!!.position.x,
+                    components.maxBy { it.position.y }!!.position.y,
+                    components.maxBy { it.position.z }!!.position.z
+            ) + 1
 
-            return SpatialRecipe(
-                    components = components,
-                    id = id,
-                    output = output
-            )
+            val minimumCrafterSize = json.minimumCrafterSize ?: recipeSize
+
+            val energyCost = json.energyCost ?: defaultEnergyCost
+            val craftTime = json.craftTime?.seconds ?: (defaultCraftTimes[minimumCrafterSize]
+                    ?: error("impossible crafter size"))
+
+            return build(components, id, output, minimumCrafterSize, energyCost, craftTime)
         }
 
 
-        override fun read(var1: Identifier?, var2: PacketByteBuf?): SpatialRecipe {
-            TODO("not implemented")
-        }
-
-        private fun deserializeJson(jsonObject: JsonObject): SpatialRecipeJsonFormat {
+        private fun deserializeJson(jsonObject: JsonObject,id:Identifier): SpatialRecipeJsonFormat {
             val json: SpatialRecipeJsonFormat
             try {
                 json = Gson().fromJson(jsonObject, SpatialRecipeJsonFormat::class.java)
             } catch (e: JsonSyntaxException) {
                 throw SpatialRecipeSyntaxException(
                         "The format of the spatial recipe is invalid. Remember that the pattern is an array of arrays (not just an array). More information:\n$e"
+                ,id
                 )
             }
             return json
         }
 
-        class SpatialRecipeSyntaxException(error: String) : Exception("Cannot load spatial recipe: $error")
+        class SpatialRecipeSyntaxException(error: String, recipeId : Identifier) : Exception("Cannot load spatial recipe" +
+                " '${recipeId.path}: $error")
 
 
         @Suppress("SENSELESS_COMPARISON")
-        private fun validateJson(json: SpatialRecipeJsonFormat) {
+        private fun validateJson(json: SpatialRecipeJsonFormat, id : Identifier) {
+            //TODO: validate that energy is enabled when energy is specified
             val missingField = when {
                 json.result == null -> "result"
                 json.result.item == null -> "result item"
@@ -158,38 +154,60 @@ data class SpatialRecipe(
                 else -> null
             }
             if (missingField != null) {
-                throw SpatialRecipeSyntaxException("Missing required field '\"$missingField\": { }.'")
+                throw SpatialRecipeSyntaxException("Missing required field '\"$missingField\": { }.'",id)
             }
             if (json.result.count != null && json.result.count < 0) {
-                throw SpatialRecipeSyntaxException("The output has an invalid count of '${json.result.count}'.")
+                throw SpatialRecipeSyntaxException("The output has an invalid count of '${json.result.count}'.",id)
             }
+
+            if (json.pattern.size > MaxCrafterSize) {
+                throw SpatialRecipeSyntaxException("The recipe pattern has too many layers (${json.pattern.size})." +
+                        " The maximum amount of layers is $MaxCrafterSize.\n" +
+                        "The pattern in question: ${json.pattern}",id)
+            }
+
+            for (layer in json.pattern) {
+                if (layer.size > MaxCrafterSize) {
+                    throw SpatialRecipeSyntaxException("One of the layers in the recipe pattern is too long (length of ${layer.size}." +
+                            " The maximum length is $MaxCrafterSize.\n" +
+                            "The layer in question: $layer",id)
+                }
+
+                for (row in layer) {
+                    if (row.length > MaxCrafterSize) {
+                        throw SpatialRecipeSyntaxException("One of the rows in the recipe pattern is too long (length of ${row.length})." +
+                                " The maximum length is $MaxCrafterSize.\n" +
+                                "The row in question: $row",id)
+                    }
+                }
+            }
+
+            if (json.minimumCrafterSize != null) {
+                if (json.minimumCrafterSize < 0) {
+                    throw SpatialRecipeSyntaxException("minimumCrafterSize cannot be a negative value (${json.minimumCrafterSize}.",id)
+                }
+                if(json.minimumCrafterSize > MaxCrafterSize){
+                    throw SpatialRecipeSyntaxException("minimunCrafterSize is too big (${json.minimumCrafterSize}," +
+                            " as the biggest crafter is of size $MaxCrafterSize.",id)
+                }
+            }
+
 
         }
 
-        private fun throwNoIngredientWithKeyError(ingredientKey: Char, ingredients: Map<String, JsonObject>): Nothing {
+        private fun throwNoIngredientWithKeyError(ingredientKey: Char, ingredients: Map<String, JsonObject>, id :Identifier): Nothing {
             val ingredientsString = GsonBuilder().setPrettyPrinting().create().toJson(ingredients)
             throw SpatialRecipeSyntaxException(
                     """ingredient key '$ingredientKey' is not defined. Please define it in the 'key' section. Defined keys:
-$ingredientsString""")
+$ingredientsString""",id)
         }
 
-        private fun noItemError(json: SpatialRecipeJsonFormat): Throwable {
-            return SpatialRecipeSyntaxException("The item defined as the output '${json.result.item}' does not exist.")
+        private fun noItemError(json: SpatialRecipeJsonFormat, id : Identifier): Throwable {
+            return SpatialRecipeSyntaxException("The item defined as the output '${json.result.item}' does not exist.",id)
         }
-
 
     }
 }
 
-
-data class RecipeComponent(override val position: ComponentPosition, val ingredient: Ingredient)
-    : CopyableWithPosition<RecipeComponent> {
-    override fun copy(newPosition: ComponentPosition) = copy(position = newPosition)
-
-
-}
-
-// The 'x' 'y' 'z' coordinates of are offset based, meaning they range from 0 to 4, based on how big the multiblock is.
-data class ComponentPosition(val x: Int, val y: Int, val z: Int)
 
 

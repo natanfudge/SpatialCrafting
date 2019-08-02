@@ -1,3 +1,5 @@
 - Provide different crafting particles
 - Hold up item in the air after craft until grabbed
 - Make a serializable scheduling library
+- Make a testing library
+- Make new crafting sounds

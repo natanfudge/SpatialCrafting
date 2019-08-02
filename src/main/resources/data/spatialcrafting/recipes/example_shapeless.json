@@ -1,0 +1,28 @@
+{
+  "type": "spatialcrafting:shapeless",
+  "pattern": [
+    [
+      "WW",
+      "RR"
+    ],
+    [
+      "WW",
+      "SW"
+    ]
+  ],
+  "minimumCrafterSize": 3,
+  "key": {
+    "W": {
+      "tag": "minecraft:logs"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "S": {
+      "item": "minecraft:stone"
+    }
+  },
+  "result": {
+    "item": "minecraft:stone_sword"
+  }
+}

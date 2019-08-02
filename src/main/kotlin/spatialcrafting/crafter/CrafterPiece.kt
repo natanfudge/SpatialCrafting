@@ -37,7 +37,7 @@ val craftersPieces = listOf(
         CrafterPiece(5)
 )
 
-fun <T> BlockEntity?.assertIs(pos: BlockPos): T {
+inline fun <reified T> BlockEntity?.assertIs(pos: BlockPos): T {
     return (this as? T)
             ?: error("BlockEntity at location $pos is not a Crafter Piece Entity as expected.\nRather, it is '${this
                     ?: "air"}'.")
@@ -145,7 +145,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         }
 
         val craftedRecipeOptional = world.recipeManager.getFirstMatch(SpatialRecipe.Type,
-                CrafterMultiblockInventoryWrapper(multiblock.getInventory(world)), world)
+                CrafterMultiblockInventoryWrapper(multiblock.getInventory(world),crafterSize =  size), world)
         val craftedRecipe = craftedRecipeOptional
                 // Can sometimes be null when the playing is loading
                 .orElse(null) ?: return
@@ -177,7 +177,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
 
         val matches = world.recipeManager.getAllMatches(SpatialRecipe.Type,
-                CrafterMultiblockInventoryWrapper(multiblockIn.getInventory(world)), world)
+                CrafterMultiblockInventoryWrapper(multiblockIn.getInventory(world), crafterSize = size), world)
 
         //TODO: provide feedback that no recipe matched
         if (matches.isEmpty()) return false
@@ -186,7 +186,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
                     "ONLY THE FIRST RECIPE WILL BE USED! The recipes are: \n$matches")
         }
 
-        val craftDuration = 15.seconds
+        val craftDuration = matches[0].craftTime
         val endTime = world.durationTime + craftDuration
 
         multiblockIn.setIsCrafting(world, craftEndTime = endTime)
@@ -195,7 +195,8 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         GlobalScope.launch {
             while (multiblockIn.isCrafting) {
                 // We do the min here so in case the time remaining is not exactly the duration time it still stops when the crafting ends.
-                delay(min(multiblockIn.craftEndTime!! - world.durationTime, Sounds.CraftLoopDuration))
+//                delay(min(multiblockIn.craftEndTime!! - world.durationTime, Sounds.CraftLoopDuration))
+                delay(Sounds.CraftLoopDuration)
                 world.play(Sounds.CraftLoop, at = pos, ofCategory = SoundCategory.BLOCKS)
 //                world.sound
             }

@@ -1,0 +1,17 @@
+{
+  "type": "spatialcrafting:shapeless",
+  "pattern": [
+    [
+"WWWWWW"
+    ]
+
+  ],
+  "key": {
+    "S": {
+      "tag": "minecraft:stone"
+    }
+  },
+  "result": {
+    "item": "minecraft:stone_sword"
+  }
+}
