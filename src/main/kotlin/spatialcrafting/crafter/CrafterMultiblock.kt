@@ -62,7 +62,8 @@ class CrafterMultiblock(
         world.getCrafterEntity(it)
     }
 
-    fun getHologramEntities(world: World) = hologramLocations.map { world.getBlockEntity(it).assertIs<HologramBlockEntity>(it) }
+    fun getHologramEntities(world: World) = hologramLocations
+            .map { world.getBlockEntity(it).assertIs<HologramBlockEntity>(it) }
 
     val totalHologramAmount = multiblockSize * multiblockSize
 

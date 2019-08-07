@@ -81,7 +81,7 @@ object ModInit {
 }
 
 class ModInitializationContext(private val modId: String, private val group: ItemGroup) {
-    fun <T> registering(registry: Registry<T>, dsl: NamespacedRegistryDsl<T>.() -> Unit) =
+    fun <T> registerTo(registry: Registry<T>, dsl: NamespacedRegistryDsl<T>.() -> Unit) =
             dsl(NamespacedRegistryDsl(modId, registry))
 
     fun registeringWithItemBlocks(dsl: BlockWithItemRegistryDsl.() -> Unit) =
@@ -107,11 +107,11 @@ class ModInitializationContext(private val modId: String, private val group: Ite
 //}
 
 open class NamespacedRegistryDsl<T>(private val namespace: String, private val registry: Registry<T>) {
-    open infix fun T.named(name: String): T = Registry.register(registry, Identifier(namespace, name), this)
+    open infix fun T.withId(name: String): T = Registry.register(registry, Identifier(namespace, name), this)
 }
 
 class BlockWithItemRegistryDsl(private val namespace: String, private val group: ItemGroup) {
-    infix fun Block.named(name: String): Block {
+    infix fun Block.withId(name: String): Block {
         Registry.register(Registry.BLOCK, Identifier(namespace, name), this)
         Registry.register(Registry.ITEM, Identifier(namespace, name), BlockItem(this, Item.Settings().group(group)))
         return this

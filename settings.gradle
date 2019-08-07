@@ -8,3 +8,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+//sourceControl {
+//    gitRepository("https://github.com/shedaniel/RoughlyEnoughItems.git") {
+//        producesModule("me.shedaniel:RoughlyEnoughItems")
+//    }
+//}

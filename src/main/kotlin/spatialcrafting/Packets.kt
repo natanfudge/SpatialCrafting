@@ -15,7 +15,6 @@ import spatialcrafting.client.writeDuration
 import spatialcrafting.crafter.*
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.util.kotlinwrappers.world
-import spatialcrafting.util.logDebug
 import java.util.stream.Stream
 
 /**
@@ -52,50 +51,55 @@ object Packets {
         fun use(context: PacketContext, packet: T)
     }
 
-//    data class CreateMultiblock(val multiblock: CrafterMultiblock, val masterEntityLocation: BlockPos) : Packet {
-//        companion object : PacketManager<CreateMultiblock> {
-//            override val id: String
-//                get() = "create_multiblock"
-//
-//            override fun fromBuf(buf: PacketByteBuf): CreateMultiblock = CreateMultiblock(
-//                    buf.readCompoundTag()?.toCrafterMultiblock()
-//                            ?: error("A compound was not written to the PacketByteBuf!"),
-//                    buf.readBlockPos()
-//            )
-//
-//            override fun use(context: PacketContext, packet: CreateMultiblock) {
-//                CrafterPiece.createMultiblock(context.world, packet.masterEntityLocation, packet.multiblock)
-//
-//            }
-//
-//        }
-//
-//        override fun addToByteBuf(buf: PacketByteBuf) {
-//            buf.writeCompoundTag(multiblock.toTag())
-//            buf.writeBlockPos(masterEntityLocation)
-//        }
-//    }
-//
-//    data class DestroyMultiblock(val multiblock: CrafterMultiblock) : Packet {
-//        companion object : PacketManager<DestroyMultiblock> {
-//            override val id: String
-//                get() = "destroy_multiblock"
-//
-//            override fun fromBuf(buf: PacketByteBuf): DestroyMultiblock = DestroyMultiblock(
-//                    buf.readCompoundTag()?.toCrafterMultiblock()
-//                            ?: error("A compound was not written to the PacketByteBuf!")
-//            )
-//
-//            override fun use(context: PacketContext, packet: DestroyMultiblock) {
-//                CrafterPiece.destroyMultiblock(context.world, packet.multiblock)
-//            }
-//
-//        }
-//
-//        override fun addToByteBuf(buf: PacketByteBuf) {
-//            buf.writeCompoundTag(multiblock.toTag())
-//        }
-//    }
+    data class AssignMultiblockState(val multiblock: CrafterMultiblock, val masterEntityPos: BlockPos) : Packet<AssignMultiblockState> {
+        override val manager: PacketManager<AssignMultiblockState>
+            get() = AssignMultiblockState
+
+        companion object : PacketManager<AssignMultiblockState> {
+            override val id: String
+                get() = "create_multiblock"
+
+            override fun fromBuf(buf: PacketByteBuf): AssignMultiblockState = AssignMultiblockState(
+                    buf.readCompoundTag()?.toCrafterMultiblock()
+                            ?: error("A compound was not written to the PacketByteBuf!"),
+                    buf.readBlockPos()
+            )
+
+            override fun use(context: PacketContext, packet: AssignMultiblockState) {
+               CrafterPieceEntity.assignMultiblockState(context.world, packet.masterEntityPos, packet.multiblock)
+            }
+
+        }
+
+        override fun addToByteBuf(buf: PacketByteBuf) {
+            buf.writeCompoundTag(multiblock.toTag())
+            buf.writeBlockPos(masterEntityPos)
+        }
+    }
+
+    data class UnassignMultiblockState(val multiblock: CrafterMultiblock) : Packet<UnassignMultiblockState> {
+        override val manager: PacketManager<UnassignMultiblockState>
+            get() = UnassignMultiblockState
+
+        companion object : PacketManager<UnassignMultiblockState> {
+            override val id: String
+                get() = "destroy_multiblock"
+
+            override fun fromBuf(buf: PacketByteBuf): UnassignMultiblockState = UnassignMultiblockState(
+                    buf.readCompoundTag()?.toCrafterMultiblock()
+                            ?: error("A compound was not written to the PacketByteBuf!")
+            )
+
+            override fun use(context: PacketContext, packet: UnassignMultiblockState) {
+                CrafterPieceEntity.unassignMultiblockState(context.world, packet.multiblock)
+            }
+
+        }
+
+        override fun addToByteBuf(buf: PacketByteBuf) {
+            buf.writeCompoundTag(multiblock.toTag())
+        }
+    }
 
     data class UpdateHologramContent(val hologramPos: BlockPos, val newItem: ItemStack) : Packet<UpdateHologramContent> {
         override val manager: PacketManager<UpdateHologramContent>

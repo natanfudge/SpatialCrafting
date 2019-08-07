@@ -34,6 +34,11 @@ operator fun Pair<Int, Int>.rangeTo(that: Pair<Int, Int>) = object : Iterable<Pa
 fun max(num1: Int, num2: Int, num3: Int): Int = max(max(num1, num2), num3)
 
 infix fun Pair<Int, Int>.until(that: Pair<Int, Int>) = this..Pair(that.first - 1, that.second - 1)
+data class Point(val x : Int, val y: Int, val z :Int)
+
+fun cubeSized(size :Int) : List<Point>{
+    return (0 until size).flatMap{ x -> (0 until size).flatMap {y-> (0 until size).map {z-> Point(x,y,z)  } } }
+}
 
 /**
  * Appends all elements yielded from results of [transform] function being invoked on each element of original collection, to the given [destination].
@@ -43,6 +48,18 @@ inline fun <T, R> Iterable<T>.flatMapIndexed(transform: (Int, T) -> Iterable<R>)
     var index = 0
     for (item in this)
         destination.addAll(transform(index++, item))
+
+    return destination
+}
+
+/**
+ * Appends all elements yielded from results of [transform] function being invoked on each element of original collection, to the given [destination].
+ */
+inline fun <T, R> Iterable<T>.mapIndexed(transform: (Int, T) -> R): List<R> {
+    val destination = ArrayList<R>()
+    var index = 0
+    for (item in this)
+        destination.add(transform(index++, item))
 
     return destination
 }

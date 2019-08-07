@@ -16,6 +16,9 @@ class ShapedSpatialRecipe(private val components: List<ShapedRecipeComponent>,
                           craftTime: Duration,
                           output: ItemStack,
                           id: Identifier) : SpatialRecipe(output, id, minimumCrafterSize, energyCost, craftTime) {
+    override val previewComponents: List<ShapedRecipeComponent>
+        get() = components
+
     override fun matches(inventoryWrapper: CrafterMultiblockInventoryWrapper, world: World): Boolean {
         if (inventoryWrapper.size != this.components.size) return false
         if(inventoryWrapper.crafterSize < minimumCrafterSize) return false

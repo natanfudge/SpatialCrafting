@@ -2,52 +2,71 @@ package spatialcrafting.docs;
 
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Material;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-// Step 1: get .ogg file
-// Step 2: put sounds.json
-// Step 3: create sound event
-// Step 4: register
-// Step 5: call playSound
-// Step 6: troubleshooting: remove out folder, turn on sounds.
 
-public class ExampleBlock extends Block {
+public class ExampleBlock extends Block implements BlockEntityProvider {
     public ExampleBlock() {
         super(Settings.of(Material.STONE));
     }
 
+
+
     @Override
-    public boolean activate(BlockState blockState, World world, BlockPos blockPos, PlayerEntity placedBy, Hand hand, BlockHitResult blockHitResult) {
-        if (!world.isClient) {
-            world.playSound(
-                    null, // Player (purpose unknown, edit if you know)
-                    blockPos, // The position of where the sound will come from
-                    ExampleMod.MY_SOUND_EVENT, // The sound that will play
-                    SoundCategory.BLOCKS, // This determines which of the volume sliders affect this sound
-                    1f, //Volume multiplier, 1 is normal, 0.5 is half volume, etc
-                    1f // Pitch multiplier, 1 is normal, 0.5 is half pitch, etc
-            );
+    public boolean activate(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockHitResult blockHitResult) {
+        if (world.isClient) return true;
+        Inventory blockEntity = (Inventory) world.getBlockEntity(blockPos);
+
+
+        if (!player.getStackInHand(hand).isEmpty()) {
+            // Check what is the first open slot and put an item from the player's hand there
+            if (blockEntity.getInvStack(0).isEmpty()) {
+                // Put the stack the player is holding into the inventory
+                blockEntity.setInvStack(0, player.getStackInHand(hand).copy());
+                // Remove the stack from the player's hand
+                player.getStackInHand(hand).setCount(0);
+            } else if (blockEntity.getInvStack(1).isEmpty()) {
+                blockEntity.setInvStack(1, player.getStackInHand(hand).copy());
+                player.getStackInHand(hand).setCount(0);
+            } else {
+                // If the inventory is full we'll print it's contents
+                System.out.println("The first slot holds "
+                        + blockEntity.getInvStack(0) + " and the second slot holds " + blockEntity.getInvStack(1));
+            }
+        } else {
+            // If the player is not holding anything we'll get give him the items in the block entity one by one
+
+            // Find the first slot that has an item and give it to the player
+            if (!blockEntity.getInvStack(1).isEmpty()) {
+                // Give the player the stack in the inventory
+                player.giveItemStack(blockEntity.getInvStack(1));
+                // Remove the stack from the inventory
+                blockEntity.removeInvStack(1);
+            } else if (!blockEntity.getInvStack(0).isEmpty()) {
+                player.giveItemStack(blockEntity.getInvStack(0));
+                blockEntity.removeInvStack(0);
+            }
         }
 
-//        if (!world.isClient) {
-//            world.playSound(
-//                    null, // Player (purpose unknown, edit if you know)
-//                    blockPos, // The position of where the sound will come from
-//                    SoundEvents.BLOCK_ANVIL_LAND, // The sound that will play
-//                    SoundCategory.BLOCKS, // This determines which of the volume sliders affect this sound
-//                    1f, //Volume multiplier, 1 is normal, 0.5 is half volume, etc
-//                    1f // Pitch multiplier, 1 is normal, 0.5 is half pitch, etc
-//            );
-//        }
+        //TODO: note about the "copy"
 
-        return false;
+
+        return true;
     }
+
+    @Override
+    public BlockEntity createBlockEntity(BlockView var1) {
+        return new DemoBlockEntity();
+    }
+
 }

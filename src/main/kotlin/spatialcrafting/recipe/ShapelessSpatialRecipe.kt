@@ -14,6 +14,25 @@ class ShapelessSpatialRecipe(private val components: List<ShapelessRecipeCompone
                              craftTime: Duration,
                              output: ItemStack,
                              id: Identifier) : SpatialRecipe(output, id, minimumCrafterSize, energyCost, craftTime) {
+    override val previewComponents: List<ShapedRecipeComponent>
+        get(){
+            val input = mutableListOf<ShapedRecipeComponent>()
+            var componentsIndex = 0
+            // Just shove all of them into the grid one by one
+            for(x in 0 until minimumCrafterSize){
+                for(y in 0 until minimumCrafterSize){
+                    for(z in 0 until minimumCrafterSize){
+                        input.add(ShapedRecipeComponent(
+                                position = ComponentPosition(x,y,z), ingredient = components[componentsIndex].ingredient
+                        ))
+                        componentsIndex++
+                        if(componentsIndex == input.size) return input // We're done adding everything
+                    }
+                }
+            }
+            return input
+        }
+
     override fun getSerializer() = Serializer
 
     data class ItemAndAmount(val stack: ItemStack, val amount: Int)

@@ -19,17 +19,23 @@
       {
         "value": "spatialcrafting.SpatialCraftingKt::init"
       }
+    ],
+    "client": [
+      {
+        "value": "spatialcrafting.SpatialCraftingKt::initClient"
+      }
+    ],
+    "rei_plugins": [
+      "spatialcrafting.compat.rei.ReiSpatialCraftingPlugin"
     ]
   },
   "mixins": [
     "spatialcrafting.mixins.json"
   ],
-  "requires": {
-    "fabric-language-kotlin": ">=1.3.30"
-  },
   "depends": {
     "fabricloader": ">=0.4.0",
-    "fabric": "*"
+    "fabric": "*",
+    "fabric-language-kotlin": ">=1.3.30"
   },
   "suggests": {
     "flamingo": "*"

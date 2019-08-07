@@ -25,7 +25,7 @@ abstract class SpatialRecipe(
 
         private val output: ItemStack,
         private val id: Identifier,
-        protected val minimumCrafterSize: Int,
+         val minimumCrafterSize: Int,
          val energyCost: Long,
          val craftTime: Duration
 ) : Recipe<CrafterMultiblockInventoryWrapper> {
@@ -39,6 +39,9 @@ abstract class SpatialRecipe(
     override fun fits(var1: Int, var2: Int) = false
 
     override fun getOutput() = output
+
+    // For REI
+    abstract val previewComponents : List<ShapedRecipeComponent>
 
 
     object Type : RecipeType<SpatialRecipe> {
@@ -146,6 +149,7 @@ abstract class SpatialRecipe(
         @Suppress("SENSELESS_COMPARISON")
         private fun validateJson(json: SpatialRecipeJsonFormat, id : Identifier) {
             //TODO: validate that energy is enabled when energy is specified
+            //TODO: validate that the total amount of input item can fit in the maximum crafter size
             val missingField = when {
                 json.result == null -> "result"
                 json.result.item == null -> "result item"

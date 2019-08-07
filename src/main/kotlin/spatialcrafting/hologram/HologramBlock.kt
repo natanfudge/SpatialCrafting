@@ -129,7 +129,9 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     }
 
 
-    private fun IWorld.getHologramEntity(pos: BlockPos) = getBlockEntity(pos).assertIs<HologramBlockEntity>(pos)
+    private fun IWorld.getHologramEntity(pos: BlockPos): HologramBlockEntity {
+        return getBlockEntity(pos).assertIs(pos)
+    }
 
     override fun onBlockBreakStart(blockState: BlockState, world: World, pos: BlockPos, player: PlayerEntity?) {
         giveItemInHologramToPlayer(player, world, pos)

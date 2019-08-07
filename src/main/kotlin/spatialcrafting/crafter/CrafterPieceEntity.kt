@@ -11,38 +11,12 @@ import spatialcrafting.util.kotlinwrappers.putBlockPos
 import spatialcrafting.util.logDebug
 import spatialcrafting.util.xz
 
-//
-//private data class CrafterPieceEntityData(var multiblockIn: CrafterMultiblock? = null, var masterEntityPos: BlockPos? = null) {
-//
-//
-//    fun addToTag(tag: CompoundTag, isMaster: Boolean) {
-//        if (isMaster) {
-//            multiblockIn?.addToTag(tag, Keys.multiblock)
-//        }
-//
-//        if (masterEntityPos != null) tag.putBlockPos(masterEntityPos, Keys.masterEntity)
-//    }
-//
-//    companion object {
-//        private object Keys {
-//            const val multiblock = "multiblock"
-//            const val masterEntity = "master"
-//        }
-//
-//        fun fromTag(tag: CompoundTag, pos: BlockPos) = CrafterPieceEntityData().apply {
-//            masterEntityPos = tag.getBlockPos(Keys.masterEntity)
-//            val isMaster =
-//            if (isMaster) {
-//                multiblockIn = tag.getCrafterMultiblock(key = Keys.multiblock, blockAmountInMultiblock = totalBlockAmountInMultiblock)
-//            }
-//        }
-//    }
-//}
+
+class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
 
 
-class CrafterPieceEntity : BlockEntity(Type)/*, BlockEntityClientSerializable */{
     companion object {
-        val Type = Builders.blockEntityType(craftersPieces) { CrafterPieceEntity() }
+        val Type = Builders.blockEntityType(CraftersPieces.values.toList()) { CrafterPieceEntity() }
 
         fun assignMultiblockState(world: World, masterPos: BlockPos, multiblock: CrafterMultiblock) {
             for (crafterEntity in multiblock.getCrafterEntities(world)) {
@@ -56,12 +30,10 @@ class CrafterPieceEntity : BlockEntity(Type)/*, BlockEntityClientSerializable */
         fun unassignMultiblockState(world: World, multiblock: CrafterMultiblock) {
             // The block which was destroyed will give a null block entity, so we need to ignore it.
             multiblock.crafterLocations.mapNotNull {
-                world.getBlockEntity(it)
+                world.getBlockEntity(it) as? CrafterPieceEntity
             }.forEach { crafterEntity ->
-                with(crafterEntity.assertIs<CrafterPieceEntity>(crafterEntity.pos)) {
-                    setMasterEntityPos(null)
-                    if (isMaster) setMultiblockIn(null)
-                }
+                crafterEntity.setMasterEntityPos(null)
+                if (crafterEntity.isMaster) crafterEntity.setMultiblockIn(null)
             }
         }
 
@@ -118,12 +90,10 @@ class CrafterPieceEntity : BlockEntity(Type)/*, BlockEntityClientSerializable */
         get() = masterEntityPos == pos
 
 
-//    override fun toClientTag(tag: CompoundTag): CompoundTag = this.toTag(tag)
-//
-//    override fun fromClientTag(tag: CompoundTag) = this.fromTag(tag)
+    override fun toClientTag(tag: CompoundTag): CompoundTag = this.toTag(tag)
 
-    // Right now we cancel crafting particles when the user leaves so there is no need to keep multiblock information on the client.
-    // Serialize the BlockEntity
+    override fun fromClientTag(tag: CompoundTag) = this.fromTag(tag)
+
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
         if (isMaster) {

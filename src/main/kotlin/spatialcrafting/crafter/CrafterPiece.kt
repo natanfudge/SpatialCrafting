@@ -30,18 +30,23 @@ import spatialcrafting.util.kotlinwrappers.setBlock
 import java.util.*
 
 
-val craftersPieces = listOf(
-        CrafterPiece(2),
-        CrafterPiece(3),
-        CrafterPiece(4),
-        CrafterPiece(5)
+val CraftersPieces = mapOf(
+        2 to CrafterPiece(2),
+        3 to CrafterPiece(3),
+        4 to CrafterPiece(4),
+        5 to CrafterPiece(5)
 )
 
 inline fun <reified T> BlockEntity?.assertIs(pos: BlockPos): T {
-    return (this as? T)
-            ?: error("BlockEntity at location $pos is not a Crafter Piece Entity as expected.\nRather, it is '${this
-                    ?: "air"}'.")
+    val result = this as? T
+    return (result
+            ?: error("BlockEntity at location $pos is not a ${T::class.qualifiedName} as expected.\nRather, it is '${this
+                    ?: "air"}'."))
+
 }
+
+//inline fun <reified T> World.get(pos : BlockPos) : T = world.getBlockEntity(pos).assertIs(pos)
+//inline fun <reified T> World.getNullable(pos : BlockPos) : T? = world.getBlockEntity(pos) as? T
 
 
 fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>(pos)
@@ -73,6 +78,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
                 .joinToString("\n") { column -> column.value.joinToString(", ") { it.xz } }
 
         fun createMultiblock(world: World, masterPos: BlockPos, multiblock: CrafterMultiblock) {
+            assert(world.isServer)
             if (thereIsSpaceForHolograms(world, multiblock)) {
                 logDebug { "Building multiblock. [${multiblock.logString()}]" }
                 CrafterPieceEntity.assignMultiblockState(world, masterPos, multiblock)
@@ -90,7 +96,8 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         }
 
         fun destroyMultiblock(world: World, multiblock: CrafterMultiblock) {
-            if (world.isServer) logDebug { "Destroying multiblock. [${multiblock.logString()}]" }
+            assert(world.isServer)
+            logDebug { "Destroying multiblock. [${multiblock.logString()}]" }
             CrafterPieceEntity.unassignMultiblockState(world, multiblock)
 
             for (hologramPos in multiblock.hologramLocations) {
@@ -98,6 +105,17 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
             }
 
         }
+    }
+
+    override fun neighborUpdate(blockState_1: BlockState?, world: World, pos: BlockPos, block_1: Block?, blockPos_2: BlockPos?, boolean_1: Boolean) {
+        if (world.isClient) return
+        val multiblock = world.getCrafterEntity(pos).multiblockIn
+        if (multiblock == null) {
+            attemptToFormMultiblock(world, pos)
+        }
+
+
+        super.neighborUpdate(blockState_1, world, pos, block_1, blockPos_2, boolean_1)
     }
 
     override fun createBlockEntity(var1: BlockView?) = CrafterPieceEntity()
@@ -115,7 +133,8 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
     override fun onBlockRemoved(blockState: BlockState, world: World, pos: BlockPos, blockState_2: BlockState?, boolean_1: Boolean) {
         assert(world.isServer)
-        val multiblock = world.getCrafterEntity(pos).multiblockIn ?: return
+        val multiblock = world.getCrafterEntity(pos).multiblockIn
+                ?: return super.onBlockRemoved(blockState, world, pos, blockState_2, boolean_1)
         destroyMultiblockFromServer(world, multiblock)
         super.onBlockRemoved(blockState, world, pos, blockState_2, boolean_1)
     }
@@ -123,9 +142,8 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
     private fun destroyMultiblockFromServer(world: World, multiblock: CrafterMultiblock) {
         assert(world.isServer)
         destroyMultiblock(world, multiblock)
-//        PlayerStream.watching(world,multiblock.locations[0]).sendPacket(Packets.DestroyMultiblock, Packets.DestroyMultiblock(
-//                multiblock
-//        ))
+        PlayerStream.watching(world, multiblock.crafterLocations[0])
+                .sendPacket(Packets.UnassignMultiblockState(multiblock))
     }
 
     /**
@@ -145,7 +163,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         }
 
         val craftedRecipeOptional = world.recipeManager.getFirstMatch(SpatialRecipe.Type,
-                CrafterMultiblockInventoryWrapper(multiblock.getInventory(world),crafterSize =  size), world)
+                CrafterMultiblockInventoryWrapper(multiblock.getInventory(world), crafterSize = size), world)
         val craftedRecipe = craftedRecipeOptional
                 // Can sometimes be null when the playing is loading
                 .orElse(null) ?: return
@@ -161,26 +179,38 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         }
 
     }
+
+
     //TODO: document sounds
 
     override fun activate(blockState_1: BlockState, world: World, pos: BlockPos, placedBy: PlayerEntity?, hand: Hand, blockHitResult_1: BlockHitResult?): Boolean {
 
-
+        // Prevent it being called twice
         if (hand == Hand.OFF_HAND) return false
 
-        if (world.isClient) return false
-        // Prevent it being called twice
+//        if(world.isServer &&placedBy != null){
+//            placedBy.sendMessage("pos = ${pos.xz}, masterPos = ${world.getCrafterEntity(pos).getMasterEntityPos()?.xz}")
+//        }
+
+
+//        val be = world.getBlockEntity(pos)
+//        if (be != null && be is CrafterPieceEntity) {
+//            ContainerProviderRegistry.INSTANCE.openContainer(id("x2crafter_piece"), placedBy) { buf->
+//                buf.writeBlockPos(pos);
+//            }
+//        }
 
 
         val multiblockIn = world.getCrafterEntity(pos).multiblockIn ?: return false
-        if (multiblockIn.isCrafting) return false
+        if (world.isClient) return true
+        if (multiblockIn.isCrafting) return true
 
 
         val matches = world.recipeManager.getAllMatches(SpatialRecipe.Type,
                 CrafterMultiblockInventoryWrapper(multiblockIn.getInventory(world), crafterSize = size), world)
 
         //TODO: provide feedback that no recipe matched
-        if (matches.isEmpty()) return false
+        if (matches.isEmpty()) return true
         if (matches.size > 1) {
             println("[Spatial Crafting] WARNING: THERE IS MORE THAN ONE RECIPE THAT MATCHES THE SAME INPUT!" +
                     "ONLY THE FIRST RECIPE WILL BE USED! The recipes are: \n$matches")
@@ -190,17 +220,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         val endTime = world.durationTime + craftDuration
 
         multiblockIn.setIsCrafting(world, craftEndTime = endTime)
-        world.play(Sounds.CraftStart, at = pos, ofCategory = SoundCategory.BLOCKS)
-
-        GlobalScope.launch {
-            while (multiblockIn.isCrafting) {
-                // We do the min here so in case the time remaining is not exactly the duration time it still stops when the crafting ends.
-//                delay(min(multiblockIn.craftEndTime!! - world.durationTime, Sounds.CraftLoopDuration))
-                delay(Sounds.CraftLoopDuration)
-                world.play(Sounds.CraftLoop, at = pos, ofCategory = SoundCategory.BLOCKS)
-//                world.sound
-            }
-        }
+        playCraftingSounds(world, pos, multiblockIn)
 
         PlayerStream.watching(world.getBlockEntity(pos)).sendPacket(
                 Packets.StartCraftingParticles(multiblockIn, craftDuration)
@@ -214,14 +234,29 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         }
 
 
-        return false
+        return true
+    }
+
+    private fun playCraftingSounds(world: World, pos: BlockPos, multiblockIn: CrafterMultiblock) {
+        world.play(Sounds.CraftStart, at = pos, ofCategory = SoundCategory.BLOCKS)
+
+        GlobalScope.launch {
+            while (multiblockIn.isCrafting) {
+                delay(Sounds.CraftLoopDuration)
+                world.play(Sounds.CraftLoop, at = pos, ofCategory = SoundCategory.BLOCKS)
+            }
+        }
     }
 
 
     override fun onPlaced(world: World, blockPos: BlockPos, blockState: BlockState, placedBy: LivingEntity?, itemStack: ItemStack?) {
         if (world.isClient) return
+        attemptToFormMultiblock(world, blockPos)
+    }
+
+    private fun attemptToFormMultiblock(world: World, blockPos: BlockPos) {
         val northernEasternCrafter = getNorthernEasternCrafter(world, blockPos)
-        val multiblock = attemptToFormMultiblock(world, northernEasternCrafter) ?: return
+        val multiblock = findPossibleMultiblock(world, northernEasternCrafter) ?: return
 
         createMultiblockFromServer(world, northernEasternCrafter, multiblock)
     }
@@ -233,14 +268,14 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
                 masterPos = northernEasternCrafter,
                 multiblock = multiblock
         )
-//        PlayerStream.watching(world,multiblock.locations[0]).sendPacket(Packets.CreateMultiblock, Packets.CreateMultiblock(
-//                multiblock = multiblock,
-//                masterEntityLocation = northernEasternCrafter
-//        ))
+        PlayerStream.watching(world, multiblock.crafterLocations[0]).sendPacket(Packets.AssignMultiblockState(
+                multiblock = multiblock,
+                masterEntityPos = northernEasternCrafter
+        ))
     }
 
 
-    private fun attemptToFormMultiblock(world: World, northernEasternCrafterPos: BlockPos): CrafterMultiblock? {
+    private fun findPossibleMultiblock(world: World, northernEasternCrafterPos: BlockPos): CrafterMultiblock? {
         val blocks = mutableListOf<BlockPos>()
         for ((westDistance, southDistance) in (0 to 0) until (size to size)) {
             val location = northernEasternCrafterPos.west(westDistance).south(southDistance)

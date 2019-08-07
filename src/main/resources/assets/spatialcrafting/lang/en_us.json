@@ -7,5 +7,7 @@
   "block.spatialcrafting.x4crafter_piece": "Ironforged crafter",
   "block.spatialcrafting.x5crafter_piece": "Gem-infused Crafter",
   "block.spatialcrafting.hologram": "Hologram",
-  "itemGroup.spatialcrafting.spatial_crafting": "Spatial Crafting"
+  "itemGroup.spatialcrafting.spatial_crafting": "Spatial Crafting",
+  "category.spatialcrafting.rei": "Spatial Crafting"
+
 }
