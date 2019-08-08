@@ -14,7 +14,7 @@ class ReiSpatialCraftingDisplay(val recipe : SpatialRecipe) : RecipeDisplay<Spat
     private val input: List<List<ItemStack>> = recipe.previewComponents.map { listOf(*it.ingredient.stackArray) }
     private val output: List<ItemStack> = listOf(recipe.output)
 
-    var currentLevel = 0
+    var currentLayer = 0
 
 
     override fun getRecipe(): Optional<Recipe<*>> = Optional.of(recipe)

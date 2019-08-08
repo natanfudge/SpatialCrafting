@@ -1,5 +1,7 @@
 package spatialcrafting
 
+import drawer.getFrom
+import drawer.write
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.fabricmc.fabric.api.client.screen.ScreenProviderRegistry
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
@@ -26,7 +28,7 @@ import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.util.kotlinwrappers.ModInit
 import spatialcrafting.util.kotlinwrappers.ModInitializationContext
 import spatialcrafting.util.kotlinwrappers.itemStack
-
+import kotlinx.serialization.Serializable
 
 //TODO: remember to handle changes in state in kapt project
 //TODO: remember to test nullable values in kapt project
@@ -129,11 +131,11 @@ fun initClient(){
 }
 
 
-
-
-
 fun <T : Packets.Packet<T>> ModInitializationContext.register(manager: Packets.PacketManager<T>) {
     registerServerToClientPacket(manager.id) { packetContext, packetByteBuf ->
         manager.use(packetContext, manager.fromBuf(packetByteBuf))
     }
 }
+
+@Serializable
+data class X(val y : Int)

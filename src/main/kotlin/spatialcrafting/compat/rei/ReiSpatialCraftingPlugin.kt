@@ -1,6 +1,7 @@
 package spatialcrafting.compat.rei
 
 import me.shedaniel.rei.api.*
+import net.minecraft.client.gui.screen.Screen
 import net.minecraft.util.Identifier
 import spatialcrafting.MaxCrafterSize
 import spatialcrafting.MinCrafterSize
@@ -34,31 +35,13 @@ class ReiSpatialCraftingPlugin : REIPluginEntry {
     override fun registerRecipeDisplays(recipeHelper: RecipeHelper) {
 //        for (i in CrafterSizes) {
 //            recipeHelper.registerRecipes(ReiCategory.id(i), SpatialRecipe::class.java) { ReiDisplay(it) }
-            recipeHelper.registerRecipes(ReiSpatialCraftingCategory.Id, SpatialRecipe::class.java) { ReiSpatialCraftingDisplay(it) }
+        recipeHelper.registerRecipes(ReiSpatialCraftingCategory.Id, SpatialRecipe::class.java) { ReiSpatialCraftingDisplay(it) }
 
 //        }
 
     }
 
     override fun registerBounds(displayHelper: DisplayHelper) {
-//        displayHelper.registerBoundsHandler(object : DisplayBoundsHandler<VillagerRecipeViewingScreen?> {
-//            override fun getBaseSupportedClass(): Class<*> {
-//                return VillagerRecipeViewingScreen::class.java
-//            }
-//
-//            fun getLeftBounds(screen: VillagerRecipeViewingScreen): Rectangle {
-//                return Rectangle(2, 0, screen.bounds.x - 4, MinecraftClient.getInstance().window.scaledHeight)
-//            }
-//
-//            fun getRightBounds(screen: VillagerRecipeViewingScreen): Rectangle {
-//                val startX = screen.bounds.x + screen.bounds.width + 2
-//                return Rectangle(startX, 0, MinecraftClient.getInstance().window.scaledWidth - startX - 2, MinecraftClient.getInstance().window.scaledHeight)
-//            }
-//
-//            override fun getPriority(): Float {
-//                return -1.0f
-//            }
-//        })
     }
 
     override fun registerOthers(recipeHelper: RecipeHelper) {
@@ -73,6 +56,22 @@ class ReiSpatialCraftingPlugin : REIPluginEntry {
     }
 
     override fun registerSpeedCraft(recipeHelper: RecipeHelper) {
+        recipeHelper.registerSpeedCraftFunctional(ReiSpatialCraftingCategory.Id,
+                object : SpeedCraftFunctional<ReiSpatialCraftingDisplay> {
+                    override fun getFunctioningFor(): Array<Class<Any>> {
+                        return arrayOf()
+                    }
+
+                    override fun acceptRecipe(screen: Screen?, recipe: ReiSpatialCraftingDisplay?): Boolean {
+                        return true
+                    }
+
+                    override fun performAutoCraft(screen: Screen?, recipe: ReiSpatialCraftingDisplay?): Boolean {
+                        return true
+                    }
+
+
+                })
 //        recipeHelper.registerSpeedCraftFunctional(ReiCategory.Id, object : SpeedCraftFunctional<ReiDisplay> {
 //            override fun getFunctioningFor(): Array<Class<*>> {
 //                return arrayOf()
