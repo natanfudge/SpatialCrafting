@@ -1,11 +1,8 @@
 package spatialcrafting
 
-import drawer.getFrom
-import drawer.write
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.fabricmc.fabric.api.client.screen.ScreenProviderRegistry
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.container.BlockContext
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
@@ -15,8 +12,6 @@ import spatialcrafting.client.gui.DramaGeneratorScreen
 //import spatialcrafting.client.gui.DramaGeneratorController
 //import spatialcrafting.client.gui.DramaGeneratorScreen
 import spatialcrafting.crafter.CrafterPieceEntity
-import spatialcrafting.crafter.TestBlock
-import spatialcrafting.crafter.TestBlockEntity
 import spatialcrafting.crafter.CraftersPieces
 import spatialcrafting.docs.ExampleMod.docsJavaInit
 import spatialcrafting.hologram.HologramBlock
@@ -30,13 +25,13 @@ import spatialcrafting.util.kotlinwrappers.ModInitializationContext
 import spatialcrafting.util.kotlinwrappers.itemStack
 import kotlinx.serialization.Serializable
 
-//TODO: remember to handle changes in state in kapt project
-//TODO: remember to test nullable values in kapt project
+
+//TODO: better x5 crafter texture
 
 
 //TODO: document recipes
 //TODO: rei integration
-//TODO: better example recipes (some op items)
+//TODO: better example recipes (some op items - sword of you want to craft this etc)
 //TODO: test putting items in differnet locations in large crafter with small recipe
 //TODO: test on server
 //TODO: ask to add to AOF
@@ -64,7 +59,7 @@ fun id(str: String) = Identifier(ModId, str)
 @Suppress("unused")
 fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
 
-    registeringWithItemBlocks {
+    registerBlocksWithItemBlocks {
         for (crafterPiece in CraftersPieces.values) {
             crafterPiece withId "x${crafterPiece.size}crafter_piece"
         }

@@ -2,6 +2,10 @@
 
 package spatialcrafting.util
 
+import net.minecraft.block.Block
+import net.minecraft.block.Material
+import net.minecraft.client.font.TextRenderer
+import net.minecraft.client.gui.DrawableHelper
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
@@ -13,6 +17,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 
 val BlockPos.xz get() = "($x,$z)"
@@ -30,6 +35,16 @@ fun LivingEntity?.sendMessage(message: String) {
 fun Vec3d.toBlockPos() = BlockPos(x.roundToInt(), y.roundToInt(), z.roundToInt())
 inline fun Ingredient.matches(itemStack: ItemStack) = method_8093(itemStack)
 
+
+fun DrawableHelper.drawCenteredStringWithoutShadow(textRenderer_1: TextRenderer, string_1: String?, int_1: Int, int_2: Int, int_3: Int) {
+    textRenderer_1.draw(string_1, (int_1 - textRenderer_1.getStringWidth(string_1) / 2).toFloat(), int_2.toFloat(), int_3)
+}
+
+fun BlockPos.distanceFrom(otherPos :Vec3d) =
+        sqrt((otherPos.x - this.x).squared() + (otherPos.y - this.y).squared() + (otherPos.z - this.z).squared())
+
+val  PlayerEntity.itemsInInventoryAndOffhand get() = inventory.main + inventory.offHand
+open class DefaultBlock : Block(Settings.of(Material.STONE))
 
 //class IdentifiedValue<T>(var value: T, val identifier: String)
 //

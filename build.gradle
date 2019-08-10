@@ -53,7 +53,7 @@ dependencies {
     }
 
 //    modImplementation "fabric-drawer:fabric-drawer-$drawer_version:dev"
-    modImplementation 'com.lettuce.fudge:fabric-drawer:1.0.7'
+    modImplementation "com.lettuce.fudge:fabric-drawer:$drawer_version"
 
 
 //    modImplementation("io.github.prospector.modmenu:ModMenu:1.6.3-95"){

@@ -1,12 +1,12 @@
 package spatialcrafting.util
 
 import net.minecraft.nbt.CompoundTag
-
-interface Serializable<T> {
-    //    fun addToTag(tag: CompoundTag, key: String) : CompoundTag
-    fun toTag(): CompoundTag
-
-}
+//
+//interface Serializable<T> {
+//    //    fun addToTag(tag: CompoundTag, key: String) : CompoundTag
+//    fun toTag(): CompoundTag
+//
+//}
 
 //fun <T : Serializable<T>> CompoundTag.putSerializable(serializable: Serializable<T>, key :String){
 //

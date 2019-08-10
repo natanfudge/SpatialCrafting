@@ -8,7 +8,7 @@ import spatialcrafting.client.Duration
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.util.matches
 
-class ShapelessSpatialRecipe(private val components: List<ShapelessRecipeComponent>,
+class ShapelessSpatialRecipe( val components: List<ShapelessRecipeComponent>,
                              minimumCrafterSize: Int,
                              energyCost: Long,
                              craftTime: Duration,

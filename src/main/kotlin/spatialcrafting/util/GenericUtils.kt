@@ -1,6 +1,7 @@
 package spatialcrafting.util
 
 import kotlin.math.max
+import kotlin.math.sqrt
 
 infix fun IntRange.by(range: IntRange): List<Pair<Int, Int>> = this.flatMap { x -> range.map { y -> Pair(x, y) } }
 fun IntRange.squared() = this by this
@@ -30,6 +31,8 @@ operator fun Pair<Int, Int>.rangeTo(that: Pair<Int, Int>) = object : Iterable<Pa
         }
     }
 }
+
+fun Double.isWholeNumber() = this.toInt().toDouble() == this
 
 fun max(num1: Int, num2: Int, num3: Int): Int = max(max(num1, num2), num3)
 
@@ -70,6 +73,10 @@ const val assertionsEnabled = true
 inline fun assert(message: String = "Assertion failure", test: () -> Boolean) {
     if (assertionsEnabled && !test()) throw AssertionError(message)
 }
+
+inline fun Int.squared() = this * this
+inline fun Double.squared() = this * this
+inline fun sqrt(num: Int) : Double = sqrt(num.toDouble())
 
 //inline fun<T> min(comparable: Comparable<T>)
 

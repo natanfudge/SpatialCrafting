@@ -3,3 +3,4 @@
 - Make a serializable scheduling library
 - Make a testing library
 - Make new crafting sounds
+- PR a system to REI that allows all crafter recipes to exist in one category

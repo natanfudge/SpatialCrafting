@@ -1,0 +1,32 @@
+{
+  "type": "spatialcrafting:shaped",
+  "pattern": [
+    [
+      "I I",
+      "   ",
+      "ICC"
+    ],
+    [
+      "I I",
+      "   ",
+      "I I"
+    ],
+    [
+      " CC",
+      "CCC",
+      "CCC"
+    ]
+  ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_block"
+    },
+    "C": {
+      "item": "spatialcrafting:x3crafter_piece"
+    }
+  },
+  "result": {
+    "item": "spatialcrafting:x4crafter_piece",
+    "count": 16
+  }
+}

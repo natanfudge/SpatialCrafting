@@ -11,7 +11,7 @@ import net.minecraft.util.Identifier
 import java.awt.Rectangle
 import java.awt.Shape
 
-class ReiButton(
+open class ReiButton(
         private var x: Int, private var y: Int, private val width: Int, private val height: Int,
         private val textureOn: Identifier, private val textureOff: Identifier,
         val isEnabled: (MinecraftClient) -> Boolean = { true }, val onClick: (MinecraftClient) -> Unit = {}
@@ -61,8 +61,10 @@ class ReiButton(
         GlStateManager.color4f(0.7f, 0.7f, 1.0f, 1.0f)
     }
 
-    private fun clearColor() {
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f)
-    }
+
 
 }
+
+     fun clearColor() {
+        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f)
+    }

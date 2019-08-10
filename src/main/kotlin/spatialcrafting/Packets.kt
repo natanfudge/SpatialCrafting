@@ -1,8 +1,10 @@
 package spatialcrafting
 
+import drawer.readFrom
 import io.netty.buffer.Unpooled
 import net.fabricmc.fabric.api.network.PacketContext
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
+import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.util.Identifier
@@ -34,6 +36,8 @@ private fun <T : PlayerEntity> Stream<T>.sendPacket(packetId: Identifier, packet
     for (player in this) {
         ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, packetId, packet)
     }
+
+
 }
 
 
@@ -60,8 +64,7 @@ object Packets {
                 get() = "create_multiblock"
 
             override fun fromBuf(buf: PacketByteBuf): AssignMultiblockState = AssignMultiblockState(
-                    buf.readCompoundTag()?.toCrafterMultiblock()
-                            ?: error("A compound was not written to the PacketByteBuf!"),
+                    CrafterMultiblock.serializer().readFrom(buf),
                     buf.readBlockPos()
             )
 
@@ -72,7 +75,7 @@ object Packets {
         }
 
         override fun addToByteBuf(buf: PacketByteBuf) {
-            buf.writeCompoundTag(multiblock.toTag())
+            multiblock.writeTo(buf)
             buf.writeBlockPos(masterEntityPos)
         }
     }
@@ -86,8 +89,7 @@ object Packets {
                 get() = "destroy_multiblock"
 
             override fun fromBuf(buf: PacketByteBuf): UnassignMultiblockState = UnassignMultiblockState(
-                    buf.readCompoundTag()?.toCrafterMultiblock()
-                            ?: error("A compound was not written to the PacketByteBuf!")
+                    CrafterMultiblock.serializer().readFrom(buf)
             )
 
             override fun use(context: PacketContext, packet: UnassignMultiblockState) {
@@ -97,7 +99,7 @@ object Packets {
         }
 
         override fun addToByteBuf(buf: PacketByteBuf) {
-            buf.writeCompoundTag(multiblock.toTag())
+            multiblock.writeTo(buf)
         }
     }
 
@@ -135,7 +137,7 @@ object Packets {
 
         companion object : PacketManager<StartCraftingParticles> {
             override fun fromBuf(buf: PacketByteBuf): StartCraftingParticles {
-                return StartCraftingParticles(buf.readCompoundTag()!!.toCrafterMultiblock()!!, buf.readDuration())
+                return StartCraftingParticles(CrafterMultiblock.serializer().readFrom(buf), buf.readDuration())
             }
 
             override fun use(context: PacketContext, packet: StartCraftingParticles) {
@@ -154,7 +156,7 @@ object Packets {
         }
 
         override fun addToByteBuf(buf: PacketByteBuf) {
-            buf.writeCompoundTag(multiblock.toTag())
+            multiblock.writeTo(buf)
             buf.writeDuration(duration)
         }
 

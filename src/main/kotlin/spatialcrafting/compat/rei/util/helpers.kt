@@ -1,6 +1,6 @@
 @file:Suppress("FunctionName")
 
-package spatialcrafting.compat.rei
+package spatialcrafting.compat.rei.util
 
 import me.shedaniel.rei.gui.widget.ButtonWidget
 import me.shedaniel.rei.gui.widget.SlotWidget
@@ -8,7 +8,6 @@ import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
-import java.awt.Rectangle
 
 fun SlotWidget(x: Int, y: Int, ingredient: Ingredient, drawBackground: Boolean = true,
                showToolTips: Boolean = true, clickToMoreRecipes: Boolean = true,

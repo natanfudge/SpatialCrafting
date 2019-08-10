@@ -10,7 +10,7 @@ import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
 import spatialcrafting.util.matches
 
-class ShapedSpatialRecipe(private val components: List<ShapedRecipeComponent>,
+class ShapedSpatialRecipe( val components: List<ShapedRecipeComponent>,
                           minimumCrafterSize: Int,
                           energyCost: Long,
                           craftTime: Duration,

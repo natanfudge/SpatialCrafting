@@ -2,25 +2,30 @@ package spatialcrafting.compat.rei
 
 import com.mojang.blaze3d.platform.GlStateManager
 import me.shedaniel.rei.api.*
+import me.shedaniel.rei.gui.widget.LabelWidget
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget
 import me.shedaniel.rei.gui.widget.Widget
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.GuiLighting
 import net.minecraft.client.resource.language.I18n
 import net.minecraft.item.ItemStack
+import net.minecraft.text.LiteralText
+import net.minecraft.text.Style
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
+import spatialcrafting.compat.rei.util.SlotWidget
+import spatialcrafting.compat.rei.util.SwappableChildWidget
+import spatialcrafting.compat.rei.util.SwappableChildrenWidget
 import spatialcrafting.crafter.CraftersPieces
 import spatialcrafting.id
-import spatialcrafting.recipe.ShapedRecipeComponent
+import spatialcrafting.util.drawCenteredStringWithoutShadow
+import spatialcrafting.util.isWholeNumber
 import java.awt.Point
 import java.awt.Rectangle
 import java.util.function.Supplier
-import kotlin.math.max
+import kotlin.math.roundToInt
 
-//TODO: show available crafters on the side
-//TODO: show current layer number (starting from 1)
-//TODO: show Craft time
+//TODO: better example recipes
 //TODO: show energy cost if that's enabled (and exists)
 //TODO: One plus button:
 // Queries the combined items of the nearest crafter and the player's inventory.
@@ -37,22 +42,24 @@ import kotlin.math.max
 // Every state has an appropriate tooltip!
 
 
-class ReiSpatialCraftingCategory : RecipeCategory<ReiSpatialCraftingDisplay> {
-
+class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatialCraftingDisplay> {
+    private fun <V> Map<Int, V>.ofRecipeSize() = getValue(recipeSize)
 
     companion object {
         private fun guiTexture(location: String) = id("textures/gui/$location")
 
-        val Id = id("rei_crafting_category")
-        val Backgrounds = mapOf(
+
+        fun id(size: Int) = id("rei_crafting_category_x$size")
+        val Background = mapOf(
                 2 to guiTexture("crafter/x2.png"),
                 3 to guiTexture("crafter/x3.png"),
                 4 to guiTexture("crafter/x4.png"),
                 5 to guiTexture("crafter/x5.png")
         )
 
-        val SizesX = mapOf(2 to 98, 3 to 116, 4 to 140, 5 to 158)
-        val SizesY = mapOf(2 to 36, 3 to 54, 4 to 72, 5 to 90)
+
+        val RecipeWidth = mapOf(2 to 98, 3 to 116, 4 to 140, 5 to 158)
+        val RecipeHeight = mapOf(2 to 36, 3 to 54, 4 to 72, 5 to 90)
 
         object Buttons {
             val DownOff = guiTexture("button/down_off.png")
@@ -79,114 +86,194 @@ class ReiSpatialCraftingCategory : RecipeCategory<ReiSpatialCraftingDisplay> {
                 5 to 147
         )
 
-        val ButtonsYOffset = mapOf(
+        val UpDownButtonsYOffset = mapOf(
                 2 to 5,
                 3 to 15,
                 4 to 23,
                 5 to 33
         )
 
+        val CraftTimeXOffset = mapOf(
+                2 to 64,
+                3 to 82,
+                4 to 104,
+                5 to 122
+        )
+
+
         const val WidthIncrease = 10
 
-    }
+        const val UpDownButtonsXOffset = -10
 
+    }
 
 
     override fun getIdentifier(): Identifier? {
-        return Id
+        return id(recipeSize)
     }
 
-    override fun getIcon(): Renderer = Renderable.fromItemStack(ItemStack(CraftersPieces[2]))
+    override fun getIcon(): Renderer = Renderable.fromItemStack(ItemStack(CraftersPieces[recipeSize]))
 
-    override fun getCategoryName(): String = I18n.translate("category.spatialcrafting.rei")
+    override fun getCategoryName(): String = I18n.translate("category.rei.spatialcrafting.x$recipeSize")
 
     override fun setupDisplay(recipeDisplaySupplier: Supplier<ReiSpatialCraftingDisplay>, bounds: Rectangle): List<Widget> {
         return setupDisplay(recipeDisplaySupplier.get(), bounds)
     }
 
     private fun setupDisplay(display: ReiSpatialCraftingDisplay, bounds: Rectangle): List<Widget> {
-        val recipe = display.recipe
-        val startPoint = Point(bounds.centerX.toInt() - SizesX.getValue(recipe.minimumCrafterSize) / 2,
-                bounds.centerY.toInt() - SizesY.getValue(recipe.minimumCrafterSize) / 2)
-
-        val inputSlots = InputSlotsWidget(currentInputSlots(startPoint,display))
-
-        return listOf(
-                background(bounds, startPoint, recipe.minimumCrafterSize),
-                inputSlots,
-                outputSlot(startPoint, recipe.output, recipe.minimumCrafterSize),
-                upButton(startPoint, display,inputSlots),
-                downButton(startPoint, display,inputSlots)
-        )
+        val startPoint = Point(bounds.centerX.toInt() - RecipeWidth.ofRecipeSize() / 2,
+                bounds.centerY.toInt() - RecipeHeight.ofRecipeSize() / 2)
+        return DisplayFactory(
+                startPoint = startPoint,
+                display = display, bounds = bounds,
+                // We use swappable widgets and set their data later because we need them to change when the player does stuff.
+                inputSlots = SwappableChildrenWidget(),
+                recipeSize = recipeSize,
+                currentLayerWidget = SwappableChildWidget()
+        ).getWidgets()
 
     }
 
-    private fun currentInputSlots(startPoint: Point,display: ReiSpatialCraftingDisplay)
-            : List<Widget> {
-        return inputSlots(startPoint, display.recipe.previewComponents, layer = display.currentLayer)
-    }
+    private class DisplayFactory(
+            val display: ReiSpatialCraftingDisplay,
+            val startPoint: Point,
+            val bounds: Rectangle,
+            val inputSlots: SwappableChildrenWidget,
+            val currentLayerWidget: SwappableChildWidget,
+            val recipeSize: Int
+    ) {
+        private fun <V> Map<Int, V>.ofRecipeSize() = getValue(recipeSize)
 
-    private fun upButton(startPoint: Point, display: ReiSpatialCraftingDisplay, inputSlots: InputSlotsWidget): Widget {
-        return ReiButton(x = startPoint.x - 10, y = startPoint.y + ButtonsYOffset.getValue(display.recipe.minimumCrafterSize), height = 10, width = 13,
-                textureOn = Buttons.UpOn, textureOff = Buttons.UpOff, isEnabled = { display.currentLayer < display.recipe.minimumCrafterSize - 1 }) {
-            display.currentLayer++
-            // Refresh input to show new layer
-            inputSlots.slots = currentInputSlots(startPoint,display)
-        }
-    }
+        fun getWidgets(): List<Widget> {
+            refreshLayerWidgets()
 
-    private fun downButton(startPoint: Point, display: ReiSpatialCraftingDisplay, inputSlots: InputSlotsWidget): Widget {
-        return ReiButton(x = startPoint.x - 10, y = startPoint.y + 15 + ButtonsYOffset.getValue(display.recipe.minimumCrafterSize),
-                height = 10, width = 13,
-                textureOn = Buttons.DownOn, textureOff = Buttons.DownOff, isEnabled = { display.currentLayer > 0 }) {
-            display.currentLayer--
-            // Refresh input to show new layer
-            inputSlots.slots = currentInputSlots(startPoint,display)
-        }
-    }
-
-    private fun inputSlots(startPoint: Point, input: List<ShapedRecipeComponent>, layer: Int): List<Widget> {
-        //TODO: remove this max when going bellow 0 is impossible
-        return input.filter { it.position.y == layer }.map {
-            SlotWidget(
-                    //TODO: make +10 a constant
-                    x = startPoint.x + it.position.x * 18 + 1 + WidthIncrease,
-                    y = startPoint.y + it.position.z * 18 + 1,
-                    ingredient = it.ingredient
+            return listOf(
+                    background(),
+                    inputSlots,
+                    outputSlot(display.recipe.output),
+                    upButton(),
+                    downButton(),
+                    currentLayerWidget,
+                    craftTimeText(),
+                    plusButton()
+//                    availableCrafters()
             )
         }
-    }
 
-    private fun outputSlot(startPoint: Point, output: ItemStack, minimumSize: Int): Widget {
-        return SlotWidget(x = startPoint.x + OutputSlotXOffset.getValue(minimumSize),
-                y = startPoint.y + OutputSlotYOffset.getValue(minimumSize),
-                itemStack = output, drawBackground = false) {
-            when {
-                it.count == 1 -> ""
-                it.count < 1 -> Formatting.RED.toString() + it.count
-                else -> it.count.toString() + ""
+        private fun plusButton() : Widget{
+            val xOffset = 19
+            val yOffset = if(recipeSize == 2) 19 else 4
+            return PlusButton(
+                    x = bounds.x + RecipeWidth.ofRecipeSize() + xOffset,
+                    y = bounds.y + RecipeHeight.ofRecipeSize() + yOffset,
+                    recipe = display.recipe
+            )
+        }
+
+
+        private fun currentLayerText(): Widget {
+            val text = LiteralText((display.currentLayer + 1).toString())
+                    .setStyle(Style().setColor(Formatting.AQUA))
+
+            return LabelWidget(
+                    startPoint.x + UpDownButtonsXOffset + 6,
+                    startPoint.y + UpDownButtonsYOffset.ofRecipeSize() - 11,
+                    text.asFormattedString()
+            )
+        }
+
+        private fun craftTimeText(): Widget {
+            val seconds = display.recipe.craftTime.inSeconds
+            val time = if (seconds.isWholeNumber()) seconds.roundToInt() else seconds
+            val text = LiteralText(time.toString() + "s")
+                    .setStyle(Style().setColor(Formatting.DARK_GRAY))
+
+
+
+            return object : LabelWidget(
+                    startPoint.x + CraftTimeXOffset.ofRecipeSize(),
+                    startPoint.y + OutputSlotYOffset.ofRecipeSize() + 20,
+                    text.asFormattedString()
+            ) {
+                override fun render(mouseX: Int, mouseY: Int, delta: Float) {
+                    drawCenteredStringWithoutShadow(font, this.text, x, y, -1)
+                }
+            }
+        }
+
+        private fun refreshLayerWidgets() {
+            // Refresh inputs slots
+            inputSlots.children = inputSlots()
+            currentLayerWidget.child = currentLayerText()
+        }
+
+
+        private fun upButton(): Widget {
+            return ReiButton(x = startPoint.x + UpDownButtonsXOffset,
+                    y = startPoint.y + UpDownButtonsYOffset.ofRecipeSize(), height = 10, width = 13,
+                    textureOn = Buttons.UpOn, textureOff = Buttons.UpOff,
+                    isEnabled = { display.currentLayer < recipeSize - 1 }) {
+                display.currentLayer++
+
+                refreshLayerWidgets()
+            }
+        }
+
+        private fun downButton(): Widget {
+            return ReiButton(x = startPoint.x + UpDownButtonsXOffset,
+                    y = startPoint.y + 15 + UpDownButtonsYOffset.ofRecipeSize(),
+                    height = 10, width = 13,
+                    textureOn = Buttons.DownOn, textureOff = Buttons.DownOff, isEnabled = { display.currentLayer > 0 }) {
+                display.currentLayer--
+
+                refreshLayerWidgets()
+            }
+        }
+
+        private fun inputSlots(): List<Widget> {
+            return display.recipe.previewComponents.filter { it.position.y == display.currentLayer }.map {
+                SlotWidget(
+                        x = startPoint.x + it.position.x * 18 + 1 + WidthIncrease,
+                        y = startPoint.y + it.position.z * 18 + 1,
+                        ingredient = it.ingredient
+                )
+            }
+        }
+
+        private fun outputSlot(output: ItemStack): Widget {
+            return SlotWidget(x = startPoint.x + OutputSlotXOffset.ofRecipeSize(),
+                    y = startPoint.y + OutputSlotYOffset.ofRecipeSize(),
+                    itemStack = output, drawBackground = false) {
+                when {
+                    it.count == 1 -> ""
+                    it.count < 1 -> Formatting.RED.toString() + it.count
+                    else -> it.count.toString() + ""
+                }
+            }
+        }
+
+
+        private fun background(): Widget {
+            return object : RecipeBaseWidget(bounds) {
+                override fun render(mouseX: Int, mouseY: Int, delta: Float) {
+                    super.render(mouseX, mouseY, delta)
+                    GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f)
+                    GuiLighting.disable()
+                    MinecraftClient.getInstance().textureManager.bindTexture(Background.ofRecipeSize())
+                    blit(startPoint.x + WidthIncrease, startPoint.y, 0, 0, RecipeWidth.ofRecipeSize(),
+                            RecipeHeight.ofRecipeSize())
+                }
             }
         }
     }
 
-
-    private fun background(bounds: Rectangle, startPoint: Point, minimumSize: Int): Widget {
-        return object : RecipeBaseWidget(bounds) {
-            override fun render(mouseX: Int, mouseY: Int, delta: Float) {
-                super.render(mouseX, mouseY, delta)
-                GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f)
-                GuiLighting.disable()
-                MinecraftClient.getInstance().textureManager.bindTexture(Backgrounds[minimumSize])
-                blit(startPoint.x + WidthIncrease, startPoint.y, 0, 0, SizesX.getValue(minimumSize), SizesY.getValue(minimumSize))
-            }
-        }
-    }
 
     override fun getDisplaySettings(): DisplaySettings<ReiSpatialCraftingDisplay> {
         return object : DisplaySettings<ReiSpatialCraftingDisplay> {
             //TODO: change this once we can control it based on recipe size
             override fun getDisplayHeight(category: RecipeCategory<out RecipeDisplay<*>>): Int {
-                return 100
+                if (recipeSize == 2) return RecipeHeight.ofRecipeSize() + 35
+                return RecipeHeight.ofRecipeSize() + 20
             }
 
             override fun getMaximumRecipePerPage(category: RecipeCategory<out RecipeDisplay<*>>): Int {
@@ -194,9 +281,8 @@ class ReiSpatialCraftingCategory : RecipeCategory<ReiSpatialCraftingDisplay> {
             }
 
             override fun getDisplayWidth(category: RecipeCategory<out RecipeDisplay<*>>, display: ReiSpatialCraftingDisplay): Int {
-                category as ReiSpatialCraftingCategory
-                val sizesWidth = SizesX.mapValues { it.value + 35 }
-                return sizesWidth.getValue(display.recipe.minimumCrafterSize)
+//                if(recipeSize == 2) return RecipeWidth.ofRecipeSize() + 70
+                return RecipeWidth.ofRecipeSize() + 35
             }
 
         }

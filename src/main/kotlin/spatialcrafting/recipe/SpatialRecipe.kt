@@ -30,6 +30,8 @@ abstract class SpatialRecipe(
          val craftTime: Duration
 ) : Recipe<CrafterMultiblockInventoryWrapper> {
 
+    fun acceptsCrafterOfSize(size: Int) = minimumCrafterSize <= size
+
     override fun craft(var1: CrafterMultiblockInventoryWrapper): ItemStack = ItemStack.EMPTY
 
     override fun getId() = id

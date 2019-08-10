@@ -287,7 +287,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
         }
 
-        return CrafterMultiblock(blocks, size, craftEndTime = null)
+        return CrafterMultiblock(blocks, size)
     }
 
 

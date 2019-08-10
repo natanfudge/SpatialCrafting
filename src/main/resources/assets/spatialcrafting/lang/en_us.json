@@ -8,6 +8,9 @@
   "block.spatialcrafting.x5crafter_piece": "Gem-infused Crafter",
   "block.spatialcrafting.hologram": "Hologram",
   "itemGroup.spatialcrafting.spatial_crafting": "Spatial Crafting",
-  "category.spatialcrafting.rei": "Spatial Crafting"
+  "category.rei.spatialcrafting.x2": "Ragged Spatial Crafting",
+  "category.rei.spatialcrafting.x3": "Durable Spatial Crafting",
+  "category.rei.spatialcrafting.x4": "Ironborn Spatial Crafting",
+  "category.rei.spatialcrafting.x5": "Dragonheart Spatial Crafting"
 
 }

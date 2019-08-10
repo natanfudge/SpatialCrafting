@@ -1,5 +1,7 @@
 package spatialcrafting.crafter
 
+import drawer.getFrom
+import drawer.getNullableFrom
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
@@ -97,7 +99,8 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
         if (isMaster) {
-            tag.put(Keys.multiblock, multiblockIn?.toTag())
+            multiblockIn?.putIn(tag)
+//            tag.put(Keys.multiblock, multiblockIn?.toTag())
         }
 
         if (masterEntityPos != null) tag.putBlockPos(Companion.Keys.masterEntity, masterEntityPos)
@@ -113,7 +116,8 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
         // Minecraft gives BlockPos(0,0,0) when there is no pos with that key.
         if (masterEntityPos == BlockPos(0, 0, 0)) masterEntityPos = null
         if (isMaster) {
-            multiblockIn = tag.addCrafterMultiblock(key = Companion.Keys.multiblock)
+            multiblockIn = CrafterMultiblock.serializer().getNullableFrom(tag)
+//            multiblockIn = tag.addCrafterMultiblock(key = Companion.Keys.multiblock)
         }
 
 
@@ -121,4 +125,7 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
     }
 
 }
+
+
+
 

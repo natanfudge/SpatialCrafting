@@ -1,23 +1,28 @@
+@file:UseSerializers(Serializers.BlockPos::class, Serializers.Identifier::class)
+
 package spatialcrafting.crafter
 
+import drawer.Serializers
+import drawer.put
+import drawer.write
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.util.Identifier
+import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.client.Duration
-import spatialcrafting.client.getDuration
-import spatialcrafting.client.putDuration
+import spatialcrafting.client.ticks
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.recipe.ComponentPosition
-import spatialcrafting.util.Serializable
-import spatialcrafting.util.kotlinwrappers.getBlockPos
-import spatialcrafting.util.kotlinwrappers.putBlockPos
-import spatialcrafting.util.kotlinwrappers.transformCompoundTag
 
 
 private const val sizeKey = "size"
 private const val locationKey = "location"
 private const val craftEndTimeKey = "craft_end_time"
 
+@Serializable
 class CrafterMultiblock(
         /**
          * This is the northern-eastern most block's location (on the server, at least).
@@ -27,36 +32,35 @@ class CrafterMultiblock(
         /**
          * For an ongoing craft
          */
-        craftEndTime: Duration?
-) : Serializable<CrafterMultiblock> {
-    var craftEndTime: Duration? = null
-        private set
+        var _craftEndTime: Long? = null,
+        /**
+         * For recipe help
+         */
+        var recipeHelpRecipeId: Identifier? = null
+) {
+    fun putIn(tag: CompoundTag) = serializer().put(this, tag)
+    fun writeTo(buf: PacketByteBuf) = serializer().write(this, buf)
 
-    init {
-        this.craftEndTime = craftEndTime
-    }
+    val craftEndTime: Duration?
+        get() = _craftEndTime?.ticks
+
 
     fun setNotCrafting(world: World) {
-        craftEndTime = null
+        _craftEndTime = null
         world.getCrafterEntity(crafterLocations[0]).markDirty()
     }
 
     fun setIsCrafting(world: World, craftEndTime: Duration) {
-        this.craftEndTime = craftEndTime
+        this._craftEndTime = craftEndTime.inTicks
         world.getCrafterEntity(crafterLocations[0]).markDirty()
     }
 
     val isCrafting: Boolean
-        get() = craftEndTime != null
+        get() = _craftEndTime != null
 
-    override fun toTag(): CompoundTag = CompoundTag().apply {
-        crafterLocations.forEachIndexed { i, blockPos ->
-            putBlockPos(locationKey + i, blockPos)
-        }
+    val recipeHelpActive: Boolean
+        get() = recipeHelpRecipeId != null
 
-        putInt(sizeKey, multiblockSize)
-        if (craftEndTime != null) putDuration(craftEndTimeKey, craftEndTime!!)
-    }
 
     fun getCrafterEntities(world: World): List<CrafterPieceEntity> = crafterLocations.map {
         world.getCrafterEntity(it)
@@ -94,24 +98,4 @@ class CrafterMultiblock(
 
 }
 
-fun totalPieceAmount(multiblockSize: Int) = multiblockSize * multiblockSize
 
-fun CompoundTag.toCrafterMultiblock(): CrafterMultiblock? {
-    val size = getInt(sizeKey)
-    val craftEndTime = getDuration(craftEndTimeKey)
-
-    val locations = (0 until totalPieceAmount(size)).mapNotNull { i ->
-        getBlockPos(locationKey + i)
-    }
-
-    // If it's empty it means everything is null
-    return if (locations.isEmpty()) return null
-    else CrafterMultiblock(locations, size, craftEndTime)
-}
-
-/**
- * Gets the tag with the key and then deserializes it
- */
-fun CompoundTag.addCrafterMultiblock(key: String): CrafterMultiblock? {
-    return this.transformCompoundTag(key) { this.toCrafterMultiblock() }
-}
