@@ -7,10 +7,13 @@ import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.entity.EntityContext
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.SidedInventory
+import net.minecraft.state.StateFactory
+import net.minecraft.state.property.BooleanProperty
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.shape.VoxelShape
+import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
 import net.minecraft.world.IWorld
 import net.minecraft.world.World
@@ -26,7 +29,7 @@ private const val Indestructible = 3600000.0f
 
 private val HologramSettings = Builders.blockSettings(
         collidable = false,
-        materialColor = MaterialColor.AIR,
+        materialColor = MaterialColor.WHITE,
         blocksLight = false,
         blocksMovement = false,
         burnable = false,
@@ -38,8 +41,9 @@ private val HologramSettings = Builders.blockSettings(
         replaceable = false
 )
 
-
+val IsHidden : BooleanProperty= BooleanProperty.of("is_hidden")
 object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributeProvider, InventoryProvider {
+
     override fun getInventory(blockState: BlockState?, world: IWorld, pos: BlockPos): SidedInventory {
         return HologramInventoryWrapper(world.getHologramEntity(pos).inventory)
     }
@@ -62,23 +66,28 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
 
     override fun createBlockEntity(var1: BlockView?) = HologramBlockEntity()
 
+    override fun appendProperties(stateFactory: StateFactory.Builder<Block, BlockState>) {
+        stateFactory.add(IsHidden)
+    }
+
+    init {
+        defaultState = stateFactory.defaultState.with(IsHidden, false)
+    }
+
 
     override fun getRenderLayer(): BlockRenderLayer {
         return BlockRenderLayer.TRANSLUCENT
     }
 
 
-    override fun getOutlineShape(blockState_1: BlockState?, blockView_1: BlockView?, blockPos_1: BlockPos?, entityContext_1: EntityContext?): VoxelShape {
-        return super.getOutlineShape(blockState_1, blockView_1, blockPos_1, entityContext_1)
-        //TODO change based on state
-//        return VoxelShapes.cuboid(0.0,0.0,0.0,0.0,0.0,0.0)
+    override fun getOutlineShape(blockState: BlockState, blockView_1: BlockView?, blockPos_1: BlockPos?, entityContext_1: EntityContext?): VoxelShape {
+        return if (blockState.get(IsHidden)) VoxelShapes.empty()
+        else super.getOutlineShape(blockState, blockView_1, blockPos_1, entityContext_1)
     }
 
 
-    override fun getRenderType(blockState_1: BlockState?): BlockRenderType {
-        return super.getRenderType(blockState_1)
-        //TODO: change based on state
-//        return BlockRenderType.INVISIBLE
+    override fun getRenderType(blockState: BlockState): BlockRenderType {
+        return if (blockState.get(IsHidden)) BlockRenderType.INVISIBLE else super.getRenderType(blockState)
     }
 
     override fun activate(blockState: BlockState, world: World, pos: BlockPos, player: PlayerEntity?, hand: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
@@ -109,10 +118,10 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
         val extractedItem = hologramEntity.extractItem()
         // Cancel crafting if needed
         if (!extractedItem.isEmpty) {
-            val multiblock = hologramEntity.getMultiblock() ?:
-                    if (world.isClient) return //specifically when no craft has occurred. The client won't have information in that case
+            val multiblock = hologramEntity.getMultiblock()
+                    ?: if (world.isClient) return //specifically when no craft has occurred. The client won't have information in that case
                     else error("A hologram should always have a multiblock," +
-                                " and yet when looking at a crafter piece below he did not have a multiblock instance.")
+                            " and yet when looking at a crafter piece below he did not have a multiblock instance.")
 
 
             multiblock.setNotCrafting(world)

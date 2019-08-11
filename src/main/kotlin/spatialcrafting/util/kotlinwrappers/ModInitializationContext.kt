@@ -1,8 +1,11 @@
 package spatialcrafting.util.kotlinwrappers
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import net.fabricmc.fabric.api.client.render.BlockEntityRendererRegistry
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.fabricmc.fabric.api.network.PacketContext
+import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.render.block.entity.BlockEntityRenderer
@@ -21,20 +24,31 @@ object ModInit {
             ModInitializationContext(modId, group).init()
 }
 
-class ModInitializationContext(private val modId: String, private val group: ItemGroup?) {
-    fun <T> registerTo(registry: Registry<T>, dsl: NamespacedRegistryDsl<T>.() -> Unit) =
+class ModInitializationContext(val modId: String,  val group: ItemGroup?) {
+    inline fun <T> registerTo(registry: Registry<T>, dsl: NamespacedRegistryDsl<T>.() -> Unit) =
             dsl(NamespacedRegistryDsl(modId, registry))
 
-    fun registerBlocksWithItemBlocks(dsl: BlockWithItemRegistryDsl.() -> Unit) =
+    inline fun registerBlocksWithItemBlocks(dsl: BlockWithItemRegistryDsl.() -> Unit) =
             dsl(BlockWithItemRegistryDsl(modId, group))
 
     inline fun <reified T : BlockEntity> register(renderer: BlockEntityRenderer<T>) = BlockEntityRendererRegistry.INSTANCE.register(T::class.java, renderer)
 
-    fun registerServerToClientPacket(packetId: String, packetConsumer: (PacketContext, PacketByteBuf) -> Unit) =
+     fun registerServerToClientPacket(packetId: String, packetConsumer: (PacketContext, PacketByteBuf) -> Unit) =
             ClientSidePacketRegistry.INSTANCE.register(Identifier(modId, packetId), packetConsumer)
+
+    fun registerClientToServerPacket(packetId: String, packetConsumer: (PacketContext, PacketByteBuf) -> Unit) =
+            ServerSidePacketRegistry.INSTANCE.register(Identifier(modId, packetId), packetConsumer)
 
 
 }
+
+//@Serializable
+//data class X(val y :Int)
+//
+//fun X.Companion.shit(){}
+//val y = X.shit()
+
+//val x = Json.stringify()
 
 
 

@@ -11,6 +11,14 @@
   "category.rei.spatialcrafting.x2": "Ragged Spatial Crafting",
   "category.rei.spatialcrafting.x3": "Durable Spatial Crafting",
   "category.rei.spatialcrafting.x4": "Ironborn Spatial Crafting",
-  "category.rei.spatialcrafting.x5": "Dragonheart Spatial Crafting"
+  "category.rei.spatialcrafting.x5": "Dragonheart Spatial Crafting",
+
+  "tooltip.rei.plus_button.no_crafter_nearby" : "No crafter multiblock nearby",
+  "tooltip.rei.plus_button.crafter_too_small" : "The nearest crafter is too small for this recipe",
+  "tooltip.rei.plus_button.all_components_available" : "Transfer items to crafter",
+  "tooltip.rei.plus_button.start_recipe_help" : "Start Recipe Help",
+  "tooltip.rei.plus_button.stop_recipe_help" : "Stop Recipe Help"
+
+
 
 }

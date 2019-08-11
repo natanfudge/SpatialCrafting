@@ -6,8 +6,13 @@ import com.mojang.blaze3d.platform.GlStateManager.SourceFactor
 import me.shedaniel.rei.client.ScreenHelper
 import me.shedaniel.rei.gui.widget.ButtonWidget
 import me.shedaniel.rei.gui.widget.QueuedTooltip
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.resource.language.I18n
 import net.minecraft.client.world.ClientWorld
 import net.minecraft.item.ItemStack
+import net.minecraft.text.Style
+import net.minecraft.text.TranslatableText
+import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
 import spatialcrafting.crafter.CrafterMultiblock
@@ -17,6 +22,7 @@ import spatialcrafting.util.distanceFrom
 import spatialcrafting.util.itemsInInventoryAndOffhand
 import spatialcrafting.util.matches
 import java.awt.Point
+import java.util.*
 
 const val width = 10
 const val height = 10
@@ -43,34 +49,64 @@ private fun SpatialRecipe.asShapeless(): ShapelessSpatialRecipe {
 data class ComponentSatisfaction(val pos: ComponentPosition, val satisfiedBy: ItemStack?)
 data class RecipeSatisfaction(val componentSatisfaction: List<ComponentSatisfaction>, val fullySatisfied: Boolean)
 
+//TODO: sync recipe help to server, because it's causing issues (set blockstates ONLY on server, which is everything. just do it on the server only.)
+//TODO: test that recipe help is working
+//TODO: show ghost items
+//TODO: auto-transfer
+
 fun startCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
-    crafterMultiblock.recipeHelpRecipeId = recipeId
+    crafterMultiblock.startRecipeHelp(recipeId,MinecraftClient.getInstance().world)
 }
 
 fun stopCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock) {
     crafterMultiblock.recipeHelpRecipeId = null
+    crafterMultiblock.showAllHolograms(MinecraftClient.getInstance().world)
 }
 
-class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe) : ButtonWidget(x, y, width, height, "+") {
+class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
+                 private var setLayer: (Int, () -> List<ComponentSatisfaction>?) -> Unit, val display: ReiSpatialCraftingDisplay)
+    : ButtonWidget(x, y, width, height, "+") {
     enum class State {
-        INACTIVE,
+        NO_NEARBY_CRAFTER,
+        NEARBY_CRAFTER_TOO_SMALL,
         READY_FOR_RECIPE_HELP,
         ALL_COMPONENTS_AVAILABLE,
         RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS
     }
 
-   private var state: State = State.INACTIVE
+    private var state: State = State.NO_NEARBY_CRAFTER
         set(value) {
             field = value
-            this.enabled = value != State.INACTIVE
+            this.enabled = value != State.NO_NEARBY_CRAFTER && value != State.NEARBY_CRAFTER_TOO_SMALL
         }
+
+    private fun String.translated() = Optional.of(I18n.translate(this))
+
+
+    /**
+     * Null if there is no need to display a red highlight
+     */
+    var recipeSatisfactionForHighlight: List<ComponentSatisfaction>? = null
+
+    override fun getTooltips(): Optional<String> {
+        val stringKey = when (state) {
+            State.NO_NEARBY_CRAFTER -> "tooltip.rei.plus_button.no_crafter_nearby"
+            State.NEARBY_CRAFTER_TOO_SMALL -> "tooltip.rei.plus_button.crafter_too_small"
+            State.READY_FOR_RECIPE_HELP -> "tooltip.rei.plus_button.start_recipe_help"
+            State.ALL_COMPONENTS_AVAILABLE -> "tooltip.rei.plus_button.all_components_available"
+            State.RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS -> "tooltip.rei.plus_button.stop_recipe_help"
+        }
+        val text = TranslatableText(stringKey)
+        if (!this.enabled) text.style = Style().setColor(Formatting.RED)
+        return Optional.of(text.asFormattedString())
+    }
 
     override fun onPressed() {
         val pos = minecraft.player.pos
         val world = minecraft.world
         val nearestCrafter = world.blockEntities.filterIsInstance<CrafterPieceEntity>()
-                    .minBy { it.pos.distanceFrom(pos) }?.multiblockIn ?: return
-        when(state){
+                .minBy { it.pos.distanceFrom(pos) }?.multiblockIn ?: return
+        when (state) {
             State.READY_FOR_RECIPE_HELP -> {
                 startCrafterRecipeHelp(nearestCrafter, recipe.id)
                 minecraft.player.closeScreen()
@@ -87,9 +123,12 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe) : ButtonWidget(x, y,
         }
 
     }
+
+
     //TODO: show missing items on hover
 
     override fun render(mouseX: Int, mouseY: Int, delta: Float) {
+        var shouldHighlightMissingComponents = false
         val pos = minecraft.player.pos
         val world = minecraft.world
         val nearestCrafter = world.blockEntities.filterIsInstance<CrafterPieceEntity>()
@@ -97,43 +136,59 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe) : ButtonWidget(x, y,
         if (nearestCrafter != null && nearestCrafter.crafterLocations[0].distanceFrom(pos) <= MaxDistanceFromNearestCrafter) {
             if (nearestCrafter.multiblockSize >= recipe.minimumCrafterSize) {
 
+                val (recipeSatisfication, fullySatisified) = getRecipeSatisfaction(nearestCrafter, world)
+
                 state = when {
-                    recipeIsCraftableWithCurrentInventory(nearestCrafter, world) -> State.ALL_COMPONENTS_AVAILABLE
+                    fullySatisified -> State.ALL_COMPONENTS_AVAILABLE
                     nearestCrafter.recipeHelpActive -> State.RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS
                     else -> State.READY_FOR_RECIPE_HELP
+                }
+
+                if (state == State.RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS && this.isHovered(mouseX, mouseY)) {
+                    highlightMissingComponents(recipeSatisfication)
+                    shouldHighlightMissingComponents = true
                 }
 
 
             }
             else {
-                state = State.INACTIVE
-
-                //TODO emit "crafter is too small tooltip"
+                state = State.NEARBY_CRAFTER_TOO_SMALL
             }
 
         }
         else {
-            state = State.INACTIVE
-            //TODO: emit "no crafter nearby tooltip"
+            state = State.NO_NEARBY_CRAFTER
         }
 
         when (state) {
-            State.ALL_COMPONENTS_AVAILABLE -> {
-                emitGreenColor()
-                //TODO: emit "click to craft" tooltip
+            State.ALL_COMPONENTS_AVAILABLE -> emitGreenColor()
+            State.RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS -> emitRedColor()
+            else -> {
             }
-            State.RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS -> {
-                emitRedColor()
-                //TODO "stop recipe help" tooltip + show what things are missing
-            }
-            State.READY_FOR_RECIPE_HELP -> {
-                //TODO: "Start recipe help" tooltip
-            }
-            State.INACTIVE ->{}
         }
+
+        if (!shouldHighlightMissingComponents) this.recipeSatisfactionForHighlight = null
 
         renderLowLevel(mouseX, mouseY, delta)
     }
+
+    private fun highlightMissingComponents(satisfaction: List<ComponentSatisfaction>) {
+        this.recipeSatisfactionForHighlight = satisfaction
+        setLayer(findFirstUnsatisfiedLayer(satisfaction)) { this.recipeSatisfactionForHighlight }
+    }
+
+    private fun findFirstUnsatisfiedLayer(satisfaction: List<ComponentSatisfaction>): Int {
+        if (!layerIsSatisfied(display.currentLayer, satisfaction)) return display.currentLayer
+        for (i in 0 until display.recipe.minimumCrafterSize) {
+            if (!layerIsSatisfied(i, satisfaction)) return i
+        }
+        error("If this method is called it's impossible that all layers are unsatisfied.")
+    }
+
+    private fun layerIsSatisfied(layer: Int, satisfaction: List<ComponentSatisfaction>): Boolean {
+        return satisfaction.filter { it.pos.y == layer }.all { it.satisfiedBy != null }
+    }
+
 
     private fun renderLowLevel(mouseX: Int, mouseY: Int, delta: Float) {
         val x = bounds.x
@@ -187,9 +242,9 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe) : ButtonWidget(x, y,
         if (tooltips.isPresent) if (!focused && isHighlighted(mouseX, mouseY)) ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(*tooltips.get().split("\n").toTypedArray())) else if (focused) ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(Point(x + width / 2, y + height / 2), *tooltips.get().split("\n").toTypedArray()))
     }
 
-    private fun recipeIsCraftableWithCurrentInventory(nearestCrafter: CrafterMultiblock, world: ClientWorld): Boolean {
-        return getRecipeSatisfaction(nearestCrafter, world).fullySatisfied
-    }
+//    private fun recipeIsCraftableWithCurrentInventory(nearestCrafter: CrafterMultiblock, world: ClientWorld): Boolean {
+//        return getRecipeSatisfaction(nearestCrafter, world).fullySatisfied
+//    }
 
     private fun getRecipeSatisfaction(nearestCrafter: CrafterMultiblock, world: ClientWorld): RecipeSatisfaction {
         val crafterInventory = nearestCrafter.getInventory(world)

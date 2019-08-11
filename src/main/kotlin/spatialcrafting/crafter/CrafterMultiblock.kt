@@ -1,4 +1,4 @@
-@file:UseSerializers(Serializers.BlockPos::class, Serializers.Identifier::class)
+@file:UseSerializers(Serializers.ForBlockPos::class, Serializers.ForIdentifier::class)
 
 package spatialcrafting.crafter
 
@@ -7,6 +7,7 @@ import drawer.put
 import drawer.write
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
+import net.minecraft.client.MinecraftClient
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
@@ -14,8 +15,12 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.client.Duration
 import spatialcrafting.client.ticks
+import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.hologram.HologramBlockEntity
+import spatialcrafting.hologram.IsHidden
 import spatialcrafting.recipe.ComponentPosition
+import spatialcrafting.recipe.SpatialRecipe
+import spatialcrafting.util.matches
 
 
 private const val sizeKey = "size"
@@ -32,11 +37,12 @@ class CrafterMultiblock(
         /**
          * For an ongoing craft
          */
-        var _craftEndTime: Long? = null,
+        private var _craftEndTime: Long? = null,
         /**
-         * For recipe help
+         * For recipe help, client only
          */
-        var recipeHelpRecipeId: Identifier? = null
+        var recipeHelpRecipeId: Identifier? = null,
+        var recipeHelpCurrentLayer: Int = 0
 ) {
     fun putIn(tag: CompoundTag) = serializer().put(this, tag)
     fun writeTo(buf: PacketByteBuf) = serializer().write(this, buf)
@@ -95,7 +101,90 @@ class CrafterMultiblock(
         return CrafterMultiblockInventory(components)
     }
 
+    private fun setHologramVisibility(world: World, pos: BlockPos, hidden: Boolean) {
+        world.setBlockState(pos, HologramBlock.defaultState.with(IsHidden, hidden))
+    }
+
+
+    fun startRecipeHelp(recipeId: Identifier, world: World) {
+        recipeHelpRecipeId = recipeId
+        recipeHelpCurrentLayer = 0
+        bumpRecipeHelpCurrentLayerIfNeeded(world)
+       hideHologramsForRecipeHelp(world)
+    }
+
+    fun bumpRecipeHelpCurrentLayerIfNeeded(world: World) {
+        if (currentRecipeLayerIsComplete(world)) {
+            if (recipeHelpCurrentLayer < multiblockSize - 1) {
+                recipeHelpCurrentLayer++
+            }
+            else {
+                showHologramsWithItemOnly(world)
+            }
+
+        }
+    }
+
+    fun showHologramsWithItemOnly(world: World) {
+        for (hologram in getHologramEntities(world)) {
+            setHologramVisibility(world, hologram.pos, hidden = hologram.getItem().isEmpty)
+        }
+    }
+
+    fun showAllHolograms(world :World){
+         for (pos in hologramLocations) {
+            setHologramVisibility(world, pos, hidden = true)
+        }
+    }
+
+    fun hideHologramsForRecipeHelp(world: World) {
+        val recipeInputs = helpRecipeComponents(world)
+        for (hologram in hologramsRelativeLocations().filter { it.relativePos.y != recipeHelpCurrentLayer }) {
+            setHologramVisibility(world, hologram.absolutePos, hidden = true)
+        }
+
+
+        for (hologram in hologramsRelativeLocations().filter { it.relativePos.y == recipeHelpCurrentLayer }) {
+            val ingredient = recipeInputs.find { it.position == hologram.relativePos }
+            if (ingredient != null) {
+                //TODO: set ghost item
+                setHologramVisibility(world, hologram.absolutePos, hidden = false)
+            }
+            else {
+                setHologramVisibility(world, hologram.absolutePos, hidden = true)
+            }
+        }
+
+    }
+
+    private fun helpRecipeComponents(world: World) =
+            (world.recipeManager.get(recipeHelpRecipeId).orElse(null)!! as SpatialRecipe).previewComponents
+
+    fun currentRecipeLayerIsComplete(world: World): Boolean {
+        val holograms = hologramsRelativeLocations()
+        return helpRecipeComponents(world).filter { it.position.y == recipeHelpCurrentLayer }
+                .all { component ->
+                    component.ingredient.matches(
+                            world.getBlockEntity(holograms.first { it.relativePos == component.position }.absolutePos)
+                                    .assertIs<HologramBlockEntity>()
+                                    .getItem()
+                    )
+                }
+    }
+
+    private fun hologramsRelativeLocations(): List<HologramPos> {
+        // (0,0,0) of holograms
+        val locations = hologramLocations
+        val originPosition = locations.minBy { it.x + it.y + it.z }!!
+        return locations.map {
+            HologramPos(it,
+                    ComponentPosition(it.x - originPosition.x, it.y - originPosition.y, it.z - originPosition.z)
+            )
+        }
+    }
+
 
 }
 
 
+data class HologramPos(val absolutePos: BlockPos, val relativePos: ComponentPosition)

@@ -37,10 +37,10 @@ val CraftersPieces = mapOf(
         5 to CrafterPiece(5)
 )
 
-inline fun <reified T> BlockEntity?.assertIs(pos: BlockPos): T {
+inline fun <reified T> BlockEntity?.assertIs(pos: BlockPos? = null): T {
     val result = this as? T
     return (result
-            ?: error("BlockEntity at location $pos is not a ${T::class.qualifiedName} as expected.\nRather, it is '${this
+            ?: error("BlockEntity at location ${pos?:this?.pos} is not a ${T::class.qualifiedName} as expected.\nRather, it is '${this
                     ?: "air"}'."))
 
 }
@@ -60,6 +60,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         }
 )), BlockEntityProvider {
 
+    //TODO: attempt form on right click
 
     companion object {
         private fun thereIsSpaceForHolograms(world: World, multiblock: CrafterMultiblock): Boolean =
@@ -79,19 +80,14 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
         fun createMultiblock(world: World, masterPos: BlockPos, multiblock: CrafterMultiblock) {
             assert(world.isServer)
-            if (thereIsSpaceForHolograms(world, multiblock)) {
-                logDebug { "Building multiblock. [${multiblock.logString()}]" }
-                CrafterPieceEntity.assignMultiblockState(world, masterPos, multiblock)
 
-                for (hologramPos in multiblock.hologramLocations) {
-                    world.setBlock(HologramBlock, pos = hologramPos)
-                }
+            logDebug { "Building multiblock. [${multiblock.logString()}]" }
+            CrafterPieceEntity.assignMultiblockState(world, masterPos, multiblock)
 
-
+            for (hologramPos in multiblock.hologramLocations) {
+                world.setBlock(HologramBlock, pos = hologramPos)
             }
-            else {
-                //TODO: show an indicator that there is no space
-            }
+
 
         }
 
@@ -183,23 +179,11 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
     //TODO: document sounds
 
-    override fun activate(blockState_1: BlockState, world: World, pos: BlockPos, placedBy: PlayerEntity?, hand: Hand, blockHitResult_1: BlockHitResult?): Boolean {
+    override fun activate(blockState_1: BlockState, world: World, pos: BlockPos, placedBy: PlayerEntity?,
+                          hand: Hand, blockHitResult_1: BlockHitResult?): Boolean {
 
         // Prevent it being called twice
         if (hand == Hand.OFF_HAND) return false
-
-//        if(world.isServer &&placedBy != null){
-//            placedBy.sendMessage("pos = ${pos.xz}, masterPos = ${world.getCrafterEntity(pos).getMasterEntityPos()?.xz}")
-//        }
-
-
-//        val be = world.getBlockEntity(pos)
-//        if (be != null && be is CrafterPieceEntity) {
-//            ContainerProviderRegistry.INSTANCE.openContainer(id("x2crafter_piece"), placedBy) { buf->
-//                buf.writeBlockPos(pos);
-//            }
-//        }
-
 
         val multiblockIn = world.getCrafterEntity(pos).multiblockIn ?: return false
         if (world.isClient) return true
@@ -222,6 +206,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         multiblockIn.setIsCrafting(world, craftEndTime = endTime)
         playCraftingSounds(world, pos, multiblockIn)
 
+        //TODO: show only holograms with item when starting crafting, then return to the original state when canceled / finished.
         PlayerStream.watching(world.getBlockEntity(pos)).sendPacket(
                 Packets.StartCraftingParticles(multiblockIn, craftDuration)
         )
@@ -233,9 +218,9 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
             "Scheduling craft at ${world.time} scheduled to end at $endTime"
         }
 
-
         return true
     }
+
 
     private fun playCraftingSounds(world: World, pos: BlockPos, multiblockIn: CrafterMultiblock) {
         world.play(Sounds.CraftStart, at = pos, ofCategory = SoundCategory.BLOCKS)
@@ -255,10 +240,18 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
     }
 
     private fun attemptToFormMultiblock(world: World, blockPos: BlockPos) {
+        assert(world.isServer)
         val northernEasternCrafter = getNorthernEasternCrafter(world, blockPos)
         val multiblock = findPossibleMultiblock(world, northernEasternCrafter) ?: return
 
-        createMultiblockFromServer(world, northernEasternCrafter, multiblock)
+        if (thereIsSpaceForHolograms(world, multiblock)) {
+            createMultiblockFromServer(world, northernEasternCrafter, multiblock)
+        }
+        else {
+            //TODO: show an indicator that there is no space
+        }
+
+
     }
 
     private fun createMultiblockFromServer(world: World, northernEasternCrafter: BlockPos, multiblock: CrafterMultiblock) {

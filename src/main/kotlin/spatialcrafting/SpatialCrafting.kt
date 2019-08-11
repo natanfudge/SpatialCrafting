@@ -21,9 +21,7 @@ import spatialcrafting.recipe.ShapedSpatialRecipe
 import spatialcrafting.recipe.ShapelessSpatialRecipe
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.util.kotlinwrappers.ModInit
-import spatialcrafting.util.kotlinwrappers.ModInitializationContext
 import spatialcrafting.util.kotlinwrappers.itemStack
-import kotlinx.serialization.Serializable
 
 
 //TODO: better x5 crafter texture
@@ -97,11 +95,11 @@ fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
 
     register(HologramBlockEntityRenderer)
 
-    register(Packets.AssignMultiblockState)
-    register(Packets.UnassignMultiblockState)
+    registerS2C(Packets.AssignMultiblockState)
+    registerS2C(Packets.UnassignMultiblockState)
 
-    register(Packets.UpdateHologramContent)
-    register(Packets.StartCraftingParticles)
+    registerS2C(Packets.UpdateHologramContent)
+    registerS2C(Packets.StartCraftingParticles)
 //    register(Packets.CancelCraftingParticles)
 
     ContainerProviderRegistry.INSTANCE.registerFactory(GuiId) { syncId, _, player, buf ->
@@ -126,11 +124,3 @@ fun initClient(){
 }
 
 
-fun <T : Packets.Packet<T>> ModInitializationContext.register(manager: Packets.PacketManager<T>) {
-    registerServerToClientPacket(manager.id) { packetContext, packetByteBuf ->
-        manager.use(packetContext, manager.fromBuf(packetByteBuf))
-    }
-}
-
-@Serializable
-data class X(val y : Int)
