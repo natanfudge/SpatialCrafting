@@ -41,7 +41,8 @@ private val HologramSettings = Builders.blockSettings(
         replaceable = false
 )
 
-val IsHidden : BooleanProperty= BooleanProperty.of("is_hidden")
+val IsHidden: BooleanProperty = BooleanProperty.of("is_hidden")
+
 object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributeProvider, InventoryProvider {
 
     override fun getInventory(blockState: BlockState?, world: IWorld, pos: BlockPos): SidedInventory {
@@ -109,38 +110,43 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     }
 
     override fun onBroken(world: IWorld, pos: BlockPos, blockState: BlockState) {
+        // For creative mode
         world.setBlock(HologramBlock, pos)
+        logDebug {
+            "Left Click on hologram in position $pos. Block Entity: ${world.getBlockEntity(pos)}"
+        }
+        super.onBroken(world, pos, blockState)
     }
 
-    override fun onBreak(world: World, pos: BlockPos, blockState: BlockState?, player: PlayerEntity?) {
+    override fun onBreak(world: World, pos: BlockPos, blockState: BlockState?, player: PlayerEntity) {
+//        if(world.isServer) player.sendMessage("Pos = ${pos.xz}. BE: ${world.getBlockEntity(pos)?.let { "Not null" } ?: "NULL!!!"}")
         val hologramEntity = world.getHologramEntity(pos)
         // This is to make it so in creative mod you won't get unnecessary items. (onBlockRemoved is called afterwards)
         val extractedItem = hologramEntity.extractItem()
         // Cancel crafting if needed
         if (!extractedItem.isEmpty) {
             val multiblock = hologramEntity.getMultiblock()
-                    ?: if (world.isClient) return //specifically when no craft has occurred. The client won't have information in that case
-                    else error("A hologram should always have a multiblock," +
-                            " and yet when looking at a crafter piece below he did not have a multiblock instance.")
+            multiblock.stopRecipeHelp(world)
 
 
             multiblock.setNotCrafting(world)
 
 //            PlayerStream.watching(hologramEntity).sendPacket(Packets.CancelCraftingParticles(multiblock.crafterLocations[0]))
         }
+
+        super.onBreak(world, pos, blockState, player)
     }
 
     override fun onBlockRemoved(stateBefore: BlockState, world: World, pos: BlockPos, stateAfter: BlockState, boolean_1: Boolean) {
         // Only happens when the entire multiblock is destroyed or in creative mode.
-        world.getHologramEntity(pos).dropInventory()
+        if(stateBefore.block != stateAfter.block){
+            world.getHologramEntity(pos).dropInventory()
+        }
+
 
         super.onBlockRemoved(stateBefore, world, pos, stateAfter, boolean_1)
     }
 
-
-    private fun IWorld.getHologramEntity(pos: BlockPos): HologramBlockEntity {
-        return getBlockEntity(pos).assertIs(pos)
-    }
 
     override fun onBlockBreakStart(blockState: BlockState, world: World, pos: BlockPos, player: PlayerEntity?) {
         giveItemInHologramToPlayer(player, world, pos)
@@ -153,4 +159,8 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     }
 
 
+}
+
+fun IWorld.getHologramEntity(pos: BlockPos): HologramBlockEntity {
+    return getBlockEntity(pos).assertIs(pos,this)
 }

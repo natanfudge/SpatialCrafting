@@ -15,9 +15,11 @@ import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
+import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.recipe.*
+import spatialcrafting.sendPacketToServer
 import spatialcrafting.util.distanceFrom
 import spatialcrafting.util.itemsInInventoryAndOffhand
 import spatialcrafting.util.matches
@@ -49,18 +51,24 @@ private fun SpatialRecipe.asShapeless(): ShapelessSpatialRecipe {
 data class ComponentSatisfaction(val pos: ComponentPosition, val satisfiedBy: ItemStack?)
 data class RecipeSatisfaction(val componentSatisfaction: List<ComponentSatisfaction>, val fullySatisfied: Boolean)
 
-//TODO: sync recipe help to server, because it's causing issues (set blockstates ONLY on server, which is everything. just do it on the server only.)
-//TODO: test that recipe help is working
 //TODO: show ghost items
 //TODO: auto-transfer
+//TODO: remember to give the player all the items that don't match in the crafter
+
+
+
 
 fun startCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
-    crafterMultiblock.startRecipeHelp(recipeId,MinecraftClient.getInstance().world)
+
+    sendPacketToServer(Packets.StartRecipeHelp(crafterMultiblock.crafterLocations[0],recipeId))
+    // So we can know if it started in the client
+    crafterMultiblock.recipeHelpRecipeId = recipeId
 }
 
 fun stopCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock) {
+    sendPacketToServer(Packets.StopRecipeHelp(crafterMultiblock.crafterLocations[0]))
+    // So we can know if it stopped in the client
     crafterMultiblock.recipeHelpRecipeId = null
-    crafterMultiblock.showAllHolograms(MinecraftClient.getInstance().world)
 }
 
 class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,

@@ -6,14 +6,14 @@ import net.minecraft.util.Identifier
 import spatialcrafting.MaxCrafterSize
 import spatialcrafting.MinCrafterSize
 import spatialcrafting.crafter.CraftersPieces
-import spatialcrafting.id
+import spatialcrafting.modId
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.util.kotlinwrappers.itemStack
 import java.util.function.Function
 
 class ReiSpatialCraftingPlugin : REIPluginEntry {
     companion object {
-        val Id = id("rei_plugin")
+        val Id = modId("rei_plugin")
         private val CrafterSizes = MinCrafterSize..MaxCrafterSize
     }
 

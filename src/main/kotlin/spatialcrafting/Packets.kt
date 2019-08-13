@@ -1,4 +1,4 @@
-@file:UseSerializers(Serializers.ForBlockPos::class)
+@file:UseSerializers(Serializers.ForBlockPos::class, Serializers.ForIdentifier::class)
 
 package spatialcrafting
 
@@ -9,8 +9,7 @@ import io.netty.buffer.Unpooled
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
+import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.fabricmc.fabric.api.network.PacketContext
 import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
 import net.minecraft.entity.player.PlayerEntity
@@ -18,6 +17,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
+import net.minecraft.world.World
 import spatialcrafting.client.Duration
 import spatialcrafting.client.playCraftParticles
 import spatialcrafting.client.readDuration
@@ -25,28 +25,57 @@ import spatialcrafting.client.writeDuration
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.crafter.assertIs
+import spatialcrafting.crafter.getCrafterEntity
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.util.kotlinwrappers.ModInitializationContext
 import spatialcrafting.util.kotlinwrappers.world
+import spatialcrafting.util.logWarning
 import java.util.stream.Stream
 
-fun <T : Packets.Packet<T>> ModInitializationContext.registerC2S(manager: Packets.PacketManager<T>) {
+fun <T : Packets.OldPacket<T>> ModInitializationContext.registerOldC2S(manager: Packets.OldPacketManager<T>) {
     registerClientToServerPacket(manager.id) { packetContext, packetByteBuf ->
         manager.use(packetContext, manager.fromBuf(packetByteBuf))
     }
 }
 
-fun <T : Packets.Packet<T>> ModInitializationContext.registerS2C(manager: Packets.PacketManager<T>) {
+fun <T : Packets.OldPacket<T>> ModInitializationContext.registerOldS2C(manager: Packets.OldPacketManager<T>) {
     registerServerToClientPacket(manager.id) { packetContext, packetByteBuf ->
         manager.use(packetContext, manager.fromBuf(packetByteBuf))
+    }
+}
+
+fun <T : Packets.Packet<T>> ModInitializationContext.registerC2S(serializer: KSerializer<T>) {
+    registerClientToServerPacket(serializer.packetId) { packetContext, packetByteBuf ->
+        serializer.readFrom(packetByteBuf).apply {
+            packetContext.taskQueue.execute {
+                use(packetContext)
+            }
+        }
+    }
+}
+
+fun <T : Packets.Packet<T>> ModInitializationContext.registerS2C(serializer: KSerializer<T>) {
+    registerServerToClientPacket(serializer.packetId) { packetContext, packetByteBuf ->
+        serializer.readFrom(packetByteBuf).apply {
+            packetContext.taskQueue.execute {
+                use(packetContext)
+            }
+        }
     }
 }
 
 /**
  * Sends a packet from the server to the client for all the players in the stream.
  */
-fun <T : Packets.Packet<T>, U : PlayerEntity> Stream<U>.sendPacket(packet: T) {
+fun <T : Packets.OldPacket<T>, U : PlayerEntity> Stream<U>.sendOldPacket(packet: T) {
     sendPacket(packetId = Identifier(ModId, packet.manager.id), packetBuilder = { packet.addToByteBuf(this) })
+}
+
+/**
+ * Sends a packet from the server to the client for all the players in the stream.
+ */
+fun <T : Packets.Packet<T>, U : PlayerEntity> Stream<U>.sendPacket(packet: T) {
+    sendPacket(packetId = Identifier(ModId, packet.serializer.packetId)) { packet.serializer.write(packet, this) }
 }
 
 
@@ -59,92 +88,56 @@ private fun <T : PlayerEntity> Stream<T>.sendPacket(packetId: Identifier, packet
     for (player in this) {
         ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, packetId, packet)
     }
-
-
 }
-//
-//inline fun <reified T : Packet<T>> Packet<T>.toJson() = Json(JsonConfiguration.Stable).stringify(manager.serializer, this as T)
-//inline fun <reified T: Packet<T>> PacketManager<T>.fromJson(json : String) : T = Json(JsonConfiguration.Stable).parse(serializer, json)
-//
-//interface Packet<T : Packet<T>> {
-//    val manager: PacketManager<T>
-//}
-//
-//interface PacketManager<T : Packet<T>> {
-//    val serializer: KSerializer<T>
-//    fun use(packet: T)
-//}
-//
-//fun main() {
-//    val x = X(2)
-//    val str = x.toJson()
-//    val back = x.manager.fromJson(str)
-//    assert(x == back)
-//}
-//
-//@Serializable
-//data class X(val y: Int) : Packet<X> {
-//    override val manager get() = object : PacketManager<X> {
-//        override val serializer = serializer()
-//        override fun use(packet: X) {
-//        }
-//    }
-//}
 
 
-//    interface MyPacket<T : Packet<T>>: Packet<T> {
-//      // Providing a KSerializer is simpler than overriding toJson
-//       val serializer : KSerializer<T>
-//        override fun toJson() : String =  Json.stringify(serializer,this )
-//        override val manager: PacketManager<T>
-//    }
-//
-//    interface MyPacketManager<T : Packet<T>> : PacketManager<T> {
-//       val serializer : KSerializer<T>
-//        override val id: String get() =  serializer.descriptor.name
-//        override fun fromJson(json : String): T = Json.parse(serializer,json)
-//        override fun use(packet: T)
-//    }
+/**
+ * Sends a packet from the server to the client for all the players in the stream.
+ */
+fun <T : Packets.Packet<T>> sendPacketToServer(packet: T) {
+    val buf = PacketByteBuf(Unpooled.buffer()).also { packet.serializer.write(packet, it) }
+    ClientSidePacketRegistry.INSTANCE.sendToServer(modId(packet.serializer.packetId), buf)
+}
+
+private val <T : Packets.Packet<T>> KSerializer<T>.packetId get() = descriptor.name.toLowerCase()
 
 
 //TODO: get ItemStack serializer working, then replace fromBuf, toBuf and Id with a serializer override (see above)
 object Packets {
-    interface Packet<T : Packet<T>> {
+    interface OldPacket<T : OldPacket<T>> {
         fun addToByteBuf(buf: PacketByteBuf)
-        val manager: PacketManager<T>
+        val manager: OldPacketManager<T>
     }
 
-    interface PacketManager<T : Packet<T>> {
+
+    interface OldPacketManager<T : OldPacket<T>> {
         val id: String
         fun fromBuf(buf: PacketByteBuf): T
         fun use(context: PacketContext, packet: T)
     }
 
-    @Serializable
-    data class AssignMultiblockState(val multiblock: CrafterMultiblock, val masterEntityPos: BlockPos) : Packet<AssignMultiblockState> {
-        override val manager: PacketManager<AssignMultiblockState>
-            get() = AssignMultiblockState
 
-        companion object : PacketManager<AssignMultiblockState> {
-            override val id: String
-                get() = "create_multiblock"
-
-            override fun fromBuf(buf: PacketByteBuf): AssignMultiblockState = serializer().readFrom(buf)
-
-            override fun use(context: PacketContext, packet: AssignMultiblockState) {
-                CrafterPieceEntity.assignMultiblockState(context.world, packet.masterEntityPos, packet.multiblock)
-            }
-
-        }
-
-        override fun addToByteBuf(buf: PacketByteBuf) = serializer().write(this, buf)
+    interface Packet<T : Packet<T>> {
+        val serializer: KSerializer<T>
+        fun use(context: PacketContext)
     }
 
-    data class UnassignMultiblockState(val multiblock: CrafterMultiblock) : Packet<UnassignMultiblockState> {
-        override val manager: PacketManager<UnassignMultiblockState>
+    @Serializable
+    data class AssignMultiblockState(val multiblock: CrafterMultiblock, val masterEntityPos: BlockPos) : Packet<AssignMultiblockState> {
+        override fun use(context: PacketContext) {
+            CrafterPieceEntity.assignMultiblockState(context.world, masterEntityPos, multiblock)
+        }
+
+        override val serializer: KSerializer<AssignMultiblockState>
+            get() = serializer()
+    }
+
+
+    data class UnassignMultiblockState(val multiblock: CrafterMultiblock) : OldPacket<UnassignMultiblockState> {
+        override val manager: OldPacketManager<UnassignMultiblockState>
             get() = UnassignMultiblockState
 
-        companion object : PacketManager<UnassignMultiblockState> {
+        companion object : OldPacketManager<UnassignMultiblockState> {
             override val id: String
                 get() = "destroy_multiblock"
 
@@ -153,7 +146,10 @@ object Packets {
             )
 
             override fun use(context: PacketContext, packet: UnassignMultiblockState) {
+
                 CrafterPieceEntity.unassignMultiblockState(context.world, packet.multiblock)
+
+
             }
 
         }
@@ -163,11 +159,11 @@ object Packets {
         }
     }
 
-    data class UpdateHologramContent(val hologramPos: BlockPos, val newItem: ItemStack) : Packet<UpdateHologramContent> {
-        override val manager: PacketManager<UpdateHologramContent>
+    data class UpdateHologramContent(val hologramPos: BlockPos, val newItem: ItemStack) : OldPacket<UpdateHologramContent> {
+        override val manager: OldPacketManager<UpdateHologramContent>
             get() = UpdateHologramContent
 
-        companion object : PacketManager<UpdateHologramContent> {
+        companion object : OldPacketManager<UpdateHologramContent> {
             override fun fromBuf(buf: PacketByteBuf): UpdateHologramContent =
                     UpdateHologramContent(buf.readBlockPos(), buf.readItemStack())
 
@@ -191,23 +187,23 @@ object Packets {
         }
     }
 
-    data class StartCraftingParticles(val multiblock: CrafterMultiblock, val duration: Duration) : Packet<StartCraftingParticles> {
-        override val manager: PacketManager<StartCraftingParticles>
+    data class StartCraftingParticles(val multiblock: CrafterMultiblock, val duration: Duration) : OldPacket<StartCraftingParticles> {
+        override val manager: OldPacketManager<StartCraftingParticles>
             get() = StartCraftingParticles
 
-        companion object : PacketManager<StartCraftingParticles> {
+        companion object : OldPacketManager<StartCraftingParticles> {
             override fun fromBuf(buf: PacketByteBuf): StartCraftingParticles {
                 return StartCraftingParticles(CrafterMultiblock.serializer().readFrom(buf), buf.readDuration())
             }
 
-            override fun use(context: PacketContext, packet: StartCraftingParticles) {
+            override fun use(context: PacketContext, packet: StartCraftingParticles) = with(packet) {
                 // We do this so we can later change the state of the multiblock through one of the crafter entities,
                 // so we can tell the client to cancel the particles.
                 CrafterPieceEntity.assignMultiblockState(context.world,
-                        masterPos = packet.multiblock.crafterLocations[0],
-                        multiblock = packet.multiblock)
+                        masterPos = multiblock.crafterLocations[0],
+                        multiblock = multiblock)
 
-                playCraftParticles(context.world, packet.multiblock, packet.duration)
+                playCraftParticles(context.world, multiblock, duration)
             }
 
 
@@ -222,7 +218,45 @@ object Packets {
 
     }
 
-//    data class StartRecipeHelp(val multiblock: CrafterMultiblock, val identifier: Identifier)
+    @Serializable
+    data class StartRecipeHelp(val anyCrafterPiecePos: BlockPos, val recipeId: Identifier) : Packet<StartRecipeHelp> {
+        override val serializer get() = serializer()
+        override fun use(context: PacketContext) {
+            val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
+            multiblock.startRecipeHelp(recipeId, context.world)
+        }
+    }
+
+
+    @Serializable
+    data class StopRecipeHelp(val anyCrafterPiecePos: BlockPos) : Packet<StopRecipeHelp> {
+        override val serializer get() = serializer()
+        override fun use(context: PacketContext) {
+            val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
+           multiblock.stopRecipeHelp(context.world)
+
+        }
+    }
+
+    private fun getAndValidateMultiblock(anyCrafterPiecePos: BlockPos, world: World): CrafterMultiblock? {
+        if (world.isHeightValidAndBlockLoaded(anyCrafterPiecePos)) {
+            val multiblock = world.getCrafterEntity(anyCrafterPiecePos).multiblockIn!!
+            if (multiblock.isLoadedAndHeightIsValid(world)) {
+                return multiblock
+            }
+            else {
+                logWarning {
+                    "Attempt to start recipe help in unloaded multiblock $multiblock! Recipe help will not apply."
+                }
+            }
+        }
+        else {
+            logWarning {
+                "Attempt to start recipe help in unloaded position $anyCrafterPiecePos! Recipe help will not apply."
+            }
+        }
+        return null
+    }
 
 //    data class CancelCraftingParticles(val oneOfTheMultiblockCraftersPos: BlockPos) : Packet<CancelCraftingParticles> {
 //        companion object : PacketManager<CancelCraftingParticles> {
@@ -260,4 +294,5 @@ object Packets {
 
 
 }
+
 

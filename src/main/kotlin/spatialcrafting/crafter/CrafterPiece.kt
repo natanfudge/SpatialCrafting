@@ -16,11 +16,13 @@ import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.BlockView
+import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.Packets
 import spatialcrafting.client.*
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.recipe.SpatialRecipe
+import spatialcrafting.sendOldPacket
 import spatialcrafting.sendPacket
 import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.dropItemStack
@@ -37,11 +39,12 @@ val CraftersPieces = mapOf(
         5 to CrafterPiece(5)
 )
 
-inline fun <reified T> BlockEntity?.assertIs(pos: BlockPos? = null): T {
+inline fun <reified T> BlockEntity?.assertIs(pos: BlockPos? = null, world: IWorld? = null): T {
     val result = this as? T
     return (result
-            ?: error("BlockEntity at location ${pos?:this?.pos} is not a ${T::class.qualifiedName} as expected.\nRather, it is '${this
-                    ?: "air"}'."))
+            ?: error("BlockEntity at location ${pos
+                    ?: this?.pos} is not a ${T::class.qualifiedName} as expected. Rather, it is '${this
+                    ?: "AIR"}'." + if (world != null) " This happened on the ${if (world.isClient) "CLIENT" else "SERVER"}" else ""))
 
 }
 
@@ -60,7 +63,6 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         }
 )), BlockEntityProvider {
 
-    //TODO: attempt form on right click
 
     companion object {
         private fun thereIsSpaceForHolograms(world: World, multiblock: CrafterMultiblock): Boolean =
@@ -68,7 +70,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
                     val isAir = world.getBlock(it) is AirBlock
                     if (isAir) true
                     else {
-                        if (world.isServer) logDebug { "Refusing to create multiblock due to ${world.getBlock(it)} existing in a required hologram space $it." }
+                        if (world.isServer) logDebug { "Refusing to create multiblock due to a '${world.getBlock(it)}' blocking the space for a hologram in $it." }
                         false
                     }
                 }
@@ -93,7 +95,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
         fun destroyMultiblock(world: World, multiblock: CrafterMultiblock) {
             assert(world.isServer)
-            logDebug { "Destroying multiblock. [${multiblock.logString()}]" }
+            logDebug { "Destroying multiblock.\n [${multiblock.logString()}]" }
             CrafterPieceEntity.unassignMultiblockState(world, multiblock)
 
             for (hologramPos in multiblock.hologramLocations) {
@@ -104,12 +106,13 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
     }
 
     override fun neighborUpdate(blockState_1: BlockState?, world: World, pos: BlockPos, block_1: Block?, blockPos_2: BlockPos?, boolean_1: Boolean) {
-        if (world.isClient) return
-        val multiblock = world.getCrafterEntity(pos).multiblockIn
-        if (multiblock == null) {
-            attemptToFormMultiblock(world, pos)
-        }
+//        if (world.isClient) return
+//        val multiblock = world.getCrafterEntity(pos).multiblockIn
+//        if (multiblock == null) {
+//            attemptToFormMultiblock(world, pos)
+//        }
 
+        //TODO: think of a better solution
 
         super.neighborUpdate(blockState_1, world, pos, block_1, blockPos_2, boolean_1)
     }
@@ -139,7 +142,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         assert(world.isServer)
         destroyMultiblock(world, multiblock)
         PlayerStream.watching(world, multiblock.crafterLocations[0])
-                .sendPacket(Packets.UnassignMultiblockState(multiblock))
+                .sendOldPacket(Packets.UnassignMultiblockState(multiblock))
     }
 
     /**
@@ -164,6 +167,11 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
                 // Can sometimes be null when the playing is loading
                 .orElse(null) ?: return
 
+        finishCraft(world, pos, multiblock, craftedRecipe)
+
+    }
+
+    private fun finishCraft(world: World, pos: BlockPos, multiblock: CrafterMultiblock, craftedRecipe: SpatialRecipe) {
         world.play(Sounds.CraftEnd, at = pos, ofCategory = SoundCategory.BLOCKS)
 
         multiblock.setNotCrafting(world)
@@ -174,10 +182,10 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
             hologram.extractItem()
         }
 
+
+        multiblock.stopRecipeHelp(world)
     }
 
-
-    //TODO: document sounds
 
     override fun activate(blockState_1: BlockState, world: World, pos: BlockPos, placedBy: PlayerEntity?,
                           hand: Hand, blockHitResult_1: BlockHitResult?): Boolean {
@@ -185,7 +193,12 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         // Prevent it being called twice
         if (hand == Hand.OFF_HAND) return false
 
+         logDebug {
+             val multiblockIn = world.getCrafterEntity(pos).multiblockIn
+            "${if (world.isClient) "CLIENT" else "SERVER"}: Right clicked on crafter piece at ${pos.xz}. Formed = ${multiblockIn != null}"
+        }
         val multiblockIn = world.getCrafterEntity(pos).multiblockIn ?: return false
+
         if (world.isClient) return true
         if (multiblockIn.isCrafting) return true
 
@@ -195,6 +208,13 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
         //TODO: provide feedback that no recipe matched
         if (matches.isEmpty()) return true
+        else craft(matches, world, multiblockIn, pos)
+
+        return true
+    }
+
+    private fun craft(matches: MutableList<SpatialRecipe>, world: World, multiblockIn: CrafterMultiblock, pos: BlockPos) {
+        assert(world.isServer)
         if (matches.size > 1) {
             println("[Spatial Crafting] WARNING: THERE IS MORE THAN ONE RECIPE THAT MATCHES THE SAME INPUT!" +
                     "ONLY THE FIRST RECIPE WILL BE USED! The recipes are: \n$matches")
@@ -207,9 +227,11 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         playCraftingSounds(world, pos, multiblockIn)
 
         //TODO: show only holograms with item when starting crafting, then return to the original state when canceled / finished.
-        PlayerStream.watching(world.getBlockEntity(pos)).sendPacket(
+        PlayerStream.watching(world.getBlockEntity(pos)).sendOldPacket(
                 Packets.StartCraftingParticles(multiblockIn, craftDuration)
         )
+
+        multiblockIn.showHologramsWithItemOnly(world)
 
         // Schedule the crafting to end
         world.blockTickScheduler.schedule(pos, this, craftDuration)
@@ -217,8 +239,6 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         logDebug {
             "Scheduling craft at ${world.time} scheduled to end at $endTime"
         }
-
-        return true
     }
 
 
@@ -236,6 +256,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
     override fun onPlaced(world: World, blockPos: BlockPos, blockState: BlockState, placedBy: LivingEntity?, itemStack: ItemStack?) {
         if (world.isClient) return
+        println("OnPlaced")
         attemptToFormMultiblock(world, blockPos)
     }
 
@@ -265,6 +286,10 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
                 multiblock = multiblock,
                 masterEntityPos = northernEasternCrafter
         ))
+//        PlayerStream.watching(world, multiblock.crafterLocations[0]).sendOldPacket(Packets.AssignMultiblockState(
+//                multiblock = multiblock,
+//                masterEntityPos = northernEasternCrafter
+//        ))
     }
 
 
@@ -273,7 +298,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         for ((westDistance, southDistance) in (0 to 0) until (size to size)) {
             val location = northernEasternCrafterPos.west(westDistance).south(southDistance)
             if (!world.holdsCompatibleCrafterPiece(location)) {
-                logDebug { "Refusing to build multiblock due to ${world.getBlock(location)} existing in required position ${location.xz}" }
+                logDebug { "Refusing to build multiblock due to a '${world.getBlock(location)}' existing in a position that needs to hold a crafter piece: ${location.xz}" }
                 return null // All nearby blocks must be crafter pieces
             }
             blocks.add(location)

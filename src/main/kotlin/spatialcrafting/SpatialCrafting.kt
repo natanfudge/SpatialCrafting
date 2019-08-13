@@ -26,7 +26,9 @@ import spatialcrafting.util.kotlinwrappers.itemStack
 
 //TODO: better x5 crafter texture
 
-
+//TODO: document packets:
+// - S2C -  Need to do taskQueue thing
+// - C2S - Need to do taskQueue thing and beware of vulns (isLoaded, etc)
 //TODO: document recipes
 //TODO: rei integration
 //TODO: better example recipes (some op items - sword of you want to craft this etc)
@@ -37,20 +39,20 @@ import spatialcrafting.util.kotlinwrappers.itemStack
 //TODO: power consumption
 //TODO: config file: sounds power multiplier, can store energy
 //TODO: Recipe generator GUI
-
+//TODO: remove useless shit for tutorials and such
 
 const val ModId = "spatialcrafting"
 
- val GuiId = id("test_gui")
+ val GuiId = modId("test_gui")
 
 const val MaxCrafterSize = 5
 const val MinCrafterSize = 2
 
 private val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
         Identifier(ModId, "spatial_crafting")
-) { CraftersPieces[MinCrafterSize]!!.itemStack }
+) { CraftersPieces.getValue(MinCrafterSize).itemStack }
 
-fun id(str: String) = Identifier(ModId, str)
+fun modId(str: String) = Identifier(ModId, str)
 
 
 //TODO: ListTag.value -> ListTag.tags
@@ -95,12 +97,15 @@ fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
 
     register(HologramBlockEntityRenderer)
 
-    registerS2C(Packets.AssignMultiblockState)
-    registerS2C(Packets.UnassignMultiblockState)
+    registerS2C(Packets.AssignMultiblockState.serializer())
+    registerOldS2C(Packets.UnassignMultiblockState)
 
-    registerS2C(Packets.UpdateHologramContent)
-    registerS2C(Packets.StartCraftingParticles)
+    registerOldS2C(Packets.UpdateHologramContent)
+    registerOldS2C(Packets.StartCraftingParticles)
 //    register(Packets.CancelCraftingParticles)
+
+    registerC2S(Packets.StartRecipeHelp.serializer())
+    registerC2S(Packets.StopRecipeHelp.serializer())
 
     ContainerProviderRegistry.INSTANCE.registerFactory(GuiId) { syncId, _, player, buf ->
         DramaGeneratorController(syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos()))

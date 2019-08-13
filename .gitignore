@@ -25,3 +25,4 @@ bin/
 run/
 lib/
 !*.ipr
+!run/newWorldSettings.json

@@ -17,7 +17,7 @@ import spatialcrafting.compat.rei.util.SlotWidget
 import spatialcrafting.compat.rei.util.SwappableChildWidget
 import spatialcrafting.compat.rei.util.SwappableChildrenWidget
 import spatialcrafting.crafter.CraftersPieces
-import spatialcrafting.id
+import spatialcrafting.modId
 import spatialcrafting.util.drawCenteredStringWithoutShadow
 import spatialcrafting.util.isWholeNumber
 import java.awt.Point
@@ -27,29 +27,17 @@ import kotlin.math.roundToInt
 
 //TODO: better example recipes
 //TODO: show energy cost if that's enabled (and exists)
-//TODO: One plus button:
-// Queries the combined items of the nearest crafter and the player's inventory.
-// While crafter help is inactivate:
-//     - No nearby crafter - button is disabled
-//     - There is nearby crafter but player doesn't have enough items - button is enabled, and clicking begins crafter help.
-//     - There is nearby crafter and player has enough items - button is green, and clicking fills all of the items in.
-// While crafter help is active:
-//     - No nearby crafter - button is disabled
-//     - There is nearby crafter but player + crafter don't have enough items - button is red, and clicking ends crafter help.
-//           - While hovering, it highlights in red the missing items in the current layer.
-//           - If no items are missing in the current layer, it jumps to a layer that does have missing items.
-//     - There is nearby crafter and player + crafter have enough items - Button is green and clicking fills in the missing items.
-// Every state has an appropriate tooltip!
+
 
 
 class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatialCraftingDisplay> {
     private fun <V> Map<Int, V>.ofRecipeSize() = getValue(recipeSize)
 
     companion object {
-        private fun guiTexture(location: String) = id("textures/gui/$location")
+        private fun guiTexture(location: String) = modId("textures/gui/$location")
 
 
-        fun id(size: Int) = id("rei_crafting_category_x$size")
+        fun id(size: Int) = modId("rei_crafting_category_x$size")
         val Background = mapOf(
                 2 to guiTexture("crafter/x2.png"),
                 3 to guiTexture("crafter/x3.png"),
@@ -424,7 +412,6 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
 
     override fun getDisplaySettings(): DisplaySettings<ReiSpatialCraftingDisplay> {
         return object : DisplaySettings<ReiSpatialCraftingDisplay> {
-            //TODO: change this once we can control it based on recipe size
             override fun getDisplayHeight(category: RecipeCategory<out RecipeDisplay<*>>): Int {
                 if (recipeSize == 2) return RecipeHeight.ofRecipeSize() + 35
                 return RecipeHeight.ofRecipeSize() + 20
@@ -435,7 +422,6 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
             }
 
             override fun getDisplayWidth(category: RecipeCategory<out RecipeDisplay<*>>, display: ReiSpatialCraftingDisplay): Int {
-//                if(recipeSize == 2) return RecipeWidth.ofRecipeSize() + 70
                 return RecipeWidth.ofRecipeSize() + 35
             }
 
