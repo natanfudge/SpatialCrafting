@@ -1,6 +1,9 @@
 - Provide different crafting particles
 - Hold up item in the air after craft until grabbed
 - Make a serializable scheduling library
-- Make a testing library
+- Make a testing library:
+    - Initializes all the registries
+    - Has 3 modes: On Client, On Integrated Server, On Dedicated Server, and those can be AND'd. Default is ALL of them.
+
 - Make new crafting sounds
 - PR a system to REI that allows all crafter recipes to exist in one category

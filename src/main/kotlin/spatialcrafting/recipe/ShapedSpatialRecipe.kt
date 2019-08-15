@@ -1,5 +1,12 @@
+@file:UseSerializers(ForItemStack::class, ForIdentifier::class, ForIngredient::class)
 package spatialcrafting.recipe
 
+import drawer.ForIdentifier
+import drawer.ForIngredient
+import drawer.ForItemStack
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
@@ -9,19 +16,29 @@ import spatialcrafting.crafter.CopyableWithPosition
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
 import spatialcrafting.util.matches
+//TODO, try doing the polymorphic thing because it might work now
+@Serializable
+class ShapedSpatialRecipe private constructor(val components: List<ShapedRecipeComponent>,
+                          override val minimumCrafterSize: Int,
+                          override val energyCost: Long,
+                          override val _craftTime: Long,
+                          override val outputStack: ItemStack,
+                          override val identifier: Identifier) : SpatialRecipe() {
+    constructor(components: List<ShapedRecipeComponent>,
+                minimumCrafterSize: Int,
+                energyCost: Long,
+                craftTime: Duration,
+                outputStack: ItemStack,
+                identifier: Identifier,
+                workaround: Byte = 0.toByte()
+    ) : this(components, minimumCrafterSize, energyCost, craftTime.inTicks, outputStack, identifier)
 
-class ShapedSpatialRecipe( val components: List<ShapedRecipeComponent>,
-                          minimumCrafterSize: Int,
-                          energyCost: Long,
-                          craftTime: Duration,
-                          output: ItemStack,
-                          id: Identifier) : SpatialRecipe(output, id, minimumCrafterSize, energyCost, craftTime) {
     override val previewComponents: List<ShapedRecipeComponent>
         get() = components
 
     override fun matches(inventoryWrapper: CrafterMultiblockInventoryWrapper, world: World): Boolean {
         if (inventoryWrapper.size != this.components.size) return false
-        if(inventoryWrapper.crafterSize < minimumCrafterSize) return false
+        if (inventoryWrapper.crafterSize < minimumCrafterSize) return false
         val inventory = inventoryWrapper.normalizePositions()
         val recipe = components.normalizePositions()
 
@@ -59,12 +76,16 @@ class ShapedSpatialRecipe( val components: List<ShapedRecipeComponent>,
     override fun getSerializer() = Serializer
 
     companion object Serializer : SpatialRecipe.Serializer<ShapedSpatialRecipe>() {
+        val x  = serializer()
+        override val serializer : KSerializer<ShapedSpatialRecipe>
+            get() = serializer()
+
         override fun build(components: List<ShapedRecipeComponent>, id: Identifier, output: ItemStack,
                            minimumCrafterSize: Int, energyCost: Long, craftTime: Duration): ShapedSpatialRecipe {
             return ShapedSpatialRecipe(
                     components = components,
-                    output = output,
-                    id = id,
+                    outputStack = output,
+                    identifier = id,
                     minimumCrafterSize = minimumCrafterSize,
                     craftTime = craftTime,
                     energyCost = energyCost
@@ -74,7 +95,7 @@ class ShapedSpatialRecipe( val components: List<ShapedRecipeComponent>,
 
     }
 }
-
+@Serializable
 data class ShapedRecipeComponent(override val position: ComponentPosition, val ingredient: Ingredient)
     : CopyableWithPosition<ShapedRecipeComponent> {
     override fun copy(newPosition: ComponentPosition) = copy(position = newPosition)
@@ -83,6 +104,7 @@ data class ShapedRecipeComponent(override val position: ComponentPosition, val i
 }
 
 // The 'x' 'y' 'z' coordinates of are offset based, meaning they range from 0 to 4, based on how big the multiblock is.
+@Serializable
 data class ComponentPosition(val x: Int, val y: Int, val z: Int)
 
 

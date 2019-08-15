@@ -4,9 +4,15 @@ import net.minecraft.sound.SoundEvent
 import spatialcrafting.modId
 
 object Sounds {
-    val CraftEnd = SoundEvent(modId("craft_end"))
-    val CraftLoop = SoundEvent(modId("craft_loop"))
-    val CraftStart = SoundEvent(modId("craft_start"))
+    const val CraftEndId = "craft_end"
+    const val CraftLoopId = "craft_loop"
+    const val CraftStartId = "craft_start"
+    val CraftEnd = SoundEvent(modId(CraftEndId))
+    val CraftLoop = SoundEvent(modId(CraftLoopId))
+    val CraftStart = SoundEvent(modId(CraftStartId))
 
     val CraftLoopDuration = 27.ticks
+
+
 }
+

@@ -1,7 +1,5 @@
 package spatialcrafting.util.kotlinwrappers
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import net.fabricmc.fabric.api.client.render.BlockEntityRendererRegistry
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.fabricmc.fabric.api.network.PacketContext
@@ -16,29 +14,34 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.registry.Registry
 
-object ModInit {
-    /**
-     * Should be called at the init method of the mod. Do all of your registry here.
-     */
-    inline fun begin(modId: String, group: ItemGroup? = null, init: ModInitializationContext.() -> Unit) =
-            ModInitializationContext(modId, group).init()
-}
+/**
+ * Should be called at the init method of the mod. Do all of your registry here.
+ */
+inline fun initCommon(modId: String, group: ItemGroup? = null, init: CommonModInitializationContext.() -> Unit) =
+        CommonModInitializationContext(modId, group).init()
 
-class ModInitializationContext(val modId: String,  val group: ItemGroup?) {
+inline fun initClientOnly(modId: String, init: ClientModInitializationContext.() -> Unit) = ClientModInitializationContext(modId).init()
+
+
+class CommonModInitializationContext(val modId: String, val group: ItemGroup?) {
     inline fun <T> registerTo(registry: Registry<T>, dsl: NamespacedRegistryDsl<T>.() -> Unit) =
             dsl(NamespacedRegistryDsl(modId, registry))
 
     inline fun registerBlocksWithItemBlocks(dsl: BlockWithItemRegistryDsl.() -> Unit) =
             dsl(BlockWithItemRegistryDsl(modId, group))
 
-    inline fun <reified T : BlockEntity> register(renderer: BlockEntityRenderer<T>) = BlockEntityRendererRegistry.INSTANCE.register(T::class.java, renderer)
-
-     fun registerServerToClientPacket(packetId: String, packetConsumer: (PacketContext, PacketByteBuf) -> Unit) =
-            ClientSidePacketRegistry.INSTANCE.register(Identifier(modId, packetId), packetConsumer)
 
     fun registerClientToServerPacket(packetId: String, packetConsumer: (PacketContext, PacketByteBuf) -> Unit) =
             ServerSidePacketRegistry.INSTANCE.register(Identifier(modId, packetId), packetConsumer)
 
+
+}
+
+class ClientModInitializationContext(private val modId: String) {
+    inline fun <reified T : BlockEntity> register(renderer: BlockEntityRenderer<T>) = BlockEntityRendererRegistry.INSTANCE.register(T::class.java, renderer)
+
+    fun registerServerToClientPacket(packetId: String, packetConsumer: (PacketContext, PacketByteBuf) -> Unit) =
+            ClientSidePacketRegistry.INSTANCE.register(Identifier(modId, packetId), packetConsumer)
 
 }
 
@@ -51,9 +54,6 @@ class ModInitializationContext(val modId: String,  val group: ItemGroup?) {
 //val x = Json.stringify()
 
 
-
-
-
 open class NamespacedRegistryDsl<T>(private val namespace: String, private val registry: Registry<T>) {
     open infix fun T.withId(name: String): T = Registry.register(registry, Identifier(namespace, name), this)
 }
@@ -61,7 +61,8 @@ open class NamespacedRegistryDsl<T>(private val namespace: String, private val r
 class BlockWithItemRegistryDsl(private val namespace: String, private val group: ItemGroup?) {
     infix fun Block.withId(name: String): Block {
         Registry.register(Registry.BLOCK, Identifier(namespace, name), this)
-        Registry.register(Registry.ITEM, Identifier(namespace, name), BlockItem(this, Item.Settings().group(group ?: ItemGroup.MISC)))
+        Registry.register(Registry.ITEM, Identifier(namespace, name), BlockItem(this, Item.Settings().group(group
+                ?: ItemGroup.MISC)))
         return this
     }
 }

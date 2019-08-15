@@ -13,27 +13,32 @@ import spatialcrafting.client.gui.DramaGeneratorScreen
 //import spatialcrafting.client.gui.DramaGeneratorScreen
 import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.crafter.CraftersPieces
-import spatialcrafting.docs.ExampleMod.docsJavaInit
+//import spatialcrafting.docs.ExampleMod.docsJavaCommonInit
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.HologramBlockEntityRenderer
 import spatialcrafting.recipe.ShapedSpatialRecipe
 import spatialcrafting.recipe.ShapelessSpatialRecipe
 import spatialcrafting.recipe.SpatialRecipe
-import spatialcrafting.util.kotlinwrappers.ModInit
+import spatialcrafting.util.kotlinwrappers.initClientOnly
+import spatialcrafting.util.kotlinwrappers.initCommon
 import spatialcrafting.util.kotlinwrappers.itemStack
 
+//TODO: fix sounds tutorial (can't reuse the id field...)
+//TODO: fix BER tutorial (needs to be on client)
 
+//TODO: test EVERYTHING on server
+//TODO: test itemstack
 //TODO: better x5 crafter texture
 
 //TODO: document packets:
-// - S2C -  Need to do taskQueue thing
+// - S2C -  Need to do taskQueue thing, needs to be registered on the client only
 // - C2S - Need to do taskQueue thing and beware of vulns (isLoaded, etc)
-//TODO: document recipes
+//TODO: document recipes (remember that you need to implement read and write properly...)
 //TODO: rei integration
 //TODO: better example recipes (some op items - sword of you want to craft this etc)
 //TODO: test putting items in differnet locations in large crafter with small recipe
-//TODO: test on server
+
 //TODO: ask to add to AOF
 //TODO: add dependencies in fabric.mod.json
 //TODO: power consumption
@@ -43,7 +48,7 @@ import spatialcrafting.util.kotlinwrappers.itemStack
 
 const val ModId = "spatialcrafting"
 
- val GuiId = modId("test_gui")
+val GuiId = modId("test_gui")
 
 const val MaxCrafterSize = 5
 const val MinCrafterSize = 2
@@ -55,15 +60,13 @@ private val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
 fun modId(str: String) = Identifier(ModId, str)
 
 
-//TODO: ListTag.value -> ListTag.tags
 @Suppress("unused")
-fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
+fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 
     registerBlocksWithItemBlocks {
         for (crafterPiece in CraftersPieces.values) {
             crafterPiece withId "x${crafterPiece.size}crafter_piece"
         }
-//        TestBlock withId "test_block"
     }
 
     registerTo(Registry.BLOCK) {
@@ -73,7 +76,6 @@ fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
     registerTo(Registry.BLOCK_ENTITY) {
         CrafterPieceEntity.Type withId "crafter_piece_entity"
         HologramBlockEntity.Type withId "hologram_entity"
-//        TestBlockEntity.Type withId "test_block_entity"
     }
 
     registerTo(Registry.RECIPE_SERIALIZER) {
@@ -84,26 +86,14 @@ fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
     registerTo(Registry.RECIPE_TYPE) {
         SpatialRecipe.Type withId SpatialRecipe.Type.Id
     }
-
-//    Registry.register(Registry.SOUND_EVENT, Identifier("spatialcrafting", "craft_end"), TestSoundEvent)
-//    register("spatialcrafting:craft_end")
-
-
+//
     registerTo(Registry.SOUND_EVENT) {
-        Sounds.CraftEnd withId Sounds.CraftEnd.id.path
-        Sounds.CraftLoop withId Sounds.CraftLoop.id.path
-        Sounds.CraftStart withId Sounds.CraftStart.id.path
+        Sounds.CraftEnd withId Sounds.CraftEndId
+        Sounds.CraftLoop withId Sounds.CraftLoopId
+        Sounds.CraftStart withId Sounds.CraftStartId
     }
-
-    register(HologramBlockEntityRenderer)
-
-    registerS2C(Packets.AssignMultiblockState.serializer())
-    registerOldS2C(Packets.UnassignMultiblockState)
-
-    registerOldS2C(Packets.UpdateHologramContent)
-    registerOldS2C(Packets.StartCraftingParticles)
-//    register(Packets.CancelCraftingParticles)
-
+//
+//
     registerC2S(Packets.StartRecipeHelp.serializer())
     registerC2S(Packets.StopRecipeHelp.serializer())
 
@@ -111,14 +101,22 @@ fun init() = ModInit.begin(ModId, group = SpatialCraftingItemGroup) {
         DramaGeneratorController(syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos()))
     }
 
-    docsJavaInit()
+//    docsJavaCommonInit()
 
 
 }
 
 @Suppress("unused")
-fun initClient(){
-    ScreenProviderRegistry.INSTANCE.registerFactory(GuiId) { syncId, _, player, buf->
+fun initClient() = initClientOnly(ModId) {
+    registerS2C(Packets.AssignMultiblockState.serializer())
+    registerS2C(Packets.UnassignMultiblockState.serializer())
+
+    registerS2C(Packets.UpdateHologramContent.serializer())
+    registerS2C(Packets.StartCraftingParticles.serializer())
+
+    register(HologramBlockEntityRenderer)
+
+    ScreenProviderRegistry.INSTANCE.registerFactory(GuiId) { syncId, _, player, buf ->
         DramaGeneratorScreen(
                 DramaGeneratorController(
                         syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos())

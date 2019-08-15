@@ -17,8 +17,7 @@
   "entrypoints": {
     "main": [
       {
-        "value": "spatialcrafting.SpatialCraftingKt::init",
-        "adapter": "kotlin"
+        "value": "spatialcrafting.SpatialCraftingKt::init"
       }
     ],
     "client": [

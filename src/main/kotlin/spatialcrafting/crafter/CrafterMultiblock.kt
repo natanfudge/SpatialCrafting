@@ -1,8 +1,9 @@
-@file:UseSerializers(Serializers.ForBlockPos::class, Serializers.ForIdentifier::class)
+@file:UseSerializers(ForBlockPos::class, ForIdentifier::class)
 
 package spatialcrafting.crafter
 
-import drawer.Serializers
+import drawer.ForBlockPos
+import drawer.ForIdentifier
 import drawer.put
 import drawer.write
 import kotlinx.serialization.Serializable

@@ -1,5 +1,13 @@
+@file:UseSerializers(ForIngredient::class, ForItemStack::class, ForIdentifier::class)
+
 package spatialcrafting.recipe
 
+import drawer.ForIdentifier
+import drawer.ForIngredient
+import drawer.ForItemStack
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
@@ -8,25 +16,36 @@ import spatialcrafting.client.Duration
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.util.matches
 
-class ShapelessSpatialRecipe( val components: List<ShapelessRecipeComponent>,
-                             minimumCrafterSize: Int,
-                             energyCost: Long,
-                             craftTime: Duration,
-                             output: ItemStack,
-                             id: Identifier) : SpatialRecipe(output, id, minimumCrafterSize, energyCost, craftTime) {
+@Serializable
+class ShapelessSpatialRecipe private constructor(private val components: List<ShapelessRecipeComponent>,
+                             override val minimumCrafterSize: Int,
+                             override val energyCost: Long,
+                             override val _craftTime: Long,
+                             override val outputStack: ItemStack,
+                             override val identifier: Identifier) : SpatialRecipe() {
+
+    constructor(components: List<ShapelessRecipeComponent>,
+                minimumCrafterSize: Int,
+                energyCost: Long,
+                craftTime: Duration,
+                outputStack: ItemStack,
+                identifier: Identifier,
+                workaround : Byte = 0.toByte()
+    ) : this(components, minimumCrafterSize, energyCost, craftTime.inTicks, outputStack, identifier)
+
     override val previewComponents: List<ShapedRecipeComponent>
-        get(){
+        get() {
             val input = mutableListOf<ShapedRecipeComponent>()
             var componentsIndex = 0
             // Just shove all of them into the grid one by one
-            for(x in 0 until minimumCrafterSize){
-                for(y in 0 until minimumCrafterSize){
-                    for(z in 0 until minimumCrafterSize){
+            for (x in 0 until minimumCrafterSize) {
+                for (y in 0 until minimumCrafterSize) {
+                    for (z in 0 until minimumCrafterSize) {
                         input.add(ShapedRecipeComponent(
-                                position = ComponentPosition(x,y,z), ingredient = components[componentsIndex].ingredient
+                                position = ComponentPosition(x, y, z), ingredient = components[componentsIndex].ingredient
                         ))
                         componentsIndex++
-                        if(componentsIndex == input.size) return input // We're done adding everything
+                        if (componentsIndex == input.size) return input // We're done adding everything
                     }
                 }
             }
@@ -50,6 +69,9 @@ class ShapelessSpatialRecipe( val components: List<ShapelessRecipeComponent>,
     }
 
     companion object Serializer : SpatialRecipe.Serializer<ShapelessSpatialRecipe>() {
+        override val serializer: KSerializer<ShapelessSpatialRecipe>
+            get() = serializer()
+
         override fun build(components: List<ShapedRecipeComponent>, id: Identifier, output: ItemStack,
                            minimumCrafterSize: Int, energyCost: Long, craftTime: Duration): ShapelessSpatialRecipe {
 
@@ -60,8 +82,8 @@ class ShapelessSpatialRecipe( val components: List<ShapelessRecipeComponent>,
             return ShapelessSpatialRecipe(
                     components = shapelessComponents,
                     minimumCrafterSize = minimumCrafterSize,
-                    output = output,
-                    id = id,
+                    outputStack = output,
+                    identifier = id,
                     energyCost = energyCost,
                     craftTime = craftTime
             )
@@ -72,4 +94,5 @@ class ShapelessSpatialRecipe( val components: List<ShapelessRecipeComponent>,
 
 }
 
+@Serializable
 data class ShapelessRecipeComponent(val ingredient: Ingredient, val amount: Int)

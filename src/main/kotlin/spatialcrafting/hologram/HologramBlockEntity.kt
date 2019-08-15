@@ -9,7 +9,7 @@ import net.minecraft.nbt.CompoundTag
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
-import spatialcrafting.sendOldPacket
+import spatialcrafting.sendPacket
 import spatialcrafting.util.kotlinwrappers.Builders
 import spatialcrafting.util.kotlinwrappers.copy
 import spatialcrafting.util.kotlinwrappers.dropItemStack
@@ -36,7 +36,7 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
             if (world!!.isClient) return@setOwnerListener
 
             if (!previousStack.isItemEqual(currentStack)) {
-                PlayerStream.watching(this).sendOldPacket(Packets.UpdateHologramContent(this.pos, currentStack))
+                PlayerStream.watching(this).sendPacket(Packets.UpdateHologramContent(this.pos, currentStack))
             }
         }
     }

@@ -22,7 +22,6 @@ import spatialcrafting.Packets
 import spatialcrafting.client.*
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.recipe.SpatialRecipe
-import spatialcrafting.sendOldPacket
 import spatialcrafting.sendPacket
 import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.dropItemStack
@@ -142,7 +141,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         assert(world.isServer)
         destroyMultiblock(world, multiblock)
         PlayerStream.watching(world, multiblock.crafterLocations[0])
-                .sendOldPacket(Packets.UnassignMultiblockState(multiblock))
+                .sendPacket(Packets.UnassignMultiblockState(multiblock))
     }
 
     /**
@@ -176,7 +175,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
         multiblock.setNotCrafting(world)
 
-        world.dropItemStack(craftedRecipe.output, multiblock.centerOfHolograms().toBlockPos())
+        world.dropItemStack(craftedRecipe.outputStack, multiblock.centerOfHolograms().toBlockPos())
 
         for (hologram in multiblock.getHologramEntities(world)) {
             hologram.extractItem()
@@ -227,7 +226,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         playCraftingSounds(world, pos, multiblockIn)
 
         //TODO: show only holograms with item when starting crafting, then return to the original state when canceled / finished.
-        PlayerStream.watching(world.getBlockEntity(pos)).sendOldPacket(
+        PlayerStream.watching(world.getBlockEntity(pos)).sendPacket(
                 Packets.StartCraftingParticles(multiblockIn, craftDuration)
         )
 

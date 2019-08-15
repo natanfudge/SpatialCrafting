@@ -193,7 +193,7 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
 
         val outputSlot = SlotWidget(x = startPoint.x + OutputSlotXOffset.ofRecipeSize(),
                 y = startPoint.y + OutputSlotYOffset.ofRecipeSize(),
-                itemStack = display.recipe.output, drawBackground = false) {
+                itemStack = display.recipe.outputStack, drawBackground = false) {
             when {
                 it.count == 1 -> ""
                 it.count < 1 -> Formatting.RED.toString() + it.count

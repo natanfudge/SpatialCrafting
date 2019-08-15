@@ -6,7 +6,6 @@ import com.mojang.blaze3d.platform.GlStateManager.SourceFactor
 import me.shedaniel.rei.client.ScreenHelper
 import me.shedaniel.rei.gui.widget.ButtonWidget
 import me.shedaniel.rei.gui.widget.QueuedTooltip
-import net.minecraft.client.MinecraftClient
 import net.minecraft.client.resource.language.I18n
 import net.minecraft.client.world.ClientWorld
 import net.minecraft.item.ItemStack
@@ -30,22 +29,7 @@ const val width = 10
 const val height = 10
 const val MaxDistanceFromNearestCrafter = 100
 
-//private data class ItemAndAmount(val item: ItemSta)
 
-private fun SpatialRecipe.asShapeless(): ShapelessSpatialRecipe {
-    if (this is ShapelessSpatialRecipe) return this
-    this as ShapedSpatialRecipe
-
-    val components = this.components.groupBy { it.ingredient }
-            .map { (ingredient, componentsThatHaveIngredient) ->
-                ShapelessRecipeComponent(ingredient, componentsThatHaveIngredient.size)
-            }
-
-
-    return ShapelessSpatialRecipe(
-            components, minimumCrafterSize, energyCost, craftTime, output, id
-    )
-}
 
 
 data class ComponentSatisfaction(val pos: ComponentPosition, val satisfiedBy: ItemStack?)
@@ -116,7 +100,7 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
                 .minBy { it.pos.distanceFrom(pos) }?.multiblockIn ?: return
         when (state) {
             State.READY_FOR_RECIPE_HELP -> {
-                startCrafterRecipeHelp(nearestCrafter, recipe.id)
+                startCrafterRecipeHelp(nearestCrafter, recipe.identifier)
                 minecraft.player.closeScreen()
             }
 
