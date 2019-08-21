@@ -1,5 +1,7 @@
 package spatialcrafting.util
 
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.math.max
 import kotlin.math.sqrt
 
@@ -84,3 +86,11 @@ val Int.d get() = this.toDouble()
 val Long.d get() = this.toDouble()
 val Int.f get() = this.toFloat()
 val Float.d get() = this.toDouble()
+
+
+//TODO: turn this off in production
+const val LogDebug = true
+const val LogWarning = true
+
+inline fun logDebug(lazyMessage: () -> String) = if (LogDebug) println("${Date()} [SC/DEBUG]: ${lazyMessage()}") else Unit
+inline fun logWarning(lazyMessage: () -> String) = if (LogWarning) println("${Date()} [SC/WARN]: ${lazyMessage()}") else Unit

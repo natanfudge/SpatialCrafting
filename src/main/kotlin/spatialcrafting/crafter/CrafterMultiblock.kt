@@ -150,7 +150,6 @@ class CrafterMultiblock(
         for (hologram in hologramsRelativePositions().filter { it.relativePos.y == recipeHelpCurrentLayer }) {
             val ingredient = recipeInputs.find { it.position == hologram.relativePos }
             if (ingredient != null) {
-                //TODO: set ghost item
                 setHologramVisibility(world, hologram.absolutePos, hidden = false)
             }
             else {
@@ -279,7 +278,7 @@ class CrafterMultiblock(
             val item = hologram.getItem()
             if (satisfaction.none { it.satisfiedBy == item }) {
                 particlesToSendFromMultiblockToPlayer.add(Pair(hologram.pos, item))
-                player.giveItemStack(hologram.extractItem())
+                player.offerOrDrop(hologram.extractItem())
             }
         }
     }

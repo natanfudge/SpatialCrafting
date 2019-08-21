@@ -28,7 +28,6 @@ abstract class ItemMovementParticle(world: World,
                                     private val itemEntity: ItemEntity,
                                     val targetLocation: Vec3d
 ) : Particle(world, itemEntity.x, itemEntity.y, itemEntity.z, 0.0, 0.0, 0.0) {
-    //TODO: hide items in hologram until it reaches them
     companion object {
 
         fun playItemMovementFromPlayerToMultiblock(player: PlayerEntity,
@@ -36,8 +35,6 @@ abstract class ItemMovementParticle(world: World,
                                                    itemsFromMultiblockToPlayer: List<Pair<BlockPos, ItemStack>>) {
             val world = getMinecraftClient().world
             val particleManager = getMinecraftClient().particleManager
-
-
 
             for ((pos, stack) in itemsFromMultiblockToPlayer) {
 

@@ -87,3 +87,5 @@ fun World.dropItemStack(stack: ItemStack, pos: Vec3d) : ItemEntity {
 
  fun vec3d(x: Double, y: Double, z: Double) = Vec3d(x, y, z)
 operator fun BlockPos.plus(vec3d: Vec3d) = this.toVec3d() + vec3d
+
+fun PlayerEntity.offerOrDrop(itemStack: ItemStack) = inventory.offerOrDrop(world,itemStack)

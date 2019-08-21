@@ -29,10 +29,6 @@ const val height = 10
 const val MaxDistanceFromNearestCrafter = 100
 
 
-//TODO: show ghost items
-//TODO: auto-transfer
-//TODO: remember to give the player all the items that don't match in the crafter
-
 
 fun fillInRecipeFromPlayerInventory(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
     sendPacketToServer(Packets.AutoCraft(crafterMultiblock.arbitraryCrafterPos(), getMinecraftClient().player.uuid, recipeId))
@@ -101,8 +97,6 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
 
     }
 
-
-    //TODO: show missing items on hover
 
     override fun render(mouseX: Int, mouseY: Int, delta: Float) {
         var shouldHighlightMissingComponents = false

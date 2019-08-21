@@ -89,21 +89,7 @@ fun <T : Packets.Packet<T>> sendPacketToServer(packet: T) {
 private val <T : Packets.Packet<T>> KSerializer<T>.packetId get() = descriptor.name.toLowerCase()
 
 
-//TODO: get ItemStack serializer working, then replace fromBuf, toBuf and Id with a serializer override (see above)
 object Packets {
-//    interface Packet<T : Packet<T>> {
-//        fun addToByteBuf(buf: PacketByteBuf)
-//        val serializer: Packetserializer<T>
-//    }
-//
-//
-//    interface Packetserializer<T : Packet<T>> {
-//        val id: String
-//        fun fromBuf(buf: PacketByteBuf): T
-//        fun use(context: PacketContext, packet: T)
-//    }
-
-
     interface Packet<T : Packet<T>> {
         val serializer: KSerializer<T>
         fun use(context: PacketContext)
@@ -117,7 +103,6 @@ object Packets {
         }
 
     }
-
 
     @Serializable
     data class UnassignMultiblockState(val multiblock: CrafterMultiblock) : Packet<UnassignMultiblockState> {

@@ -98,9 +98,6 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
 
     }
 
-
-//TODO: when recipe help is on, cycle through the stacks of the ingredient, but rerender the
-
     override fun emitItemQuads(stack: ItemStack, randomSupplier: Supplier<Random>, context: RenderContext) {
     }
 

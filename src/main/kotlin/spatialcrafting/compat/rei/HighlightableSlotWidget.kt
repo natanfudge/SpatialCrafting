@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.GlStateManager
 import me.shedaniel.rei.gui.widget.SlotWidget
 import net.minecraft.item.ItemStack
 
-//TODO: bring the highlighting more inline with the new REI highlighting
 class HighlightableSlotWidget(x: Int, y: Int, itemStackList: List<ItemStack>, drawBackground: Boolean = true,
                               showToolTips: Boolean = true, clickToMoreRecipes: Boolean = true,
                               val itemCountOverlay: (ItemStack) -> String = { "" }, val highlighted: () -> Boolean)

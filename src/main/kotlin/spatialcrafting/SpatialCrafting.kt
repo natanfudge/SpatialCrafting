@@ -33,8 +33,6 @@ import spatialcrafting.util.kotlinwrappers.initClientOnly
 import spatialcrafting.util.kotlinwrappers.initCommon
 import java.util.function.Function
 
-//TODO: document reload chunks (F3+A)
-//TODO: rei integration
 
 //TODO: test putting items in differnet locations in large crafter with small recipe
 

@@ -227,7 +227,6 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         multiblockIn.setIsCrafting(craftEndTime = endTime)
         playCraftingSounds(world, pos, multiblockIn)
 
-        //TODO: show only holograms with item when starting crafting, then return to the original state when canceled / finished.
         PlayerStream.watching(world.getBlockEntity(pos)).sendPacket(
                 Packets.StartCraftingParticles(multiblockIn, craftDuration)
         )

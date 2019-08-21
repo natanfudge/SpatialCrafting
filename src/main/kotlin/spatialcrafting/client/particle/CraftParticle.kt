@@ -22,9 +22,8 @@ class CraftParticle(world: World,
 ) : SpriteBillboardParticle(world, sourcePos.x, sourcePos.y, sourcePos.z, 0.0, 0.0, 0.0) {
 
 
-    //TODO: submit yarn mappings for these
-    private val field_17783 = this.random.nextFloat() * 3.0f
-    private val field_17784 = this.random.nextFloat() * 3.0f
+    private val randomFloat = this.random.nextFloat() * 3.0f
+    private val anotherRandomFloat = this.random.nextFloat() * 3.0f
 
     init {
         this.maxAge = 500;
@@ -42,19 +41,19 @@ class CraftParticle(world: World,
     }
 
     override fun getMinU(): Float {
-        return sprite.getU(((field_17783 + 1.0f) / 4.0f * 16.0f).toDouble())
+        return sprite.getU(((randomFloat + 1.0f) / 4.0f * 16.0f).toDouble())
     }
 
     override fun getMaxU(): Float {
-        return sprite.getU((field_17783 / 4.0f * 16.0f).toDouble())
+        return sprite.getU((randomFloat / 4.0f * 16.0f).toDouble())
     }
 
     override fun getMinV(): Float {
-        return sprite.getV((field_17784 / 4.0f * 16.0f).toDouble())
+        return sprite.getV((anotherRandomFloat / 4.0f * 16.0f).toDouble())
     }
 
     override fun getMaxV(): Float {
-        return sprite.getV(((field_17784 + 1.0f) / 4.0f * 16.0f).toDouble())
+        return sprite.getV(((anotherRandomFloat + 1.0f) / 4.0f * 16.0f).toDouble())
     }
 
 

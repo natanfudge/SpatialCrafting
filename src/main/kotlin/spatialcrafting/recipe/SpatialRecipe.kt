@@ -37,12 +37,9 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
     abstract val identifier: Identifier
     abstract val minimumCrafterSize: Int
     protected abstract val energyCost: Long
-    //TODO: make this duration?
     protected abstract val _craftTime: Long
 
     val craftTime: Duration get() = _craftTime.ticks
-
-    fun acceptsCrafterOfSize(size: Int) = minimumCrafterSize <= size
 
     override fun craft(var1: CrafterMultiblockInventoryWrapper): ItemStack = ItemStack.EMPTY
 
@@ -153,7 +150,6 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
         @Suppress("SENSELESS_COMPARISON")
         private fun validateJson(json: SpatialRecipeJsonFormat, id: Identifier) {
             //TODO: validate that energy is enabled when energy is specified
-            //TODO: validate that the total amount of input item can fit in the maximum crafter size
             val missingField = when {
                 json.result == null -> "result"
                 json.result.item == null -> "result item"

@@ -16,7 +16,7 @@ import spatialcrafting.crafter.CopyableWithPosition
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
 import spatialcrafting.util.matches
-//TODO, try doing the polymorphic thing because it might work now
+
 @Serializable
 class ShapedSpatialRecipe private constructor(val components: List<ShapedRecipeComponent>,
                           override val minimumCrafterSize: Int,

@@ -21,7 +21,6 @@ public class ExampleBlock extends Block implements BlockEntityProvider {
     }
 
 
-
     @Override
     public boolean activate(BlockState blockState, World world, BlockPos blockPos, PlayerEntity player, Hand hand, BlockHitResult blockHitResult) {
         if (world.isClient) return true;
@@ -49,16 +48,14 @@ public class ExampleBlock extends Block implements BlockEntityProvider {
             // Find the first slot that has an item and give it to the player
             if (!blockEntity.getInvStack(1).isEmpty()) {
                 // Give the player the stack in the inventory
-                player.giveItemStack(blockEntity.getInvStack(1));
+                player.inventory.offerOrDrop(world, blockEntity.getInvStack(1));
                 // Remove the stack from the inventory
                 blockEntity.removeInvStack(1);
             } else if (!blockEntity.getInvStack(0).isEmpty()) {
-                player.giveItemStack(blockEntity.getInvStack(0));
+                player.inventory.offerOrDrop(world, blockEntity.getInvStack(0));
                 blockEntity.removeInvStack(0);
             }
         }
-
-        //TODO: note about the "copy"
 
 
         return true;

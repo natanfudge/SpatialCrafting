@@ -24,6 +24,7 @@ import spatialcrafting.hologram.HologramBlock.IsHiddenPropertyName
 import spatialcrafting.util.isHoldingItemIn
 import spatialcrafting.util.kotlinwrappers.Builders
 import spatialcrafting.util.logDebug
+import spatialcrafting.util.offerOrDrop
 import spatialcrafting.util.setBlock
 
 
@@ -167,7 +168,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     private fun giveItemInHologramToPlayer(player: PlayerEntity?, world: World, pos: BlockPos) {
         if (player == null) return
         val itemInHologram = world.getHologramEntity(pos).extractItem()
-        player.giveItemStack(itemInHologram)
+        player.offerOrDrop(itemInHologram)
     }
 
 
