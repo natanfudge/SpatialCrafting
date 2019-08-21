@@ -25,6 +25,7 @@ import spatialcrafting.hologram.HologramBakedModel
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.HologramBlockEntityRenderer
+import spatialcrafting.item.ShapelessSword
 import spatialcrafting.recipe.ShapedSpatialRecipe
 import spatialcrafting.recipe.ShapelessSpatialRecipe
 import spatialcrafting.recipe.SpatialRecipe
@@ -35,6 +36,13 @@ import java.util.function.Function
 
 
 //TODO: test putting items in differnet locations in large crafter with small recipe
+//TODO: need examples for:
+// Shapeless recipe
+// Minimum crafter size
+// craft time
+// power
+
+//TODO: make the ghost item cycle through the ingredient matching stacks
 
 //TODO: ask to add to AOF
 //TODO: add dependencies in fabric.mod.json
@@ -56,7 +64,7 @@ val GuiId = modId("test_gui")
 const val MaxCrafterSize = 5
 const val MinCrafterSize = 2
 
-private val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
+ val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
         Identifier(ModId, "spatial_crafting")
 ) { CraftersPieces.getValue(MinCrafterSize).itemStack }
 
@@ -71,6 +79,10 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
         for (crafterPiece in CraftersPieces.values) {
             crafterPiece withId "x${crafterPiece.size}crafter_piece"
         }
+    }
+
+    registerTo(Registry.ITEM){
+        ShapelessSword withId "shapeless_sword"
     }
 
     registerTo(Registry.BLOCK) {
@@ -90,14 +102,14 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
     registerTo(Registry.RECIPE_TYPE) {
         SpatialRecipe.Type withId SpatialRecipe.Type.Id
     }
-//
+
     registerTo(Registry.SOUND_EVENT) {
         Sounds.CraftEnd withId Sounds.CraftEndId
         Sounds.CraftLoop withId Sounds.CraftLoopId
         Sounds.CraftStart withId Sounds.CraftStartId
     }
-//
-//
+
+
     registerC2S(Packets.StartRecipeHelp.serializer())
     registerC2S(Packets.StopRecipeHelp.serializer())
     registerC2S(Packets.AutoCraft.serializer())

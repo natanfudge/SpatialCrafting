@@ -2,7 +2,7 @@ package spatialcrafting.hologram
 
 import net.minecraft.client.render.block.entity.BlockEntityRenderer
 import net.minecraft.client.render.model.json.ModelTransformation
-import spatialcrafting.util.kotlinwrappers.GL
+import spatialcrafting.util.GL
 import kotlin.math.sin
 
 

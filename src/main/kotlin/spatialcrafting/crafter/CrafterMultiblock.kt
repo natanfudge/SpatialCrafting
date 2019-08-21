@@ -33,8 +33,8 @@ class CrafterMultiblock(
         /**
          * This is the northern-eastern most block's location (on the server, at least).
          */
-        val crafterLocations: List<BlockPos>,
-        val multiblockSize: Int,
+        val crafterLocations: List<BlockPos> = listOf(),
+        val multiblockSize: Int = 2,
         /**
          * For an ongoing craft
          */

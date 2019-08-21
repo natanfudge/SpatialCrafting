@@ -4,7 +4,6 @@ package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.AttributeList
 import drawer.ForIngredient
-import drawer.getNullableFrom
 import drawer.put
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers

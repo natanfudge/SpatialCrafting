@@ -1,0 +1,25 @@
+{
+  "type": "spatialcrafting:shapeless",
+  "pattern": [
+    [
+      "GGG",
+      "SSS",
+      "GGG"
+    ],
+    [
+      "SGS",
+      "SSS"
+    ]
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:glowstone_dust"
+    },
+    "S": {
+      "tag": "c:sticks"
+    }
+  },
+  "result": {
+    "item": "spatialcrafting:shapeless_sword"
+  }
+}

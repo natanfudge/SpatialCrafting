@@ -12,17 +12,17 @@ import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
 import net.minecraft.world.World
-import spatialcrafting.util.Duration
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
+import spatialcrafting.util.Duration
 import spatialcrafting.util.matches
 
 @Serializable
 class ShapelessSpatialRecipe private constructor(private val components: List<ShapelessRecipeComponent>,
-                             override val minimumCrafterSize: Int,
-                             override val energyCost: Long,
-                             override val _craftTime: Long,
-                             override val outputStack: ItemStack,
-                             override val identifier: Identifier) : SpatialRecipe() {
+                                                 override val minimumCrafterSize: Int,
+                                                 override val energyCost: Long,
+                                                 override val _craftTime: Long,
+                                                 override val outputStack: ItemStack,
+                                                 override val identifier: Identifier) : SpatialRecipe() {
 
     constructor(components: List<ShapelessRecipeComponent>,
                 minimumCrafterSize: Int,
@@ -30,27 +30,38 @@ class ShapelessSpatialRecipe private constructor(private val components: List<Sh
                 craftTime: Duration,
                 outputStack: ItemStack,
                 identifier: Identifier,
-                workaround : Byte = 0.toByte()
+                workaround: Byte = 0.toByte()
     ) : this(components, minimumCrafterSize, energyCost, craftTime.inTicks, outputStack, identifier)
 
-    override val previewComponents: List<ShapedRecipeComponent>
-        get() {
-            val input = mutableListOf<ShapedRecipeComponent>()
-            var componentsIndex = 0
-            // Just shove all of them into the grid one by one
-            for (x in 0 until minimumCrafterSize) {
-                for (y in 0 until minimumCrafterSize) {
-                    for (z in 0 until minimumCrafterSize) {
-                        input.add(ShapedRecipeComponent(
-                                position = ComponentPosition(x, y, z), ingredient = components[componentsIndex].ingredient
-                        ))
-                        componentsIndex++
-                        if (componentsIndex == input.size) return input // We're done adding everything
-                    }
+    override val previewComponents: List<ShapedRecipeComponent> by lazy { calculatePreviewComponents() }
+
+    private fun calculatePreviewComponents(): List<ShapedRecipeComponent> {
+        val input = mutableListOf<ShapedRecipeComponent>()
+
+        var x = 0
+        var y = 0
+        var z = 0
+        for (component in components) {
+            for (instanceOfStack in 0 until component.amount) {
+                input.add(ShapedRecipeComponent(
+                        position = ComponentPosition(x, y, z), ingredient = component.ingredient
+                ))
+
+                x++
+                if (x == minimumCrafterSize) {
+                    x = 0
+                    z++
+                }
+                if (z == minimumCrafterSize) {
+                    z = 0
+                    y++
                 }
             }
-            return input
+
         }
+
+        return input
+    }
 
     override fun getSerializer() = Serializer
 

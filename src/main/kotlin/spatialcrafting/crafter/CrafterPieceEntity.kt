@@ -1,16 +1,14 @@
 package spatialcrafting.crafter
 
-import drawer.getNullableFrom
+import drawer.getFrom
+import drawer.nullable
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.Builders
-import spatialcrafting.util.kotlinwrappers.getBlockPos
-import spatialcrafting.util.kotlinwrappers.putBlockPos
-import spatialcrafting.util.logDebug
-import spatialcrafting.util.xz
 
 
 class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
@@ -102,7 +100,7 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
 //            tag.put(Keys.multiblock, multiblockIn?.toTag())
         }
 
-        if (masterEntityPos != null) tag.putBlockPos(Companion.Keys.masterEntity, masterEntityPos)
+        if (masterEntityPos != null) tag.putBlockPos(Keys.masterEntity,masterEntityPos)
         return tag
 
     }
@@ -115,8 +113,11 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
         // Minecraft gives BlockPos(0,0,0) when there is no pos with that key.
         if (masterEntityPos == BlockPos(0, 0, 0)) masterEntityPos = null
         if (isMaster) {
-            multiblockIn = CrafterMultiblock.serializer().getNullableFrom(tag)
-//            multiblockIn = tag.addCrafterMultiblock(key = Companion.Keys.multiblock)
+            multiblockIn = CrafterMultiblock.serializer().nullable.getFrom(tag)
+            // If this is true it means something went wrong with the data
+            if(multiblockIn?.crafterLocations?.size != multiblockIn?.multiblockSize?.squared()){
+                multiblockIn = null
+            }
         }
 
 

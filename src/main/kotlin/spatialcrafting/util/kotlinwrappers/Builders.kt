@@ -6,6 +6,8 @@ import net.minecraft.block.MaterialColor
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.block.piston.PistonBehavior
+import net.minecraft.item.ToolMaterial
+import net.minecraft.recipe.Ingredient
 
 
 object Builders {
@@ -92,5 +94,5 @@ object Builders {
         if (dropsLike != null) dropsLike(dropsLike)
     }
 
-
 }
+
