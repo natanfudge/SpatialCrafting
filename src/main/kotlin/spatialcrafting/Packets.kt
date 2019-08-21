@@ -16,6 +16,7 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import spatialcrafting.client.particle.ItemMovementParticle
 import spatialcrafting.client.particle.playCraftParticles
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
@@ -161,7 +162,7 @@ object Packets {
             // We do this so we can later change the state of the multiblock through one of the crafter entities,
             // so we can tell the client to cancel the particles.
             CrafterPieceEntity.assignMultiblockState(context.world,
-                    masterPos = multiblock.crafterLocations[0],
+                    anyCrafterPos = multiblock.arbitraryCrafterPos(),
                     multiblock = multiblock)
 
             playCraftParticles(context.world, multiblock, duration)
@@ -201,10 +202,10 @@ object Packets {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
-            val player = context.world.getPlayerByUuid(withInventoryOfPlayer) ?:
-                logWarning { "AutoCraft initiated for unknown player with UUID $withInventoryOfPlayer." }.run { return }
+            val player = context.world.getPlayerByUuid(withInventoryOfPlayer)
+                    ?: logWarning { "AutoCraft initiated for unknown player with UUID $withInventoryOfPlayer." }.run { return }
 
-            if(!multiblock.canBeUsedByPlayer(player)){
+            if (!multiblock.canBeUsedByPlayer(player)) {
                 logWarning {
                     "AutoCraft initiated by player with UUID $withInventoryOfPlayer who cannot access the multiblock at ${multiblock.crafterLocations}"
                 }
@@ -214,14 +215,29 @@ object Packets {
             val recipe = getAndValidateRecipe(recipeId, context.world) ?: return
 
 
-            multiblock.autoCraft(context.world,player, recipe)
+            multiblock.autoCraft(context.world, player, recipe)
+        }
+
+    }
+
+    @Serializable
+    data class ItemMovementFromPlayerToMultiblockParticles(
+            val player: UUID,
+            val itemsFromPlayerToMultiblock: List<Pair<BlockPos, ItemStack>>,
+            val itemsFromMultiblockToPlayer: List<Pair<BlockPos, ItemStack>>) : Packet<ItemMovementFromPlayerToMultiblockParticles> {
+        override val serializer get() = serializer()
+        override fun use(context: PacketContext) {
+            val player = context.world.getPlayerByUuid(player)
+                    ?: error("ItemMovementFromPlayerToMultiblockParticles initiated for unknown player with UUID $player.")
+            ItemMovementParticle.playItemMovementFromPlayerToMultiblock(player,itemsFromPlayerToMultiblock, itemsFromMultiblockToPlayer)
+
         }
 
     }
 
     private fun getAndValidateRecipe(recipeId: Identifier, world: World): SpatialRecipe? {
         val recipe = world.recipeManager.get(recipeId).orElse(null)
-        if(recipe == null){
+        if (recipe == null) {
             logWarning { "Attempt to use packet with non-existent recipe id '$recipe'! Packet will not apply." }
             return null
         }

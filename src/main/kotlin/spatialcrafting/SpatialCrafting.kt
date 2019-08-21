@@ -143,6 +143,7 @@ fun initClient() = initClientOnly(ModId) {
 
     registerS2C(Packets.UpdateHologramContent.serializer())
     registerS2C(Packets.StartCraftingParticles.serializer())
+    registerS2C(Packets.ItemMovementFromPlayerToMultiblockParticles.serializer())
 
     register(HologramBlockEntityRenderer)
 

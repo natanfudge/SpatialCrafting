@@ -23,48 +23,6 @@ import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.Builders
 
 
-//
-//data class SerializableData(val value: Any?, val serializer: KSerializer<Any?>)
-//
-//data class BlockEntityData(val data: MutableMap<String, Any?> = mutableMapOf()) {
-//    fun putIn(tag: CompoundTag) {
-//
-//    }
-//
-//    companion object {
-//        fun getFrom(tag: CompoundTag): BlockEntityData {
-//            val map = SerializationData.serializers
-//                    .mapNotNull {(propertyName,serializer)-> Pair(propertyName,serializer) }
-//            for((propertyName,serializer) in ){
-//                 tag.getTag(propertyName)
-//            }
-//        }
-//    }
-//}
-//
-//
-//
-//object SerializationData{
-//    var serializers : MutableMap<String,KSerializer<Any?>> = mutableMapOf()
-//}
-
-//fun y(){
-//    val x = X()
-//    val obj = x.com
-//}
-//
-//class X{
-//    companion object{
-//        val y =2
-//    }
-//}
-
-//@Serializable
-//data class GhostIngredient(val ingredient: Ingredient, val cycleIndex: Int)
-
-//@Serializable
-//data class HologramData(val inventory: HologramInventory)
-
 class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, RenderAttachmentBlockEntity {
     override fun getRenderAttachmentData(): Any = ghostIngredient?.let {
         if (it.matches(getItem())) ItemStack.EMPTY
@@ -107,6 +65,12 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
         }
 
     private var ghostIngredientCycleIndex = 0
+
+    /**
+     * Used for [spatialcrafting.client.particle.ItemMovementParticle] so it doesn't appear that the item arrives instantly when
+     * in the particle it looks like it is still travelling
+     */
+    var contentsAreTravelling = false
 
 
     /**
@@ -159,23 +123,12 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
     fun extractItem(): ItemStack {
         val item = inventory.extract(1)
         markDirty()
-        if (world!!.isServer) {
-            val multiblock = getMultiblock()
-//            if (multiblock.recipeHelpActive) {
-//                multiblock.decreaseRecipeHelpCurrentLayerIfNeeded(world!!)
-//            }
-        }
         return item
     }
 
     fun isEmpty() = getItem().isEmpty
 
     fun registerInventory(to: AttributeList<*>) = inventory.offerSelfAsAttribute(to, null, null)
-
-//    private fun afterItemRemoved(){
-//
-//    }
-
 
     // Note: we don't change recipe help here because this is only called when the entire multiblock is destroyed
     fun dropInventory() = world!!.dropItemStack(getItem(), pos)

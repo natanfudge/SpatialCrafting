@@ -9,6 +9,7 @@ import kotlin.math.sin
 object HologramBlockEntityRenderer : BlockEntityRenderer<HologramBlockEntity>() {
 
     override fun render(tile: HologramBlockEntity, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int) {
+        if(tile.contentsAreTravelling) return
         val stack = tile.getItem()
         if (!stack.isEmpty) {
             GL.begin {

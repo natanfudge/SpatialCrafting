@@ -6,8 +6,6 @@ import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.item.TooltipContext
-import net.minecraft.client.particle.ItemPickupParticle
-import net.minecraft.entity.Entity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
@@ -23,7 +21,7 @@ import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.Packets
 import spatialcrafting.client.Sounds
-import spatialcrafting.client.particle.MyItemPickupParticle
+import spatialcrafting.client.particle.ItemMovementParticle
 import spatialcrafting.client.particle.centerOfHolograms
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.recipe.SpatialRecipe
@@ -143,7 +141,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
     private fun destroyMultiblockFromServer(world: World, multiblock: CrafterMultiblock) {
         assert(world.isServer)
         destroyMultiblock(world, multiblock)
-        PlayerStream.watching(world, multiblock.crafterLocations[0])
+        PlayerStream.watching(world, multiblock.arbitraryCrafterPos())
                 .sendPacket(Packets.UnassignMultiblockState(multiblock))
     }
 
@@ -177,7 +175,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
     private fun finishCraft(world: World, anyCrafterPos: BlockPos, multiblock: CrafterMultiblock, craftedRecipe: SpatialRecipe) {
         world.play(Sounds.CraftEnd, at = anyCrafterPos, ofCategory = SoundCategory.BLOCKS)
 
-        multiblock.setNotCrafting(world)
+        multiblock.setNotCrafting()
 
         world.dropItemStack(craftedRecipe.outputStack, multiblock.centerOfHolograms().toBlockPos())
 
@@ -197,20 +195,13 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         // Prevent it being called twice
         if (hand == Hand.OFF_HAND) return false
 
-        //TODO: move this into the auto craft
-        if(world.isClient && placedBy != null){
-            val entity = world.dropItemStack(Items.CARROT.itemStack,pos.up())
-            getMinecraftClient().particleManager.addParticle(MyItemPickupParticle(world, entity, placedBy.pos))
-        }
-
          logDebug {
              val multiblockIn = world.getCrafterEntity(pos).multiblockIn
             "${if (world.isClient) "CLIENT" else "SERVER"}: Right clicked on crafter piece at ${pos.xz}. Formed = ${multiblockIn != null}"
         }
         val multiblockIn = world.getCrafterEntity(pos).multiblockIn ?: return false
 
-        if (world.isClient) return true
-        if (multiblockIn.isCrafting) return true
+        if (world.isClient || multiblockIn.isCrafting) return true
 
 
         val matches = world.recipeManager.getAllMatches(SpatialRecipe.Type,
@@ -233,7 +224,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         val craftDuration = matches[0].craftTime
         val endTime = world.durationTime + craftDuration
 
-        multiblockIn.setIsCrafting(world, craftEndTime = endTime)
+        multiblockIn.setIsCrafting(craftEndTime = endTime)
         playCraftingSounds(world, pos, multiblockIn)
 
         //TODO: show only holograms with item when starting crafting, then return to the original state when canceled / finished.
@@ -292,14 +283,11 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
                 masterPos = northernEasternCrafter,
                 multiblock = multiblock
         )
-        PlayerStream.watching(world, multiblock.crafterLocations[0]).sendPacket(Packets.AssignMultiblockState(
+        PlayerStream.watching(world, multiblock.arbitraryCrafterPos()).sendPacket(Packets.AssignMultiblockState(
                 multiblock = multiblock,
                 masterEntityPos = northernEasternCrafter
         ))
-//        PlayerStream.watching(world, multiblock.crafterLocations[0]).sendOldPacket(Packets.AssignMultiblockState(
-//                multiblock = multiblock,
-//                masterEntityPos = northernEasternCrafter
-//        ))
+
     }
 
 

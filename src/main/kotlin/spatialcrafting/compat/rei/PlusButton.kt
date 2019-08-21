@@ -35,17 +35,17 @@ const val MaxDistanceFromNearestCrafter = 100
 
 
 fun fillInRecipeFromPlayerInventory(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
-    sendPacketToServer(Packets.AutoCraft(crafterMultiblock.crafterLocations[0], getMinecraftClient().player.uuid, recipeId))
+    sendPacketToServer(Packets.AutoCraft(crafterMultiblock.arbitraryCrafterPos(), getMinecraftClient().player.uuid, recipeId))
 }
 
 
 fun startCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
-    sendPacketToServer(Packets.StartRecipeHelp(crafterMultiblock.crafterLocations[0], recipeId))
+    sendPacketToServer(Packets.StartRecipeHelp(crafterMultiblock.arbitraryCrafterPos(), recipeId))
     crafterMultiblock.startRecipeHelpCommon(recipeId)
 }
 
 fun stopCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock) {
-    sendPacketToServer(Packets.StopRecipeHelp(crafterMultiblock.crafterLocations[0]))
+    sendPacketToServer(Packets.StopRecipeHelp(crafterMultiblock.arbitraryCrafterPos()))
     crafterMultiblock.stopRecipeHelpCommon()
 }
 

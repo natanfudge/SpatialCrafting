@@ -14,16 +14,12 @@ import net.minecraft.world.World
 import spatialcrafting.client.Speed
 import spatialcrafting.client.bps
 import spatialcrafting.crafter.CrafterMultiblock
-import spatialcrafting.util.Duration
-import spatialcrafting.util.distancePassedIn
-import spatialcrafting.util.seconds
-import spatialcrafting.util.ticks
+import spatialcrafting.util.*
 import kotlin.math.max
 import kotlin.math.roundToInt
 
 private val TimeBetweenParticles = 0.1.seconds
-private fun vec3d(x: Double, y: Double, z: Double) = Vec3d(x, y, z)
-private operator fun BlockPos.plus(vec3d: Vec3d) = this.toVec3d() + vec3d
+
 
 private val YEndPosIncreaseSpeed = 0.5.bps
 private val SlamdownSpeed = 4.bps

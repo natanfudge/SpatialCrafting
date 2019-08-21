@@ -1,6 +1,5 @@
 package spatialcrafting.crafter
 
-import drawer.getFrom
 import drawer.getNullableFrom
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
 import net.minecraft.block.entity.BlockEntity
@@ -20,10 +19,10 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
     companion object {
         val Type = Builders.blockEntityType(CraftersPieces.values.toList()) { CrafterPieceEntity() }
 
-        fun assignMultiblockState(world: World, masterPos: BlockPos, multiblock: CrafterMultiblock) {
+        fun assignMultiblockState(world: World, anyCrafterPos: BlockPos, multiblock: CrafterMultiblock) {
             for (crafterEntity in multiblock.getCrafterEntities(world)) {
                 with(crafterEntity) {
-                    setMasterEntityPos(masterPos)
+                    setMasterEntityPos(anyCrafterPos)
                     if (isMaster) setMultiblockIn(multiblock)
                 }
             }

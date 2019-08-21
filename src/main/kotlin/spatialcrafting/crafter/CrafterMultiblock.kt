@@ -5,21 +5,22 @@ package spatialcrafting.crafter
 import drawer.ForBlockPos
 import drawer.ForIdentifier
 import drawer.put
-import drawer.write
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
+import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
-import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import spatialcrafting.Packets
 import spatialcrafting.hologram.*
 import spatialcrafting.recipe.ComponentPosition
 import spatialcrafting.recipe.ShapedRecipeComponent
 import spatialcrafting.recipe.SpatialRecipe
+import spatialcrafting.sendPacket
 import spatialcrafting.util.*
 
 
@@ -45,20 +46,17 @@ class CrafterMultiblock(
         var recipeHelpCurrentLayer: Int = 0
 ) {
     fun putIn(tag: CompoundTag) = serializer().put(this, tag)
-    fun writeTo(buf: PacketByteBuf) = serializer().write(this, buf)
 
     val craftEndTime: Duration?
         get() = _craftEndTime?.ticks
 
 
-    fun setNotCrafting(world: World) {
+    fun setNotCrafting() {
         _craftEndTime = null
-        world.getCrafterEntity(crafterLocations[0]).markDirty()
     }
 
-    fun setIsCrafting(world: World, craftEndTime: Duration) {
+    fun setIsCrafting(craftEndTime: Duration) {
         this._craftEndTime = craftEndTime.inTicks
-        world.getCrafterEntity(crafterLocations[0]).markDirty()
     }
 
     val isCrafting: Boolean
@@ -179,14 +177,14 @@ class CrafterMultiblock(
                 }
     }
 
-    fun decreaseRecipeHelpCurrentLayerIfNeeded(world: World) {
-        if ((0 until recipeHelpCurrentLayer).any { !layerIsComplete(it, world) }) {
-            assert(recipeHelpCurrentLayer <= 0)
-            logDebug { "Reducing recipe help layer" }
-            recipeHelpCurrentLayer--
-            hideAndShowHologramsForRecipeHelp(world)
-        }
-    }
+//    fun decreaseRecipeHelpCurrentLayerIfNeeded(world: World) {
+//        if ((0 until recipeHelpCurrentLayer).any { !layerIsComplete(it, world) }) {
+//            assert(recipeHelpCurrentLayer <= 0)
+//            logDebug { "Reducing recipe help layer" }
+//            recipeHelpCurrentLayer--
+//            hideAndShowHologramsForRecipeHelp(world)
+//        }
+//    }
 
     // Server only
     fun startRecipeHelpServer(recipeId: Identifier, world: World) {
@@ -245,27 +243,43 @@ class CrafterMultiblock(
 
         val relativeHologramPositions = hologramsRelativePositions()
 
-        givePlayerMismatchingItems(world, withInventoryOfPlayer, satisfaction)
+        val particlesToSendFromMultiblockToPlayer = mutableListOf<Pair<BlockPos, ItemStack>>()
+        val particlesToSendFromPlayerToMultiblock = mutableListOf<Pair<BlockPos, ItemStack>>()
 
+        givePlayerMismatchingItems(world, withInventoryOfPlayer, satisfaction, particlesToSendFromMultiblockToPlayer)
 
+        insertRecipeToMultiblock(satisfaction, world, relativeHologramPositions, particlesToSendFromPlayerToMultiblock)
+
+        PlayerStream.watching(world, arbitraryCrafterPos()).sendPacket(Packets.ItemMovementFromPlayerToMultiblockParticles(
+                withInventoryOfPlayer.uuid,
+                itemsFromMultiblockToPlayer = particlesToSendFromMultiblockToPlayer,
+                itemsFromPlayerToMultiblock = particlesToSendFromPlayerToMultiblock
+        ))
+    }
+
+    fun arbitraryCrafterPos() = crafterLocations[0]
+
+    private fun insertRecipeToMultiblock(satisfaction: List<ComponentSatisfaction>, world: World, relativeHologramPositions: List<HologramPos>, particlesToSendFromPlayerToMultiblock: MutableList<Pair<BlockPos, ItemStack>>) {
         for ((componentPos, satisfiedByStack, isAlreadyInMultiblock) in satisfaction) {
             if (!isAlreadyInMultiblock) {
                 val hologram = world.getHologramEntity(relativeHologramPositions.first { it.relativePos == componentPos }.absolutePos)
                 assert(hologram.isEmpty())
-                hologram.insertItem(satisfiedByStack!!.copy(1))
-                satisfiedByStack--
+                particlesToSendFromPlayerToMultiblock.add(Pair(hologram.pos, satisfiedByStack!!))
+                hologram.insertItem(satisfiedByStack.copy(1))
+                satisfiedByStack.count--
             }
         }
     }
 
 //    private fun ItemStack.move(amount : Int = this.count) = copy(amount).also { count -= amount }
 
-    fun givePlayerMismatchingItems(world: World, player: PlayerEntity, satisfaction: List<ComponentSatisfaction>) {
-        for(hologram in getHologramEntities(world)){
+    fun givePlayerMismatchingItems(world: World, player: PlayerEntity, satisfaction: List<ComponentSatisfaction>,
+                                   particlesToSendFromMultiblockToPlayer: MutableList<Pair<BlockPos, ItemStack>>) {
+        for (hologram in getHologramEntities(world)) {
             val item = hologram.getItem()
-            if(satisfaction.none { it.satisfiedBy == item }){
-                player.giveItemStack(item.copy())
-                item.count--
+            if (satisfaction.none { it.satisfiedBy == item }) {
+                particlesToSendFromMultiblockToPlayer.add(Pair(hologram.pos, item))
+                player.giveItemStack(hologram.extractItem())
             }
         }
     }

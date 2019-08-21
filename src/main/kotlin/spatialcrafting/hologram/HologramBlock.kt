@@ -21,7 +21,6 @@ import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.crafter.assertIs
 import spatialcrafting.hologram.HologramBlock.IsHiddenPropertyName
-import spatialcrafting.util.getMinecraftClient
 import spatialcrafting.util.isHoldingItemIn
 import spatialcrafting.util.kotlinwrappers.Builders
 import spatialcrafting.util.logDebug
@@ -134,9 +133,8 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
             multiblock.stopRecipeHelpServer(world)
 
 
-            multiblock.setNotCrafting(world)
+            multiblock.setNotCrafting()
 
-//            PlayerStream.watching(hologramEntity).sendPacket(Packets.CancelCraftingParticles(multiblock.crafterLocations[0]))
         }
 
 //        super.onBreak(world, pos, blockState, player)

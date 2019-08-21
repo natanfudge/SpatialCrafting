@@ -23,6 +23,8 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.IWorld
 import net.minecraft.world.World
+import spatialcrafting.client.particle.plus
+import spatialcrafting.client.particle.toVec3d
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
@@ -78,6 +80,10 @@ val World.isServer get() = !isClient
 fun IWorld.setBlock(block: Block, pos: BlockPos): Boolean = world.setBlockState(pos, block.defaultState)
 
 fun World.name() = if (isClient) "Client" else "Server"
-fun World.dropItemStack(stack: ItemStack, pos: BlockPos) : ItemEntity {
-    return ItemEntity(world, pos.x.d, pos.y.d, pos.z.d, stack).also { world.spawnEntity(it) }
+fun World.dropItemStack(stack: ItemStack, pos: BlockPos) : ItemEntity  = dropItemStack(stack,pos.toVec3d())
+fun World.dropItemStack(stack: ItemStack, pos: Vec3d) : ItemEntity {
+    return ItemEntity(world, pos.x, pos.y, pos.z, stack).also { world.spawnEntity(it) }
 }
+
+ fun vec3d(x: Double, y: Double, z: Double) = Vec3d(x, y, z)
+operator fun BlockPos.plus(vec3d: Vec3d) = this.toVec3d() + vec3d
