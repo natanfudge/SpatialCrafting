@@ -8,7 +8,7 @@ import spatialcrafting.MinCrafterSize
 import spatialcrafting.crafter.CraftersPieces
 import spatialcrafting.modId
 import spatialcrafting.recipe.SpatialRecipe
-import spatialcrafting.util.kotlinwrappers.itemStack
+import spatialcrafting.util.itemStack
 import java.util.function.Function
 
 class ReiSpatialCraftingPlugin : REIPluginEntry {

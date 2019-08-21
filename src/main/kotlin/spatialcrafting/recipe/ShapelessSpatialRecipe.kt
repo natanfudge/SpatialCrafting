@@ -12,7 +12,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
 import net.minecraft.world.World
-import spatialcrafting.client.Duration
+import spatialcrafting.util.Duration
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.util.matches
 

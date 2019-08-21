@@ -5,8 +5,10 @@ import alexiil.mc.lib.attributes.AttributeProvider
 import net.minecraft.block.*
 import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.entity.EntityContext
+import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.SidedInventory
+import net.minecraft.item.ItemStack
 import net.minecraft.state.StateFactory
 import net.minecraft.state.property.BooleanProperty
 import net.minecraft.util.Hand
@@ -18,10 +20,12 @@ import net.minecraft.world.BlockView
 import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.crafter.assertIs
+import spatialcrafting.hologram.HologramBlock.IsHiddenPropertyName
+import spatialcrafting.util.getMinecraftClient
+import spatialcrafting.util.isHoldingItemIn
 import spatialcrafting.util.kotlinwrappers.Builders
-import spatialcrafting.util.kotlinwrappers.isHoldingItemIn
-import spatialcrafting.util.kotlinwrappers.setBlock
 import spatialcrafting.util.logDebug
+import spatialcrafting.util.setBlock
 
 
 private const val Unbreakable = -1.0f
@@ -41,12 +45,14 @@ private val HologramSettings = Builders.blockSettings(
         replaceable = false
 )
 
-val IsHidden: BooleanProperty = BooleanProperty.of("is_hidden")
+
+val IsHidden: BooleanProperty = BooleanProperty.of(IsHiddenPropertyName)
 
 object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributeProvider, InventoryProvider {
+    const val IsHiddenPropertyName = "is_hidden"
 
     override fun getInventory(blockState: BlockState?, world: IWorld, pos: BlockPos): SidedInventory {
-        return HologramInventoryWrapper(world.getHologramEntity(pos).inventory)
+        return HologramInventoryWrapper(world.getHologramEntity(pos).inventory,pos)
     }
 
     override fun addAllAttributes(
@@ -91,8 +97,13 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
         return if (blockState.get(IsHidden)) BlockRenderType.INVISIBLE else super.getRenderType(blockState)
     }
 
+    override fun onPlaced(world_1: World?, blockPos_1: BlockPos?, blockState_1: BlockState?, livingEntity_1: LivingEntity?, itemStack_1: ItemStack?) {
+        super.onPlaced(world_1, blockPos_1, blockState_1, livingEntity_1, itemStack_1)
+    }
+
     override fun activate(blockState: BlockState, world: World, pos: BlockPos, player: PlayerEntity?, hand: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
         if (player == null || hand == null) return false
+
 
         val hologramEntity = world.getHologramEntity(pos)
 
@@ -109,14 +120,8 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
         return true
     }
 
-    override fun onBroken(world: IWorld, pos: BlockPos, blockState: BlockState) {
-        // For creative mode
-        world.setBlock(HologramBlock, pos)
-        logDebug {
-            "Left Click on hologram in position $pos. Block Entity: ${world.getBlockEntity(pos)}"
-        }
-        super.onBroken(world, pos, blockState)
-    }
+
+
 
     override fun onBreak(world: World, pos: BlockPos, blockState: BlockState?, player: PlayerEntity) {
 //        if(world.isServer) player.sendMessage("Pos = ${pos.xz}. BE: ${world.getBlockEntity(pos)?.let { "Not null" } ?: "NULL!!!"}")
@@ -126,7 +131,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
         // Cancel crafting if needed
         if (!extractedItem.isEmpty) {
             val multiblock = hologramEntity.getMultiblock()
-            multiblock.stopRecipeHelp(world)
+            multiblock.stopRecipeHelpServer(world)
 
 
             multiblock.setNotCrafting(world)
@@ -134,17 +139,26 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
 //            PlayerStream.watching(hologramEntity).sendPacket(Packets.CancelCraftingParticles(multiblock.crafterLocations[0]))
         }
 
-        super.onBreak(world, pos, blockState, player)
+//        super.onBreak(world, pos, blockState, player)
     }
 
     override fun onBlockRemoved(stateBefore: BlockState, world: World, pos: BlockPos, stateAfter: BlockState, boolean_1: Boolean) {
         // Only happens when the entire multiblock is destroyed or in creative mode.
-        if(stateBefore.block != stateAfter.block){
+        if (stateBefore.block != stateAfter.block) {
             world.getHologramEntity(pos).dropInventory()
         }
 
+    }
 
-        super.onBlockRemoved(stateBefore, world, pos, stateAfter, boolean_1)
+    override fun onBroken(world: IWorld, pos: BlockPos, blockState: BlockState) {
+        // For creative mode
+        world.setBlock(HologramBlock, pos)
+        logDebug {
+            "Left Click on hologram in position $pos. Block Entity: ${world.getBlockEntity(pos)}"
+        }
+
+
+        super.onBroken(world, pos, blockState)
     }
 
 
@@ -162,5 +176,5 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
 }
 
 fun IWorld.getHologramEntity(pos: BlockPos): HologramBlockEntity {
-    return getBlockEntity(pos).assertIs(pos,this)
+    return getBlockEntity(pos).assertIs(pos, this)
 }

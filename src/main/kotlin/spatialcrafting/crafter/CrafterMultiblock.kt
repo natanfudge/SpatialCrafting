@@ -8,20 +8,19 @@ import drawer.put
 import drawer.write
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
-import spatialcrafting.client.Duration
-import spatialcrafting.client.ticks
-import spatialcrafting.hologram.HologramBlock
-import spatialcrafting.hologram.IsHidden
-import spatialcrafting.hologram.getHologramEntity
+import spatialcrafting.hologram.*
 import spatialcrafting.recipe.ComponentPosition
+import spatialcrafting.recipe.ShapedRecipeComponent
 import spatialcrafting.recipe.SpatialRecipe
-import spatialcrafting.util.logDebug
-import spatialcrafting.util.matches
+import spatialcrafting.util.*
 
 
 private const val sizeKey = "size"
@@ -76,12 +75,13 @@ class CrafterMultiblock(
     fun getHologramEntities(world: World) = hologramLocations
             .map { world.getHologramEntity(it) }
 
-    val totalHologramAmount = multiblockSize * multiblockSize
-
-    val hologramLocations: List<BlockPos>
-        get() = this.crafterLocations.flatMap { pos ->
+    val hologramLocations: List<BlockPos> by lazy {
+        this.crafterLocations.flatMap { pos ->
             (1..multiblockSize).map { pos.up(it) }
         }
+    }
+
+    fun canBeUsedByPlayer(player: PlayerEntity) = hologramLocations.all { player.isCloseEnoughToHologramPos(it) }
 
     fun getInventory(world: World): CrafterMultiblockInventory {
         val entities = getHologramEntities(world).filter { !it.getItem().isEmpty }
@@ -106,18 +106,25 @@ class CrafterMultiblock(
         world.setBlockState(pos, HologramBlock.defaultState.with(IsHidden, hidden))
     }
 
-
-    fun startRecipeHelp(recipeId: Identifier, world: World) {
-        recipeHelpRecipeId = recipeId
-        recipeHelpCurrentLayer = 0
-        bumpRecipeHelpCurrentLayerIfNeeded(world)
-        hideAndShowHologramsForRecipeHelp(world)
+    private fun hologramsRelativePositions(): List<HologramPos> {
+        val originPosition = originHologramPos()
+        return hologramLocations.map {
+            HologramPos(it, it.relativeTo(originPosition))
+        }
     }
 
-    fun stopRecipeHelp(world: World) {
-        recipeHelpRecipeId = null
-        showAllHolograms(world)
+    // (0,0,0) of holograms
+    private fun originHologramPos() = hologramLocations.minBy { it.x + it.y + it.z }!!
+
+    private fun BlockPos.relativeTo(originPos: BlockPos) = ComponentPosition(x - originPos.x, y - originPos.y, z - originPos.z)
+
+
+    fun isLoadedAndHeightIsValid(world: World) = crafterLocations.all { world.isHeightValidAndBlockLoaded(it) }
+
+    private fun helpRecipeComponents(world: World): List<ShapedRecipeComponent>? = recipeHelpRecipeId?.let {
+        (world.recipeManager.get(it).orElse(null)!! as SpatialRecipe).previewComponents
     }
+
 
     fun bumpRecipeHelpCurrentLayerIfNeeded(world: World) {
         if (layerIsComplete(recipeHelpCurrentLayer, world)) {
@@ -135,35 +142,14 @@ class CrafterMultiblock(
         }
     }
 
-    fun decreaseRecipeHelpCurrentLayerIfNeeded(world: World) {
-        if ((0 until recipeHelpCurrentLayer).any { !layerIsComplete(it, world) }) {
-            assert(recipeHelpCurrentLayer <= 0)
-            logDebug { "Reducing recipe help layer" }
-            recipeHelpCurrentLayer--
-            hideAndShowHologramsForRecipeHelp(world)
-        }
-    }
-
-    fun showHologramsWithItemOnly(world: World) {
-        for (hologram in getHologramEntities(world)) {
-            setHologramVisibility(world, hologram.pos, hidden = hologram.getItem().isEmpty)
-        }
-    }
-
-    fun showAllHolograms(world: World) {
-        for (pos in hologramLocations) {
-            setHologramVisibility(world, pos, hidden = false)
-        }
-    }
-
-    fun hideAndShowHologramsForRecipeHelp(world: World) {
-        val recipeInputs = helpRecipeComponents(world)
-        for (hologram in hologramsRelativeLocations().filter { it.relativePos.y != recipeHelpCurrentLayer }) {
+    private fun hideAndShowHologramsForRecipeHelp(world: World) {
+        val recipeInputs = helpRecipeComponents(world)!!
+        for (hologram in hologramsRelativePositions().filter { it.relativePos.y != recipeHelpCurrentLayer }) {
             setHologramVisibility(world, hologram.absolutePos, hidden = true)
         }
 
 
-        for (hologram in hologramsRelativeLocations().filter { it.relativePos.y == recipeHelpCurrentLayer }) {
+        for (hologram in hologramsRelativePositions().filter { it.relativePos.y == recipeHelpCurrentLayer }) {
             val ingredient = recipeInputs.find { it.position == hologram.relativePos }
             if (ingredient != null) {
                 //TODO: set ghost item
@@ -176,12 +162,15 @@ class CrafterMultiblock(
 
     }
 
-    private fun helpRecipeComponents(world: World) =
-            (world.recipeManager.get(recipeHelpRecipeId).orElse(null)!! as SpatialRecipe).previewComponents
+    fun showHologramsWithItemOnly(world: World) {
+        for (hologram in getHologramEntities(world)) {
+            setHologramVisibility(world, hologram.pos, hidden = hologram.getItem().isEmpty)
+        }
+    }
 
     private fun layerIsComplete(layer: Int, world: World): Boolean {
-        val holograms = hologramsRelativeLocations()
-        return helpRecipeComponents(world).filter { it.position.y == layer }
+        val holograms = hologramsRelativePositions()
+        return helpRecipeComponents(world)!!.filter { it.position.y == layer }
                 .all { component ->
                     component.ingredient.matches(
                             world.getHologramEntity(holograms.first { it.relativePos == component.position }.absolutePos)
@@ -190,19 +179,96 @@ class CrafterMultiblock(
                 }
     }
 
-
-    private fun hologramsRelativeLocations(): List<HologramPos> {
-        // (0,0,0) of holograms
-        val locations = hologramLocations
-        val originPosition = locations.minBy { it.x + it.y + it.z }!!
-        return locations.map {
-            HologramPos(it,
-                    ComponentPosition(it.x - originPosition.x, it.y - originPosition.y, it.z - originPosition.z)
-            )
+    fun decreaseRecipeHelpCurrentLayerIfNeeded(world: World) {
+        if ((0 until recipeHelpCurrentLayer).any { !layerIsComplete(it, world) }) {
+            assert(recipeHelpCurrentLayer <= 0)
+            logDebug { "Reducing recipe help layer" }
+            recipeHelpCurrentLayer--
+            hideAndShowHologramsForRecipeHelp(world)
         }
     }
 
-    fun isLoadedAndHeightIsValid(world: World) = crafterLocations.all { world.isHeightValidAndBlockLoaded(it) }
+    // Server only
+    fun startRecipeHelpServer(recipeId: Identifier, world: World) {
+        assert(world.isServer)
+        startRecipeHelpCommon(recipeId)
+        bumpRecipeHelpCurrentLayerIfNeeded(world)
+        hideAndShowHologramsForRecipeHelp(world)
+    }
+
+    fun startRecipeHelpCommon(recipeId: Identifier) {
+        recipeHelpRecipeId = recipeId
+        recipeHelpCurrentLayer = 0
+    }
+
+
+    fun stopRecipeHelpServer(world: World) {
+        assert(world.isServer)
+        stopRecipeHelpCommon()
+        showAllHolograms(world)
+    }
+
+    fun stopRecipeHelpCommon() {
+        recipeHelpRecipeId = null
+    }
+
+    private fun showAllHolograms(world: World) {
+        for (pos in hologramLocations) {
+            setHologramVisibility(world, pos, hidden = false)
+        }
+    }
+
+    fun hologramGhostIngredientFor(hologram: HologramBlockEntity): Ingredient? {
+        val components = helpRecipeComponents(hologram.world!!) ?: return null
+        val relativePos = hologram.pos.relativeTo(originHologramPos())
+        return components.find { it.position == relativePos }?.ingredient
+    }
+
+
+    /**
+     * - Checks the recipe matches with the player inventory + multiblock inventory
+     * - Transfer every missing item of the recipe from the player inventory to the multiblock inventory
+     * - Transfer every mismatching item in the multiblock to the player inventory
+     */
+    fun autoCraft(world: World, withInventoryOfPlayer: PlayerEntity, recipe: SpatialRecipe) {
+        assert(world.isServer)
+        val (satisfaction, isFullySatisfied) = getRecipeSatisfaction(
+                recipe = recipe,
+                nearestCrafter = this,
+                world = world,
+                player = withInventoryOfPlayer
+        )
+        if (!isFullySatisfied) {
+            logWarning { "An autocraft was initiated when the player can't actually craft the recipe with his and the multiblock's inventory." }
+            return
+        }
+
+        val relativeHologramPositions = hologramsRelativePositions()
+
+        givePlayerMismatchingItems(world, withInventoryOfPlayer, satisfaction)
+
+
+        for ((componentPos, satisfiedByStack, isAlreadyInMultiblock) in satisfaction) {
+            if (!isAlreadyInMultiblock) {
+                val hologram = world.getHologramEntity(relativeHologramPositions.first { it.relativePos == componentPos }.absolutePos)
+                assert(hologram.isEmpty())
+                hologram.insertItem(satisfiedByStack!!.copy(1))
+                satisfiedByStack--
+            }
+        }
+    }
+
+//    private fun ItemStack.move(amount : Int = this.count) = copy(amount).also { count -= amount }
+
+    fun givePlayerMismatchingItems(world: World, player: PlayerEntity, satisfaction: List<ComponentSatisfaction>) {
+        for(hologram in getHologramEntities(world)){
+            val item = hologram.getItem()
+            if(satisfaction.none { it.satisfiedBy == item }){
+                player.giveItemStack(item.copy())
+                item.count--
+            }
+        }
+    }
 
 
 }

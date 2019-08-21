@@ -6,9 +6,12 @@ import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.item.TooltipContext
+import net.minecraft.client.particle.ItemPickupParticle
+import net.minecraft.entity.Entity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
+import net.minecraft.item.Items
 import net.minecraft.sound.SoundCategory
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
@@ -19,15 +22,13 @@ import net.minecraft.world.BlockView
 import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.Packets
-import spatialcrafting.client.*
+import spatialcrafting.client.Sounds
+import spatialcrafting.client.particle.MyItemPickupParticle
+import spatialcrafting.client.particle.centerOfHolograms
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.sendPacket
 import spatialcrafting.util.*
-import spatialcrafting.util.kotlinwrappers.dropItemStack
-import spatialcrafting.util.kotlinwrappers.getBlock
-import spatialcrafting.util.kotlinwrappers.isServer
-import spatialcrafting.util.kotlinwrappers.setBlock
 import java.util.*
 
 
@@ -99,6 +100,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
             for (hologramPos in multiblock.hologramLocations) {
                 world.setBlock(Blocks.AIR, pos = hologramPos)
+                world.removeBlockEntity(hologramPos)
             }
 
         }
@@ -112,6 +114,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 //        }
 
         //TODO: think of a better solution
+        // Maybe on chunk update, look at gravel
 
         super.neighborUpdate(blockState_1, world, pos, block_1, blockPos_2, boolean_1)
     }
@@ -147,16 +150,17 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
     /**
      * Called when crafting is done
      */
-    override fun onScheduledTick(blockState: BlockState?, world: World, pos: BlockPos, random: Random?) {
+    override fun onScheduledTick(blockState: BlockState?, world: World, anyCrafterPos: BlockPos, random: Random?) {
+        assert(world.isServer)
         logDebug { "Scheduling ended at world time ${world.time}" }
-        val multiblock = world.getCrafterEntity(pos).multiblockIn ?: return
+        val multiblock = world.getCrafterEntity(anyCrafterPos).multiblockIn ?: return
         // In case it was canceled
         val craftEndTime = multiblock.craftEndTime ?: return
 
         // For some reason this gets called when the world loads for no reasons os we need to do this
         if (craftEndTime > world.durationTime) {
             logDebug { "Scheduling popped too early at ${world.durationTime} when it was supposed to pop at $craftEndTime. Rescheduling." }
-            world.blockTickScheduler.schedule(pos, this, craftEndTime - world.durationTime)
+            world.blockTickScheduler.schedule(anyCrafterPos, this, craftEndTime - world.durationTime)
             return
         }
 
@@ -166,12 +170,12 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
                 // Can sometimes be null when the playing is loading
                 .orElse(null) ?: return
 
-        finishCraft(world, pos, multiblock, craftedRecipe)
+        finishCraft(world, anyCrafterPos, multiblock, craftedRecipe)
 
     }
 
-    private fun finishCraft(world: World, pos: BlockPos, multiblock: CrafterMultiblock, craftedRecipe: SpatialRecipe) {
-        world.play(Sounds.CraftEnd, at = pos, ofCategory = SoundCategory.BLOCKS)
+    private fun finishCraft(world: World, anyCrafterPos: BlockPos, multiblock: CrafterMultiblock, craftedRecipe: SpatialRecipe) {
+        world.play(Sounds.CraftEnd, at = anyCrafterPos, ofCategory = SoundCategory.BLOCKS)
 
         multiblock.setNotCrafting(world)
 
@@ -182,7 +186,8 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         }
 
 
-        multiblock.stopRecipeHelp(world)
+        multiblock.stopRecipeHelpServer(world)
+        PlayerStream.watching(world,anyCrafterPos).sendPacket(Packets.StopRecipeHelp(anyCrafterPos))
     }
 
 
@@ -191,6 +196,12 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
         // Prevent it being called twice
         if (hand == Hand.OFF_HAND) return false
+
+        //TODO: move this into the auto craft
+        if(world.isClient && placedBy != null){
+            val entity = world.dropItemStack(Items.CARROT.itemStack,pos.up())
+            getMinecraftClient().particleManager.addParticle(MyItemPickupParticle(world, entity, placedBy.pos))
+        }
 
          logDebug {
              val multiblockIn = world.getCrafterEntity(pos).multiblockIn

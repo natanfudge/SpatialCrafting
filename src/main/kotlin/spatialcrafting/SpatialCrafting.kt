@@ -1,42 +1,41 @@
 package spatialcrafting
 
+//import spatialcrafting.client.gui.DramaGeneratorController
+//import spatialcrafting.client.gui.DramaGeneratorScreen
+//import spatialcrafting.docs.ExampleMod.docsJavaCommonInit
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
+import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
+import net.fabricmc.fabric.api.client.model.ModelVariantProvider
 import net.fabricmc.fabric.api.client.screen.ScreenProviderRegistry
 import net.fabricmc.fabric.api.container.ContainerProviderRegistry
+import net.minecraft.client.render.model.BakedModel
+import net.minecraft.client.render.model.ModelBakeSettings
+import net.minecraft.client.render.model.ModelLoader
+import net.minecraft.client.render.model.UnbakedModel
+import net.minecraft.client.texture.Sprite
 import net.minecraft.container.BlockContext
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
 import spatialcrafting.client.Sounds
 import spatialcrafting.client.gui.DramaGeneratorController
 import spatialcrafting.client.gui.DramaGeneratorScreen
-//import spatialcrafting.client.gui.DramaGeneratorController
-//import spatialcrafting.client.gui.DramaGeneratorScreen
 import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.crafter.CraftersPieces
-//import spatialcrafting.docs.ExampleMod.docsJavaCommonInit
+import spatialcrafting.hologram.HologramBakedModel
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.HologramBlockEntityRenderer
 import spatialcrafting.recipe.ShapedSpatialRecipe
 import spatialcrafting.recipe.ShapelessSpatialRecipe
 import spatialcrafting.recipe.SpatialRecipe
+import spatialcrafting.util.itemStack
 import spatialcrafting.util.kotlinwrappers.initClientOnly
 import spatialcrafting.util.kotlinwrappers.initCommon
-import spatialcrafting.util.kotlinwrappers.itemStack
+import java.util.function.Function
 
-//TODO: fix sounds tutorial (can't reuse the id field...)
-//TODO: fix BER tutorial (needs to be on client)
-
-//TODO: test EVERYTHING on server
-//TODO: test itemstack
-//TODO: better x5 crafter texture
-
-//TODO: document packets:
-// - S2C -  Need to do taskQueue thing, needs to be registered on the client only
-// - C2S - Need to do taskQueue thing and beware of vulns (isLoaded, etc)
-//TODO: document recipes (remember that you need to implement read and write properly...)
+//TODO: document reload chunks (F3+A)
 //TODO: rei integration
-//TODO: better example recipes (some op items - sword of you want to craft this etc)
+
 //TODO: test putting items in differnet locations in large crafter with small recipe
 
 //TODO: ask to add to AOF
@@ -44,7 +43,13 @@ import spatialcrafting.util.kotlinwrappers.itemStack
 //TODO: power consumption
 //TODO: config file: sounds power multiplier, can store energy
 //TODO: Recipe generator GUI
-//TODO: remove useless shit for tutorials and such
+//TODO: test EVERYTHING on server
+//TODO: remove useless shit for tutorials and such, go through everything and make sure its needed
+//TODO: document packets:
+// - S2C -  Need to do taskQueue thing, needs to be registered on the client only
+// - C2S - Need to do taskQueue thing and beware of vulns (isLoaded, etc)
+//TODO: document recipes (remember that you need to implement read and write properly...)
+//TODO: better example recipes (some op items - sword of you want to craft this etc)
 
 const val ModId = "spatialcrafting"
 
@@ -59,6 +64,7 @@ private val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
 
 fun modId(str: String) = Identifier(ModId, str)
 
+private const val HologramId = "hologram"
 
 @Suppress("unused")
 fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
@@ -70,7 +76,7 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
     }
 
     registerTo(Registry.BLOCK) {
-        HologramBlock withId "hologram"
+        HologramBlock withId HologramId
     }
 
     registerTo(Registry.BLOCK_ENTITY) {
@@ -96,6 +102,7 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 //
     registerC2S(Packets.StartRecipeHelp.serializer())
     registerC2S(Packets.StopRecipeHelp.serializer())
+    registerC2S(Packets.AutoCraft.serializer())
 
     ContainerProviderRegistry.INSTANCE.registerFactory(GuiId) { syncId, _, player, buf ->
         DramaGeneratorController(syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos()))
@@ -106,8 +113,31 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 
 }
 
+
+
 @Suppress("unused")
 fun initClient() = initClientOnly(ModId) {
+
+    ModelLoadingRegistry.INSTANCE.registerVariantProvider {
+        ModelVariantProvider { modelId, _ ->
+            if (modelId.namespace == ModId && modelId.path == HologramId) {
+                object : UnbakedModel {
+                    override fun bake(modelLoader: ModelLoader, spriteFunction: Function<Identifier, Sprite>, settings: ModelBakeSettings): BakedModel {
+                        return HologramBakedModel()
+                    }
+
+                    override fun getModelDependencies(): List<Identifier> = listOf()
+                    override fun getTextureDependencies(unbakedModelFunction: Function<Identifier, UnbakedModel>, strings: MutableSet<String>): List<Identifier> =
+                            listOf(HologramBakedModel.Texture)
+                }
+            }
+            else null
+        }
+    }
+//    ModelLoadingRegistry.INSTANCE.registerVariantProvider {
+//
+//    }
+//    ModelVariantProvider
     registerS2C(Packets.AssignMultiblockState.serializer())
     registerS2C(Packets.UnassignMultiblockState.serializer())
 

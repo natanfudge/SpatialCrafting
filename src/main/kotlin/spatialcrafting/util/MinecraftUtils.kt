@@ -2,19 +2,26 @@
 
 package spatialcrafting.util
 
+import net.fabricmc.fabric.api.network.PacketContext
 import net.minecraft.block.Block
+import net.minecraft.block.BlockState
 import net.minecraft.block.Material
+import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawableHelper
+import net.minecraft.entity.ItemEntity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.item.ItemConvertible
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
 import net.minecraft.text.LiteralText
+import net.minecraft.util.Hand
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
+import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
@@ -40,25 +47,37 @@ fun DrawableHelper.drawCenteredStringWithoutShadow(textRenderer_1: TextRenderer,
     textRenderer_1.draw(string_1, (int_1 - textRenderer_1.getStringWidth(string_1) / 2).toFloat(), int_2.toFloat(), int_3)
 }
 
+fun getMinecraftClient() : MinecraftClient = MinecraftClient.getInstance()
+
 fun BlockPos.distanceFrom(otherPos :Vec3d) =
         sqrt((otherPos.x - this.x).squared() + (otherPos.y - this.y).squared() + (otherPos.z - this.z).squared())
 
 val  PlayerEntity.itemsInInventoryAndOffhand get() = inventory.main + inventory.offHand
 open class DefaultBlock : Block(Settings.of(Material.STONE))
 
-//class IdentifiedValue<T>(var value: T, val identifier: String)
-//
-//infix fun <T> T?.identifiedByNullable(identifier: String): IdentifiedValue<T?> = IdentifiedValue(this, identifier)
-//infix fun <T> T.identifiedBy(identifier: String): IdentifiedValue<T> = IdentifiedValue(this, identifier)
-//
-//fun CompoundTag.putBlockPos(pos: IdentifiedValue<BlockPos>) = putBlockPos(pos.value, pos.identifier)
-//fun CompoundTag.getBlockPos(identified: IdentifiedValue<BlockPos>): BlockPos? = getBlockPos(identified.identifier)
-//class Identified {
-//    operator fun getValue(thisRef: Any?, property: KProperty<*>): IdentifiedValue {
-//        return "$thisRef, thank you for delegating '${property.name}' to me!"
-//    }
-//
-//    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: String) {
-//        println("$value has been assigned to '${property.name}' in $thisRef.")
-//    }
-//}
+fun PlayerEntity.isHoldingItemIn(hand: Hand): Boolean = !getStackInHand(hand).isEmpty
+
+val PacketContext.world: World get() = player.world
+
+/**
+ * Creates a new [ItemStack] with the specified [count].
+ */
+fun ItemStack.copy(count: Int) = copy().apply { this.count = count }
+
+
+/**
+ * Converts this into an [ItemStack] that holds exactly one of this.
+ */
+val ItemConvertible.itemStack get() = ItemStack(this)
+
+fun World.getBlock(location: BlockPos): Block = getBlockState(location).block
+val World.isServer get() = !isClient
+/**
+ * Replaces the block in the [pos] with the specified [block], using the default [BlockState].
+ */
+fun IWorld.setBlock(block: Block, pos: BlockPos): Boolean = world.setBlockState(pos, block.defaultState)
+
+fun World.name() = if (isClient) "Client" else "Server"
+fun World.dropItemStack(stack: ItemStack, pos: BlockPos) : ItemEntity {
+    return ItemEntity(world, pos.x.d, pos.y.d, pos.z.d, stack).also { world.spawnEntity(it) }
+}

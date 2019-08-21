@@ -56,6 +56,7 @@ class ClientModInitializationContext(private val modId: String) {
 
 open class NamespacedRegistryDsl<T>(private val namespace: String, private val registry: Registry<T>) {
     open infix fun T.withId(name: String): T = Registry.register(registry, Identifier(namespace, name), this)
+    open infix fun T.withId(id : Identifier): T = Registry.register(registry, id, this)
 }
 
 class BlockWithItemRegistryDsl(private val namespace: String, private val group: ItemGroup?) {

@@ -19,11 +19,11 @@ object HologramBlockEntityRenderer : BlockEntityRenderer<HologramBlockEntity>() 
                 translate(x + MOVE_TO_MID_BLOCK_OFFSET, y + offset + HEIGHT_INCREASE, z + MOVE_TO_MID_BLOCK_OFFSET)
 
                 // Makes the item bigger
-                scale(SIZE_MULTIPLIER, SIZE_MULTIPLIER, SIZE_MULTIPLIER)
-
-                // Spins the item around
-                rotate(time, 0, SPIN_SPEED, 0)
-                minecraft.itemRenderer.renderItem(stack, ModelTransformation.Type.GROUND)
+                scale(SIZE_MULTIPLIER, SIZE_MULTIPLIER, SIZE_MULTIPLIER) {
+                    // Spins the item around
+                    rotate(time, 0, SPIN_SPEED, 0)
+                    minecraft.itemRenderer.renderItem(stack, ModelTransformation.Type.GROUND)
+                }
 
             }
 

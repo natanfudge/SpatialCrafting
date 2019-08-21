@@ -6,9 +6,6 @@ import com.mojang.blaze3d.platform.GlStateManager.SourceFactor
 import me.shedaniel.rei.client.ScreenHelper
 import me.shedaniel.rei.gui.widget.ButtonWidget
 import me.shedaniel.rei.gui.widget.QueuedTooltip
-import net.minecraft.client.resource.language.I18n
-import net.minecraft.client.world.ClientWorld
-import net.minecraft.item.ItemStack
 import net.minecraft.text.Style
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
@@ -17,11 +14,13 @@ import net.minecraft.util.math.MathHelper
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
-import spatialcrafting.recipe.*
+import spatialcrafting.hologram.isCloseEnoughToHologramPos
+import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.sendPacketToServer
+import spatialcrafting.util.ComponentSatisfaction
 import spatialcrafting.util.distanceFrom
-import spatialcrafting.util.itemsInInventoryAndOffhand
-import spatialcrafting.util.matches
+import spatialcrafting.util.getMinecraftClient
+import spatialcrafting.util.getRecipeSatisfaction
 import java.awt.Point
 import java.util.*
 
@@ -30,29 +29,24 @@ const val height = 10
 const val MaxDistanceFromNearestCrafter = 100
 
 
-
-
-data class ComponentSatisfaction(val pos: ComponentPosition, val satisfiedBy: ItemStack?)
-data class RecipeSatisfaction(val componentSatisfaction: List<ComponentSatisfaction>, val fullySatisfied: Boolean)
-
 //TODO: show ghost items
 //TODO: auto-transfer
 //TODO: remember to give the player all the items that don't match in the crafter
 
 
+fun fillInRecipeFromPlayerInventory(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
+    sendPacketToServer(Packets.AutoCraft(crafterMultiblock.crafterLocations[0], getMinecraftClient().player.uuid, recipeId))
+}
 
 
 fun startCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
-
-    sendPacketToServer(Packets.StartRecipeHelp(crafterMultiblock.crafterLocations[0],recipeId))
-    // So we can know if it started in the client
-    crafterMultiblock.recipeHelpRecipeId = recipeId
+    sendPacketToServer(Packets.StartRecipeHelp(crafterMultiblock.crafterLocations[0], recipeId))
+    crafterMultiblock.startRecipeHelpCommon(recipeId)
 }
 
 fun stopCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock) {
     sendPacketToServer(Packets.StopRecipeHelp(crafterMultiblock.crafterLocations[0]))
-    // So we can know if it stopped in the client
-    crafterMultiblock.recipeHelpRecipeId = null
+    crafterMultiblock.stopRecipeHelpCommon()
 }
 
 class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
@@ -71,9 +65,6 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
             field = value
             this.enabled = value != State.NO_NEARBY_CRAFTER && value != State.NEARBY_CRAFTER_TOO_SMALL
         }
-
-    private fun String.translated() = Optional.of(I18n.translate(this))
-
 
     /**
      * Null if there is no need to display a red highlight
@@ -99,20 +90,14 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
         val nearestCrafter = world.blockEntities.filterIsInstance<CrafterPieceEntity>()
                 .minBy { it.pos.distanceFrom(pos) }?.multiblockIn ?: return
         when (state) {
-            State.READY_FOR_RECIPE_HELP -> {
-                startCrafterRecipeHelp(nearestCrafter, recipe.identifier)
-                minecraft.player.closeScreen()
-            }
+            State.READY_FOR_RECIPE_HELP -> startCrafterRecipeHelp(nearestCrafter, recipe.identifier)
+            State.ALL_COMPONENTS_AVAILABLE -> fillInRecipeFromPlayerInventory(nearestCrafter, recipe.identifier)
+            State.RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS -> stopCrafterRecipeHelp(nearestCrafter)
 
-            State.ALL_COMPONENTS_AVAILABLE -> {
-                //TODO
-            }
-            State.RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS -> {
-                stopCrafterRecipeHelp(nearestCrafter)
-                minecraft.player.closeScreen()
-            }
             else -> error("Impossible")
         }
+
+        minecraft.player.closeScreen()
 
     }
 
@@ -125,19 +110,24 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
         val world = minecraft.world
         val nearestCrafter = world.blockEntities.filterIsInstance<CrafterPieceEntity>()
                 .minBy { it.pos.distanceFrom(pos) }?.multiblockIn
-        if (nearestCrafter != null && nearestCrafter.crafterLocations[0].distanceFrom(pos) <= MaxDistanceFromNearestCrafter) {
+        if (nearestCrafter != null && nearestCrafter.canBeUsedByPlayer(minecraft.player)) {
             if (nearestCrafter.multiblockSize >= recipe.minimumCrafterSize) {
 
-                val (recipeSatisfication, fullySatisified) = getRecipeSatisfaction(nearestCrafter, world)
+                val (recipeSatisfaction, fullySatisfied) = getRecipeSatisfaction(
+                        recipe = recipe,
+                        nearestCrafter = nearestCrafter,
+                        world = world,
+                        player = getMinecraftClient().player
+                )
 
                 state = when {
-                    fullySatisified -> State.ALL_COMPONENTS_AVAILABLE
+                    fullySatisfied -> State.ALL_COMPONENTS_AVAILABLE
                     nearestCrafter.recipeHelpActive -> State.RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS
                     else -> State.READY_FOR_RECIPE_HELP
                 }
 
                 if (state == State.RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS && this.isHovered(mouseX, mouseY)) {
-                    highlightMissingComponents(recipeSatisfication)
+                    highlightMissingComponents(recipeSatisfaction)
                     shouldHighlightMissingComponents = true
                 }
 
@@ -238,46 +228,6 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
 //        return getRecipeSatisfaction(nearestCrafter, world).fullySatisfied
 //    }
 
-    private fun getRecipeSatisfaction(nearestCrafter: CrafterMultiblock, world: ClientWorld): RecipeSatisfaction {
-        val crafterInventory = nearestCrafter.getInventory(world)
-
-        var fullySatisfied = true
-        val playerItems = minecraft.player.itemsInInventoryAndOffhand
-
-        // Tracks how many ingredients an itemstack in the player's inventory satisfies.
-        // This is so one itemstack that holds 2 of the item doesn't satisfy 10 different ingredients
-        val satisfactionMap = mutableMapOf<ItemStack, Int>()
-
-        val satisfaction = recipe.previewComponents.map { (pos, ingredient) ->
-            // Check if the ingredient exists in the multiblock already
-            val stackInMultiblockAtPos = crafterInventory.find { it.position == pos }?.itemStack
-                    ?: ItemStack.EMPTY
-
-            var satisfiedBy: ItemStack? = null
-
-            if (ingredient.matches(stackInMultiblockAtPos)) {
-                satisfiedBy = stackInMultiblockAtPos
-            }
-            else {
-                for (playerStack in playerItems) {
-                    if (!ingredient.matches(playerStack)) continue
-                    val ingredientsSatisfiedByStack = satisfactionMap[playerStack] ?: 0
-                    // Check that a single stack of 2 items does't satisfy more than 2
-                    if (playerStack.count > ingredientsSatisfiedByStack) {
-                        satisfiedBy = playerStack
-                        satisfactionMap[playerStack] = ingredientsSatisfiedByStack + 1
-                        break
-                    }
-                }
-            }
-
-            if (satisfiedBy == null) fullySatisfied = false
-
-            return@map ComponentSatisfaction(pos, satisfiedBy)
-        }
-
-        return RecipeSatisfaction(satisfaction, fullySatisfied)
-    }
 
     private fun emitRedColor() {
         GlStateManager.color4f(1f, 0f, 0f, 1.0f)

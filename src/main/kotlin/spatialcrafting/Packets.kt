@@ -1,4 +1,4 @@
-@file:UseSerializers(ForBlockPos::class, ForIdentifier::class, ForItemStack::class)
+@file:UseSerializers(ForBlockPos::class, ForIdentifier::class, ForItemStack::class, ForUuid::class)
 
 package spatialcrafting
 
@@ -16,31 +16,19 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
-import spatialcrafting.client.Duration
-import spatialcrafting.client.playCraftParticles
-import spatialcrafting.client.ticks
+import spatialcrafting.client.particle.playCraftParticles
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.crafter.assertIs
 import spatialcrafting.crafter.getCrafterEntity
 import spatialcrafting.hologram.HologramBlockEntity
+import spatialcrafting.recipe.SpatialRecipe
+import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.ClientModInitializationContext
 import spatialcrafting.util.kotlinwrappers.CommonModInitializationContext
-import spatialcrafting.util.kotlinwrappers.world
-import spatialcrafting.util.logWarning
+import java.util.*
 import java.util.stream.Stream
 
-//fun <T : Packets.Packet<T>> CommonModInitializationContext.registerOldC2S(serializer: Packets.Packetserializer<T>) {
-//    registerClientToServerPacket(serializer.id) { packetContext, packetByteBuf ->
-//        serializer.use(packetContext, serializer.fromBuf(packetByteBuf))
-//    }
-//}
-//
-//fun <T : Packets.Packet<T>> ClientModInitializationContext.registerOldS2C(serializer: Packets.Packetserializer<T>) {
-//    registerServerToClientPacket(serializer.id) { packetContext, packetByteBuf ->
-//        serializer.use(packetContext, serializer.fromBuf(packetByteBuf))
-//    }
-//}
 
 fun <T : Packets.Packet<T>> CommonModInitializationContext.registerC2S(serializer: KSerializer<T>) {
     registerClientToServerPacket(serializer.packetId) { packetContext, packetByteBuf ->
@@ -149,8 +137,14 @@ object Packets {
             else {
                 if (hologram.isEmpty()) hologram.insertItem(newItem)
             }
+
+
+            getMinecraftClient().worldRenderer.updateBlock(null, hologramPos, null, null, RerenderFlag)
+
         }
     }
+
+    const val RerenderFlag = 8
 
     @Serializable
     data class StartCraftingParticles(val multiblock: CrafterMultiblock, private val _duration: Long) : Packet<StartCraftingParticles> {
@@ -181,7 +175,8 @@ object Packets {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
-            multiblock.startRecipeHelp(recipeId, context.world)
+            getAndValidateRecipe(recipeId, context.world) ?: return
+            multiblock.startRecipeHelpServer(recipeId, context.world)
         }
     }
 
@@ -191,9 +186,46 @@ object Packets {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
-            multiblock.stopRecipeHelp(context.world)
-
+            multiblock.stopRecipeHelpServer(context.world)
         }
+    }
+
+
+    /**
+     * - Checks the recipe matches with the player inventory + multiblock inventory
+     * - Transfer every missing item of the recipe from the player inventory to the multiblock inventory
+     * - Transfer every mismatching item in the multiblock to the player inventory
+     */
+    @Serializable
+    data class AutoCraft(val anyCrafterPiecePos: BlockPos, val withInventoryOfPlayer: UUID, val recipeId: Identifier) : Packet<AutoCraft> {
+        override val serializer get() = serializer()
+        override fun use(context: PacketContext) {
+            val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
+            val player = context.world.getPlayerByUuid(withInventoryOfPlayer) ?:
+                logWarning { "AutoCraft initiated for unknown player with UUID $withInventoryOfPlayer." }.run { return }
+
+            if(!multiblock.canBeUsedByPlayer(player)){
+                logWarning {
+                    "AutoCraft initiated by player with UUID $withInventoryOfPlayer who cannot access the multiblock at ${multiblock.crafterLocations}"
+                }
+                return
+            }
+
+            val recipe = getAndValidateRecipe(recipeId, context.world) ?: return
+
+
+            multiblock.autoCraft(context.world,player, recipe)
+        }
+
+    }
+
+    private fun getAndValidateRecipe(recipeId: Identifier, world: World): SpatialRecipe? {
+        val recipe = world.recipeManager.get(recipeId).orElse(null)
+        if(recipe == null){
+            logWarning { "Attempt to use packet with non-existent recipe id '$recipe'! Packet will not apply." }
+            return null
+        }
+        return recipe as SpatialRecipe
     }
 
     private fun getAndValidateMultiblock(anyCrafterPiecePos: BlockPos, world: World): CrafterMultiblock? {
@@ -204,13 +236,13 @@ object Packets {
             }
             else {
                 logWarning {
-                    "Attempt to start recipe help in unloaded multiblock $multiblock! Recipe help will not apply."
+                    "Attempt to use packet with unloaded multiblock '$multiblock'! Packet will not apply."
                 }
             }
         }
         else {
             logWarning {
-                "Attempt to start recipe help in unloaded position $anyCrafterPiecePos! Recipe help will not apply."
+                "Attempt to use packet in unloaded position '$anyCrafterPiecePos'! Packet will not apply."
             }
         }
         return null

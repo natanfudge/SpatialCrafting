@@ -11,7 +11,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
 import net.minecraft.world.World
-import spatialcrafting.client.Duration
+import spatialcrafting.util.Duration
 import spatialcrafting.crafter.CopyableWithPosition
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
@@ -76,7 +76,6 @@ class ShapedSpatialRecipe private constructor(val components: List<ShapedRecipeC
     override fun getSerializer() = Serializer
 
     companion object Serializer : SpatialRecipe.Serializer<ShapedSpatialRecipe>() {
-        val x  = serializer()
         override val serializer : KSerializer<ShapedSpatialRecipe>
             get() = serializer()
 
@@ -100,8 +99,8 @@ data class ShapedRecipeComponent(override val position: ComponentPosition, val i
     : CopyableWithPosition<ShapedRecipeComponent> {
     override fun copy(newPosition: ComponentPosition) = copy(position = newPosition)
 
-
 }
+
 
 // The 'x' 'y' 'z' coordinates of are offset based, meaning they range from 0 to 4, based on how big the multiblock is.
 @Serializable

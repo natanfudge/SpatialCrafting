@@ -1,4 +1,4 @@
-package spatialcrafting.client
+package spatialcrafting.client.particle
 
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.particle.ParticleTextureSheet
@@ -6,7 +6,9 @@ import net.minecraft.client.particle.SpriteBillboardParticle
 import net.minecraft.item.ItemStack
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
-import spatialcrafting.client.MathUtil.euclideanDistanceOf
+import spatialcrafting.client.particle.MathUtil.euclideanDistanceOf
+import spatialcrafting.util.Duration
+import spatialcrafting.util.ticks
 
 class CraftParticle(world: World,
                     sourcePos: Vec3d,

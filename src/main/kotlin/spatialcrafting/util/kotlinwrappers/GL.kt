@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11
 
 class GL {
     val minecraft: MinecraftClient = MinecraftClient.getInstance()
-    var scaled: Boolean = false
+//    var scaled: Boolean = false
 
     companion object {
         /**
@@ -14,8 +14,8 @@ class GL {
          */
         inline fun begin(rendering: GL.() -> Unit) {
             GlStateManager.pushMatrix()
-            val gl = GL().apply(rendering)
-            if (gl.scaled) GlStateManager.scalef(1f, 1f, 1f)
+            GL().apply(rendering)
+//            if (gl.scaled)
             GlStateManager.popMatrix()
         }
     }
@@ -41,28 +41,29 @@ class GL {
         GlStateManager.translatef(x.toFloat(), y.toFloat(), z.toFloat())
     }
 
-    /**
-     * Scales the xsize, ysize and zsize by the [x] [y] [z] multipliers (1 = normal size, 0.5 = half size, etc)
-     */
-    fun scale(x: Number, y: Number, z: Number) {
-        GlStateManager.scaled(x.toDouble(), y.toDouble(), z.toDouble())
-        scaled = true
-    }
-
-    /**
-     * Scales the xsize, ysize and zsize by the [x] [y] [z] multipliers (1 = normal size, 0.5 = half size, etc)
-     */
-    fun scale(x: Float, y: Float, z: Float) {
-        GlStateManager.scalef(x, y, z)
-        scaled = true
-    }
+//    /**
+//     * Scales the xsize, ysize and zsize by the [x] [y] [z] multipliers (1 = normal size, 0.5 = half size, etc)
+//     */
+//    fun scale(x: Number, y: Number, z: Number) {
+//        GlStateManager.scaled(x.toDouble(), y.toDouble(), z.toDouble())
+//        scaled = true
+//    }
+//
+//    /**
+//     * Scales the xsize, ysize and zsize by the [x] [y] [z] multipliers (1 = normal size, 0.5 = half size, etc)
+//     */
+//    fun scale(x: Float, y: Float, z: Float) {
+//        GlStateManager.scalef(x, y, z)
+//        scaled = true
+//    }
 
     /**
      * Scales the xsize, ysize and zsize of the model by the [x] [y] [z] multipliers (1 = normal size, 0.5 = half size, etc)
      */
-    fun scale(x: Int, y: Int, z: Int) {
+    inline fun scale(x: Int, y: Int, z: Int, code : () -> Unit) {
         GlStateManager.scalef(x.toFloat(), y.toFloat(), z.toFloat())
-        scaled = true
+        code()
+        GlStateManager.scalef(1f, 1f, 1f)
     }
 
     /**

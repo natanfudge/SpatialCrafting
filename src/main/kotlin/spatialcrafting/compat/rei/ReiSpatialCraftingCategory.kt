@@ -18,6 +18,7 @@ import spatialcrafting.compat.rei.util.SwappableChildWidget
 import spatialcrafting.compat.rei.util.SwappableChildrenWidget
 import spatialcrafting.crafter.CraftersPieces
 import spatialcrafting.modId
+import spatialcrafting.util.ComponentSatisfaction
 import spatialcrafting.util.drawCenteredStringWithoutShadow
 import spatialcrafting.util.isWholeNumber
 import java.awt.Point

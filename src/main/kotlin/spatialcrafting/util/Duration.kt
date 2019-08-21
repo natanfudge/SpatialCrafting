@@ -1,6 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
-package spatialcrafting.client
+package spatialcrafting.util
 
 import io.netty.buffer.ByteBuf
 import kotlinx.coroutines.CoroutineScope
@@ -9,8 +9,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.TickScheduler
 import net.minecraft.world.World
-import spatialcrafting.util.d
-import spatialcrafting.util.f
+import spatialcrafting.client.Speed
 import kotlin.math.roundToLong
 
 inline val World.durationTime get() = time.ticks

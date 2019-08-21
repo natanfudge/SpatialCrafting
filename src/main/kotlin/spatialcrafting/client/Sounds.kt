@@ -2,6 +2,7 @@ package spatialcrafting.client
 
 import net.minecraft.sound.SoundEvent
 import spatialcrafting.modId
+import spatialcrafting.util.ticks
 
 object Sounds {
     const val CraftEndId = "craft_end"

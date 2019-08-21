@@ -1,4 +1,4 @@
-package spatialcrafting.client
+package spatialcrafting.client.particle
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -11,8 +11,13 @@ import net.minecraft.item.Items
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
+import spatialcrafting.client.Speed
+import spatialcrafting.client.bps
 import spatialcrafting.crafter.CrafterMultiblock
-import spatialcrafting.crafter.getCrafterEntity
+import spatialcrafting.util.Duration
+import spatialcrafting.util.distancePassedIn
+import spatialcrafting.util.seconds
+import spatialcrafting.util.ticks
 import kotlin.math.max
 import kotlin.math.roundToInt
 

@@ -22,9 +22,9 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.registry.Registry
 import spatialcrafting.MaxCrafterSize
-import spatialcrafting.client.Duration
-import spatialcrafting.client.seconds
-import spatialcrafting.client.ticks
+import spatialcrafting.util.Duration
+import spatialcrafting.util.seconds
+import spatialcrafting.util.ticks
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
 import spatialcrafting.util.flatMapIndexed

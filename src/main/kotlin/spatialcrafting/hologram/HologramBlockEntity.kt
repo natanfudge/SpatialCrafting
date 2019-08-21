@@ -1,23 +1,76 @@
+@file:UseSerializers(ForIngredient::class)
+
 package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.AttributeList
+import drawer.ForIngredient
+import drawer.getNullableFrom
+import drawer.put
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
+import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity
 import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.recipe.Ingredient
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.sendPacket
+import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.Builders
-import spatialcrafting.util.kotlinwrappers.copy
-import spatialcrafting.util.kotlinwrappers.dropItemStack
-import spatialcrafting.util.kotlinwrappers.isServer
-import spatialcrafting.util.logDebug
 
 
-class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
+//
+//data class SerializableData(val value: Any?, val serializer: KSerializer<Any?>)
+//
+//data class BlockEntityData(val data: MutableMap<String, Any?> = mutableMapOf()) {
+//    fun putIn(tag: CompoundTag) {
+//
+//    }
+//
+//    companion object {
+//        fun getFrom(tag: CompoundTag): BlockEntityData {
+//            val map = SerializationData.serializers
+//                    .mapNotNull {(propertyName,serializer)-> Pair(propertyName,serializer) }
+//            for((propertyName,serializer) in ){
+//                 tag.getTag(propertyName)
+//            }
+//        }
+//    }
+//}
+//
+//
+//
+//object SerializationData{
+//    var serializers : MutableMap<String,KSerializer<Any?>> = mutableMapOf()
+//}
+
+//fun y(){
+//    val x = X()
+//    val obj = x.com
+//}
+//
+//class X{
+//    companion object{
+//        val y =2
+//    }
+//}
+
+//@Serializable
+//data class GhostIngredient(val ingredient: Ingredient, val cycleIndex: Int)
+
+//@Serializable
+//data class HologramData(val inventory: HologramInventory)
+
+class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, RenderAttachmentBlockEntity {
+    override fun getRenderAttachmentData(): Any = ghostIngredient?.let {
+        if (it.matches(getItem())) ItemStack.EMPTY
+        else it.stackArray[ghostIngredientCycleIndex]
+    } ?: ItemStack.EMPTY
+
 
     companion object {
         val Type = Builders.blockEntityType(HologramBlock) { HologramBlockEntity() }
@@ -25,6 +78,7 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
         private object Keys {
             const val Inventory = "inventory"
             const val LastChangeTime = "last_change_time"
+            const val GhostIngredientCycleIndex = "cycle_index"
         }
     }
 
@@ -33,13 +87,26 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
         // Since inventory is only changed at server side we need to send a packet to the client
         // Note: this will be called again in the client after we do that, so we need to ignore it that time.
         it.setOwnerListener { _, _, previousStack, currentStack ->
-            if (world!!.isClient) return@setOwnerListener
+            lastChangeTime = world!!.time
+            if (world!!.isClient) {
+                return@setOwnerListener
+            }
 
             if (!previousStack.isItemEqual(currentStack)) {
                 PlayerStream.watching(this).sendPacket(Packets.UpdateHologramContent(this.pos, currentStack))
             }
         }
     }
+
+
+    private val ghostIngredient: Ingredient?
+        get() = try{ getMultiblock().hologramGhostIngredientFor(this) }
+        catch (e : IllegalStateException){
+            logWarning { "Could not get ghost ingredient: $e" }
+            null
+        }
+
+    private var ghostIngredientCycleIndex = 0
 
 
     /**
@@ -49,15 +116,17 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
-        tag.put(Keys.Inventory, inventory.toTag());
+        tag.put(Keys.Inventory, inventory.toTag())
         tag.putLong(Keys.LastChangeTime, lastChangeTime)
+        tag.putInt(Keys.GhostIngredientCycleIndex, ghostIngredientCycleIndex)
         return tag
     }
 
     override fun fromTag(tag: CompoundTag) {
         super.fromTag(tag)
-        inventory.fromTag(tag.getCompound(Keys.Inventory));
+        inventory.fromTag(tag.getCompound(Keys.Inventory))
         lastChangeTime = tag.getLong(Keys.LastChangeTime)
+        ghostIngredientCycleIndex = tag.getInt(Keys.GhostIngredientCycleIndex)
     }
 
     override fun toClientTag(p0: CompoundTag): CompoundTag = toTag(p0)
@@ -92,9 +161,9 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
         markDirty()
         if (world!!.isServer) {
             val multiblock = getMultiblock()
-            if (multiblock.recipeHelpActive) {
-                multiblock.decreaseRecipeHelpCurrentLayerIfNeeded(world!!)
-            }
+//            if (multiblock.recipeHelpActive) {
+//                multiblock.decreaseRecipeHelpCurrentLayerIfNeeded(world!!)
+//            }
         }
         return item
     }
@@ -120,8 +189,9 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable {
             val entityBelow = world.getBlockEntity(currentPos)
             if (entityBelow !is HologramBlockEntity) {
                 if (entityBelow is CrafterPieceEntity) {
-                    return entityBelow.multiblockIn ?: error("A hologram should always have a multiblock," +
-                            " and yet when looking at a crafter piece below at position $pos he did not have a multiblock instance.")
+                    return entityBelow.multiblockIn
+                            ?: error("A hologram should always have a multiblock," +
+                                    " and yet when looking at a crafter piece below at position $pos he did not have a multiblock instance.")
                 }
                 else {
                     error("Looked down below a hologram, and instead of finding a crafter entity, a $entityBelow was found!")
