@@ -111,12 +111,12 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 
 
     registerC2S(Packets.StartRecipeHelp.serializer())
-    registerC2S(Packets.StopRecipeHelp.serializer())
-    registerC2S(Packets.AutoCraft.serializer())
 
-    ContainerProviderRegistry.INSTANCE.registerFactory(GuiId) { syncId, _, player, buf ->
-        DramaGeneratorController(syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos()))
-    }
+    registerC2S(Packets.AutoCraft.serializer())
+//
+//    ContainerProviderRegistry.INSTANCE.registerFactory(GuiId) { syncId, _, player, buf ->
+//        DramaGeneratorController(syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos()))
+//    }
 
 //    docsJavaCommonInit()
 
@@ -144,26 +144,23 @@ fun initClient() = initClientOnly(ModId) {
             else null
         }
     }
-//    ModelLoadingRegistry.INSTANCE.registerVariantProvider {
-//
-//    }
-//    ModelVariantProvider
+
     registerS2C(Packets.AssignMultiblockState.serializer())
     registerS2C(Packets.UnassignMultiblockState.serializer())
-
+    registerS2C(Packets.StopRecipeHelp.serializer())
     registerS2C(Packets.UpdateHologramContent.serializer())
     registerS2C(Packets.StartCraftingParticles.serializer())
     registerS2C(Packets.ItemMovementFromPlayerToMultiblockParticles.serializer())
 
     register(HologramBlockEntityRenderer)
 
-    ScreenProviderRegistry.INSTANCE.registerFactory(GuiId) { syncId, _, player, buf ->
-        DramaGeneratorScreen(
-                DramaGeneratorController(
-                        syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos())
-                ), player
-        )
-    }
+//    ScreenProviderRegistry.INSTANCE.registerFactory(GuiId) { syncId, _, player, buf ->
+//        DramaGeneratorScreen(
+//                DramaGeneratorController(
+//                        syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos())
+//                ), player
+//        )
+//    }
 
 }
 

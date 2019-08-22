@@ -7,6 +7,8 @@ import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.recipe.ComponentPosition
 import spatialcrafting.recipe.SpatialRecipe
 
+//TODO: doesn't work for the same reason as the shapeless crafting ( when there is multiple matching stacks of the same ingredient)
+// Probably want to unify the 2 concepts.
  fun getRecipeSatisfaction(recipe: SpatialRecipe, nearestCrafter: CrafterMultiblock, world: World, player: PlayerEntity): RecipeSatisfaction {
     val crafterInventory = nearestCrafter.getInventory(world)
 

@@ -4,8 +4,6 @@ package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.AttributeList
 import drawer.ForIngredient
-import drawer.put
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity
@@ -14,6 +12,7 @@ import net.minecraft.block.entity.BlockEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.recipe.Ingredient
+import net.minecraft.util.Tickable
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
@@ -21,11 +20,13 @@ import spatialcrafting.sendPacket
 import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.Builders
 
+private const val TicksPerSecond = 20
 
-class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, RenderAttachmentBlockEntity {
+class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, RenderAttachmentBlockEntity, Tickable {
+
     override fun getRenderAttachmentData(): Any = ghostIngredient?.let {
         if (it.matches(getItem())) ItemStack.EMPTY
-        else it.stackArray[ghostIngredientCycleIndex]
+        else it.stackArray[(ghostIngredientCycleIndex / TicksPerSecond) % it.stackArray.size]
     } ?: ItemStack.EMPTY
 
 
@@ -57,12 +58,33 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
 
 
     private val ghostIngredient: Ingredient?
-        get() = try{ getMultiblock().hologramGhostIngredientFor(this) }
-        catch (e : IllegalStateException){
+        get() = try {
+            getMultiblock().hologramGhostIngredientFor(this).also { ghostIngredientActive = it != null }
+        } catch (e: IllegalStateException) {
             logWarning { "Could not get ghost ingredient: $e" }
             null
         }
 
+    /**
+     * A way to avoid checking if there is a ghost ingredient every tick
+     */
+    private var ghostIngredientActive: Boolean = false
+
+    override fun tick(/*client : MinecraftClient*/) {
+        // Value is always incremented to avoid desyncs
+        if (world?.isClient == true) {
+            ghostIngredientCycleIndex++
+            if (ghostIngredientActive) {
+                if (ghostIngredientCycleIndex % TicksPerSecond == 0) getMinecraftClient().scheduleRenderUpdate(pos)
+            }
+        }
+
+
+    }
+
+    /**
+     * Measured in ticks and then divided by 20. Used to change the item that is showed in the ghost item constantly
+     */
     private var ghostIngredientCycleIndex = 0
 
     /**
@@ -81,7 +103,6 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
         super.toTag(tag)
         tag.put(Keys.Inventory, inventory.toTag())
         tag.putLong(Keys.LastChangeTime, lastChangeTime)
-        tag.putInt(Keys.GhostIngredientCycleIndex, ghostIngredientCycleIndex)
         return tag
     }
 
@@ -89,7 +110,6 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
         super.fromTag(tag)
         inventory.fromTag(tag.getCompound(Keys.Inventory))
         lastChangeTime = tag.getLong(Keys.LastChangeTime)
-        ghostIngredientCycleIndex = tag.getInt(Keys.GhostIngredientCycleIndex)
     }
 
     override fun toClientTag(p0: CompoundTag): CompoundTag = toTag(p0)

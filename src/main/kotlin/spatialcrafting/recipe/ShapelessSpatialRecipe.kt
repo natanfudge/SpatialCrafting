@@ -15,6 +15,7 @@ import net.minecraft.world.World
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.util.Duration
 import spatialcrafting.util.matches
+import kotlin.properties.Delegates
 
 @Serializable
 class ShapelessSpatialRecipe private constructor(private val components: List<ShapelessRecipeComponent>,
@@ -33,9 +34,7 @@ class ShapelessSpatialRecipe private constructor(private val components: List<Sh
                 workaround: Byte = 0.toByte()
     ) : this(components, minimumCrafterSize, energyCost, craftTime.inTicks, outputStack, identifier)
 
-    override val previewComponents: List<ShapedRecipeComponent> by lazy { calculatePreviewComponents() }
-
-    private fun calculatePreviewComponents(): List<ShapedRecipeComponent> {
+    override val previewComponents: List<ShapedRecipeComponent> by lazy {
         val input = mutableListOf<ShapedRecipeComponent>()
 
         var x = 0
@@ -60,19 +59,30 @@ class ShapelessSpatialRecipe private constructor(private val components: List<Sh
 
         }
 
-        return input
+        return@lazy input
     }
+
+//    private fun calculatePreviewComponents(): List<ShapedRecipeComponent> {
+//
+//    }
 
     override fun getSerializer() = Serializer
 
     data class ItemAndAmount(val stack: ItemStack, val amount: Int)
 
+    val x  : Int by lazy {  2  }
+
+    //TODO: doesn't work when there is multiple matching stacks of the same ingredient.
     override fun matches(inventory: CrafterMultiblockInventoryWrapper, world: World): Boolean {
+        if (minimumCrafterSize > inventory.crafterSize) return false
         val shapelessInventory = inventory.groupBy { it.itemStack.item }.map { ItemAndAmount(it.value[0].itemStack, it.value.size) }
         if (shapelessInventory.size != components.size) return false
-        if (minimumCrafterSize > inventory.crafterSize) return false
+
 
         return components.all { component ->
+            // Gather all stacks in the inventory that match the component
+            val matchingStacks = shapelessInventory.sumBy { if(component.ingredient.matches(it.stack)) it.amount else 0 }
+            // Ensure it is
             // Check every component exists in the inventory with the required amount
             shapelessInventory.any { component.ingredient.matches(it.stack) && component.amount == it.amount }
         }

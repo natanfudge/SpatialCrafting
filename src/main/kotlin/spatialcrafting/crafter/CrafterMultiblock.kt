@@ -257,6 +257,7 @@ class CrafterMultiblock(
     }
 
     fun arbitraryCrafterPos() = crafterLocations[0]
+    fun differentArbitraryCrafterPos() = crafterLocations[1]
 
     private fun insertRecipeToMultiblock(satisfaction: List<ComponentSatisfaction>, world: World, relativeHologramPositions: List<HologramPos>, particlesToSendFromPlayerToMultiblock: MutableList<Pair<BlockPos, ItemStack>>) {
         for ((componentPos, satisfiedByStack, isAlreadyInMultiblock) in satisfaction) {

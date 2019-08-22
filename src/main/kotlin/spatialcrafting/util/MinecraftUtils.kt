@@ -96,6 +96,13 @@ fun CompoundTag.getBlockPos(key: String): BlockPos? = getLong(key).let { if (it 
 
 fun PlayerEntity.offerOrDrop(itemStack: ItemStack) = inventory.offerOrDrop(world, itemStack)
 
+fun MinecraftClient.scheduleRenderUpdate(pos: BlockPos) = worldRenderer.updateBlock(
+        null, pos, null, null, RerenderFlag
+)
+
+private const val RerenderFlag = 8
+
+
 class ToolMaterialImpl(private val _miningLevel: Int,
                        private val _durability: Int,
                        private val _miningSpeed: Float,

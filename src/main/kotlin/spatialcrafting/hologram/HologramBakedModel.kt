@@ -50,11 +50,6 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
 
             val scale = 0.5
 
-            val x = "test".toIntOrNull()
-
-//            val x :  = 2.f
-
-
             // Rescales the model
             for (i in 0..3) {
                 quad.pos(i, ((quad.x(i) - 0.5f) * scale + 0.5f).toFloat(),

@@ -52,7 +52,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     const val IsHiddenPropertyName = "is_hidden"
 
     override fun getInventory(blockState: BlockState?, world: IWorld, pos: BlockPos): SidedInventory {
-        return HologramInventoryWrapper(world.getHologramEntity(pos).inventory,pos)
+        return HologramInventoryWrapper(world.getHologramEntity(pos).inventory, pos)
     }
 
     override fun addAllAttributes(
@@ -121,24 +121,21 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     }
 
 
-
-
     override fun onBreak(world: World, pos: BlockPos, blockState: BlockState?, player: PlayerEntity) {
-//        if(world.isServer) player.sendMessage("Pos = ${pos.xz}. BE: ${world.getBlockEntity(pos)?.let { "Not null" } ?: "NULL!!!"}")
         val hologramEntity = world.getHologramEntity(pos)
         // This is to make it so in creative mod you won't get unnecessary items. (onBlockRemoved is called afterwards)
         val extractedItem = hologramEntity.extractItem()
         // Cancel crafting if needed
         if (!extractedItem.isEmpty) {
             val multiblock = hologramEntity.getMultiblock()
-            multiblock.stopRecipeHelpServer(world)
-
-
+            if (multiblock.isCrafting) {
+                multiblock.stopRecipeHelpServer(world)
+            }
             multiblock.setNotCrafting()
+
 
         }
 
-//        super.onBreak(world, pos, blockState, player)
     }
 
     override fun onBlockRemoved(stateBefore: BlockState, world: World, pos: BlockPos, stateAfter: BlockState, boolean_1: Boolean) {

@@ -9,7 +9,6 @@ import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
 import net.minecraft.sound.SoundCategory
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
@@ -21,7 +20,6 @@ import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.Packets
 import spatialcrafting.client.Sounds
-import spatialcrafting.client.particle.ItemMovementParticle
 import spatialcrafting.client.particle.centerOfHolograms
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.recipe.SpatialRecipe
@@ -94,6 +92,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         fun destroyMultiblock(world: World, multiblock: CrafterMultiblock) {
             assert(world.isServer)
             logDebug { "Destroying multiblock.\n [${multiblock.logString()}]" }
+
             CrafterPieceEntity.unassignMultiblockState(world, multiblock)
 
             for (hologramPos in multiblock.hologramLocations) {
@@ -142,7 +141,10 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         assert(world.isServer)
         destroyMultiblock(world, multiblock)
         PlayerStream.watching(world, multiblock.arbitraryCrafterPos())
-                .sendPacket(Packets.UnassignMultiblockState(multiblock))
+                .sendPacket(Packets.UnassignMultiblockState(
+                        multiblock.arbitraryCrafterPos(),
+                        multiblock.differentArbitraryCrafterPos()
+                ))
     }
 
     /**
@@ -185,7 +187,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
 
 
         multiblock.stopRecipeHelpServer(world)
-        PlayerStream.watching(world,anyCrafterPos).sendPacket(Packets.StopRecipeHelp(anyCrafterPos))
+        PlayerStream.watching(world, anyCrafterPos).sendPacket(Packets.StopRecipeHelp(anyCrafterPos))
     }
 
 
@@ -195,8 +197,8 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         // Prevent it being called twice
         if (hand == Hand.OFF_HAND) return false
 
-         logDebug {
-             val multiblockIn = world.getCrafterEntity(pos).multiblockIn
+        logDebug {
+            val multiblockIn = world.getCrafterEntity(pos).multiblockIn
             "${if (world.isClient) "CLIENT" else "SERVER"}: Right clicked on crafter piece at ${pos.xz}. Formed = ${multiblockIn != null}"
         }
         val multiblockIn = world.getCrafterEntity(pos).multiblockIn ?: return false

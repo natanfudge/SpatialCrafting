@@ -31,7 +31,7 @@ import java.util.*
 import java.util.stream.Stream
 
 
-fun <T : Packets.Packet<T>> CommonModInitializationContext.registerC2S(serializer: KSerializer<T>) {
+fun <T : C2SPacket<T>> CommonModInitializationContext.registerC2S(serializer: KSerializer<T>) {
     registerClientToServerPacket(serializer.packetId) { packetContext, packetByteBuf ->
         serializer.readFrom(packetByteBuf).apply {
             packetContext.taskQueue.execute {
@@ -41,7 +41,7 @@ fun <T : Packets.Packet<T>> CommonModInitializationContext.registerC2S(serialize
     }
 }
 
-fun <T : Packets.Packet<T>> ClientModInitializationContext.registerS2C(serializer: KSerializer<T>) {
+fun <T : S2CPacket<T>> ClientModInitializationContext.registerS2C(serializer: KSerializer<T>) {
     registerServerToClientPacket(serializer.packetId) { packetContext, packetByteBuf ->
         serializer.readFrom(packetByteBuf).apply {
             packetContext.taskQueue.execute {
@@ -61,7 +61,8 @@ fun <T : Packets.Packet<T>> ClientModInitializationContext.registerS2C(serialize
 /**
  * Sends a packet from the server to the client for all the players in the stream.
  */
-fun <T : Packets.Packet<T>, U : PlayerEntity> Stream<U>.sendPacket(packet: T) {
+fun <T : S2CPacket<T>, U : PlayerEntity> Stream<U>.sendPacket(packet: T) {
+
     sendPacket(packetId = Identifier(ModId, packet.serializer.packetId)) { packet.serializer.write(packet, this) }
 }
 
@@ -81,22 +82,26 @@ private fun <T : PlayerEntity> Stream<T>.sendPacket(packetId: Identifier, packet
 /**
  * Sends a packet from the server to the client for all the players in the stream.
  */
-fun <T : Packets.Packet<T>> sendPacketToServer(packet: T) {
+fun <T : C2SPacket<T>> sendPacketToServer(packet: T) {
     val buf = PacketByteBuf(Unpooled.buffer()).also { packet.serializer.write(packet, it) }
     ClientSidePacketRegistry.INSTANCE.sendToServer(modId(packet.serializer.packetId), buf)
 }
 
-private val <T : Packets.Packet<T>> KSerializer<T>.packetId get() = descriptor.name.toLowerCase()
+private val <T : Packet<T>> KSerializer<T>.packetId get() = descriptor.name.toLowerCase()
 
+interface Packet<T : Packet<T>> {
+    val serializer: KSerializer<T>
+    fun use(context: PacketContext)
+}
+
+interface C2SPacket<T : Packet<T>> : Packet<T>
+interface S2CPacket<T : Packet<T>> : Packet<T>
 
 object Packets {
-    interface Packet<T : Packet<T>> {
-        val serializer: KSerializer<T>
-        fun use(context: PacketContext)
-    }
+
 
     @Serializable
-    data class AssignMultiblockState(val multiblock: CrafterMultiblock, val masterEntityPos: BlockPos) : Packet<AssignMultiblockState> {
+    data class AssignMultiblockState(val multiblock: CrafterMultiblock, val masterEntityPos: BlockPos) : S2CPacket<AssignMultiblockState> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             CrafterPieceEntity.assignMultiblockState(context.world, masterEntityPos, multiblock)
@@ -105,15 +110,20 @@ object Packets {
     }
 
     @Serializable
-    data class UnassignMultiblockState(val multiblock: CrafterMultiblock) : Packet<UnassignMultiblockState> {
+    data class UnassignMultiblockState(val anyCrafterPiecePos: BlockPos,
+                                       /**
+                                        * In case the first pos was a block that was destroyed in which case not multiblock can be gathered from it.
+                                        */
+                                       val backupCrafterPiecePos : BlockPos) : S2CPacket<UnassignMultiblockState> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
-            CrafterPieceEntity.unassignMultiblockState(context.world, multiblock)
+            val crafter = context.world.getBlockEntity(anyCrafterPiecePos) as? CrafterPieceEntity ?: context.world.getCrafterEntity(backupCrafterPiecePos)
+            CrafterPieceEntity.unassignMultiblockState(context.world,crafter.multiblockIn ?: error("No multiblock to unassign"))
         }
     }
 
     @Serializable
-    data class UpdateHologramContent(val hologramPos: BlockPos, val newItem: ItemStack) : Packet<UpdateHologramContent> {
+    data class UpdateHologramContent(val hologramPos: BlockPos, val newItem: ItemStack) : S2CPacket<UpdateHologramContent> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val hologram = context.world.getBlockEntity(hologramPos).assertIs<HologramBlockEntity>(hologramPos)
@@ -125,15 +135,14 @@ object Packets {
             }
 
 
-            getMinecraftClient().worldRenderer.updateBlock(null, hologramPos, null, null, RerenderFlag)
+            getMinecraftClient().scheduleRenderUpdate(hologramPos)
 
         }
     }
 
-    const val RerenderFlag = 8
 
     @Serializable
-    data class StartCraftingParticles(val multiblock: CrafterMultiblock, private val _duration: Long) : Packet<StartCraftingParticles> {
+    data class StartCraftingParticles(val multiblock: CrafterMultiblock, private val _duration: Long) : S2CPacket<StartCraftingParticles> {
         override val serializer get() = serializer()
 
         val duration: Duration get() = _duration.ticks
@@ -157,7 +166,7 @@ object Packets {
     }
 
     @Serializable
-    data class StartRecipeHelp(val anyCrafterPiecePos: BlockPos, val recipeId: Identifier) : Packet<StartRecipeHelp> {
+    data class StartRecipeHelp(val anyCrafterPiecePos: BlockPos, val recipeId: Identifier) : C2SPacket<StartRecipeHelp> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
@@ -168,11 +177,17 @@ object Packets {
 
 
     @Serializable
-    data class StopRecipeHelp(val anyCrafterPiecePos: BlockPos) : Packet<StopRecipeHelp> {
+    data class StopRecipeHelp(val anyCrafterPiecePos: BlockPos) : C2SPacket<StopRecipeHelp>, S2CPacket<StopRecipeHelp> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
-            multiblock.stopRecipeHelpServer(context.world)
+            if (context.world.isClient) {
+                multiblock.stopRecipeHelpCommon()
+            }
+            else {
+                multiblock.stopRecipeHelpServer(context.world)
+            }
+
         }
     }
 
@@ -183,7 +198,7 @@ object Packets {
      * - Transfer every mismatching item in the multiblock to the player inventory
      */
     @Serializable
-    data class AutoCraft(val anyCrafterPiecePos: BlockPos, val withInventoryOfPlayer: UUID, val recipeId: Identifier) : Packet<AutoCraft> {
+    data class AutoCraft(val anyCrafterPiecePos: BlockPos, val withInventoryOfPlayer: UUID, val recipeId: Identifier) : C2SPacket<AutoCraft> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
@@ -209,12 +224,12 @@ object Packets {
     data class ItemMovementFromPlayerToMultiblockParticles(
             val player: UUID,
             val itemsFromPlayerToMultiblock: List<Pair<BlockPos, ItemStack>>,
-            val itemsFromMultiblockToPlayer: List<Pair<BlockPos, ItemStack>>) : Packet<ItemMovementFromPlayerToMultiblockParticles> {
+            val itemsFromMultiblockToPlayer: List<Pair<BlockPos, ItemStack>>) : S2CPacket<ItemMovementFromPlayerToMultiblockParticles> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val player = context.world.getPlayerByUuid(player)
                     ?: error("ItemMovementFromPlayerToMultiblockParticles initiated for unknown player with UUID $player.")
-            ItemMovementParticle.playItemMovementFromPlayerToMultiblock(player,itemsFromPlayerToMultiblock, itemsFromMultiblockToPlayer)
+            ItemMovementParticle.playItemMovementFromPlayerToMultiblock(player, itemsFromPlayerToMultiblock, itemsFromMultiblockToPlayer)
 
         }
 
