@@ -1,0 +1,17 @@
+{
+  "type": "spatialcrafting:shaped",
+  "craftTime": 1,
+  "pattern": [
+    [
+      "S"
+    ]
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "spatialcrafting:pointy_stick"
+  }
+}

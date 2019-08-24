@@ -4,7 +4,7 @@ import me.shedaniel.rei.api.*
 import net.minecraft.recipe.Recipe
 import net.minecraft.util.Identifier
 import spatialcrafting.MaxCrafterSize
-import spatialcrafting.MinCrafterSize
+import spatialcrafting.SmallestCrafterSize
 import spatialcrafting.crafter.CraftersPieces
 import spatialcrafting.modId
 import spatialcrafting.recipe.SpatialRecipe
@@ -14,7 +14,7 @@ import java.util.function.Function
 class ReiSpatialCraftingPlugin : REIPluginEntry {
     companion object {
         val Id = modId("rei_plugin")
-        private val CrafterSizes = MinCrafterSize..MaxCrafterSize
+        private val CrafterSizes = SmallestCrafterSize..MaxCrafterSize
     }
 
 
@@ -43,7 +43,7 @@ class ReiSpatialCraftingPlugin : REIPluginEntry {
     override fun registerRecipeDisplays(recipeHelper: RecipeHelper) {
         for (i in CrafterSizes) {
             recipeHelper.registerRecipes<SpatialRecipe>(i,
-                    recipeFilter = { recipe -> recipe is SpatialRecipe && recipe.minimumCrafterSize == i },
+                    recipeFilter = { recipe -> recipe is SpatialRecipe && recipe.minimumCrafterSize == i  },
                     mappingFunction = { ReiSpatialCraftingDisplay(it) }
             )
 

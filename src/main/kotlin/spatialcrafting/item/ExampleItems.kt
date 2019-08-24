@@ -1,21 +1,20 @@
 package spatialcrafting.item
 
-import net.minecraft.item.Item
 import net.minecraft.item.Items
 import net.minecraft.item.SwordItem
 import net.minecraft.recipe.Ingredient
-import spatialcrafting.SpatialCraftingItemGroup
 import spatialcrafting.util.ToolMaterialImpl
+import spatialcrafting.util.kotlinwrappers.Builders
 
-val ShapelessSword = SwordItem(ToolMaterialImpl(
-        _miningLevel = 3,
-        _durability = 3,
-        _miningSpeed = 6.5f,
-        _attackDamage = 3.0f,
-        _enchantability = 0
-) { Ingredient.ofItems(Items.MUSHROOM_STEW) }
-        , 20,
-        -1.0f,
-        Item.Settings().group(SpatialCraftingItemGroup)
-)
 
+val ShapelessSword = Builders.sword(durability = 3, attackSpeed = 3f, damage = 15, enchantability = 0) {
+    Ingredient.ofItems(Items.MUSHROOM_STEW)
+}
+
+val DeceptivelySmallSword = Builders.sword(durability = 3000, attackSpeed = 0.3f, damage = 25, enchantability = 10){
+    Ingredient.ofItems(Items.IRON_BLOCK)
+}
+
+val PointyStick = Builders.sword(durability = 100, attackSpeed = 1.8f, damage = 3,enchantability = 3){
+    Ingredient.ofItems(Items.STICK)
+}

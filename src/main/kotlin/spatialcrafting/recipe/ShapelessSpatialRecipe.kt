@@ -61,16 +61,11 @@ class ShapelessSpatialRecipe private constructor(private val components: List<Sh
 
         return@lazy input
     }
-
-//    private fun calculatePreviewComponents(): List<ShapedRecipeComponent> {
-//
-//    }
-
+    
     override fun getSerializer() = Serializer
 
     data class ItemAndAmount(val stack: ItemStack, val amount: Int)
 
-    val x  : Int by lazy {  2  }
 
     //TODO: doesn't work when there is multiple matching stacks of the same ingredient.
     override fun matches(inventory: CrafterMultiblockInventoryWrapper, world: World): Boolean {

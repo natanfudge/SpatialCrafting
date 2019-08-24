@@ -6,8 +6,11 @@ import net.minecraft.block.MaterialColor
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.block.piston.PistonBehavior
-import net.minecraft.item.ToolMaterial
+import net.minecraft.item.Item
+import net.minecraft.item.SwordItem
 import net.minecraft.recipe.Ingredient
+import spatialcrafting.SpatialCraftingItemGroup
+import spatialcrafting.util.ToolMaterialImpl
 
 
 object Builders {
@@ -93,6 +96,20 @@ object Builders {
         strength(hardness, resistance)
         if (dropsLike != null) dropsLike(dropsLike)
     }
+
+    fun sword(durability: Int, damage: Int, attackSpeed: Float, enchantability: Int, repairMaterial: () -> Ingredient) = SwordItem(ToolMaterialImpl(
+            _miningLevel = 0,
+            _durability = durability,
+            _miningSpeed = 0f,
+            _attackDamage = 0f,
+            _enchantability = enchantability,
+            _repairIngredient = repairMaterial
+    ),
+            damage - 1,
+            attackSpeed - 4,
+            Item.Settings().group(SpatialCraftingItemGroup)
+    )
+    // -4 = 0 attack speed
 
 }
 

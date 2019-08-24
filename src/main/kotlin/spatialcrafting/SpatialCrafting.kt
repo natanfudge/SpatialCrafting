@@ -1,30 +1,25 @@
 package spatialcrafting
 
-//import spatialcrafting.client.gui.DramaGeneratorController
-//import spatialcrafting.client.gui.DramaGeneratorScreen
-//import spatialcrafting.docs.ExampleMod.docsJavaCommonInit
+
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
 import net.fabricmc.fabric.api.client.model.ModelVariantProvider
-import net.fabricmc.fabric.api.client.screen.ScreenProviderRegistry
-import net.fabricmc.fabric.api.container.ContainerProviderRegistry
 import net.minecraft.client.render.model.BakedModel
 import net.minecraft.client.render.model.ModelBakeSettings
 import net.minecraft.client.render.model.ModelLoader
 import net.minecraft.client.render.model.UnbakedModel
 import net.minecraft.client.texture.Sprite
-import net.minecraft.container.BlockContext
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
 import spatialcrafting.client.Sounds
-import spatialcrafting.client.gui.DramaGeneratorController
-import spatialcrafting.client.gui.DramaGeneratorScreen
 import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.crafter.CraftersPieces
 import spatialcrafting.hologram.HologramBakedModel
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.HologramBlockEntityRenderer
+import spatialcrafting.item.DeceptivelySmallSword
+import spatialcrafting.item.PointyStick
 import spatialcrafting.item.ShapelessSword
 import spatialcrafting.recipe.ShapedSpatialRecipe
 import spatialcrafting.recipe.ShapelessSpatialRecipe
@@ -35,14 +30,9 @@ import spatialcrafting.util.kotlinwrappers.initCommon
 import java.util.function.Function
 
 
-//TODO: test putting items in differnet locations in large crafter with small recipe
 //TODO: need examples for:
-// Shapeless recipe
-// Minimum crafter size
-// craft time
 // power
 
-//TODO: make the ghost item cycle through the ingredient matching stacks
 
 //TODO: ask to add to AOF
 //TODO: add dependencies in fabric.mod.json
@@ -62,11 +52,11 @@ const val ModId = "spatialcrafting"
 val GuiId = modId("test_gui")
 
 const val MaxCrafterSize = 5
-const val MinCrafterSize = 2
+const val SmallestCrafterSize = 2
 
  val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
         Identifier(ModId, "spatial_crafting")
-) { CraftersPieces.getValue(MinCrafterSize).itemStack }
+) { CraftersPieces.getValue(SmallestCrafterSize).itemStack }
 
 fun modId(str: String) = Identifier(ModId, str)
 
@@ -83,6 +73,8 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 
     registerTo(Registry.ITEM){
         ShapelessSword withId "shapeless_sword"
+        DeceptivelySmallSword withId "deceptively_small_sword"
+        PointyStick withId "pointy_stick"
     }
 
     registerTo(Registry.BLOCK) {
@@ -113,10 +105,6 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
     registerC2S(Packets.StartRecipeHelp.serializer())
 
     registerC2S(Packets.AutoCraft.serializer())
-//
-//    ContainerProviderRegistry.INSTANCE.registerFactory(GuiId) { syncId, _, player, buf ->
-//        DramaGeneratorController(syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos()))
-//    }
 
 //    docsJavaCommonInit()
 
@@ -153,14 +141,6 @@ fun initClient() = initClientOnly(ModId) {
     registerS2C(Packets.ItemMovementFromPlayerToMultiblockParticles.serializer())
 
     register(HologramBlockEntityRenderer)
-
-//    ScreenProviderRegistry.INSTANCE.registerFactory(GuiId) { syncId, _, player, buf ->
-//        DramaGeneratorScreen(
-//                DramaGeneratorController(
-//                        syncId, player.inventory, BlockContext.create(player.world, buf.readBlockPos())
-//                ), player
-//        )
-//    }
 
 }
 

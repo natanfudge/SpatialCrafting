@@ -22,6 +22,7 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.registry.Registry
 import spatialcrafting.MaxCrafterSize
+import spatialcrafting.SmallestCrafterSize
 import spatialcrafting.util.Duration
 import spatialcrafting.util.seconds
 import spatialcrafting.util.ticks
@@ -29,6 +30,7 @@ import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
 import spatialcrafting.util.flatMapIndexed
 import spatialcrafting.util.max
+import kotlin.math.max
 
 @Serializable
 abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
@@ -126,7 +128,7 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
             val craftTime = json.craftTime?.seconds ?: (defaultCraftTimes[minimumCrafterSize]
                     ?: error("impossible crafter size"))
 
-            return build(components, id, output, minimumCrafterSize, energyCost, craftTime)
+            return build(components, id, output,max(minimumCrafterSize, SmallestCrafterSize) , energyCost, craftTime)
         }
 
 

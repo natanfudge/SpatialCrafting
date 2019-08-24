@@ -1,0 +1,32 @@
+{
+  "type": "spatialcrafting:shaped",
+  "minimumCrafterSize": 5,
+  "pattern": [
+    [
+      "",
+      "",
+      "  S"
+    ],
+    [
+      "",
+      "",
+      "  W"
+    ],
+    [
+      "",
+      "",
+      "  W"
+    ]
+  ],
+  "key": {
+    "S": {
+      "tag": "c:sticks"
+    },
+    "W": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "result": {
+    "item": "spatialcrafting:deceptively_small_sword"
+  }
+}
