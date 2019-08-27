@@ -19,13 +19,12 @@ import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
 import net.minecraft.world.IWorld
 import net.minecraft.world.World
+import spatialcrafting.client.gui.ExampleGui
+import spatialcrafting.client.gui.ExampleScreen
 import spatialcrafting.crafter.assertIs
 import spatialcrafting.hologram.HologramBlock.IsHiddenPropertyName
-import spatialcrafting.util.isHoldingItemIn
+import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.Builders
-import spatialcrafting.util.logDebug
-import spatialcrafting.util.offerOrDrop
-import spatialcrafting.util.setBlock
 
 
 private const val Unbreakable = -1.0f
@@ -101,20 +100,23 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
         super.onPlaced(world_1, blockPos_1, blockState_1, livingEntity_1, itemStack_1)
     }
 
-    override fun activate(blockState: BlockState, world: World, pos: BlockPos, player: PlayerEntity?, hand: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
-        if (player == null || hand == null) return false
+    override fun activate(blockState: BlockState, world: World, pos: BlockPos, clickedBy: PlayerEntity?, hand: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
+        if (clickedBy == null || hand == null) return false
 
 
         val hologramEntity = world.getHologramEntity(pos)
 
-        if (player.isHoldingItemIn(hand)) {
+        if (clickedBy.isHoldingItemIn(hand)) {
             if (hologramEntity.isEmpty()) {
-                hologramEntity.insertItem(player.getStackInHand(hand))
-                if (!player.isCreative) player.getStackInHand(hand).count--
+                hologramEntity.insertItem(clickedBy.getStackInHand(hand))
+                if (!clickedBy.isCreative) clickedBy.getStackInHand(hand).count--
                 logDebug {
                     "Inserted item into hologram. New Content: " + hologramEntity.getItem()
                 }
             }
+        }
+        else if (world.isClient && clickedBy.isCreative) {
+            getMinecraftClient().openScreen(ExampleScreen(ExampleGui()))
         }
 
         return true

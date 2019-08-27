@@ -5,9 +5,8 @@ import me.shedaniel.rei.gui.widget.HighlightableWidget
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawableHelper
 import net.minecraft.client.gui.Element
-import net.minecraft.client.sound.PositionedSoundInstance
-import net.minecraft.sound.SoundEvents
 import net.minecraft.util.Identifier
+import spatialcrafting.util.playButtonClickSoundClient
 import java.awt.Rectangle
 import java.awt.Shape
 
@@ -32,7 +31,8 @@ open class ReiButton(
             DrawableHelper.blit(x, y, 0f, 0f, width, height, width, height)
 
 
-        } else {
+        }
+        else {
             clearColor()
 
             // Draw off texture
@@ -49,7 +49,7 @@ open class ReiButton(
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, buttonId: Int): Boolean {
         if (isHighlighted(mouseX, mouseY) && isEnabled(minecraft) && buttonId == 0) {
-            minecraft.soundManager.play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0f))
+            playButtonClickSoundClient()
             onClick(minecraft)
             return true
         }
@@ -57,14 +57,13 @@ open class ReiButton(
 
     }
 
-    private fun emitHoverColor() {
-        GlStateManager.color4f(0.7f, 0.7f, 1.0f, 1.0f)
-    }
-
-
 
 }
 
-     fun clearColor() {
-        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f)
-    }
+ fun emitHoverColor() {
+    GlStateManager.color4f(0.7f, 0.7f, 1.0f, 1.0f)
+}
+
+fun clearColor() {
+    GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f)
+}

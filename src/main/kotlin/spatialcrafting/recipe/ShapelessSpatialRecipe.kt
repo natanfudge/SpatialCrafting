@@ -64,22 +64,33 @@ class ShapelessSpatialRecipe private constructor(private val components: List<Sh
     
     override fun getSerializer() = Serializer
 
-    data class ItemAndAmount(val stack: ItemStack, val amount: Int)
+    data class ItemAndAmount(val stack: ItemStack, val amount: Int, var wasUsed : Boolean)
+
+//    data class MarkedStack(val wasUsed : Int, val stack :ItemStack)
 
 
-    //TODO: doesn't work when there is multiple matching stacks of the same ingredient.
+    //TODO: won't work sometimes
     override fun matches(inventory: CrafterMultiblockInventoryWrapper, world: World): Boolean {
         if (minimumCrafterSize > inventory.crafterSize) return false
-        val shapelessInventory = inventory.groupBy { it.itemStack.item }.map { ItemAndAmount(it.value[0].itemStack, it.value.size) }
+        val shapelessInventory = inventory.groupBy { it.itemStack.item }
+                .map { ItemAndAmount(stack = it.value[0].itemStack,amount = it.value.size, wasUsed = false) }
+
         if (shapelessInventory.size != components.size) return false
 
 
         return components.all { component ->
             // Gather all stacks in the inventory that match the component
-            val matchingStacks = shapelessInventory.sumBy { if(component.ingredient.matches(it.stack)) it.amount else 0 }
-            // Ensure it is
-            // Check every component exists in the inventory with the required amount
-            shapelessInventory.any { component.ingredient.matches(it.stack) && component.amount == it.amount }
+            val matchingStacks = shapelessInventory.sumBy {
+                if(!it.wasUsed && component.ingredient.matches(it.stack)) it.amount.apply {
+                    // To make sure we don't use the same stack in multiple components
+                    it.wasUsed = true
+                } else 0
+            }
+
+            return@all matchingStacks == component.amount
+//            // Ensure it is
+//            // Check every component exists in the inventory with the required amount
+//            shapelessInventory.any { component.ingredient.matches(it.stack) && component.amount == it.amount }
         }
 
     }

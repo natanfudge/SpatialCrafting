@@ -10,6 +10,7 @@ import net.minecraft.block.Material
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawableHelper
+import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.entity.ItemEntity
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -20,6 +21,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.recipe.Ingredient
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
+import net.minecraft.sound.SoundEvents
 import net.minecraft.text.LiteralText
 import net.minecraft.util.Hand
 import net.minecraft.util.math.BlockPos
@@ -37,6 +39,8 @@ val BlockPos.xz get() = "($x,$z)"
 
 fun World.play(soundEvent: SoundEvent, at: BlockPos,
                ofCategory: SoundCategory, toPlayer: PlayerEntity? = null, volumeMultiplier: Float = 1.0f, pitchMultiplier: Float = 1.0f): Unit = playSound(toPlayer, at, soundEvent, ofCategory, volumeMultiplier, pitchMultiplier)
+
+fun playButtonClickSoundClient() = getMinecraftClient().soundManager.play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0f))
 
 fun LivingEntity?.sendMessage(message: String) {
     if (this == null) return

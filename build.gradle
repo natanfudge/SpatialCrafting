@@ -28,6 +28,7 @@ repositories {
     maven { url = "http://server.bbkr.space:8081/artifactory/libs-release/" }
     jcenter()
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {

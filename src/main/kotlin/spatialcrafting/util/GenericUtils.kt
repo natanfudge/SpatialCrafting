@@ -5,6 +5,7 @@ import kotlin.collections.ArrayList
 import kotlin.math.max
 import kotlin.math.sqrt
 
+
 infix fun IntRange.by(range: IntRange): List<Pair<Int, Int>> = this.flatMap { x -> range.map { y -> Pair(x, y) } }
 fun IntRange.squared() = this by this
 
@@ -39,10 +40,10 @@ fun Double.isWholeNumber() = this.toInt().toDouble() == this
 fun max(num1: Int, num2: Int, num3: Int): Int = max(max(num1, num2), num3)
 
 infix fun Pair<Int, Int>.until(that: Pair<Int, Int>) = this..Pair(that.first - 1, that.second - 1)
-data class Point(val x : Int, val y: Int, val z :Int)
+data class Point(val x: Int, val y: Int, val z: Int)
 
-fun cubeSized(size :Int) : List<Point>{
-    return (0 until size).flatMap{ x -> (0 until size).flatMap {y-> (0 until size).map {z-> Point(x,y,z)  } } }
+fun cubeSized(size: Int): List<Point> {
+    return (0 until size).flatMap { x -> (0 until size).flatMap { y -> (0 until size).map { z -> Point(x, y, z) } } }
 }
 
 /**
@@ -78,7 +79,7 @@ inline fun assert(message: String = "Assertion failure", test: () -> Boolean) {
 
 inline fun Int.squared() = this * this
 inline fun Double.squared() = this * this
-inline fun sqrt(num: Int) : Double = sqrt(num.toDouble())
+inline fun sqrt(num: Int): Double = sqrt(num.toDouble())
 
 //inline fun<T> min(comparable: Comparable<T>)
 
@@ -86,7 +87,9 @@ val Int.d get() = this.toDouble()
 val Long.d get() = this.toDouble()
 val Int.f get() = this.toFloat()
 val Float.d get() = this.toDouble()
+val Int.l get() = this.toLong()
 
+inline fun <T, R : Comparable<R>> Iterable<T>.maxValueBy(selector: (T) -> R): R?  = maxBy(selector)?.let(selector)
 
 //TODO: turn this off in production
 const val LogDebug = true
@@ -94,3 +97,10 @@ const val LogWarning = true
 
 inline fun logDebug(lazyMessage: () -> String) = if (LogDebug) println("${Date()} [SC/DEBUG]: ${lazyMessage()}") else Unit
 inline fun logWarning(lazyMessage: () -> String) = if (LogWarning) println("${Date()} [SC/WARN]: ${lazyMessage()}") else Unit
+
+
+inline fun <reified T, reified V> T.getPrivateField(name: String): V {
+    val f = T::class.java.getDeclaredField(name)
+    f.isAccessible = true
+    return f.get(this) as V
+}

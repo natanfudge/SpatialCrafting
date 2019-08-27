@@ -20,12 +20,20 @@ import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.Packets
 import spatialcrafting.client.Sounds
+import spatialcrafting.client.gui.ExampleGui
+import spatialcrafting.client.gui.ExampleScreen
 import spatialcrafting.client.particle.centerOfHolograms
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.sendPacket
 import spatialcrafting.util.*
 import java.util.*
+
+
+
+
+
+
 
 
 val CraftersPieces = mapOf(
@@ -191,7 +199,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
     }
 
 
-    override fun activate(blockState_1: BlockState, world: World, pos: BlockPos, placedBy: PlayerEntity?,
+    override fun activate(blockState_1: BlockState, world: World, pos: BlockPos, clickedBy: PlayerEntity?,
                           hand: Hand, blockHitResult_1: BlockHitResult?): Boolean {
 
         // Prevent it being called twice
@@ -202,6 +210,8 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
             "${if (world.isClient) "CLIENT" else "SERVER"}: Right clicked on crafter piece at ${pos.xz}. Formed = ${multiblockIn != null}"
         }
         val multiblockIn = world.getCrafterEntity(pos).multiblockIn ?: return false
+
+
 
         if (world.isClient || multiblockIn.isCrafting) return true
 

@@ -51,12 +51,6 @@ fun <T : S2CPacket<T>> ClientModInitializationContext.registerS2C(serializer: KS
     }
 }
 
-///**
-// * Sends a packet from the server to the client for all the players in the stream.
-// */
-//fun <T : Packets.Packet<T>, U : PlayerEntity> Stream<U>.sendPacket(packet: T) {
-//    sendPacket(packetId = Identifier(ModId, packet.serializer.id), packetBuilder = { packet.addToByteBuf(this) })
-//}
 
 /**
  * Sends a packet from the server to the client for all the players in the stream.
@@ -219,6 +213,23 @@ object Packets {
         }
 
     }
+
+    @Serializable
+    data class ChangeActiveLayer(val anyCrafterPiecePos: BlockPos, val toLayer : Int) : C2SPacket<ChangeActiveLayer>{
+                override val serializer get() = serializer()
+        override fun use(context: PacketContext) {
+            val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
+            if(toLayer < 0 || toLayer >= multiblock.multiblockSize){
+                logWarning { "Attempt to change active layer to invalid layer '$toLayer'." }
+                return
+            }
+            multiblock.showHologramsOnlyOfLayer(toLayer,context.world)
+
+        }
+
+    }
+
+
 
     @Serializable
     data class ItemMovementFromPlayerToMultiblockParticles(

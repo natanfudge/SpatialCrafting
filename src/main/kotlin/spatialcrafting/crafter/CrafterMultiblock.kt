@@ -43,7 +43,11 @@ class CrafterMultiblock(
          * For recipe help, client only
          */
         var recipeHelpRecipeId: Identifier? = null,
-        var recipeHelpCurrentLayer: Int = 0
+        var recipeHelpCurrentLayer: Int = 0,
+        /**
+         * For recipe creator, client only
+         */
+        var recipeCreatorCurrentLayer : Int = 0
 ) {
     fun putIn(tag: CompoundTag) = serializer().put(this, tag)
 
@@ -140,14 +144,20 @@ class CrafterMultiblock(
         }
     }
 
+    private fun hologramsNotOfLayer(layer: Int): List<HologramPos> = hologramsRelativePositions()
+            .filter { it.relativePos.y != recipeHelpCurrentLayer }
+
+    private fun hologramsOfLayer(layer: Int): List<HologramPos> = hologramsRelativePositions()
+            .filter { it.relativePos.y == recipeHelpCurrentLayer }
+
     private fun hideAndShowHologramsForRecipeHelp(world: World) {
         val recipeInputs = helpRecipeComponents(world)!!
-        for (hologram in hologramsRelativePositions().filter { it.relativePos.y != recipeHelpCurrentLayer }) {
+        for (hologram in hologramsNotOfLayer(recipeHelpCurrentLayer)) {
             setHologramVisibility(world, hologram.absolutePos, hidden = true)
         }
 
 
-        for (hologram in hologramsRelativePositions().filter { it.relativePos.y == recipeHelpCurrentLayer }) {
+        for (hologram in hologramsOfLayer(recipeHelpCurrentLayer)) {
             val ingredient = recipeInputs.find { it.position == hologram.relativePos }
             if (ingredient != null) {
                 setHologramVisibility(world, hologram.absolutePos, hidden = false)
@@ -213,6 +223,17 @@ class CrafterMultiblock(
         for (pos in hologramLocations) {
             setHologramVisibility(world, pos, hidden = false)
         }
+    }
+
+    fun showHologramsOnlyOfLayer(layer: Int, world: World) {
+        for (hologram in hologramsOfLayer(layer)) {
+            setHologramVisibility(world, hologram.absolutePos, hidden = false)
+        }
+
+        for (hologram in hologramsNotOfLayer(layer)) {
+            setHologramVisibility(world, hologram.absolutePos, hidden = true)
+        }
+
     }
 
     fun hologramGhostIngredientFor(hologram: HologramBlockEntity): Ingredient? {

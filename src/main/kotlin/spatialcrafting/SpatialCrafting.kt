@@ -4,6 +4,7 @@ package spatialcrafting
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
 import net.fabricmc.fabric.api.client.model.ModelVariantProvider
+import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.render.model.BakedModel
 import net.minecraft.client.render.model.ModelBakeSettings
 import net.minecraft.client.render.model.ModelLoader
@@ -29,6 +30,7 @@ import spatialcrafting.util.kotlinwrappers.initClientOnly
 import spatialcrafting.util.kotlinwrappers.initCommon
 import java.util.function.Function
 
+//TODO: SHAPELESS CRAFTING DOESN'T WORK!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 //TODO: need examples for:
 // power
@@ -103,8 +105,10 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 
 
     registerC2S(Packets.StartRecipeHelp.serializer())
-
     registerC2S(Packets.AutoCraft.serializer())
+    registerC2S(Packets.ChangeActiveLayer.serializer())
+    registerC2S(Packets.StopRecipeHelp.serializer())
+
 
 //    docsJavaCommonInit()
 

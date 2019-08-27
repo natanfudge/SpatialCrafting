@@ -6,28 +6,25 @@ import com.mojang.blaze3d.platform.GlStateManager.SourceFactor
 import me.shedaniel.rei.client.ScreenHelper
 import me.shedaniel.rei.gui.widget.ButtonWidget
 import me.shedaniel.rei.gui.widget.QueuedTooltip
+import net.minecraft.client.world.ClientWorld
 import net.minecraft.text.Style
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
+import net.minecraft.util.math.Vec3d
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
-import spatialcrafting.hologram.isCloseEnoughToHologramPos
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.sendPacketToServer
-import spatialcrafting.util.ComponentSatisfaction
-import spatialcrafting.util.distanceFrom
-import spatialcrafting.util.getMinecraftClient
-import spatialcrafting.util.getRecipeSatisfaction
+import spatialcrafting.util.*
 import java.awt.Point
 import java.util.*
 
 const val width = 10
 const val height = 10
 const val MaxDistanceFromNearestCrafter = 100
-
 
 
 fun fillInRecipeFromPlayerInventory(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
@@ -37,6 +34,7 @@ fun fillInRecipeFromPlayerInventory(crafterMultiblock: CrafterMultiblock, recipe
 
 fun startCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
     sendPacketToServer(Packets.StartRecipeHelp(crafterMultiblock.arbitraryCrafterPos(), recipeId))
+    getMinecraftClient().scheduleRenderUpdate(crafterMultiblock.arbitraryCrafterPos())
     crafterMultiblock.startRecipeHelpCommon(recipeId)
 }
 
@@ -44,6 +42,10 @@ fun stopCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock) {
     sendPacketToServer(Packets.StopRecipeHelp(crafterMultiblock.arbitraryCrafterPos()))
     crafterMultiblock.stopRecipeHelpCommon()
 }
+
+fun getNearestCrafter(world: ClientWorld, pos: Vec3d) =
+        world.blockEntities.filterIsInstance<CrafterPieceEntity>()
+                .minBy { it.pos.distanceFrom(pos) }?.multiblockIn
 
 class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
                  private var setLayer: (Int, () -> List<ComponentSatisfaction>?) -> Unit, val display: ReiSpatialCraftingDisplay)
@@ -83,8 +85,7 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
     override fun onPressed() {
         val pos = minecraft.player.pos
         val world = minecraft.world
-        val nearestCrafter = world.blockEntities.filterIsInstance<CrafterPieceEntity>()
-                .minBy { it.pos.distanceFrom(pos) }?.multiblockIn ?: return
+        val nearestCrafter = getNearestCrafter(world, pos) ?: return
         when (state) {
             State.READY_FOR_RECIPE_HELP -> startCrafterRecipeHelp(nearestCrafter, recipe.identifier)
             State.ALL_COMPONENTS_AVAILABLE -> fillInRecipeFromPlayerInventory(nearestCrafter, recipe.identifier)
