@@ -28,6 +28,8 @@ private const val sizeKey = "size"
 private const val locationKey = "location"
 private const val craftEndTimeKey = "craft_end_time"
 
+const val RecipeCreatorCurrentLayerInactive = -1
+
 @Serializable
 class CrafterMultiblock(
         /**
@@ -47,7 +49,7 @@ class CrafterMultiblock(
         /**
          * For recipe creator, client only
          */
-        var recipeCreatorCurrentLayer : Int = 0
+        var recipeCreatorCurrentLayer : Int = RecipeCreatorCurrentLayerInactive
 ) {
     fun putIn(tag: CompoundTag) = serializer().put(this, tag)
 

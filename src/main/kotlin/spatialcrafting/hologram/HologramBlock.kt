@@ -19,7 +19,7 @@ import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
 import net.minecraft.world.IWorld
 import net.minecraft.world.World
-import spatialcrafting.client.gui.ExampleGui
+import spatialcrafting.client.gui.RecipeCreatorGui
 import spatialcrafting.client.gui.ExampleScreen
 import spatialcrafting.crafter.assertIs
 import spatialcrafting.hologram.HologramBlock.IsHiddenPropertyName
@@ -116,7 +116,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
             }
         }
         else if (world.isClient && clickedBy.isCreative) {
-            getMinecraftClient().openScreen(ExampleScreen(ExampleGui()))
+            getMinecraftClient().openScreen(ExampleScreen(RecipeCreatorGui()))
         }
 
         return true

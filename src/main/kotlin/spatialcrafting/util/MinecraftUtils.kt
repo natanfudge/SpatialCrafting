@@ -40,7 +40,7 @@ val BlockPos.xz get() = "($x,$z)"
 fun World.play(soundEvent: SoundEvent, at: BlockPos,
                ofCategory: SoundCategory, toPlayer: PlayerEntity? = null, volumeMultiplier: Float = 1.0f, pitchMultiplier: Float = 1.0f): Unit = playSound(toPlayer, at, soundEvent, ofCategory, volumeMultiplier, pitchMultiplier)
 
-fun playButtonClickSoundClient() = getMinecraftClient().soundManager.play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0f))
+fun playButtonClickSoundToClient() = getMinecraftClient().soundManager.play(PositionedSoundInstance.master(SoundEvents.UI_BUTTON_CLICK, 1.0f))
 
 fun LivingEntity?.sendMessage(message: String) {
     if (this == null) return

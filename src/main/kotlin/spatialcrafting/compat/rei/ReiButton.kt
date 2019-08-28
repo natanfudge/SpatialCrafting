@@ -6,7 +6,7 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawableHelper
 import net.minecraft.client.gui.Element
 import net.minecraft.util.Identifier
-import spatialcrafting.util.playButtonClickSoundClient
+import spatialcrafting.util.playButtonClickSoundToClient
 import java.awt.Rectangle
 import java.awt.Shape
 
@@ -49,7 +49,7 @@ open class ReiButton(
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, buttonId: Int): Boolean {
         if (isHighlighted(mouseX, mouseY) && isEnabled(minecraft) && buttonId == 0) {
-            playButtonClickSoundClient()
+            playButtonClickSoundToClient()
             onClick(minecraft)
             return true
         }

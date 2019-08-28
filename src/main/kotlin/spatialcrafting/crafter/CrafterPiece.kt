@@ -20,8 +20,6 @@ import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.Packets
 import spatialcrafting.client.Sounds
-import spatialcrafting.client.gui.ExampleGui
-import spatialcrafting.client.gui.ExampleScreen
 import spatialcrafting.client.particle.centerOfHolograms
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.recipe.SpatialRecipe

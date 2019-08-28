@@ -89,7 +89,7 @@ val Int.f get() = this.toFloat()
 val Float.d get() = this.toDouble()
 val Int.l get() = this.toLong()
 
-inline fun <T, R : Comparable<R>> Iterable<T>.maxValueBy(selector: (T) -> R): R?  = maxBy(selector)?.let(selector)
+inline fun <T, R : Comparable<R>> Iterable<T>.maxValueBy(selector: (T) -> R): R? = maxBy(selector)?.let(selector)
 
 //TODO: turn this off in production
 const val LogDebug = true
@@ -104,3 +104,6 @@ inline fun <reified T, reified V> T.getPrivateField(name: String): V {
     f.isAccessible = true
     return f.get(this) as V
 }
+
+
+operator fun String.times(num: Int) = (1..num).joinToString("") { this }

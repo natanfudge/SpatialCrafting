@@ -81,7 +81,9 @@
         <w>crafter</w>
         <w>crafters</w>
         <w>deserializes</w>
+        <w>disableable</w>
         <w>enchantability</w>
+        <w>hoverable</w>
         <w>itemstack</w>
         <w>minecraft</w>
         <w>multiblock</w>

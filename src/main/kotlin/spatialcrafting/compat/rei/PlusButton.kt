@@ -22,9 +22,8 @@ import spatialcrafting.util.*
 import java.awt.Point
 import java.util.*
 
-const val width = 10
-const val height = 10
-const val MaxDistanceFromNearestCrafter = 100
+private const val width = 10
+private const val height = 10
 
 
 fun fillInRecipeFromPlayerInventory(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
