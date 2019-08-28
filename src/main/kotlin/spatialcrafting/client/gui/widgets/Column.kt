@@ -11,15 +11,16 @@ enum class MainAxisAlignment {
     End
 }
 
-class ColumnClass(/*private val devChildren: List<DevWidget>, */private val alignment: MainAxisAlignment, override val compose: () -> Unit) : DevWidget {
+class ColumnClass(/*private val devChildren: List<DevWidget>, */private val alignment: MainAxisAlignment,
+                                                                override val compose: DevWidget.() -> Unit) : DevWidget() {
     override val minimumHeight get() = devChildren.sumBy { it.minimumHeight }
     override val minimumWidth get() = devChildren.maxValueBy { it.minimumWidth } ?: 0
     override val expandHeight = true
     override val expandWidth = false
 
-    private val devChildren = mutableListOf<DevWidget>()
+//    private val devChildren = mutableListOf<IDevWidget>()
 
-    private fun positionChildren(constraints: Constraints): List<RuntimeWidget> {
+    private fun positionChildren(constraints: Constraints): MutableList<RuntimeWidget> {
 
         var height = min(constraints.height, devChildren.sumBy { it.minimumHeight })
         val space = constraints.height - height
@@ -45,7 +46,7 @@ class ColumnClass(/*private val devChildren: List<DevWidget>, */private val alig
             if (widget.expandHeight) {
                 widgetHeight += extraSpaceForExpandingWidgets
             }
-            children.add(widget.position(Constraints(
+            children.add(widget.layout(Constraints(
                     x = constraints.x, y = currentY, width = widget.minimumWidth, height = widgetHeight
             )))
 
@@ -55,13 +56,13 @@ class ColumnClass(/*private val devChildren: List<DevWidget>, */private val alig
         return children
     }
 
-    override fun position(constraints: Constraints): RuntimeWidget = runtimeWidget(
+    override fun getLayout(constraints: Constraints): RuntimeWidget = runtimeWidget(
             constraints = constraints, children = positionChildren(constraints), debugIdentifier = "Column"
     ) {
         for (child in runtimeChildren) child.draw()
     }
 }
 
-fun WidgetContext.Column(alignment: MainAxisAlignment = Start, children: () -> Unit): DevWidget =
+fun DevWidget.Column(alignment: MainAxisAlignment = Start, children: DevWidget.() -> Unit): DevWidget =
         add(ColumnClass(alignment, children))
 

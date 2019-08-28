@@ -4,15 +4,18 @@ import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
 import spatialcrafting.client.gui.RuntimeWidget
 
-//TODO: get rid of "child" params because they are probably not needed
-class Clickable(private val child: DevWidget, val onClick: RuntimeWidget.() -> Unit, override val compose: () -> Unit) : DevWidget {
-    override val minimumHeight = child.minimumHeight
-    override val minimumWidth = child.minimumWidth
+class Clickable(val onClick: RuntimeWidget.() -> Unit) : DevWidget() {
+    //TODO: might need to change it
+    override val compose: DevWidget.() -> Unit = {}
 
-    override fun position(constraints: Constraints): RuntimeWidget = ClickableRuntime(constraints, this)
-//
+    private val child get() = devChildren.first()
+    override val minimumHeight get() = child.minimumHeight
+    override val minimumWidth get() = child.minimumWidth
+
+    override fun getLayout(constraints: Constraints): RuntimeWidget = ClickableRuntime(constraints, this)
+    //
     inner class ClickableRuntime(override val constraints: Constraints, override val composer: DevWidget) : RuntimeWidget {
-        override var runtimeChildren = listOf(child.position(constraints))
+        override var runtimeChildren = listOf(child.layout(constraints))
         override fun draw() {
             runtimeChildren.first().draw()
         }

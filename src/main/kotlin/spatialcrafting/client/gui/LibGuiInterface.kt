@@ -17,12 +17,14 @@ private fun RuntimeWidget.walk(visitor: (RuntimeWidget) -> Unit) {
 
 // Libgui begins the box thing a bit higher
 private const val PaddingOffset = 3
-//var debugRoot
-fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: WidgetContext.() -> Unit) {
 
-    val context = ChildrenContext()
-    context.init()
-    val root: DevWidget = ColumnClass(context.children, MainAxisAlignment.Start)
+//var debugRoot
+fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidget.() -> Unit) {
+
+//    val context = ChildrenContext()
+//    context.init()
+    val root: DevWidget = ColumnClass(MainAxisAlignment.Start, init)
+    root.compose(root)
 
     val screenWidth = getMinecraftClient().window.scaledWidth
     val screenHeight = getMinecraftClient().window.scaledHeight
@@ -30,7 +32,7 @@ fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: WidgetC
     val absoluteX = (screenWidth - width) / 2
     val absoluteY = (screenHeight - height) / 2
 
-    val runtimeRoot: RuntimeWidget = root.position(Constraints(absoluteX, absoluteY /*- PaddingOffset*/, width, height))
+    val runtimeRoot: RuntimeWidget = root.layout(Constraints(absoluteX, absoluteY /*- PaddingOffset*/, width, height))
 
     val libGuiRoot = object : WWidget() {
         override fun paintBackground(x: Int, y: Int) {
@@ -68,7 +70,7 @@ private fun RuntimeWidget.infoString(nestingLevel: Int = 0): String =
                 if (runtimeChildren.isNotEmpty()) {
                     "{\n" +
                             runtimeChildren.joinToString("\n") { it.infoString(nestingLevel + 1) } +
-                              "\n${("  " * nestingLevel)}}"
+                            "\n${("  " * nestingLevel)}}"
                 }
                 else {
                     ""
