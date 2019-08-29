@@ -5,6 +5,7 @@ import io.github.cottonmc.cotton.gui.widget.WPlainPanel
 import io.github.cottonmc.cotton.gui.widget.WWidget
 import spatialcrafting.client.gui.widgets.Clickable
 import spatialcrafting.client.gui.widgets.ColumnClass
+import spatialcrafting.client.gui.widgets.CrossAxisAlignment
 import spatialcrafting.client.gui.widgets.MainAxisAlignment
 import spatialcrafting.util.getMinecraftClient
 import spatialcrafting.util.logDebug
@@ -29,7 +30,7 @@ fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidg
 
 //    val context = ChildrenContext()
 //    context.init()
-    val root: DevWidget = ColumnClass(MainAxisAlignment.Start, init)
+    val root: DevWidget = ColumnClass(MainAxisAlignment.Start,CrossAxisAlignment.Start, init)
     root.walk { it.composeDirectChildren(it) }
 //    root.compose(root)
 

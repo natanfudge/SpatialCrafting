@@ -141,9 +141,6 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
             )
         }
 
-
-        currentLayerText(display, startPoint)
-
         val seconds = display.recipe.craftTime.inSeconds
         val time = if (seconds.isWholeNumber()) seconds.roundToInt() else seconds
         val text = LiteralText(time.toString() + "s")

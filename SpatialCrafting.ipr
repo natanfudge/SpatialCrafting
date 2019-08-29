@@ -358,13 +358,13 @@
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.io.github.cottonmc.LibGui:1.3.999-SNAPSHOT">
+    <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.io.github.cottonmc.LibGui:1.3.2">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.io.github.cottonmc.LibGui-1.3.999-SNAPSHOT.jar!/" />
+        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.io.github.cottonmc.LibGui-1.3.2.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.io.github.cottonmc.LibGui-1.3.999-SNAPSHOT-sources.jar!/" />
+        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.io.github.cottonmc.LibGui-1.3.2-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.io.github.prospector.modmenu:1.7.9+build.118">

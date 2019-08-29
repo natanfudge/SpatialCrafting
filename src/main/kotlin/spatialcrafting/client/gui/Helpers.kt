@@ -9,7 +9,7 @@ private val mc = getMinecraftClient()
 fun getClientMouseX() = (mc.mouse.x * mc.window.scaledWidth.toDouble() / mc.window.width.toDouble()).toInt()
 fun getClientMouseY() = (mc.mouse.y * mc.window.scaledHeight.toDouble() / mc.window.height.toDouble()).toInt()
 
-class LibGuiWidget(private val libGuiWidget: WWidget, width: Int, height: Int) : DevWidget() {
+class LibGuiWidget(private val libGuiWidget: WWidget, width: Int = libGuiWidget.width, height: Int = libGuiWidget.height) : DevWidget() {
     override val composeDirectChildren: DevWidget.() -> Unit = {/*children.add(libGuiWidget)*/}
     init {
         libGuiWidget.setSize(width, height)

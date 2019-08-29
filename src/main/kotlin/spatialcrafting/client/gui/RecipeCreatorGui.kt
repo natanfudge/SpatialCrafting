@@ -3,10 +3,7 @@ package spatialcrafting.client.gui
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing
 import spatialcrafting.Packets
-import spatialcrafting.client.gui.widgets.Column
-import spatialcrafting.client.gui.widgets.Image
-import spatialcrafting.client.gui.widgets.MainAxisAlignment
-import spatialcrafting.client.gui.widgets.VerticalSpace
+import spatialcrafting.client.gui.widgets.*
 import spatialcrafting.compat.rei.getNearestCrafter
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.RecipeCreatorCurrentLayerInactive
@@ -19,30 +16,48 @@ class RecipeCreatorGui : LightweightGuiDescription() {
         val nearestCrafter = getNearestCrafter(getMinecraftClient().world, getMinecraftClient().player.pos)
                 ?: error("Crafter GUI opened without a crafter multiblock")
 
-        var doAsdf = true
-
         drawWidgets(64, 60) {
-            Column(MainAxisAlignment.Center) {
-                DisableableImage(
-                        enabledTexture = "gui/button/up_on.png",
-                        disabledTexture = "gui/button/up_off.png",
-                        width = 13,
-                        height = 11,
-                        enabled = nearestCrafter.recipeCreatorCurrentLayer < nearestCrafter.multiblockSize - 1
-                ) {
-                    changeCurrentLayer(nearestCrafter, change = +1, recompositionTarget = this@Column)
-                }
 
-                VerticalSpace(5)
-                DisableableImage(
-                        enabledTexture = "gui/button/down_on.png",
-                        disabledTexture = "gui/button/down_off.png",
-                        width = 13,
-                        height = 11,
-                        enabled = nearestCrafter.recipeCreatorCurrentLayer > 0
-                ) {
-                    changeCurrentLayer(nearestCrafter, change = -1, recompositionTarget = this@Column)
+            Row {
+                UpDownButtons(nearestCrafter)
+                Row(MainAxisAlignment.End) {
+                    Column(MainAxisAlignment.Center) {
+                        Switch(true)
+                        VerticalSpace(5)
+                        Switch(false)
+                    }
                 }
+            }
+
+
+        }
+    }
+
+    private fun DevWidget.UpDownButtons(nearestCrafter: CrafterMultiblock) {
+        Column(MainAxisAlignment.Center, CrossAxisAlignment.Baseline) {
+            if (nearestCrafter.recipeCreatorCurrentLayer != RecipeCreatorCurrentLayerInactive) {
+                Text("${nearestCrafter.recipeCreatorCurrentLayer}", color = 0x55_FF_FF)
+            }
+
+            DisableableImage(
+                    enabledTexture = "gui/button/up_on.png",
+                    disabledTexture = "gui/button/up_off.png",
+                    width = 13,
+                    height = 11,
+                    enabled = nearestCrafter.recipeCreatorCurrentLayer < nearestCrafter.multiblockSize - 1
+            ) {
+                changeCurrentLayer(nearestCrafter, change = +1, recompositionTarget = this@Column)
+            }
+
+            VerticalSpace(5)
+            DisableableImage(
+                    enabledTexture = "gui/button/down_on.png",
+                    disabledTexture = "gui/button/down_off.png",
+                    width = 13,
+                    height = 11,
+                    enabled = nearestCrafter.recipeCreatorCurrentLayer > 0
+            ) {
+                changeCurrentLayer(nearestCrafter, change = -1, recompositionTarget = this@Column)
             }
 
         }
