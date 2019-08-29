@@ -147,10 +147,10 @@ class CrafterMultiblock(
     }
 
     private fun hologramsNotOfLayer(layer: Int): List<HologramPos> = hologramsRelativePositions()
-            .filter { it.relativePos.y != recipeHelpCurrentLayer }
+            .filter { it.relativePos.y != layer }
 
     private fun hologramsOfLayer(layer: Int): List<HologramPos> = hologramsRelativePositions()
-            .filter { it.relativePos.y == recipeHelpCurrentLayer }
+            .filter { it.relativePos.y == layer }
 
     private fun hideAndShowHologramsForRecipeHelp(world: World) {
         val recipeInputs = helpRecipeComponents(world)!!

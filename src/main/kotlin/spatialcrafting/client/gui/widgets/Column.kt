@@ -12,7 +12,7 @@ enum class MainAxisAlignment {
 }
 
 class ColumnClass(/*private val devChildren: List<DevWidget>, */private val alignment: MainAxisAlignment,
-                                                                override val compose: DevWidget.() -> Unit) : DevWidget() {
+                                                                override val composeDirectChildren: DevWidget.() -> Unit) : DevWidget() {
     override val minimumHeight get() = devChildren.sumBy { it.minimumHeight }
     override val minimumWidth get() = devChildren.maxValueBy { it.minimumWidth } ?: 0
     override val expandHeight = true
@@ -59,7 +59,7 @@ class ColumnClass(/*private val devChildren: List<DevWidget>, */private val alig
     override fun getLayout(constraints: Constraints): RuntimeWidget = runtimeWidget(
             constraints = constraints, children = positionChildren(constraints), debugIdentifier = "Column"
     ) {
-        for (child in runtimeChildren) child.draw()
+        for (child in it.runtimeChildren) child.draw()
     }
 }
 

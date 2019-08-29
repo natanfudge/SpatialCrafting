@@ -15,6 +15,12 @@ private fun RuntimeWidget.walk(visitor: (RuntimeWidget) -> Unit) {
     for (child in runtimeChildren) child.walk(visitor)
 }
 
+fun DevWidget.walk(visitor: (DevWidget) -> Unit) {
+    visitor(this)
+    for (child in devChildren) child.walk(visitor)
+}
+
+
 // Libgui begins the box thing a bit higher
 private const val PaddingOffset = 3
 
@@ -24,7 +30,8 @@ fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidg
 //    val context = ChildrenContext()
 //    context.init()
     val root: DevWidget = ColumnClass(MainAxisAlignment.Start, init)
-    root.compose(root)
+    root.walk { it.composeDirectChildren(it) }
+//    root.compose(root)
 
     val screenWidth = getMinecraftClient().window.scaledWidth
     val screenHeight = getMinecraftClient().window.scaledHeight
@@ -65,7 +72,7 @@ fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidg
 
 }
 
-private fun RuntimeWidget.infoString(nestingLevel: Int = 0): String =
+fun RuntimeWidget.infoString(nestingLevel: Int = 0): String =
         "  " * nestingLevel + "${this.debugIdentifier}($constraints) " +
                 if (runtimeChildren.isNotEmpty()) {
                     "{\n" +
