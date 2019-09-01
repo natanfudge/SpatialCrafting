@@ -1,2 +1,2 @@
 # Spatial Crafting
-https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items
+https://www.curseforge.com/minecraft/mc-mods/spatial-crafting
