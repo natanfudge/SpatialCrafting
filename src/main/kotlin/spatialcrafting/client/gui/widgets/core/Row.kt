@@ -4,7 +4,7 @@ import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
 import spatialcrafting.client.gui.RuntimeWidget
 import spatialcrafting.client.gui.widgets.core.Direction.LeftToRight
-import spatialcrafting.client.gui.widgets.core.MainAxisAlignment.*
+import spatialcrafting.client.gui.widgets.core.MainAxisAlignment.Start
 import spatialcrafting.client.gui.widgets.runtimeWidget
 import spatialcrafting.util.maxValueBy
 

@@ -3,8 +3,8 @@ package spatialcrafting.client.gui.widgets.core
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
 import spatialcrafting.client.gui.RuntimeWidget
-import spatialcrafting.client.gui.widgets.*
 import spatialcrafting.client.gui.widgets.core.MainAxisAlignment.Start
+import spatialcrafting.client.gui.widgets.runtimeWidget
 import spatialcrafting.util.maxValueBy
 
 

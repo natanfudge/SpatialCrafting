@@ -2,7 +2,6 @@ package spatialcrafting.client.gui
 
 import io.github.cottonmc.cotton.gui.GuiDescription
 import io.github.cottonmc.cotton.gui.client.ClientCottonScreen
-import net.minecraft.client.gui.screen.Screen
 import spatialcrafting.util.getMinecraftClient
 
 

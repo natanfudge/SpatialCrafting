@@ -15,10 +15,6 @@ data class Constraints(val x: Int, val y: Int, val width: Int, val height: Int) 
             && y < this.y + height
 }
 
-val Constraints.endX get() = x + width
-val Constraints.endY get() = y + height
-val Constraints.middleX get() = (x + endX) / 2
-val Constraints.middleY get() = (y + endY) / 2
 
 fun DevWidget.widthIn(constraints: Constraints) = if (expandWidth) constraints.width else min(constraints.width, minimumWidth)
 fun DevWidget.heightIn(constraints: Constraints) = if (expandHeight) constraints.height else min(constraints.height, minimumHeight)
@@ -112,7 +108,7 @@ interface RuntimeWidget {
     val constraints: Constraints
     var runtimeChildren: List<RuntimeWidget>
         get() = listOf()
-        set(value) {}
+        set(_) {}
 
     fun draw()
     val origin: DevWidget

@@ -22,15 +22,11 @@ fun DevWidget.walk(visitor: (DevWidget) -> Unit) {
 }
 
 
-// Libgui begins the box thing a bit higher
-private const val PaddingOffset = 3
 
 //var debugRoot
 fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidget.() -> Unit) {
 
     val overlay = Overlay()
-//    val context = ChildrenContext()
-//    context.init()
     val root: DevWidget = ColumnClass(overlay = overlay) {
         Stack {
             init()
@@ -38,7 +34,6 @@ fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidg
         }
     }
     root.walk { it.composeDirectChildren(it) }
-//    root.compose(root)
 
     val screenWidth = getMinecraftClient().window.scaledWidth
     val screenHeight = getMinecraftClient().window.scaledHeight

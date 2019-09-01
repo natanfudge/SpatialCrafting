@@ -80,14 +80,18 @@
         <w>craftable</w>
         <w>crafter</w>
         <w>crafters</w>
+        <w>datapacks</w>
         <w>deserialized</w>
         <w>deserializes</w>
         <w>disableable</w>
         <w>enchantability</w>
         <w>hoverable</w>
         <w>itemstack</w>
+        <w>mcmeta</w>
         <w>minecraft</w>
         <w>multiblock</w>
+        <w>recomposition</w>
+        <w>slamdown</w>
         <w>spatialcrafting</w>
         <w>unassign</w>
         <w>unform</w>

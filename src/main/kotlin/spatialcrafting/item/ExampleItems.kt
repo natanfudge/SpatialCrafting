@@ -1,9 +1,7 @@
 package spatialcrafting.item
 
 import net.minecraft.item.Items
-import net.minecraft.item.SwordItem
 import net.minecraft.recipe.Ingredient
-import spatialcrafting.util.ToolMaterialImpl
 import spatialcrafting.util.kotlinwrappers.Builders
 
 

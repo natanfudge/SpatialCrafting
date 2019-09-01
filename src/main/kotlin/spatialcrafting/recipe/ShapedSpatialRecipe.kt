@@ -11,10 +11,10 @@ import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
 import net.minecraft.world.World
-import spatialcrafting.util.Duration
 import spatialcrafting.crafter.CopyableWithPosition
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
+import spatialcrafting.util.Duration
 import spatialcrafting.util.matches
 
 @Serializable

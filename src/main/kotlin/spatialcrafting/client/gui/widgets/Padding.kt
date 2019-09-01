@@ -2,8 +2,8 @@ package spatialcrafting.client.gui.widgets
 
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
-import spatialcrafting.client.gui.widgets.core.SingleChildDevWidget
 import spatialcrafting.client.gui.widgets.core.Overlay
+import spatialcrafting.client.gui.widgets.core.SingleChildDevWidget
 
 
 class PaddingClass(private val left: Int,

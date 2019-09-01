@@ -1,6 +1,5 @@
 package spatialcrafting.crafter
 
-import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.BasicInventory
 import net.minecraft.item.ItemStack
 

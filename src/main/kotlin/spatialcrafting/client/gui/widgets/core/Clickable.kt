@@ -13,7 +13,6 @@ class Clickable<T : DevWidget>(overlay: Overlay?,
     override val minimumWidth get() = child.minimumWidth
 
     override fun getLayout(constraints: Constraints): RuntimeWidget = ClickableRuntime(constraints, this)
-    //
     inner class ClickableRuntime(override val constraints: Constraints, override val origin: DevWidget) : RuntimeWidget {
         override var runtimeChildren = listOf(child.layout(constraints))
         override fun draw() {
@@ -22,6 +21,7 @@ class Clickable<T : DevWidget>(overlay: Overlay?,
 
         fun onClick() = try {
             val callback = this@Clickable.onClick
+            @Suppress("UNCHECKED_CAST")
             (child as T).callback(this)
         } catch (e: Exception) {
             println("ERROR: unable to process click.")

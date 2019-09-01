@@ -15,7 +15,6 @@ import net.minecraft.world.World
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.util.Duration
 import spatialcrafting.util.matches
-import kotlin.properties.Delegates
 
 @Serializable
 class ShapelessSpatialRecipe private constructor( val components: List<ShapelessRecipeComponent>,
