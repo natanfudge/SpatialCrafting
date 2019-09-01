@@ -1,5 +1,7 @@
 package spatialcrafting.util.kotlinwrappers
 
+import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding
+import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry
 import net.fabricmc.fabric.api.client.render.BlockEntityRendererRegistry
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.fabricmc.fabric.api.network.PacketContext
@@ -39,6 +41,7 @@ class CommonModInitializationContext(val modId: String, val group: ItemGroup?) {
 
 class ClientModInitializationContext(private val modId: String) {
     inline fun <reified T : BlockEntity> register(renderer: BlockEntityRenderer<T>) = BlockEntityRendererRegistry.INSTANCE.register(T::class.java, renderer)
+    fun register(keyBinding : FabricKeyBinding) = KeyBindingRegistry.INSTANCE.register(keyBinding)
 
     fun registerServerToClientPacket(packetId: String, packetConsumer: (PacketContext, PacketByteBuf) -> Unit) =
             ClientSidePacketRegistry.INSTANCE.register(Identifier(modId, packetId), packetConsumer)

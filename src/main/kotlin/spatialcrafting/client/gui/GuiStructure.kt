@@ -1,8 +1,12 @@
 package spatialcrafting.client.gui
 
-import spatialcrafting.client.gui.widgets.Clickable
-import spatialcrafting.client.gui.widgets.TightSingleChildDevWidget
+import spatialcrafting.client.gui.widgets.core.Clickable
+import spatialcrafting.client.gui.widgets.core.Overlay
+import spatialcrafting.client.gui.widgets.core.TightSingleChildDevWidget
+import spatialcrafting.client.gui.widgets.getClientMouseX
+import spatialcrafting.client.gui.widgets.getClientMouseY
 import spatialcrafting.util.logDebug
+import java.lang.Integer.min
 
 data class Constraints(val x: Int, val y: Int, val width: Int, val height: Int) {
     fun contains(x: Int, y: Int) = x >= this.x
@@ -10,8 +14,16 @@ data class Constraints(val x: Int, val y: Int, val width: Int, val height: Int) 
             && x < this.x + width
             && y < this.y + height
 }
-//TODO: maybe go back to WidgetContext
-//TODO: document this system
+
+val Constraints.endX get() = x + width
+val Constraints.endY get() = y + height
+val Constraints.middleX get() = (x + endX) / 2
+val Constraints.middleY get() = (y + endY) / 2
+
+fun DevWidget.widthIn(constraints: Constraints) = if (expandWidth) constraints.width else min(constraints.width, minimumWidth)
+fun DevWidget.heightIn(constraints: Constraints) = if (expandHeight) constraints.height else min(constraints.height, minimumHeight)
+
+//TODO: steal a bunch of code from compose
 /**
  * The process is like this:
  * 1. User writes a dev widget.
@@ -33,14 +45,19 @@ data class Constraints(val x: Int, val y: Int, val width: Int, val height: Int) 
 /**
  * Dev widget contain what the dev see. Relative ordering of elements
  */
-abstract class DevWidget {
+abstract class DevWidget(
+
+        //TODO: The best way is probably to go up in the tree instead of doing this.
+
+        val overlay: Overlay?) {
     abstract val minimumHeight: Int
     abstract val minimumWidth: Int
     open val expandHeight: Boolean get() = false
     open val expandWidth: Boolean get() = false
 
     val devChildren: MutableList<DevWidget> = mutableListOf()
-    fun add(widget: DevWidget) = widget.also { devChildren.add(it) }
+    fun <T : DevWidget> add(widget: T) = widget.also { devChildren.add(it) }
+
 
     /**
      * Used to go back during runtime and change the runtime layout through the dev widget
@@ -60,21 +77,22 @@ abstract class DevWidget {
     /**
      * Function of self
      */
-    open val composeDirectChildren: DevWidget.() -> Unit = {}
+    abstract val composeDirectChildren: DevWidget.() -> Unit /*= {}*/
 
 
-    fun DevWidget.onClick(callback: RuntimeWidget.() -> Unit): DevWidget {
+    fun <T : DevWidget> T.onClick(callback: T.(runtimeWidget: RuntimeWidget) -> Unit): DevWidget {
         this@DevWidget.devChildren.remove(this)
-        return this@DevWidget.add(Clickable(callback) { add(this@onClick) })
+        return this@DevWidget.add(Clickable(overlay, callback) { add(this@onClick) })
     }
 
-    fun DevWidget.onHover(callback: RuntimeWidget.() -> Unit): DevWidget {
+    fun DevWidget.onHover(callback: RuntimeWidget.(mouseX: Int, mouseY: Int) -> Unit): DevWidget {
         this@DevWidget.devChildren.remove(this)
         return this@DevWidget.add(TightSingleChildDevWidget(composeDirectChildren = { add(this@onHover) }, drawer = {
             it.draw()
-            if (it.constraints.contains(getClientMouseX(), getClientMouseY())) it.callback()
-        }))
+            if (it.constraints.contains(getClientMouseX(), getClientMouseY())) it.callback(getClientMouseX(), getClientMouseY())
+        }, overlay = overlay))
     }
+
 
     fun recompose(target: DevWidget) = target.apply {
         devChildren.clear()
@@ -86,33 +104,9 @@ abstract class DevWidget {
         }
     }
 
-//    fun IDevWidget.onHover(callback: RuntimeWidget.() -> Unit): IDevWidget {
-//        devChildren.remove(this)
-//        return SingleChildDevWidget(this) {
-//            draw()
-//            if (constraints.contains(getClientMouseX(), getClientMouseY())) callback()
-//        }.also { add(it) }
-//    }
+
 }
 
-
-//abstract class DevWidget : IDevWidget {
-//    override val devChildren: MutableList<IDevWidget> = mutableListOf()
-//    override lateinit var runtimeLayout: RuntimeWidget
-//    protected fun getLayout(constraints: Constraints): RuntimeWidget{
-//
-//    }
-//}
-
-
-//fun RuntimeWidget.recompose(){
-////    // My children recompose
-////    for(child in runtimeChildren) child.recompose()
-//    // I recompose
-//    runtimeChildren = runtimeChildren.map { it.composer.position(it.constraints) }
-//
-//
-//}
 
 /**
  * Runtime Widgets have absolute positions and drawing functions.
@@ -121,27 +115,12 @@ interface RuntimeWidget {
     val constraints: Constraints
     var runtimeChildren: List<RuntimeWidget>
         get() = listOf()
-        set(value) {
-            val x = 2
-        }
-//        get() = listOf()
-//        set(value) {}
-
-//    var parent: RuntimeWidget?
-//    set(value) {field = value}
-
-//    val parent : RuntimeWidget
+        set(value) {}
 
     fun draw()
     val origin: DevWidget
 
     val debugIdentifier: String get() = "RuntimeWidget"
 
-//    override fun toString() = "RuntimeWidget{ constraints = { $constraints }" +
-//            if(runtimeChildren.isNotEmpty()) ", children = [\n" + runtimeChildren.joinToString("\n")  + "\n]" else " "+
-//                    "}"
-
-//    fun drawBackground(){}
-//    fun drawForeground(){}
 }
 

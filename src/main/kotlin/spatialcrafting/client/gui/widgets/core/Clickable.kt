@@ -1,12 +1,12 @@
-package spatialcrafting.client.gui.widgets
+package spatialcrafting.client.gui.widgets.core
 
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
 import spatialcrafting.client.gui.RuntimeWidget
 
-class Clickable(val onClick: RuntimeWidget.() -> Unit,override val composeDirectChildren: DevWidget.() -> Unit) : DevWidget() {
-//    //TODO: might need to change it
-//     = {}
+class Clickable<T : DevWidget>(overlay: Overlay?,
+                val onClick: T.(RuntimeWidget) -> Unit,
+                override val composeDirectChildren: DevWidget.() -> Unit) : DevWidget(overlay) {
 
     private val child get() = devChildren.first()
     override val minimumHeight get() = child.minimumHeight
@@ -20,7 +20,13 @@ class Clickable(val onClick: RuntimeWidget.() -> Unit,override val composeDirect
             runtimeChildren.first().draw()
         }
 
-        fun onClick() = this@Clickable.onClick(this)
+        fun onClick() = try {
+            val callback = this@Clickable.onClick
+            (child as T).callback(this)
+        } catch (e: Exception) {
+            println("ERROR: unable to process click.")
+            e.printStackTrace()
+        }
 
         override val debugIdentifier = "Clickable"
 

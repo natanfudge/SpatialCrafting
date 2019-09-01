@@ -80,6 +80,7 @@
         <w>craftable</w>
         <w>crafter</w>
         <w>crafters</w>
+        <w>deserialized</w>
         <w>deserializes</w>
         <w>disableable</w>
         <w>enchantability</w>
@@ -342,6 +343,15 @@
         <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.com.lettuce.fudge.fabric-drawer-1.1.0-RC-1.jar!/" />
       </CLASSES>
       <JAVADOC />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.com.lettuce.fudge.fabric-drawer-1.1.0-RC-1-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.curse_gradle.data_loader:2749923">
+      <CLASSES>
+        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.curse_gradle.data_loader-2749923.jar!/" />
+      </CLASSES>
+      <JAVADOC />
       <SOURCES />
     </library>
     <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.gamemodeoverhaul.GamemodeOverhaul:1.0.1.0">
@@ -463,7 +473,9 @@
         <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-api.fabric-keybindings-v0-0.1.1+7dfef87c42.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES />
+      <SOURCES>
+        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-api.fabric-keybindings-v0-0.1.1+7dfef87c42-sources.jar!/" />
+      </SOURCES>
     </library>
     <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-api.fabric-loot-tables-v1:0.1.0+b494ebeb42">
       <CLASSES>

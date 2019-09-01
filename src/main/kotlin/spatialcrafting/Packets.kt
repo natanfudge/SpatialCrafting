@@ -108,11 +108,15 @@ object Packets {
                                        /**
                                         * In case the first pos was a block that was destroyed in which case not multiblock can be gathered from it.
                                         */
-                                       val backupCrafterPiecePos : BlockPos) : S2CPacket<UnassignMultiblockState> {
+                                       val backupCrafterPiecePos: BlockPos) : S2CPacket<UnassignMultiblockState> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
-            val crafter = context.world.getBlockEntity(anyCrafterPiecePos) as? CrafterPieceEntity ?: context.world.getCrafterEntity(backupCrafterPiecePos)
-            CrafterPieceEntity.unassignMultiblockState(context.world,crafter.multiblockIn ?: error("No multiblock to unassign"))
+            val crafter = context.world.getBlockEntity(anyCrafterPiecePos) as? CrafterPieceEntity
+                    ?: context.world.getCrafterEntity(backupCrafterPiecePos)
+
+                CrafterPieceEntity.unassignMultiblockState(context.world, crafter.multiblockIn
+                        ?: error("No multiblock to unassign"))
+
         }
     }
 
@@ -215,21 +219,20 @@ object Packets {
     }
 
     @Serializable
-    data class ChangeActiveLayer(val anyCrafterPiecePos: BlockPos, val toLayer : Int) : C2SPacket<ChangeActiveLayer>{
-                override val serializer get() = serializer()
+    data class ChangeActiveLayer(val anyCrafterPiecePos: BlockPos, val toLayer: Int) : C2SPacket<ChangeActiveLayer> {
+        override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
-            if(toLayer < 0 || toLayer >= multiblock.multiblockSize){
+            if (toLayer < 0 || toLayer >= multiblock.multiblockSize) {
                 logWarning { "Attempt to change active layer to invalid layer '$toLayer'." }
                 return
             }
-            multiblock.showHologramsOnlyOfLayer(toLayer,context.world)
+            multiblock.showHologramsOnlyOfLayer(toLayer, context.world)
+            multiblock.recipeCreatorCurrentLayer = toLayer
 
         }
 
     }
-
-
 
     @Serializable
     data class ItemMovementFromPlayerToMultiblockParticles(
@@ -245,6 +248,15 @@ object Packets {
         }
 
     }
+
+//    @Serializable
+//    data class UpdateRecipeCreatorHologramLayer(val anyCrafterPiecePos: BlockPos,val layer : Int): C2SPacket<UpdateRecipeCreatorHologramLayer>{
+//        override val serializer = serializer()
+//        override fun use(context: PacketContext) {
+//            val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
+//
+//        }
+//    }
 
     private fun getAndValidateRecipe(recipeId: Identifier, world: World): SpatialRecipe? {
         val recipe = world.recipeManager.get(recipeId).orElse(null)

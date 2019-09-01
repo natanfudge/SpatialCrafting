@@ -3,10 +3,10 @@ package spatialcrafting.client.gui
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel
 import io.github.cottonmc.cotton.gui.widget.WWidget
-import spatialcrafting.client.gui.widgets.Clickable
-import spatialcrafting.client.gui.widgets.ColumnClass
-import spatialcrafting.client.gui.widgets.CrossAxisAlignment
-import spatialcrafting.client.gui.widgets.MainAxisAlignment
+import spatialcrafting.client.gui.widgets.core.Clickable
+import spatialcrafting.client.gui.widgets.core.ColumnClass
+import spatialcrafting.client.gui.widgets.core.Overlay
+import spatialcrafting.client.gui.widgets.core.Stack
 import spatialcrafting.util.getMinecraftClient
 import spatialcrafting.util.logDebug
 import spatialcrafting.util.times
@@ -28,9 +28,15 @@ private const val PaddingOffset = 3
 //var debugRoot
 fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidget.() -> Unit) {
 
+    val overlay = Overlay()
 //    val context = ChildrenContext()
 //    context.init()
-    val root: DevWidget = ColumnClass(MainAxisAlignment.Start,CrossAxisAlignment.Start, init)
+    val root: DevWidget = ColumnClass(overlay = overlay) {
+        Stack {
+            init()
+            add(overlay)
+        }
+    }
     root.walk { it.composeDirectChildren(it) }
 //    root.compose(root)
 
@@ -57,7 +63,7 @@ fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidg
 
         override fun onClick(x: Int, y: Int, button: Int) {
             runtimeRoot.walk {
-                if (it.constraints.contains(x + absoluteX, y + absoluteY) && it is Clickable.ClickableRuntime) it.onClick()
+                if (it.constraints.contains(x + absoluteX, y + absoluteY) && it is Clickable<*>.ClickableRuntime) it.onClick()
             }
         }
 

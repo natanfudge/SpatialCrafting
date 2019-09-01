@@ -19,7 +19,9 @@
   "tooltip.rei.plus_button.crafter_too_small" : "The nearest crafter is too small for this recipe",
   "tooltip.rei.plus_button.all_components_available" : "Transfer items to crafter",
   "tooltip.rei.plus_button.start_recipe_help" : "Start Recipe Help",
-  "tooltip.rei.plus_button.stop_recipe_help" : "Stop Recipe Help"
+  "tooltip.rei.plus_button.stop_recipe_help" : "Stop Recipe Help",
+
+  "key.spatialcrafting.open_recipe_creator": "Open Recipe Creator [For modpack makers]"
 
 
 

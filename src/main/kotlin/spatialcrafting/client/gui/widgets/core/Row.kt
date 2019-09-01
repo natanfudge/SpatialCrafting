@@ -1,11 +1,11 @@
-package spatialcrafting.client.gui.widgets
+package spatialcrafting.client.gui.widgets.core
 
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
 import spatialcrafting.client.gui.RuntimeWidget
-import spatialcrafting.client.gui.runtimeWidget
-import spatialcrafting.client.gui.widgets.Direction.LeftToRight
-import spatialcrafting.client.gui.widgets.MainAxisAlignment.*
+import spatialcrafting.client.gui.widgets.core.Direction.LeftToRight
+import spatialcrafting.client.gui.widgets.core.MainAxisAlignment.*
+import spatialcrafting.client.gui.widgets.runtimeWidget
 import spatialcrafting.util.maxValueBy
 
 
@@ -14,12 +14,14 @@ enum class Direction {
 }
 
 class RowClass(mainAxisAlignment: MainAxisAlignment,
-crossAxisAlignment: CrossAxisAlignment,
-               override val composeDirectChildren: DevWidget.() -> Unit) : Flex(mainAxisAlignment,crossAxisAlignment) {
+               mainAxisSize : FlexSize = FlexSize.Expand,
+               crossAxisAlignment: CrossAxisAlignment,
+               override val composeDirectChildren: DevWidget.() -> Unit,
+               overlay: Overlay?) : Flex(mainAxisAlignment,crossAxisAlignment, mainAxisSize, overlay) {
     override val minimumHeight get() = devChildren.maxValueBy { it.minimumHeight } ?: 0
-    override val minimumWidth get() = devChildren.sumBy { it.minimumHeight }
+    override val minimumWidth get() = devChildren.sumBy { it.minimumWidth }
     override val expandHeight get() = devChildren.any { it.expandHeight }
-    override val expandWidth = true
+    override val expandWidth = mainAxisSize == FlexSize.Expand
 
 
     override fun getLayout(constraints: Constraints): RuntimeWidget = runtimeWidget(
@@ -30,7 +32,8 @@ crossAxisAlignment: CrossAxisAlignment,
 }
 
 fun DevWidget.Row(mainAxisAlignment: MainAxisAlignment = Start,
+                  mainAxisSize: FlexSize = FlexSize.Expand,
                   crossAxisAlignment: CrossAxisAlignment = CrossAxisAlignment.Start,
                   children: DevWidget.() -> Unit): DevWidget =
-        add(RowClass(mainAxisAlignment,crossAxisAlignment, children))
+        add(RowClass(mainAxisAlignment,mainAxisSize, crossAxisAlignment, children,overlay))
 

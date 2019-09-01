@@ -2,14 +2,16 @@ package spatialcrafting.client.gui.widgets
 
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
-import spatialcrafting.client.gui.runtimeWidget
+import spatialcrafting.client.gui.widgets.core.SingleChildDevWidget
+import spatialcrafting.client.gui.widgets.core.Overlay
 
 
 class PaddingClass(private val left: Int,
                    private val right: Int,
                    private val top: Int,
                    private val bottom: Int,
-                   override val composeDirectChildren: DevWidget.() -> Unit) : OptionalSingleChildDevWidget() {
+                   override val composeDirectChildren: DevWidget.() -> Unit, overlay: Overlay?)
+    : SingleChildDevWidget(overlay) {
     override val minimumHeight get() = child?.minimumHeight ?: 0 + top + bottom
     override val minimumWidth get() = child?.minimumWidth ?: 0 + left + right
 
@@ -34,5 +36,6 @@ class PaddingClass(private val left: Int,
 fun DevWidget.Padding(left: Int = 0,
                       right: Int = 0,
                       top: Int = 0,
-                      bottom: Int = 0, child: DevWidget.() -> Unit): DevWidget = add(PaddingClass(left, right, top, bottom, child))
+                      bottom: Int = 0, child: DevWidget.() -> Unit): DevWidget =
+        add(PaddingClass(left, right, top, bottom, child,overlay))
 

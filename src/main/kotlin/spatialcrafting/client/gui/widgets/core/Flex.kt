@@ -1,12 +1,11 @@
-package spatialcrafting.client.gui.widgets
+package spatialcrafting.client.gui.widgets.core
 
-import spatialcrafting.client.gui.Constraints
-import spatialcrafting.client.gui.DevWidget
-import spatialcrafting.client.gui.RuntimeWidget
-import spatialcrafting.client.gui.widgets.CrossAxisAlignment.Baseline
-import spatialcrafting.client.gui.widgets.CrossAxisAlignment.Start
-import spatialcrafting.client.gui.widgets.Direction.LeftToRight
-import spatialcrafting.client.gui.widgets.Direction.TopToBottom
+import spatialcrafting.client.gui.*
+import spatialcrafting.client.gui.widgets.core.CrossAxisAlignment.Baseline
+import spatialcrafting.client.gui.widgets.core.CrossAxisAlignment.Start
+import spatialcrafting.client.gui.widgets.core.Direction.LeftToRight
+import spatialcrafting.client.gui.widgets.core.Direction.TopToBottom
+import java.lang.Integer.min
 
 enum class MainAxisAlignment {
     Start,
@@ -19,7 +18,15 @@ enum class CrossAxisAlignment {
     Baseline
 }
 
-abstract class Flex(private val mainAxisAlignment: MainAxisAlignment, private val crossAxisAlignment: CrossAxisAlignment) : DevWidget() {
+enum class FlexSize{
+    Expand,
+    Wrap
+}
+//TODO other classes should wrap this instead of extending it
+abstract class Flex(private val mainAxisAlignment: MainAxisAlignment,
+                    private val crossAxisAlignment: CrossAxisAlignment,
+                    private val crossAxisSize : FlexSize,
+                    overlay: Overlay?) : DevWidget(overlay) {
     fun positionFlexLayout(constraints: Constraints, direction: Direction): MutableList<RuntimeWidget> {
         // "Main Axis Size" means "width/height"
         val constraintsMainAxisStart = startingLocation(direction, constraints)
@@ -54,8 +61,8 @@ abstract class Flex(private val mainAxisAlignment: MainAxisAlignment, private va
         val children = mutableListOf<RuntimeWidget>()
         for (child in devChildren) {
             var childMainAxisSize = when (direction) {
-                LeftToRight -> child.minimumWidth
-                TopToBottom -> child.minimumHeight
+                LeftToRight -> min(constraints.width, child.minimumWidth)
+                TopToBottom -> min(constraints.height, child.minimumHeight)
             }
             val childExpandsInDirection = when (direction) {
                 LeftToRight -> child.expandWidth
@@ -67,8 +74,8 @@ abstract class Flex(private val mainAxisAlignment: MainAxisAlignment, private va
             }
 
             val childCrossAxisSize = when (direction) {
-                LeftToRight -> if (child.expandHeight) constraints.height else child.minimumHeight
-                TopToBottom -> if (child.expandWidth) constraints.width else child.minimumWidth
+                LeftToRight -> child.heightIn(constraints)
+                TopToBottom -> child.widthIn(constraints)
             }
             val childCrossAxisLocation = when (crossAxisAlignment) {
                 Start -> constraintsCrossAxisStart
@@ -111,8 +118,8 @@ abstract class Flex(private val mainAxisAlignment: MainAxisAlignment, private va
 
     private fun flexMainAxisSize(direction: Direction, constraints: Constraints): Int {
         return when (direction) {
-            LeftToRight -> Integer.min(constraints.width, devChildren.sumBy { it.minimumWidth })
-            TopToBottom -> Integer.min(constraints.height, devChildren.sumBy { it.minimumHeight })
+            LeftToRight -> min(constraints.width, devChildren.sumBy { it.minimumWidth })
+            TopToBottom -> min(constraints.height, devChildren.sumBy { it.minimumHeight })
         }
     }
 

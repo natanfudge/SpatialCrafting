@@ -21,6 +21,7 @@ import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.client.gui.RecipeCreatorGui
 import spatialcrafting.client.gui.RecipeCreatorScreen
+import spatialcrafting.client.keybinding.RecipeCreatorKeyBinding
 import spatialcrafting.crafter.assertIs
 import spatialcrafting.hologram.HologramBlock.IsHiddenPropertyName
 import spatialcrafting.util.*
@@ -106,6 +107,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
 
         val hologramEntity = world.getHologramEntity(pos)
 
+
         if (clickedBy.isHoldingItemIn(hand)) {
             if (hologramEntity.isEmpty()) {
                 hologramEntity.insertItem(clickedBy.getStackInHand(hand))
@@ -115,10 +117,10 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
                 }
             }
         }
-        else if (world.isClient && clickedBy.isCreative) {
+
+        if (world.isClient && clickedBy.isCreative && RecipeCreatorKeyBinding.isPressed) {
             getMinecraftClient().openScreen(RecipeCreatorScreen(RecipeCreatorGui()))
         }
-
         return true
     }
 

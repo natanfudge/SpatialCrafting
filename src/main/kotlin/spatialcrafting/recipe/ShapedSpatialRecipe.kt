@@ -99,6 +99,15 @@ data class ShapedRecipeComponent(override val position: ComponentPosition, val i
     : CopyableWithPosition<ShapedRecipeComponent> {
     override fun copy(newPosition: ComponentPosition) = copy(position = newPosition)
 
+    override fun equals(other: Any?) = other is ShapedRecipeComponent &&
+            other.position == this.position && other.ingredient.ids == this.ingredient.ids
+
+    override fun hashCode(): Int {
+        var result = position.hashCode()
+        result = 31 * result + ingredient.hashCode()
+        return result
+    }
+
 }
 
 

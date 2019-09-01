@@ -18,7 +18,7 @@ import spatialcrafting.util.matches
 import kotlin.properties.Delegates
 
 @Serializable
-class ShapelessSpatialRecipe private constructor(private val components: List<ShapelessRecipeComponent>,
+class ShapelessSpatialRecipe private constructor( val components: List<ShapelessRecipeComponent>,
                                                  override val minimumCrafterSize: Int,
                                                  override val energyCost: Long,
                                                  override val _craftTime: Long,

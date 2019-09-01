@@ -23,13 +23,13 @@ import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.registry.Registry
 import spatialcrafting.MaxCrafterSize
 import spatialcrafting.SmallestCrafterSize
-import spatialcrafting.util.Duration
-import spatialcrafting.util.seconds
-import spatialcrafting.util.ticks
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
+import spatialcrafting.util.Duration
 import spatialcrafting.util.flatMapIndexed
 import spatialcrafting.util.max
+import spatialcrafting.util.seconds
+import spatialcrafting.util.ticks
 import kotlin.math.max
 
 @Serializable
@@ -63,7 +63,8 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
     }
 
     abstract class Serializer<T : SpatialRecipe> : RecipeSerializer<SpatialRecipe> {
-        abstract val serializer : KSerializer<T>
+        abstract val serializer: KSerializer<T>
+
         companion object {
             const val defaultEnergyCost = 1000L
             val defaultCraftTimes = mapOf(
@@ -83,12 +84,12 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
                            id: Identifier, output: ItemStack, minimumCrafterSize: Int, energyCost: Long, craftTime: Duration): T
 
         override fun read(id: Identifier, jsonObject: JsonObject): SpatialRecipe {
-            return readMeasured(jsonObject, id)
+            val deserialized = deserializeJson(jsonObject, id)
+            validateJson(deserialized, id)
+            return readFromDeserialized(deserialized, id)
         }
 
-        private fun readMeasured(jsonObject: JsonObject, id: Identifier): T {
-            val json = deserializeJson(jsonObject, id)
-
+        fun readFromDeserialized(json: SpatialRecipeJsonFormat, id: Identifier): T {
             validateJson(json, id)
             val ingredients = json.key.mapValues { Ingredient.fromJson(it.value) }
             val components = json.pattern.flatMapIndexed { y, layer ->
@@ -97,7 +98,7 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
                         if (ingredientKey == ' ') return@mapIndexed null
                         ShapedRecipeComponent(
                                 ComponentPosition(x, y, z),
-                                ingredient = ingredients[ingredientKey.toString()]
+                                ingredient = ingredients[ingredientKey]
                                         ?: throwNoIngredientWithKeyError(ingredientKey, json.key, id)
                         )
                     }.filterNotNull()
@@ -128,11 +129,11 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
             val craftTime = json.craftTime?.seconds ?: (defaultCraftTimes[minimumCrafterSize]
                     ?: error("impossible crafter size"))
 
-            return build(components, id, output,max(minimumCrafterSize, SmallestCrafterSize) , energyCost, craftTime)
+            return build(components, id, output, max(minimumCrafterSize, SmallestCrafterSize), energyCost, craftTime)
         }
 
 
-        private fun deserializeJson(jsonObject: JsonObject, id: Identifier): SpatialRecipeJsonFormat {
+         fun deserializeJson(jsonObject: JsonObject, id: Identifier): SpatialRecipeJsonFormat {
             val json: SpatialRecipeJsonFormat
             try {
                 json = Gson().fromJson(jsonObject, SpatialRecipeJsonFormat::class.java)
@@ -201,7 +202,7 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
 
         }
 
-        private fun throwNoIngredientWithKeyError(ingredientKey: Char, ingredients: Map<String, JsonObject>, id: Identifier): Nothing {
+        private fun throwNoIngredientWithKeyError(ingredientKey: Char, ingredients: Map<Char, JsonObject>, id: Identifier): Nothing {
             val ingredientsString = GsonBuilder().setPrettyPrinting().create().toJson(ingredients)
             throw SpatialRecipeSyntaxException(
                     """ingredient key '$ingredientKey' is not defined. Please define it in the 'key' section. Defined keys:

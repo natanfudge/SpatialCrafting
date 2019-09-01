@@ -1,5 +1,6 @@
 package spatialcrafting.util
 
+import spatialcrafting.recipe.ComponentPosition
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.max
@@ -89,7 +90,21 @@ val Int.f get() = this.toFloat()
 val Float.d get() = this.toDouble()
 val Int.l get() = this.toLong()
 
-inline fun <T, R : Comparable<R>> Iterable<T>.maxValueBy(selector: (T) -> R): R? = maxBy(selector)?.let(selector)
+inline fun <T, R : Comparable<R>> Iterable<T>.maxValueBy(selector: (T) -> R): R? {
+    val iterator = iterator()
+    if (!iterator.hasNext()) return null
+    val maxElem = iterator.next()
+    if (!iterator.hasNext()) return selector(maxElem)
+    var maxValue = selector(maxElem)
+    do {
+        val e = iterator.next()
+        val v = selector(e)
+        if (maxValue < v) {
+            maxValue = v
+        }
+    } while (iterator.hasNext())
+    return maxValue
+}
 
 //TODO: turn this off in production
 const val LogDebug = true
@@ -98,6 +113,30 @@ const val LogWarning = true
 inline fun logDebug(lazyMessage: () -> String) = if (LogDebug) println("${Date()} [SC/DEBUG]: ${lazyMessage()}") else Unit
 inline fun logWarning(lazyMessage: () -> String) = if (LogWarning) println("${Date()} [SC/WARN]: ${lazyMessage()}") else Unit
 
+
+fun allIndicesInCubeOfSize(size: Int) = (0 until size)
+        .flatMap { x -> (0 until size).map { y -> x to y } }
+        .flatMap { (x, y) -> (0 until size).map { z -> Triple(x, y, z) } }
+
+fun x() {
+    val oneRange = 0 until 5
+    val listOfRanges = oneRange.map { 0 until 5 }
+    val listOfListOfRanges = listOfRanges.map { range ->
+        range.map { 0 until 5 }
+    }
+
+    val x = listOfListOfRanges
+}
+
+fun cubeOfSize(size: Int) = (0 until size)
+        .map { 0 until size }
+        .map { it.map { 0 until size } }
+
+fun List<List<IntRange>>.mapCube(mapping: (ComponentPosition) -> Char) = mapIndexed { y, layer ->
+    layer.mapIndexed { x, row ->
+        row.map { z -> mapping(ComponentPosition(x, y, z)) }.joinToString("")
+    }
+}
 
 inline fun <reified T, reified V> T.getPrivateField(name: String): V {
     val f = T::class.java.getDeclaredField(name)

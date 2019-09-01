@@ -2,17 +2,19 @@ package spatialcrafting
 
 
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
+import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
 import net.fabricmc.fabric.api.client.model.ModelVariantProvider
-import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.render.model.BakedModel
 import net.minecraft.client.render.model.ModelBakeSettings
 import net.minecraft.client.render.model.ModelLoader
 import net.minecraft.client.render.model.UnbakedModel
 import net.minecraft.client.texture.Sprite
+import net.minecraft.item.ItemGroup
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
 import spatialcrafting.client.Sounds
+import spatialcrafting.client.keybinding.RecipeCreatorKeyBinding
 import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.crafter.CraftersPieces
 import spatialcrafting.hologram.HologramBakedModel
@@ -22,9 +24,7 @@ import spatialcrafting.hologram.HologramBlockEntityRenderer
 import spatialcrafting.item.DeceptivelySmallSword
 import spatialcrafting.item.PointyStick
 import spatialcrafting.item.ShapelessSword
-import spatialcrafting.recipe.ShapedSpatialRecipe
-import spatialcrafting.recipe.ShapelessSpatialRecipe
-import spatialcrafting.recipe.SpatialRecipe
+import spatialcrafting.recipe.*
 import spatialcrafting.util.itemStack
 import spatialcrafting.util.kotlinwrappers.initClientOnly
 import spatialcrafting.util.kotlinwrappers.initCommon
@@ -56,9 +56,10 @@ val GuiId = modId("test_gui")
 const val MaxCrafterSize = 5
 const val SmallestCrafterSize = 2
 
- val SpatialCraftingItemGroup = FabricItemGroupBuilder.build(
+val SpatialCraftingItemGroup: ItemGroup  = FabricItemGroupBuilder.build(
         Identifier(ModId, "spatial_crafting")
 ) { CraftersPieces.getValue(SmallestCrafterSize).itemStack }
+
 
 fun modId(str: String) = Identifier(ModId, str)
 
@@ -73,7 +74,7 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
         }
     }
 
-    registerTo(Registry.ITEM){
+    registerTo(Registry.ITEM) {
         ShapelessSword withId "shapeless_sword"
         DeceptivelySmallSword withId "deceptively_small_sword"
         PointyStick withId "pointy_stick"
@@ -89,8 +90,8 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
     }
 
     registerTo(Registry.RECIPE_SERIALIZER) {
-        ShapedSpatialRecipe.Serializer withId "shaped"
-        ShapelessSpatialRecipe withId "shapeless"
+        ShapedSpatialRecipe.Serializer withId Identifier(ShapedRecipeType)
+        ShapelessSpatialRecipe withId Identifier(ShapelessRecipeType)
     }
 
     registerTo(Registry.RECIPE_TYPE) {
@@ -114,7 +115,6 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 
 
 }
-
 
 
 @Suppress("unused")
@@ -145,6 +145,7 @@ fun initClient() = initClientOnly(ModId) {
     registerS2C(Packets.ItemMovementFromPlayerToMultiblockParticles.serializer())
 
     register(HologramBlockEntityRenderer)
+    register(RecipeCreatorKeyBinding)
 
 }
 
