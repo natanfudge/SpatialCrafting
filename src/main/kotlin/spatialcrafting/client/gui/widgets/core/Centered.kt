@@ -3,7 +3,6 @@
 //import spatialcrafting.client.gui.*
 //import spatialcrafting.client.gui.widgets.runtimeWidget
 //
-////TODO: generalize into Align
 //class CenteredClass(overlay: Overlay?, override val composeDirectChildren: DevWidget.() -> Unit) : SingleChildDevWidget(overlay) {
 //    override val minimumHeight = child?.minimumHeight ?: 0
 //    override val minimumWidth = child?.minimumHeight ?: 0

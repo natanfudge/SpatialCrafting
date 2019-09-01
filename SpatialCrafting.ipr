@@ -338,14 +338,12 @@
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.com.lettuce.fudge.fabric-drawer:1.1.0-RC-1">
+    <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.com.lettuce.fudge.fabric-drawer:1.1.0">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.com.lettuce.fudge.fabric-drawer-1.1.0-RC-1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.com.lettuce.fudge.fabric-drawer-1.1.0.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES>
-        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.com.lettuce.fudge.fabric-drawer-1.1.0-RC-1-sources.jar!/" />
-      </SOURCES>
+      <SOURCES />
     </library>
     <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.curse_gradle.data_loader:2749923">
       <CLASSES>
@@ -582,21 +580,19 @@
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-language-kotlin:1.3.40+build.1">
+    <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-language-kotlin:1.3.50+build.1">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-language-kotlin-1.3.40+build.1.jar!/" />
+        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-language-kotlin-1.3.50+build.1.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES />
     </library>
-    <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-loader:0.4.8+build.159">
+    <library name="Gradle: net.fabricmc.mapped:net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-loader:0.4.9+build.160">
       <CLASSES>
-        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-loader-0.4.8+build.159.jar!/" />
+        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-loader-0.4.9+build.160.jar!/" />
       </CLASSES>
       <JAVADOC />
-      <SOURCES>
-        <root url="jar://$PROJECT_DIR$/.gradle/loom-cache/remapped_mods/net.fabricmc.yarn.1_14_4.12.net.fabricmc.fabric-loader-0.4.8+build.159-sources.jar!/" />
-      </SOURCES>
+      <SOURCES />
     </library>
     <library name="Gradle: net.fabricmc:fabric-loader-sat4j:2.3.5.4">
       <CLASSES>
@@ -768,101 +764,101 @@
         <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-core/2.8.1/a0a7f683da620c345b502fff04d1e46cde2e8d9/log4j-core-2.8.1-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: org.jetbrains.kotlin:kotlin-reflect:1.3.40">
+    <library name="Gradle: org.jetbrains.kotlin:kotlin-reflect:1.3.50">
       <CLASSES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.3.40/f2f8357e000fd80d8d799110f012b86fd4637386/kotlin-reflect-1.3.40.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.3.50/b499f22fd7c3e9c2e5b6c4005221fa47fc7f9a7a/kotlin-reflect-1.3.50.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.3.40/9f909e117bfdad6170873f2353b2718b12c9c688/kotlin-reflect-1.3.40-javadoc.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.3.50/c86b9ba59cf5fcdf802872198458c32e4e3062ec/kotlin-reflect-1.3.50-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.3.40/e03e6009b731f9140bc05b7ec950b9336bd8eedc/kotlin-reflect-1.3.40-sources.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-reflect/1.3.50/4e1686609dbfe77db1072774f0d38ab82b67206b/kotlin-reflect-1.3.50-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-common:1.3.40" type="kotlin.common">
+    <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-common:1.3.50" type="kotlin.common">
       <CLASSES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.40/ff8f3da514fc2877d1303d55e22d6da8156c29fb/kotlin-stdlib-common-1.3.40.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.50/3d9cd3e1bc7b92e95f43d45be3bfbcf38e36ab87/kotlin-stdlib-common-1.3.50.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.40/344f49d6aeab2a04e26227bbeaa433fd2c894874/kotlin-stdlib-common-1.3.40-javadoc.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.50/acd7ffcfdebdbf05b2edba3615968b33241063ea/kotlin-stdlib-common-1.3.50-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.40/682cd7821872d1a3c1e8a3e6bdaabd17f2b71004/kotlin-stdlib-common-1.3.40-sources.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.50/8ac406cf33e942265c4abb33ee0acdee79292dd6/kotlin-stdlib-common-1.3.50-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.40">
+    <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.50">
       <CLASSES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.3.40/2995de8f68444ad47f29e7b59962ac31e6301d7e/kotlin-stdlib-jdk7-1.3.40.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.3.50/50ad05ea1c2595fb31b800e76db464d08d599af3/kotlin-stdlib-jdk7-1.3.50.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.3.40/6fd2c0275289b1e7a7c4ffc92cc853e20c5f5942/kotlin-stdlib-jdk7-1.3.40-javadoc.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.3.50/925b641f3f328a6c02cca5c327934f8de12e5747/kotlin-stdlib-jdk7-1.3.50-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.3.40/3d0c620918fdca4e2c542c3c85d139b35697a6f7/kotlin-stdlib-jdk7-1.3.40-sources.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.3.50/854725f0e8cdf688647bdc9022d1b32228fefc14/kotlin-stdlib-jdk7-1.3.50-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.40">
+    <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.50">
       <CLASSES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.3.40/2d1d0a2f27fd060787075c69113846803fc27734/kotlin-stdlib-jdk8-1.3.40.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.3.50/bf65725d4ae2cf00010d84e945fcbc201f590e11/kotlin-stdlib-jdk8-1.3.50.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.3.40/6fd2c0275289b1e7a7c4ffc92cc853e20c5f5942/kotlin-stdlib-jdk8-1.3.40-javadoc.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.3.50/925b641f3f328a6c02cca5c327934f8de12e5747/kotlin-stdlib-jdk8-1.3.50-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.3.40/765172795111fcc082ac9e4ccd766ce61505ee54/kotlin-stdlib-jdk8-1.3.40-sources.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.3.50/e1eaa82220f14bd12ae0bf211a08b2bad5700e20/kotlin-stdlib-jdk8-1.3.50-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib:1.3.40">
+    <library name="Gradle: org.jetbrains.kotlin:kotlin-stdlib:1.3.50">
       <CLASSES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.40/b8a521c687329303778548e2f09b0ba5b2665236/kotlin-stdlib-1.3.40.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.50/b529d1738c7e98bbfa36a4134039528f2ce78ebf/kotlin-stdlib-1.3.50.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.40/344f49d6aeab2a04e26227bbeaa433fd2c894874/kotlin-stdlib-1.3.40-javadoc.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.50/acd7ffcfdebdbf05b2edba3615968b33241063ea/kotlin-stdlib-1.3.50-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.40/7af6fd6b9293e80fc7408493a764858a7f66b022/kotlin-stdlib-1.3.40-sources.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.50/bc0c767786c4a3c042a364e69d3f3dd5ff5253a5/kotlin-stdlib-1.3.50-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.2">
+    <library name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0">
       <CLASSES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core/1.2.2/6ff48bdfc38a8c22e3fc37605b6a6afaed3b6dbd/kotlinx-coroutines-core-1.2.2.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core/1.3.0/36fa8555d92456448ec19e64b00be830df9a7fb5/kotlinx-coroutines-core-1.3.0.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core/1.2.2/581262993f8ab29f1a47db7de8b24c2f5118d12f/kotlinx-coroutines-core-1.2.2-javadoc.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core/1.3.0/8fdb244b797a9318128367d854452bf9db99c417/kotlinx-coroutines-core-1.3.0-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core/1.2.2/a60b581427c2c24d884457045ff9076051dd3bf1/kotlinx-coroutines-core-1.2.2-sources.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-core/1.3.0/23a4e24d487cf4838494193e8bbf52f332006557/kotlinx-coroutines-core-1.3.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.2.2">
+    <library name="Gradle: org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.0">
       <CLASSES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8/1.2.2/71653b85af2fe6baeb5314c2863dffe7aac8068a/kotlinx-coroutines-jdk8-1.2.2.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8/1.3.0/48e18e65dc706278e22ed65104b63f6caebaa170/kotlinx-coroutines-jdk8-1.3.0.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8/1.2.2/56c6298908452ddbdc5c3800bc9eb71a42eb93a3/kotlinx-coroutines-jdk8-1.2.2-javadoc.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8/1.3.0/d526d9827c4da24d2779be0a3e60120262956e17/kotlinx-coroutines-jdk8-1.3.0-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8/1.2.2/1957991fbdd39da4a4d306e8eaccffe15422a99a/kotlinx-coroutines-jdk8-1.2.2-sources.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8/1.3.0/9b7e3d5493a90e7906d5f8244dbc0ed2cfa44df6/kotlinx-coroutines-jdk8-1.3.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.11.1">
+    <library name="Gradle: org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.12.0">
       <CLASSES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-runtime/0.11.1/fcb54fe242d6addcd89b8aececb835a6b392c568/kotlinx-serialization-runtime-0.11.1.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-runtime/0.12.0/418a99564fcb3fa1b278b529238d2cb5a3f80d7d/kotlinx-serialization-runtime-0.12.0.jar!/" />
       </CLASSES>
       <JAVADOC />
       <SOURCES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-runtime/0.11.1/3007c79083583c0c641d8348a058bf4998784bb7/kotlinx-serialization-runtime-0.11.1-sources.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlinx/kotlinx-serialization-runtime/0.12.0/8d8a1066b50404e42c910b2189a925a25552b61f/kotlinx-serialization-runtime-0.12.0-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Gradle: org.jetbrains:annotations:16.0.3">
+    <library name="Gradle: org.jetbrains:annotations:17.0.0">
       <CLASSES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/16.0.3/62c7299ced2a089cc541726c6d763da9417604a0/annotations-16.0.3.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/17.0.0/8ceead41f4e71821919dbdb7a9847608f1a938cb/annotations-17.0.0.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/16.0.3/a74853b38d101f094c90dad3e1f11681a5d07164/annotations-16.0.3-javadoc.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/17.0.0/e5eaaf09601e7eb46339ef672a99be3a9a21ff7b/annotations-17.0.0-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/16.0.3/c3bc8659eca392a635059c6cda7b1365dfbe5a43/annotations-16.0.3-sources.jar!/" />
+        <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/17.0.0/c4824e1e82f2783838485a3536db0b8f4d53aa95/annotations-17.0.0-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Gradle: org.lwjgl:lwjgl-glfw:3.2.2">

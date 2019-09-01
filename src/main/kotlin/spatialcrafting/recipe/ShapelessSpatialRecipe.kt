@@ -66,8 +66,6 @@ class ShapelessSpatialRecipe private constructor( val components: List<Shapeless
 
     data class ItemAndAmount(val stack: ItemStack, val amount: Int, var wasUsed : Boolean)
 
-//    data class MarkedStack(val wasUsed : Int, val stack :ItemStack)
-
 
     //TODO: won't work sometimes
     override fun matches(inventory: CrafterMultiblockInventoryWrapper, world: World): Boolean {

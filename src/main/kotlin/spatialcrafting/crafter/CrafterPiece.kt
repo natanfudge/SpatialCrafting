@@ -110,12 +110,6 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
     }
 
     override fun neighborUpdate(blockState_1: BlockState?, world: World, pos: BlockPos, block_1: Block?, blockPos_2: BlockPos?, boolean_1: Boolean) {
-//        if (world.isClient) return
-//        val multiblock = world.getCrafterEntity(pos).multiblockIn
-//        if (multiblock == null) {
-//            attemptToFormMultiblock(world, pos)
-//        }
-
         //TODO: think of a better solution
         // Maybe on chunk update, look at gravel
 
@@ -217,8 +211,10 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
         val matches = world.recipeManager.getAllMatches(SpatialRecipe.Type,
                 CrafterMultiblockInventoryWrapper(multiblockIn.getInventory(world), crafterSize = size), world)
 
-        //TODO: provide feedback that no recipe matched
-        if (matches.isEmpty()) return true
+        if (matches.isEmpty()) {
+            clickedBy?.sendMessage(TranslatableText("message.spatialcrafting.no_match"))
+            return true
+        }
         else craft(matches, world, multiblockIn, pos)
 
         return true
@@ -267,10 +263,10 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
     override fun onPlaced(world: World, blockPos: BlockPos, blockState: BlockState, placedBy: LivingEntity?, itemStack: ItemStack?) {
         if (world.isClient) return
         println("OnPlaced")
-        attemptToFormMultiblock(world, blockPos)
+        attemptToFormMultiblock(world, blockPos,placedBy)
     }
 
-    private fun attemptToFormMultiblock(world: World, blockPos: BlockPos) {
+    private fun attemptToFormMultiblock(world: World, blockPos: BlockPos, byPlayer : LivingEntity?) {
         assert(world.isServer)
         val northernEasternCrafter = getNorthernEasternCrafter(world, blockPos)
         val multiblock = findPossibleMultiblock(world, northernEasternCrafter) ?: return
@@ -279,7 +275,7 @@ class CrafterPiece(val size: Int) : Block(Settings.copy(
             createMultiblockFromServer(world, northernEasternCrafter, multiblock)
         }
         else {
-            //TODO: show an indicator that there is no space
+            byPlayer?.sendMessage(TranslatableText("message.spatialcrafting.no_space"))
         }
 
 

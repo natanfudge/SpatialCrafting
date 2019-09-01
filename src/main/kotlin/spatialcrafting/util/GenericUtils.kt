@@ -71,8 +71,8 @@ inline fun <T, R> Iterable<T>.mapIndexed(transform: (Int, T) -> R): List<R> {
     return destination
 }
 
-//TODO: turn this off in production
-const val assertionsEnabled = true
+//TODO: turn this on in debug
+const val assertionsEnabled = false
 
 inline fun assert(message: String = "Assertion failure", test: () -> Boolean) {
     if (assertionsEnabled && !test()) throw AssertionError(message)
@@ -106,9 +106,9 @@ inline fun <T, R : Comparable<R>> Iterable<T>.maxValueBy(selector: (T) -> R): R?
     return maxValue
 }
 
-//TODO: turn this off in production
-const val LogDebug = true
-const val LogWarning = true
+//TODO: turn this on in debug
+const val LogDebug = false
+const val LogWarning = false
 
 inline fun logDebug(lazyMessage: () -> String) = if (LogDebug) println("${Date()} [SC/DEBUG]: ${lazyMessage()}") else Unit
 inline fun logWarning(lazyMessage: () -> String) = if (LogWarning) println("${Date()} [SC/WARN]: ${lazyMessage()}") else Unit

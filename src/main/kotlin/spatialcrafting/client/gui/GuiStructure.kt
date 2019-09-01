@@ -46,9 +46,6 @@ fun DevWidget.heightIn(constraints: Constraints) = if (expandHeight) constraints
  * Dev widget contain what the dev see. Relative ordering of elements
  */
 abstract class DevWidget(
-
-        //TODO: The best way is probably to go up in the tree instead of doing this.
-
         val overlay: Overlay?) {
     abstract val minimumHeight: Int
     abstract val minimumWidth: Int

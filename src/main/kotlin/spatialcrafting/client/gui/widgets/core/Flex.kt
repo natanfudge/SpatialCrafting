@@ -22,7 +22,6 @@ enum class FlexSize{
     Expand,
     Wrap
 }
-//TODO other classes should wrap this instead of extending it
 abstract class Flex(private val mainAxisAlignment: MainAxisAlignment,
                     private val crossAxisAlignment: CrossAxisAlignment,
                     private val crossAxisSize : FlexSize,

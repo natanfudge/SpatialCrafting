@@ -30,18 +30,15 @@ import spatialcrafting.util.kotlinwrappers.initClientOnly
 import spatialcrafting.util.kotlinwrappers.initCommon
 import java.util.function.Function
 
-//TODO: SHAPELESS CRAFTING DOESN'T WORK!!!!!!!!!!!!!!!!!!!!!!!!!!
+//TODO: analysis
 
 //TODO: need examples for:
 // power
 
 
 //TODO: ask to add to AOF
-//TODO: add dependencies in fabric.mod.json
 //TODO: power consumption
-//TODO: config file: sounds power multiplier, can store energy
-//TODO: Recipe generator GUI
-//TODO: test EVERYTHING on server
+//TODO: config file: can store energy
 //TODO: remove useless shit for tutorials and such, go through everything and make sure its needed
 //TODO: document packets:
 // - S2C -  Need to do taskQueue thing, needs to be registered on the client only

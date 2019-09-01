@@ -21,7 +21,10 @@
   "tooltip.rei.plus_button.start_recipe_help" : "Start Recipe Help",
   "tooltip.rei.plus_button.stop_recipe_help" : "Stop Recipe Help",
 
-  "key.spatialcrafting.open_recipe_creator": "Open Recipe Creator [For modpack makers]"
+  "key.spatialcrafting.open_recipe_creator": "Open Recipe Creator [For modpack makers]",
+
+  "message.spatialcrafting.no_match": "No recipe matches",
+  "message.spatialcrafting.no_space": "Not enough space above the crafter pieces"
 
 
 

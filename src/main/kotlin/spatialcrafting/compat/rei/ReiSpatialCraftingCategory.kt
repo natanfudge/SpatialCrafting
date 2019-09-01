@@ -26,7 +26,6 @@ import java.awt.Rectangle
 import java.util.function.Supplier
 import kotlin.math.roundToInt
 
-//TODO: better example recipes
 //TODO: show energy cost if that's enabled (and exists)
 
 

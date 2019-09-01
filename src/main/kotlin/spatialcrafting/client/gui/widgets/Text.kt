@@ -10,7 +10,6 @@ import spatialcrafting.util.getMinecraftClient
 
 const val StringHeight = 8
 
-//TODO: some funcy Draw{} shit that allows me to avoid creating a class
 
 class TextClass(private val text: String, private val color: Int, overlay: Overlay?) : NoChildDevWidget(overlay) {
     override val composeDirectChildren: DevWidget.() -> Unit = {}

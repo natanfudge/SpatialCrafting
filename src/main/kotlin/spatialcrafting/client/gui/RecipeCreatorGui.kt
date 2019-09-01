@@ -21,7 +21,6 @@ data class RecipeOptions(var shaped: Boolean = true,
                          var minimumCrafterSize: String,
                          var useTags: Boolean = true)
 
-//TODO: fix text fields
 class RecipeCreatorGui : LightweightGuiDescription() {
     init {
         val nearestCrafter = getNearestCrafter(getMinecraftClient().world, getMinecraftClient().player.pos)

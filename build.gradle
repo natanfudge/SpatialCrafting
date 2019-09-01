@@ -41,7 +41,6 @@ dependencies {
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:$fabric_version"
-    modImplementation "net.fabricmc.fabric-api:fabric-keybindings-v0:0.1.1+7dfef87c42"
     // LBA
     modImplementation ("alexiil.mc.lib:libblockattributes-items:$lba_version")
     //LibGui
