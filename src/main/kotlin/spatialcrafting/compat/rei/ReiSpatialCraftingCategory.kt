@@ -18,8 +18,8 @@ import spatialcrafting.compat.rei.util.SwappableChildWidget
 import spatialcrafting.compat.rei.util.SwappableChildrenWidget
 import spatialcrafting.crafter.CraftersPieces
 import spatialcrafting.modId
-import spatialcrafting.util.ComponentSatisfaction
-import spatialcrafting.util.drawCenteredStringWithoutShadow
+import spatialcrafting.recipe.ComponentSatisfaction
+import spatialcrafting.util.Client
 import spatialcrafting.util.isWholeNumber
 import java.awt.Point
 import java.awt.Rectangle
@@ -152,7 +152,7 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
                 text.asFormattedString()
         ) {
             override fun render(mouseX: Int, mouseY: Int, delta: Float) {
-                drawCenteredStringWithoutShadow(font, this.text, x, y, -1)
+                Client.drawCenteredStringWithoutShadow(font, this.text, x, y, -1)
             }
         }
 

@@ -5,8 +5,6 @@ package spatialcrafting.client
 import spatialcrafting.util.Duration
 import spatialcrafting.util.d
 
-inline val Int.bpt get() = Speed(this.d)
-inline val Double.bpt get() = Speed(this)
 inline val Int.bps get() = Speed(this.d / Duration.TicksPerSecond)
 inline val Double.bps get() = Speed(this / Duration.TicksPerSecond)
 

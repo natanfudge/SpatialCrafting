@@ -26,7 +26,7 @@ private val HalfOfEachCoordinate = Vec3d(0.5, 0.5, 0.5)
 @Environment(EnvType.CLIENT)
 abstract class ItemMovementParticle(world: World,
                                     private val itemEntity: ItemEntity,
-                                    val targetLocation: Vec3d
+                                    private val targetLocation: Vec3d
 ) : Particle(world, itemEntity.x, itemEntity.y, itemEntity.z, 0.0, 0.0, 0.0) {
     companion object {
 
@@ -63,28 +63,28 @@ abstract class ItemMovementParticle(world: World,
     }
 
     override fun buildGeometry(bufferBuilder_1: BufferBuilder?, camera_1: Camera?, magicFloat: Float, float_2: Float, float_3: Float, float_4: Float, float_5: Float, float_6: Float) {
-        var float_7 = (progress.toFloat() + magicFloat) / maxProgress.toFloat()
-        float_7 *= float_7
-        val double_1 = itemEntity.x
-        val double_2 = itemEntity.y
-        val double_3 = itemEntity.z
-        val double_4 = targetLocationX(magicFloat)
-        val double_5 = targetLocationY(magicFloat)
-        val double_6 = targetLocationZ(magicFloat)
+        var float7 = (progress.toFloat() + magicFloat) / maxProgress.toFloat()
+        float7 *= float7
+        val double1 = itemEntity.x
+        val double2 = itemEntity.y
+        val double3 = itemEntity.z
+        val double4 = targetLocationX(magicFloat)
+        val double5 = targetLocationY(magicFloat)
+        val double6 = targetLocationZ(magicFloat)
 
-        var double_7 = MathHelper.lerp(float_7.toDouble(), double_1, double_4)
-        var double_8 = MathHelper.lerp(float_7.toDouble(), double_2, double_5)
-        var double_9 = MathHelper.lerp(float_7.toDouble(), double_3, double_6)
-        val int_1 = getColorMultiplier(magicFloat)
-        val int_2 = int_1 % 65536
-        val int_3 = int_1 / 65536
-        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, int_2.toFloat(), int_3.toFloat())
+        var double7 = MathHelper.lerp(float7.toDouble(), double1, double4)
+        var double8 = MathHelper.lerp(float7.toDouble(), double2, double5)
+        var double9 = MathHelper.lerp(float7.toDouble(), double3, double6)
+        val int1 = getColorMultiplier(magicFloat)
+        val int2 = int1 % 65536
+        val int3 = int1 / 65536
+        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, int2.toFloat(), int3.toFloat())
         GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f)
-        double_7 -= cameraX
-        double_8 -= cameraY
-        double_9 -= cameraZ
+        double7 -= cameraX
+        double8 -= cameraY
+        double9 -= cameraZ
         GlStateManager.enableLighting()
-        entityRenderManager!!.render(itemEntity, double_7, double_8, double_9, itemEntity.yaw, magicFloat, false)
+        entityRenderManager!!.render(itemEntity, double7, double8, double9, itemEntity.yaw, magicFloat, false)
     }
 
     override fun tick() {

@@ -1,15 +1,15 @@
-package spatialcrafting.util
+package spatialcrafting.recipe
 
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.world.World
 import spatialcrafting.crafter.CrafterMultiblock
-import spatialcrafting.recipe.ComponentPosition
-import spatialcrafting.recipe.SpatialRecipe
+import spatialcrafting.util.itemsInInventoryAndOffhand
+import spatialcrafting.util.matches
 
 //TODO: doesn't work for the same reason as the shapeless crafting ( when there is multiple matching stacks of the same ingredient)
 // Probably want to unify the 2 concepts.
- fun getRecipeSatisfaction(recipe: SpatialRecipe, nearestCrafter: CrafterMultiblock, world: World, player: PlayerEntity): RecipeSatisfaction {
+fun getRecipeSatisfaction(recipe: SpatialRecipe, nearestCrafter: CrafterMultiblock, world: World, player: PlayerEntity): RecipeSatisfaction {
     val crafterInventory = nearestCrafter.getInventory(world)
 
     var fullySatisfied = true
@@ -46,12 +46,12 @@ import spatialcrafting.recipe.SpatialRecipe
 
         if (satisfiedBy == null) fullySatisfied = false
 
-        return@map ComponentSatisfaction(pos, satisfiedBy,isAlreadyInMultiblock)
+        return@map ComponentSatisfaction(pos, satisfiedBy, isAlreadyInMultiblock)
     }
 
     return RecipeSatisfaction(satisfaction, fullySatisfied)
 }
 
 
-data class ComponentSatisfaction(val pos: ComponentPosition, val satisfiedBy: ItemStack?, val isAlreadyInMultiblock : Boolean)
+data class ComponentSatisfaction(val pos: ComponentPosition, val satisfiedBy: ItemStack?, val isAlreadyInMultiblock: Boolean)
 data class RecipeSatisfaction(val componentSatisfaction: List<ComponentSatisfaction>, val fullySatisfied: Boolean)

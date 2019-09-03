@@ -16,8 +16,9 @@ import net.minecraft.util.math.Vec3d
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
+import spatialcrafting.recipe.ComponentSatisfaction
 import spatialcrafting.recipe.SpatialRecipe
-import spatialcrafting.sendPacketToServer
+import spatialcrafting.recipe.getRecipeSatisfaction
 import spatialcrafting.util.*
 import java.awt.Point
 import java.util.*
@@ -33,7 +34,7 @@ fun fillInRecipeFromPlayerInventory(crafterMultiblock: CrafterMultiblock, recipe
 
 fun startCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
     sendPacketToServer(Packets.StartRecipeHelp(crafterMultiblock.arbitraryCrafterPos(), recipeId))
-    getMinecraftClient().scheduleRenderUpdate(crafterMultiblock.arbitraryCrafterPos())
+    Client.scheduleRenderUpdate(crafterMultiblock.arbitraryCrafterPos())
     crafterMultiblock.startRecipeHelpCommon(recipeId)
 }
 
@@ -172,7 +173,6 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
         val width = bounds.width
         val height = bounds.height
         minecraft.textureManager.bindTexture(if (ScreenHelper.isDarkModeEnabled()) BUTTON_LOCATION_DARK else BUTTON_LOCATION)
-//        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f)
         val textureOffset = getTextureId(isHovered(mouseX, mouseY))
         GlStateManager.enableBlend()
         GlStateManager.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO)
@@ -217,10 +217,6 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
 
         if (tooltips.isPresent) if (!focused && isHighlighted(mouseX, mouseY)) ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(*tooltips.get().split("\n").toTypedArray())) else if (focused) ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(Point(x + width / 2, y + height / 2), *tooltips.get().split("\n").toTypedArray()))
     }
-
-//    private fun recipeIsCraftableWithCurrentInventory(nearestCrafter: CrafterMultiblock, world: ClientWorld): Boolean {
-//        return getRecipeSatisfaction(nearestCrafter, world).fullySatisfied
-//    }
 
 
     private fun emitRedColor() {

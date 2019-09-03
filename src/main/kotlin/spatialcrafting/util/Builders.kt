@@ -109,7 +109,6 @@ object Builders {
             attackSpeed - 4,
             Item.Settings().group(SpatialCraftingItemGroup)
     )
-    // -4 = 0 attack speed
 
 }
 

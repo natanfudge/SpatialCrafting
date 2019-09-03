@@ -17,9 +17,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.Packets
 import spatialcrafting.hologram.*
-import spatialcrafting.recipe.ComponentPosition
-import spatialcrafting.recipe.ShapedRecipeComponent
-import spatialcrafting.recipe.SpatialRecipe
+import spatialcrafting.recipe.*
 import spatialcrafting.sendPacket
 import spatialcrafting.util.*
 

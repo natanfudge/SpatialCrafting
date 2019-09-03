@@ -8,13 +8,13 @@ import spatialcrafting.client.gui.widgets.runtimeWidget
 abstract class SingleChildDevWidget(overlay: Overlay?) : DevWidget(overlay) {
     protected val child get() = devChildren.firstOrNull()
 
-    fun singleChildRuntimeWidget(constraints: Constraints, debugIdentifier: String = "SingleChildWidget",
-                                 childProducer: (child: DevWidget) -> RuntimeWidget,
-                                 drawer: (child: RuntimeWidget) -> Unit) = runtimeWidget(
-            constraints = constraints, debugIdentifier = debugIdentifier,
-            children = child?.let { listOf(childProducer(it)) } ?: listOf(),
-            drawer = {it.runtimeChildren.firstOrNull()?.let(drawer)}
-    )
+//    fun singleChildRuntimeWidget(constraints: Constraints, debugIdentifier: String = "SingleChildWidget",
+//                                 childProducer: (child: DevWidget) -> RuntimeWidget,
+//                                 drawer: (child: RuntimeWidget) -> Unit) = runtimeWidget(
+//            constraints = constraints, debugIdentifier = debugIdentifier,
+//            children = child?.let { listOf(childProducer(it)) } ?: listOf(),
+//            drawer = {it.runtimeChildren.firstOrNull()?.let(drawer)}
+//    )
 }
 
 open class TightSingleChildDevWidget(

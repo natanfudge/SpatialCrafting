@@ -9,9 +9,10 @@ import spatialcrafting.client.gui.widgets.core.*
 import spatialcrafting.compat.rei.getNearestCrafter
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.RecipeCreatorCurrentLayerInactive
+import spatialcrafting.l
 import spatialcrafting.sendPacketToServer
+import spatialcrafting.util.Client
 import spatialcrafting.util.getMinecraftClient
-import spatialcrafting.util.playButtonClickSoundToClient
 
 data class GeneratedRecipeState(var result: String? = null)
 
@@ -20,6 +21,7 @@ data class RecipeOptions(var shaped: Boolean = true,
                          var energyCost: Int = 1000,
                          var minimumCrafterSize: String,
                          var useTags: Boolean = true)
+
 
 class RecipeCreatorGui : LightweightGuiDescription() {
     init {
@@ -143,7 +145,7 @@ private fun DevWidget.DisableableImage(enabledTexture: String,
                                        hoverText: String = "",
                                        onClick: DevWidget.(RuntimeWidget) -> Unit) =
         if (enabled) HoverableImage(enabledTexture, width, height).onClick {
-            playButtonClickSoundToClient()
+            Client.playButtonClickSound()
             onClick(it)
         }.onHover { _, _ ->
             if (hoverText != "") {

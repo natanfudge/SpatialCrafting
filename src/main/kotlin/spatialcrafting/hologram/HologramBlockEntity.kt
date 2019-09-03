@@ -16,7 +16,6 @@ import net.minecraft.util.Tickable
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
-import spatialcrafting.sendPacket
 import spatialcrafting.util.*
 import spatialcrafting.util.kotlinwrappers.Builders
 
@@ -36,7 +35,6 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
         private object Keys {
             const val Inventory = "inventory"
             const val LastChangeTime = "last_change_time"
-            const val GhostIngredientCycleIndex = "cycle_index"
         }
     }
 
@@ -75,7 +73,7 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
         if (world?.isClient == true) {
             ghostIngredientCycleIndex++
             if (ghostIngredientActive) {
-                if (ghostIngredientCycleIndex % TicksPerSecond == 0) getMinecraftClient().scheduleRenderUpdate(pos)
+                if (ghostIngredientCycleIndex % TicksPerSecond == 0) Client.scheduleRenderUpdate(pos)
             }
         }
 

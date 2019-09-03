@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier
 import org.lwjgl.glfw.GLFW
 import spatialcrafting.ModId
 import spatialcrafting.client.gui.DevWidget
-import spatialcrafting.util.playButtonClickSoundToClient
+import spatialcrafting.util.Client
 
 fun DevWidget.Image(texture: Identifier, width: Int, height: Int): DevWidget = LibGuiWidget(WSprite(texture), width, height)
 fun DevWidget.Image(path: String, width: Int, height: Int): DevWidget = Image(Identifier("$ModId:textures/$path"), width, height)
@@ -21,7 +21,7 @@ fun DevWidget.Button(text: String, enabled: Boolean = true, onClick: () -> Unit)
         WButton(LiteralText(text)).apply { isEnabled = enabled }, width = widthOf(text) + 5, height = 20)
         .onClick {
             if (enabled) {
-                playButtonClickSoundToClient()
+                Client.playButtonClickSound()
                 onClick()
             }
         }

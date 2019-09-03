@@ -25,14 +25,14 @@ import spatialcrafting.item.PointyStick
 import spatialcrafting.item.ShapelessSword
 import spatialcrafting.recipe.*
 import spatialcrafting.util.itemStack
-import spatialcrafting.util.kotlinwrappers.initClientOnly
-import spatialcrafting.util.kotlinwrappers.initCommon
+import spatialcrafting.util.initClientOnly
+import spatialcrafting.util.initCommon
 import java.util.function.Function
 
-//TODO: analysis
 
 //TODO: need examples for:
 // power
+
 
 
 //TODO: ask to add to AOF
@@ -86,7 +86,7 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
     }
 
     registerTo(Registry.RECIPE_SERIALIZER) {
-        ShapedSpatialRecipe.Serializer withId Identifier(ShapedRecipeType)
+        ShapedSpatialRecipe withId Identifier(ShapedRecipeType)
         ShapelessSpatialRecipe withId Identifier(ShapelessRecipeType)
     }
 
@@ -107,7 +107,6 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
     registerC2S(Packets.StopRecipeHelp.serializer())
 
 
-//    docsJavaCommonInit()
 
 
 }

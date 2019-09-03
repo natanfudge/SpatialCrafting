@@ -3,17 +3,11 @@
 package spatialcrafting
 
 import drawer.*
-import io.netty.buffer.Unpooled
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
 import net.fabricmc.fabric.api.network.PacketContext
-import net.fabricmc.fabric.api.network.ServerSidePacketRegistry
-import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.util.Identifier
-import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.client.particle.ItemMovementParticle
@@ -25,71 +19,21 @@ import spatialcrafting.crafter.getCrafterEntity
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.util.*
-import spatialcrafting.util.kotlinwrappers.ClientModInitializationContext
-import spatialcrafting.util.kotlinwrappers.CommonModInitializationContext
 import java.util.*
-import java.util.stream.Stream
 
 
-fun <T : C2SPacket<T>> CommonModInitializationContext.registerC2S(serializer: KSerializer<T>) {
-    registerClientToServerPacket(serializer.packetId) { packetContext, packetByteBuf ->
-        serializer.readFrom(packetByteBuf).apply {
-            packetContext.taskQueue.execute {
-                use(packetContext)
-            }
-        }
-    }
+interface C2SPacket<T : Packet<T>> : InternalC2SPacket<T>{
+    override val modId get() = ModId
+}
+interface S2CPacket<T : Packet<T>> : InternalS2CPacket<T>{
+    override val modId get() = ModId
 }
 
-fun <T : S2CPacket<T>> ClientModInitializationContext.registerS2C(serializer: KSerializer<T>) {
-    registerServerToClientPacket(serializer.packetId) { packetContext, packetByteBuf ->
-        serializer.readFrom(packetByteBuf).apply {
-            packetContext.taskQueue.execute {
-                use(packetContext)
-            }
-        }
-    }
+interface TwoSidedPacket<T: Packet<T>> : InternalTwoSidedPacket<T>{
+    override val modId get() = ModId
 }
 
 
-/**
- * Sends a packet from the server to the client for all the players in the stream.
- */
-fun <T : S2CPacket<T>, U : PlayerEntity> Stream<U>.sendPacket(packet: T) {
-
-    sendPacket(packetId = Identifier(ModId, packet.serializer.packetId)) { packet.serializer.write(packet, this) }
-}
-
-
-/**
- * Sends a packet from the server to the client for all the players in the stream.
- * @param packetBuilder Put the information you wish to send here
- */
-private fun <T : PlayerEntity> Stream<T>.sendPacket(packetId: Identifier, packetBuilder: PacketByteBuf.() -> Unit) {
-    val packet = PacketByteBuf(Unpooled.buffer()).apply(packetBuilder)
-    for (player in this) {
-        ServerSidePacketRegistry.INSTANCE.sendToPlayer(player, packetId, packet)
-    }
-}
-
-
-/**
- * Sends a packet from the server to the client for all the players in the stream.
- */
-fun <T : C2SPacket<T>> sendPacketToServer(packet: T) {
-    val buf = PacketByteBuf(Unpooled.buffer()).also { packet.serializer.write(packet, it) }
-    ClientSidePacketRegistry.INSTANCE.sendToServer(modId(packet.serializer.packetId), buf)
-}
-
-private val <T : Packet<T>> KSerializer<T>.packetId get() = descriptor.name.toLowerCase()
-
-interface Packet<T : Packet<T>> {
-    val serializer: KSerializer<T>
-    fun use(context: PacketContext)
-}
-
-interface C2SPacket<T : Packet<T>> : Packet<T>
-interface S2CPacket<T : Packet<T>> : Packet<T>
 
 object Packets {
 
@@ -133,7 +77,7 @@ object Packets {
             }
 
 
-            getMinecraftClient().scheduleRenderUpdate(hologramPos)
+            Client.scheduleRenderUpdate(hologramPos)
 
         }
     }
@@ -175,7 +119,7 @@ object Packets {
 
 
     @Serializable
-    data class StopRecipeHelp(val anyCrafterPiecePos: BlockPos) : C2SPacket<StopRecipeHelp>, S2CPacket<StopRecipeHelp> {
+    data class StopRecipeHelp(val anyCrafterPiecePos: BlockPos) : TwoSidedPacket<StopRecipeHelp>{
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
@@ -249,14 +193,6 @@ object Packets {
 
     }
 
-//    @Serializable
-//    data class UpdateRecipeCreatorHologramLayer(val anyCrafterPiecePos: BlockPos,val layer : Int): C2SPacket<UpdateRecipeCreatorHologramLayer>{
-//        override val serializer = serializer()
-//        override fun use(context: PacketContext) {
-//            val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
-//
-//        }
-//    }
 
     private fun getAndValidateRecipe(recipeId: Identifier, world: World): SpatialRecipe? {
         val recipe = world.recipeManager.get(recipeId).orElse(null)
