@@ -9,10 +9,9 @@ import spatialcrafting.client.gui.widgets.core.*
 import spatialcrafting.compat.rei.getNearestCrafter
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.RecipeCreatorCurrentLayerInactive
-import spatialcrafting.l
-import spatialcrafting.sendPacketToServer
 import spatialcrafting.util.Client
 import spatialcrafting.util.getMinecraftClient
+import spatialcrafting.util.sendPacketToServer
 
 data class GeneratedRecipeState(var result: String? = null)
 

@@ -23,7 +23,6 @@ import spatialcrafting.client.Sounds
 import spatialcrafting.client.particle.centerOfHolograms
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.recipe.SpatialRecipe
-import spatialcrafting.sendPacket
 import spatialcrafting.util.*
 import java.util.*
 

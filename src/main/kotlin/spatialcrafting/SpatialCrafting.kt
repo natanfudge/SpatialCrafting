@@ -24,9 +24,7 @@ import spatialcrafting.item.DeceptivelySmallSword
 import spatialcrafting.item.PointyStick
 import spatialcrafting.item.ShapelessSword
 import spatialcrafting.recipe.*
-import spatialcrafting.util.itemStack
-import spatialcrafting.util.initClientOnly
-import spatialcrafting.util.initCommon
+import spatialcrafting.util.*
 import java.util.function.Function
 
 

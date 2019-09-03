@@ -18,7 +18,6 @@ import net.minecraft.world.World
 import spatialcrafting.Packets
 import spatialcrafting.hologram.*
 import spatialcrafting.recipe.*
-import spatialcrafting.sendPacket
 import spatialcrafting.util.*
 
 
