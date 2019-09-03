@@ -3,9 +3,10 @@ package spatialcrafting.compat.rei
 import com.mojang.blaze3d.platform.GlStateManager
 import com.mojang.blaze3d.platform.GlStateManager.DestFactor
 import com.mojang.blaze3d.platform.GlStateManager.SourceFactor
-import me.shedaniel.rei.client.ScreenHelper
+import me.shedaniel.math.api.Point
 import me.shedaniel.rei.gui.widget.ButtonWidget
 import me.shedaniel.rei.gui.widget.QueuedTooltip
+import me.shedaniel.rei.impl.ScreenHelper
 import net.minecraft.client.world.ClientWorld
 import net.minecraft.text.Style
 import net.minecraft.text.TranslatableText
@@ -20,7 +21,6 @@ import spatialcrafting.recipe.ComponentSatisfaction
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.recipe.getRecipeSatisfaction
 import spatialcrafting.util.*
-import java.awt.Point
 import java.util.*
 
 private const val width = 10
@@ -215,7 +215,7 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
 
         drawCenteredString(font, text, x + width / 2, y + (height - 8) / 2, colour)
 
-        if (tooltips.isPresent) if (!focused && isHighlighted(mouseX, mouseY)) ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(*tooltips.get().split("\n").toTypedArray())) else if (focused) ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(Point(x + width / 2, y + height / 2), *tooltips.get().split("\n").toTypedArray()))
+        if (tooltips.isPresent) if (!focused && containsMouse(mouseX, mouseY)) ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(*tooltips.get().split("\n").toTypedArray())) else if (focused) ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(Point(x + width / 2, y + height / 2), *tooltips.get().split("\n").toTypedArray()))
     }
 
 

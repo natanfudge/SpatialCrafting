@@ -2,12 +2,11 @@ package spatialcrafting.compat.rei
 
 import me.shedaniel.rei.api.RecipeDisplay
 import net.minecraft.item.ItemStack
-import net.minecraft.recipe.Recipe
 import net.minecraft.util.Identifier
 import spatialcrafting.recipe.SpatialRecipe
 import java.util.*
 
-class ReiSpatialCraftingDisplay(val recipe : SpatialRecipe) : RecipeDisplay<SpatialRecipe> {
+class ReiSpatialCraftingDisplay(val recipe : SpatialRecipe) : RecipeDisplay {
 //    override fun getRecipeCategory(): Identifier = ReiCategory.id(recipe.minimumCrafterSize)
     override fun getRecipeCategory(): Identifier = ReiSpatialCraftingCategory.id(recipe.minimumCrafterSize)
 
@@ -18,8 +17,7 @@ class ReiSpatialCraftingDisplay(val recipe : SpatialRecipe) : RecipeDisplay<Spat
 
 //    fun craftersThatCanCraft() = CraftersPieces.filter { recipe.acceptsCrafterOfSize(it.key) }
 
-
-    override fun getRecipe(): Optional<Recipe<*>> = Optional.of(recipe)
+    override fun getRecipeLocation(): Optional<Identifier> = Optional.of(recipe.identifier)
 
     override fun getInput(): List<List<ItemStack>> = input
 //    + listOf(

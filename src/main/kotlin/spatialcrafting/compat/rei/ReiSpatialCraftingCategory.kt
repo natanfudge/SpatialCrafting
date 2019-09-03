@@ -1,7 +1,10 @@
 package spatialcrafting.compat.rei
 
 import com.mojang.blaze3d.platform.GlStateManager
-import me.shedaniel.rei.api.*
+import me.shedaniel.math.api.Point
+import me.shedaniel.math.api.Rectangle
+import me.shedaniel.rei.api.RecipeCategory
+import me.shedaniel.rei.api.Renderer
 import me.shedaniel.rei.gui.widget.LabelWidget
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget
 import me.shedaniel.rei.gui.widget.Widget
@@ -21,13 +24,10 @@ import spatialcrafting.modId
 import spatialcrafting.recipe.ComponentSatisfaction
 import spatialcrafting.util.Client
 import spatialcrafting.util.isWholeNumber
-import java.awt.Point
-import java.awt.Rectangle
 import java.util.function.Supplier
 import kotlin.math.roundToInt
 
 //TODO: show energy cost if that's enabled (and exists)
-
 
 
 class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatialCraftingDisplay> {
@@ -100,7 +100,7 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
         return id(recipeSize)
     }
 
-    override fun getIcon(): Renderer = Renderable.fromItemStack(ItemStack(CraftersPieces[recipeSize]))
+    override fun getIcon(): Renderer = Renderer.fromItemStack(ItemStack(CraftersPieces[recipeSize]))
 
     override fun getCategoryName(): String = I18n.translate("category.rei.spatialcrafting.x$recipeSize")
 
@@ -114,8 +114,8 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
     }
 
     private fun setupDisplay(display: ReiSpatialCraftingDisplay, bounds: Rectangle): List<Widget> {
-        val startPoint = Point(bounds.centerX.toInt() - RecipeWidth.ofRecipeSize() / 2,
-                bounds.centerY.toInt() - RecipeHeight.ofRecipeSize() / 2)
+        val startPoint = Point(bounds.centerX - RecipeWidth.ofRecipeSize() / 2,
+                bounds.centerY - RecipeHeight.ofRecipeSize() / 2)
 
         val inputSlots = SwappableChildrenWidget()
         val currentLayerWidget = SwappableChildWidget()
@@ -256,23 +256,11 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
         }
     }
 
-    override fun getDisplaySettings(): DisplaySettings<ReiSpatialCraftingDisplay> {
-        return object : DisplaySettings<ReiSpatialCraftingDisplay> {
-            override fun getDisplayHeight(category: RecipeCategory<out RecipeDisplay<*>>): Int {
-                if (recipeSize == 2) return RecipeHeight.ofRecipeSize() + 35
-                return RecipeHeight.ofRecipeSize() + 20
-            }
-
-            override fun getMaximumRecipePerPage(category: RecipeCategory<out RecipeDisplay<*>>): Int {
-                return 99
-            }
-
-            override fun getDisplayWidth(category: RecipeCategory<out RecipeDisplay<*>>, display: ReiSpatialCraftingDisplay): Int {
-                return RecipeWidth.ofRecipeSize() + 35
-            }
-
-        }
+    override fun getDisplayHeight(): Int {
+        if (recipeSize == 2) return RecipeHeight.ofRecipeSize() + 35
+        return RecipeHeight.ofRecipeSize() + 20
     }
 
+    override fun getDisplayWidth(display: ReiSpatialCraftingDisplay?): Int = RecipeWidth.ofRecipeSize() + 35
 
 }
