@@ -1,14 +1,19 @@
 package spatialcrafting.compat.rei
 
 import com.mojang.blaze3d.platform.GlStateManager
+import me.shedaniel.math.compat.RenderHelper
+import me.shedaniel.rei.gui.renderers.ItemStackRenderer
 import me.shedaniel.rei.gui.widget.SlotWidget
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.render.GuiLighting
 import net.minecraft.item.ItemStack
 
 class HighlightableSlotWidget(x: Int, y: Int, itemStackList: List<ItemStack>, drawBackground: Boolean = true,
                               showToolTips: Boolean = true, clickToMoreRecipes: Boolean = true,
-                              val itemCountOverlay: (ItemStack) -> String = { "" }, val highlighted: () -> Boolean)
-    : SlotWidget(x, y, itemStackList, drawBackground, showToolTips, clickToMoreRecipes) {
-    override fun getItemCountOverlay(currentStack: ItemStack): String = itemCountOverlay(currentStack)
+                              val highlighted: () -> Boolean,
+                              itemCountOverlay: (ItemStack) -> String = { "" },
+                              extraTooltips: ((ItemStack) -> List<String>)? = null)
+    : SlotWidget(x, y, SlotItemStackRenderer(itemStackList, itemCountOverlay, extraTooltips), drawBackground, showToolTips, clickToMoreRecipes) {
 
     override fun render(mouseX: Int, mouseY: Int, delta: Float) {
         super.render(mouseX, mouseY, delta)
@@ -25,4 +30,28 @@ class HighlightableSlotWidget(x: Int, y: Int, itemStackList: List<ItemStack>, dr
 
     }
 
+}
+
+class SlotItemStackRenderer(private val itemStackList: List<ItemStack>, private val itemCountOverlay: (ItemStack) -> String, private val extraTooltips: ((ItemStack) -> List<String>?)?) : ItemStackRenderer() {
+    override fun getItemStack(): ItemStack = if (itemStackList.isEmpty()) ItemStack.EMPTY else itemStackList[(System.currentTimeMillis() / 500 % itemStackList.size.toDouble() / 1f).toInt()]
+    override fun getExtraToolTips(stack: ItemStack): List<String>? {
+        return if (extraTooltips == null) emptyList() else extraTooltips.invoke(stack) ?: emptyList()
+    }
+
+    override fun render(x: Int, y: Int, mouseX: Double, mouseY: Double, delta: Float) {
+        val l = x - 8
+        val i1 = y - 6
+        RenderHelper.color4f(1.0f, 1.0f, 1.0f, 1.0f)
+        val itemRenderer = MinecraftClient.getInstance().itemRenderer
+        itemRenderer.zOffset = blitOffset.toFloat()
+        GuiLighting.enableForItems()
+        RenderHelper.colorMask(true, true, true, true)
+        RenderHelper.enableLighting()
+        RenderHelper.enableRescaleNormal()
+        RenderHelper.enableDepthTest()
+        itemRenderer.renderGuiItem(itemStack, l, i1)
+        itemRenderer.renderGuiItemOverlay(MinecraftClient.getInstance().textRenderer, itemStack, l, i1, itemCountOverlay.invoke(itemStack))
+        itemRenderer.zOffset = 0.0f
+        this.blitOffset = 0
+    }
 }
