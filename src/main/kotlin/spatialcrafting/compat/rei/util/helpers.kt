@@ -2,12 +2,8 @@
 
 package spatialcrafting.compat.rei.util
 
-import me.shedaniel.rei.gui.widget.ButtonWidget
 import me.shedaniel.rei.gui.widget.SlotWidget
 import net.minecraft.item.ItemStack
-import net.minecraft.recipe.Ingredient
-import net.minecraft.text.LiteralText
-import net.minecraft.text.Text
 import spatialcrafting.compat.rei.HighlightableSlotWidget
 
 

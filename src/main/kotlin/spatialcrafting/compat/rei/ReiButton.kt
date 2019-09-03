@@ -7,8 +7,7 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawableHelper
 import net.minecraft.client.gui.Element
 import net.minecraft.util.Identifier
-import spatialcrafting.util.playButtonClickSoundToClient
-import spatialcrafting.util.Client
+import spatialcrafting.util.Client.playButtonClickSound
 
 open class ReiButton(
         private var x: Int, private var y: Int, private val width: Int, private val height: Int,
@@ -21,8 +20,7 @@ open class ReiButton(
 
             if (containsMouse(mouseX, mouseY)) {
                 emitHoverColor()
-            }
-            else {
+            } else {
                 clearColor()
             }
 
@@ -31,8 +29,7 @@ open class ReiButton(
             DrawableHelper.blit(x, y, 0f, 0f, width, height, width, height)
 
 
-        }
-        else {
+        } else {
             clearColor()
 
             // Draw off texture
@@ -49,7 +46,7 @@ open class ReiButton(
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, buttonId: Int): Boolean {
         if (containsMouse(mouseX, mouseY) && isEnabled(minecraft) && buttonId == 0) {
-            playButtonClickSoundToClient()
+            playButtonClickSound()
             onClick(minecraft)
             return true
         }
@@ -60,7 +57,7 @@ open class ReiButton(
 
 }
 
- fun emitHoverColor() {
+fun emitHoverColor() {
     GlStateManager.color4f(0.7f, 0.7f, 1.0f, 1.0f)
 }
 
