@@ -1,18 +1,20 @@
 package spatialcrafting.client.particle
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
-import net.minecraft.client.MinecraftClient
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import spatialcrafting.client.Speed
 import spatialcrafting.client.bps
 import spatialcrafting.crafter.CrafterMultiblock
+import spatialcrafting.crafter.CrafterPieceBlock
+import spatialcrafting.crafter.CraftersPieces
+import spatialcrafting.crafter.getCrafterEntityOrNull
+import spatialcrafting.ticker.Scheduler
 import spatialcrafting.util.*
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -26,9 +28,48 @@ private val BaseBlockFlightSpeed = 1.bps
 private val BlockFlightSpeedIncreasePerSecond = 0.2.bps
 private val Phase2StartTime = 5.seconds
 
+private const val DurationDataKey = "particle_craft_duration"
+private const val StartTimeKey = "particle_craft_start_time"
+
+fun playAllCraftParticles(world: World, multiblock: CrafterMultiblock, duration: Duration) {
+    val block = CraftersPieces.values.first()
+    val durationData = CompoundTag().apply {
+        putDuration(DurationDataKey, duration)
+        putLong(StartTimeKey, world.time)
+    }
+    multiblock.cancellationTokens.craftingParticles = Scheduler.repeatFor(duration.inTicks.toInt(),
+            tickInterval = TimeBetweenParticles.inTicks.toInt(),
+            block = block,
+            scheduleId = CrafterPieceBlock.EmitRoundOfCraftingParticles,
+            blockPos = multiblock.arbitraryCrafterPos(),
+            world = world,
+            additionalData = durationData
+    )
+    // Execute the first one immediately
+    block.onScheduleEnd(world, multiblock.arbitraryCrafterPos(), scheduleId = CrafterPieceBlock.EmitRoundOfCraftingParticles,
+            additionalData = durationData)
+}
 
 @Environment(EnvType.CLIENT)
-fun playCraftParticles(world: World, multiblock: CrafterMultiblock, duration: Duration) {
+fun playRoundOfCraftParticles(world: World, anyCrafterPos: BlockPos, particleData: CompoundTag) {
+    val multiblock = world.getCrafterEntityOrNull(anyCrafterPos)?.multiblockIn ?: run {
+        logInfo { "Can't find multiblock to emit craft particles with at pos $anyCrafterPos" }
+        return
+    }
+
+    playRoundOfCraftParticles(world, multiblock, particleData)
+}
+
+
+@Environment(EnvType.CLIENT)
+private fun playRoundOfCraftParticles(world: World, multiblock: CrafterMultiblock, particleData: CompoundTag) {
+
+    val craftDuration = particleData.getDuration(DurationDataKey)
+    if (craftDuration == 0.ticks) logWarning { "Craft initiated with 0 duration." }
+    val craftStartTime = particleData.getLong(StartTimeKey)
+    if (craftStartTime == 0L) logWarning { "Craft start time is set to 0." }
+
+
     val hologramParticleData = multiblock.getHologramEntities(world).map {
         HologramParticleData(
                 // Shoots particles from the 4 corners of the hologram
@@ -40,18 +81,19 @@ fun playCraftParticles(world: World, multiblock: CrafterMultiblock, duration: Du
         )
     }
 
+
+
     CraftParticleEmitter(world = world,
-            craftDuration = duration,
             //TODO this value is responsible on some way to the y value of where the particles end
             // at the end of the craft, but it doesn't seem to work properly
             craftYEndPos = multiblock.centerOfHolograms().y /*- 1.0*/,  /*+ 6.5*/
             originalEndPos = multiblock.centerOfHolograms(),
             allHologramData = hologramParticleData,
-            startTime = world.time,
-            multiblock = multiblock
+            craftDuration = craftDuration,
+            timePassed = (world.time - craftStartTime).ticks
+
     ).emit()
 }
-
 
 
 data class HologramParticleData(val corner1Location: Vec3d,
@@ -61,29 +103,29 @@ data class HologramParticleData(val corner1Location: Vec3d,
                                 val itemStack: ItemStack)
 
 class CraftParticleEmitter(val world: World, val craftDuration: Duration, val originalEndPos: Vec3d,
-                           val craftYEndPos: Double, val allHologramData: List<HologramParticleData>, val startTime: Long,
-                           private val multiblock: CrafterMultiblock) {
-
-    private var timePassed = 0.ticks
+                           val craftYEndPos: Double, val allHologramData: List<HologramParticleData>, val timePassed: Duration) {
 
     fun emit() {
-        GlobalScope.launch {
-            while (timePassed < craftDuration
-                    // Make it so we can cancel the crafting
-                    && multiblock.isCrafting
-                    // Make sure this stops when the player exits
-                    && world == MinecraftClient.getInstance().world) {
-                for (hologram in allHologramData) {
-                    if (hologram.itemStack.item != Items.AIR) {
-                        emitHologramParticles(hologram)
-                    }
-                }
-                delay(TimeBetweenParticles.inMilliseconds)
-                timePassed = (world.time - startTime).ticks
 
+
+//        GlobalScope.launch {
+//            while (timePassed < craftDuration
+//                    // Make it so we can cancel the crafting
+//                    && multiblock.isCrafting
+//                    // Make sure this stops when the player exits
+//                    && world == MinecraftClient.getInstance().world)
+//            {
+        for (hologram in allHologramData) {
+            if (hologram.itemStack.item != Items.AIR) {
+                emitHologramParticles(hologram)
             }
-
         }
+//                delay(TimeBetweenParticles.inMilliseconds)
+//                timePassed = (world.time - startTime).ticks
+//
+//            }
+//
+//        }
     }
 
     // This is used to make particles stop appearing slightly before the crafting stops, such that it looks like once ALL particles have stopped the crafting is done.

@@ -1,16 +1,21 @@
-package spatialcrafting.util.kotlinwrappers
+package spatialcrafting.util
 
+import net.fabricmc.api.EnvType
+import net.fabricmc.api.Environment
 import net.minecraft.block.Block
 import net.minecraft.block.Material
 import net.minecraft.block.MaterialColor
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.block.piston.PistonBehavior
+import net.minecraft.client.sound.*
 import net.minecraft.item.Item
 import net.minecraft.item.SwordItem
 import net.minecraft.recipe.Ingredient
+import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvent
+import net.minecraft.util.math.Vec3d
 import spatialcrafting.SpatialCraftingItemGroup
-import spatialcrafting.util.ToolMaterialImpl
 
 
 object Builders {
@@ -110,5 +115,25 @@ object Builders {
             Item.Settings().group(SpatialCraftingItemGroup)
     )
 
+
 }
 
+
+
+object ClientBuilders {
+
+    @Environment(EnvType.CLIENT)
+    fun soundInstance(soundEvent: SoundEvent,
+                      category: SoundCategory,
+                      pos: Vec3d,
+                      volume: Float = 1.0f,
+                      pitch: Float = 1.0f,
+                      repeats: Boolean = false,
+                      repeatDelay: Int = 0,
+                      attenuationType: SoundInstance.AttenuationType = SoundInstance.AttenuationType.LINEAR,
+                      relative: Boolean = false): SoundInstance {
+        return PositionedSoundInstance(soundEvent.id, category, volume, pitch, repeats, repeatDelay, attenuationType,
+                pos.x.toFloat(), pos.y.toFloat(), pos.z.toFloat(), relative)
+
+    }
+}

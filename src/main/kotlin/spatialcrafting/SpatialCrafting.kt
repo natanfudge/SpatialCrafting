@@ -4,12 +4,14 @@ package spatialcrafting
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
 import net.fabricmc.fabric.api.client.model.ModelVariantProvider
+import net.fabricmc.fabric.api.event.world.WorldTickCallback
 import net.minecraft.client.render.model.BakedModel
 import net.minecraft.client.render.model.ModelBakeSettings
 import net.minecraft.client.render.model.ModelLoader
 import net.minecraft.client.render.model.UnbakedModel
 import net.minecraft.client.texture.Sprite
 import net.minecraft.item.ItemGroup
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
 import spatialcrafting.client.Sounds
@@ -24,13 +26,15 @@ import spatialcrafting.item.DeceptivelySmallSword
 import spatialcrafting.item.PointyStick
 import spatialcrafting.item.ShapelessSword
 import spatialcrafting.recipe.*
+import spatialcrafting.ticker.registerTickerC2SPackets
+import spatialcrafting.ticker.worldTick
 import spatialcrafting.util.*
 import java.util.function.Function
 
+//TODO: remove dies irae song (before commit)
 
 //TODO: need examples for:
 // power
-
 
 
 //TODO: ask to add to AOF
@@ -50,7 +54,7 @@ val GuiId = modId("test_gui")
 const val MaxCrafterSize = 5
 const val SmallestCrafterSize = 2
 
-val SpatialCraftingItemGroup: ItemGroup  = FabricItemGroupBuilder.build(
+val SpatialCraftingItemGroup: ItemGroup = FabricItemGroupBuilder.build(
         Identifier(ModId, "spatial_crafting")
 ) { CraftersPieces.getValue(SmallestCrafterSize).itemStack }
 
@@ -59,8 +63,10 @@ fun modId(str: String) = Identifier(ModId, str)
 
 private const val HologramId = "hologram"
 
+
 @Suppress("unused")
 fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
+    WorldTickCallback.EVENT.register(WorldTickCallback { if (it is ServerWorld && it.isServer) worldTick(it) })
 
     registerBlocksWithItemBlocks {
         for (crafterPiece in CraftersPieces.values) {
@@ -99,14 +105,14 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
     }
 
 
-    registerC2S(Packets.StartRecipeHelp.serializer())
-    registerC2S(Packets.AutoCraft.serializer())
-    registerC2S(Packets.ChangeActiveLayer.serializer())
-    registerC2S(Packets.StopRecipeHelp.serializer())
+    registerC2S(
+            Packets.StartRecipeHelp.serializer(),
+            Packets.AutoCraft.serializer(),
+            Packets.ChangeActiveLayer.serializer(),
+            Packets.StopRecipeHelp.serializer()
+    )
 
-
-
-
+    registerTickerC2SPackets()
 }
 
 
@@ -130,12 +136,17 @@ fun initClient() = initClientOnly(ModId) {
         }
     }
 
-    registerS2C(Packets.AssignMultiblockState.serializer())
-    registerS2C(Packets.UnassignMultiblockState.serializer())
-    registerS2C(Packets.StopRecipeHelp.serializer())
-    registerS2C(Packets.UpdateHologramContent.serializer())
-    registerS2C(Packets.StartCraftingParticles.serializer())
-    registerS2C(Packets.ItemMovementFromPlayerToMultiblockParticles.serializer())
+    registerS2C(
+            Packets.AssignMultiblockState.serializer(),
+            Packets.UnassignMultiblockState.serializer(),
+            Packets.StopRecipeHelp.serializer(),
+            Packets.UpdateHologramContent.serializer(),
+            Packets.StartCraftingParticles.serializer(),
+            Packets.ItemMovementFromPlayerToMultiblockParticles.serializer(),
+            Packets.StopCraftingParticles.serializer()
+    )
+
+    registerTickerC2SPackets()
 
     register(HologramBlockEntityRenderer)
     register(RecipeCreatorKeyBinding)

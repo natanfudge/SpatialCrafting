@@ -1,6 +1,6 @@
 - Provide different crafting particles
 - Hold up item in the air after craft until grabbed
-- Make a serializable scheduling library
+- Improve upon the scheduler library to use compiler plugin to just be able to use a lambda and goodbye. (using serializer)
 - Make a testing library:
     - Initializes all the registries
     - Has 3 modes: On Client, On Integrated Server, On Dedicated Server, and those can be AND'd. Default is ALL of them.
@@ -8,3 +8,8 @@
 - Make new crafting sounds
 - PR a system to REI that allows all crafter recipes to exist in one category
 - Display the recipe in the REI screen in 3D
+- Sound lib:
+   - Sound becomes less strong if you are far away from it, and can't be heard if you are too distant.
+   - Sound gets sent to anyone new in the area and continues where it left off.
+   - Sound can be stopped more easily
+- A way to automatically update fabric.mod.json depends

@@ -23,9 +23,9 @@ import spatialcrafting.client.gui.RecipeCreatorGui
 import spatialcrafting.client.gui.RecipeCreatorScreen
 import spatialcrafting.client.keybinding.RecipeCreatorKeyBinding
 import spatialcrafting.crafter.assertIs
+import spatialcrafting.crafter.stopCrafting
 import spatialcrafting.hologram.HologramBlock.IsHiddenPropertyName
 import spatialcrafting.util.*
-import spatialcrafting.util.kotlinwrappers.Builders
 
 
 private const val Unbreakable = -1.0f
@@ -97,9 +97,6 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
         return if (blockState.get(IsHidden)) BlockRenderType.INVISIBLE else super.getRenderType(blockState)
     }
 
-    override fun onPlaced(world_1: World?, blockPos_1: BlockPos?, blockState_1: BlockState?, livingEntity_1: LivingEntity?, itemStack_1: ItemStack?) {
-        super.onPlaced(world_1, blockPos_1, blockState_1, livingEntity_1, itemStack_1)
-    }
 
     override fun activate(blockState: BlockState, world: World, pos: BlockPos, clickedBy: PlayerEntity?, hand: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
         if (clickedBy == null || hand == null) return false
@@ -132,15 +129,13 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
         // Cancel crafting if needed
         if (!extractedItem.isEmpty) {
             val multiblock = hologramEntity.getMultiblock()
-            if (multiblock.isCrafting) {
-                multiblock.stopRecipeHelpServer(world)
-            }
-            multiblock.setNotCrafting()
+            if (multiblock.isCrafting) multiblock.stopCrafting(world)
 
 
         }
 
     }
+
 
     override fun onBlockRemoved(stateBefore: BlockState, world: World, pos: BlockPos, stateAfter: BlockState, boolean_1: Boolean) {
         // Only happens when the entire multiblock is destroyed or in creative mode.

@@ -16,8 +16,9 @@ import net.minecraft.util.Tickable
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
+import spatialcrafting.crafter.bumpRecipeHelpCurrentLayerIfNeeded
+import spatialcrafting.crafter.hologramGhostIngredientFor
 import spatialcrafting.util.*
-import spatialcrafting.util.kotlinwrappers.Builders
 
 private const val TicksPerSecond = 20
 
@@ -56,19 +57,16 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
 
 
     private val ghostIngredient: Ingredient?
-        get() = try {
-            getMultiblock().hologramGhostIngredientFor(this).also { ghostIngredientActive = it != null }
-        } catch (e: IllegalStateException) {
-            logWarning { "Could not get ghost ingredient: $e" }
-            null
-        }
+        get() = getMultiblockOrNull()?.hologramGhostIngredientFor(this)
+                .also { ghostIngredientActive = it != null }
+
 
     /**
      * A way to avoid checking if there is a ghost ingredient every tick
      */
     private var ghostIngredientActive: Boolean = false
 
-    override fun tick(/*client : MinecraftClient*/) {
+    override fun tick() {
         // Value is always incremented to avoid desyncs
         if (world?.isClient == true) {
             ghostIngredientCycleIndex++
@@ -151,26 +149,20 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
     fun dropInventory() = world!!.dropItemStack(getItem(), pos)
 
 
-    fun getMultiblock(): CrafterMultiblock {
+    fun getMultiblock() = getMultiblockOrNull() ?: error("A hologram should always have a multiblock," +
+                                    " and yet when looking at a crafter piece below at position $pos he did not have a multiblock instance.")
+    fun getMultiblockOrNull(): CrafterMultiblock? {
         val world = world!!
         // We just go down until we find a crafter
         var currentPos = pos.down()
         while (true) {
             val entityBelow = world.getBlockEntity(currentPos)
             if (entityBelow !is HologramBlockEntity) {
-                if (entityBelow is CrafterPieceEntity) {
-                    return entityBelow.multiblockIn
-                            ?: error("A hologram should always have a multiblock," +
-                                    " and yet when looking at a crafter piece below at position $pos he did not have a multiblock instance.")
-                }
-                else {
-                    error("Looked down below a hologram, and instead of finding a crafter entity, a $entityBelow was found!")
-                }
+                return if (entityBelow is CrafterPieceEntity) entityBelow.multiblockIn
+                else null
             }
             currentPos = currentPos.down()
         }
-
-
     }
 
 }

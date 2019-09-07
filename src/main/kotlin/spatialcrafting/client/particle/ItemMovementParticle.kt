@@ -33,6 +33,7 @@ abstract class ItemMovementParticle(world: World,
         fun playItemMovementFromPlayerToMultiblock(player: PlayerEntity,
                                                    itemsFromPlayerToMultiblock: List<Pair<BlockPos, ItemStack>>,
                                                    itemsFromMultiblockToPlayer: List<Pair<BlockPos, ItemStack>>) {
+
             val world = getMinecraftClient().world
             val particleManager = getMinecraftClient().particleManager
 
@@ -59,6 +60,7 @@ abstract class ItemMovementParticle(world: World,
     private val entityRenderManager = getMinecraftClient().entityRenderManager
 
     override fun getType(): ParticleTextureSheet? {
+        itemEntity.x
         return ParticleTextureSheet.CUSTOM
     }
 

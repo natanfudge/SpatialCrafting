@@ -7,7 +7,7 @@ Fabric Loom: 0.2.5-SNAPSHOT Build(local)
 :providing io.github.cottonmc:LibGui:1.3.2 (net.fabricmc.yarn.1_14_4.12)
 :providing com.lettuce.fudge:fabric-drawer:1.1.0 (net.fabricmc.yarn.1_14_4.12)
 :providing net.fabricmc:fabric-language-kotlin:1.3.50+build.1 (net.fabricmc.yarn.1_14_4.12)
-:providing me.shedaniel:RoughlyEnoughItems:2.9.7+build.144 (net.fabricmc.yarn.1_14_4.12)
+:providing me.shedaniel:RoughlyEnoughItems:3.1.2+build.12 (net.fabricmc.yarn.1_14_4.12)
 :providing net.fabricmc.fabric-api:fabric-api-base:0.1.0+b494ebeb42 (net.fabricmc.yarn.1_14_4.12)
 :providing net.fabricmc.fabric-api:fabric-biomes-v1:0.1.0+896c7fbb42 (net.fabricmc.yarn.1_14_4.12)
 :providing net.fabricmc.fabric-api:fabric-commands-v0:0.1.1+b494ebeb42 (net.fabricmc.yarn.1_14_4.12)
@@ -34,8 +34,11 @@ Fabric Loom: 0.2.5-SNAPSHOT Build(local)
 :providing net.fabricmc.fabric-api:fabric-tag-extensions-v0:0.1.1+b494ebeb42 (net.fabricmc.yarn.1_14_4.12)
 :providing net.fabricmc.fabric-api:fabric-textures-v0:0.1.4+b494ebeb42 (net.fabricmc.yarn.1_14_4.12)
 :providing io.github.cottonmc:Jankson:1.0.0+j1.1.2 (net.fabricmc.yarn.1_14_4.12)
+:providing me.shedaniel.cloth:cloth-events:0.6.0 (net.fabricmc.yarn.1_14_4.12)
+:providing me.shedaniel.cloth:fiber2cloth:1.1.0 (net.fabricmc.yarn.1_14_4.12)
+:providing me.shedaniel.cloth:config-2:1.1.1 (net.fabricmc.yarn.1_14_4.12)
 :providing io.github.prospector:modmenu:1.7.9+build.118 (net.fabricmc.yarn.1_14_4.12)
-:providing net.fabricmc:fabric-loader:0.4.9+build.160 (net.fabricmc.yarn.1_14_4.12)
+:providing net.fabricmc:fabric-loader:0.6.1+build.164 (net.fabricmc.yarn.1_14_4.12)
 :providing alexiil.mc.lib:libblockattributes-items:0.4.10 (net.fabricmc.yarn.1_14_4.12)
 :providing alexiil.mc.lib:libblockattributes-core:0.4.10 (net.fabricmc.yarn.1_14_4.12)
 :providing org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.50
@@ -46,9 +49,8 @@ Fabric Loom: 0.2.5-SNAPSHOT Build(local)
 :providing org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.50
 :providing org.jetbrains.kotlin:kotlin-stdlib:1.3.50
 :providing org.jetbrains:annotations:17.0.0
-:providing cloth:ClothEvents:0.3.1.23 (net.fabricmc.yarn.1_14_4.12)
-:providing blue.endless:jankson:1.1.0
-:providing cloth-config:ClothConfig2:0.2.0 (net.fabricmc.yarn.1_14_4.12)
+:providing me.zeroeightsix:fiber:0.6.0-7
+:providing blue.endless:jankson:1.1.1
 :providing org.jetbrains.kotlin:kotlin-stdlib-common:1.3.50
 :providing mcp.mobius.waila:Hwyla:1.14.2-1.9.17-66 (net.fabricmc.yarn.1_14_4.12)
 :providing com.jamieswhiteshirt:developer-mode:1.0.14 (net.fabricmc.yarn.1_14_4.12)
@@ -59,7 +61,7 @@ Fabric Loom: 0.2.5-SNAPSHOT Build(local)
 :providing io.github.cottonmc:LibGui:1.3.2 (net.fabricmc.yarn.1_14_4.12) sources
 :providing com.lettuce.fudge:fabric-drawer:1.1.0 (net.fabricmc.yarn.1_14_4.12) sources
 :providing net.fabricmc:fabric-language-kotlin:1.3.50+build.1 (net.fabricmc.yarn.1_14_4.12) sources
-:providing me.shedaniel:RoughlyEnoughItems:2.9.7+build.144 (net.fabricmc.yarn.1_14_4.12) sources
+:providing me.shedaniel:RoughlyEnoughItems:3.1.2+build.12 (net.fabricmc.yarn.1_14_4.12) sources
 :providing net.fabricmc.fabric-api:fabric-api-base:0.1.0+b494ebeb42 (net.fabricmc.yarn.1_14_4.12) sources
 :providing net.fabricmc.fabric-api:fabric-biomes-v1:0.1.0+896c7fbb42 (net.fabricmc.yarn.1_14_4.12) sources
 :providing net.fabricmc.fabric-api:fabric-commands-v0:0.1.1+b494ebeb42 (net.fabricmc.yarn.1_14_4.12) sources
@@ -86,8 +88,11 @@ Fabric Loom: 0.2.5-SNAPSHOT Build(local)
 :providing net.fabricmc.fabric-api:fabric-tag-extensions-v0:0.1.1+b494ebeb42 (net.fabricmc.yarn.1_14_4.12) sources
 :providing net.fabricmc.fabric-api:fabric-textures-v0:0.1.4+b494ebeb42 (net.fabricmc.yarn.1_14_4.12) sources
 :providing io.github.cottonmc:Jankson:1.0.0+j1.1.2 (net.fabricmc.yarn.1_14_4.12) sources
+:providing me.shedaniel.cloth:cloth-events:0.6.0 (net.fabricmc.yarn.1_14_4.12) sources
+:providing me.shedaniel.cloth:fiber2cloth:1.1.0 (net.fabricmc.yarn.1_14_4.12) sources
+:providing me.shedaniel.cloth:config-2:1.1.1 (net.fabricmc.yarn.1_14_4.12) sources
 :providing io.github.prospector:modmenu:1.7.9+build.118 (net.fabricmc.yarn.1_14_4.12) sources
-:providing net.fabricmc:fabric-loader:0.4.9+build.160 (net.fabricmc.yarn.1_14_4.12) sources
+:providing net.fabricmc:fabric-loader:0.6.1+build.164 (net.fabricmc.yarn.1_14_4.12) sources
 :providing alexiil.mc.lib:libblockattributes-items:0.4.10 (net.fabricmc.yarn.1_14_4.12) sources
 :providing alexiil.mc.lib:libblockattributes-core:0.4.10 (net.fabricmc.yarn.1_14_4.12) sources
 :providing mcp.mobius.waila:Hwyla:1.14.2-1.9.17-66 (net.fabricmc.yarn.1_14_4.12) sources
@@ -104,15 +109,15 @@ Fabric Loom: 0.2.5-SNAPSHOT Build(local)
 > Task :assemble UP-TO-DATE
 
 > Task :remapJar
-:remapping spatialcrafting-1.0.0-dev.jar
+:remapping spatialcrafting-1.1.0-dev.jar
 Could not find refmap definition, will be using default name: SpatialCrafting-refmap.json
 
 > Task :curseforge300824
-Uploaded C:\Users\natan\Desktop\SpatialCrafting\build\libs\spatialcrafting-1.0.0.jar to CurseForge Project: 300824, with ID: 2777174
+Uploaded C:\Users\natan\Desktop\SpatialCrafting\build\libs\spatialcrafting-1.1.0.jar to CurseForge Project: 300824, with ID: 2777543
 
 Deprecated Gradle features were used in this build, making it incompatible with Gradle 6.0.
 Use '--warning-mode all' to show the individual deprecation warnings.
 See https://docs.gradle.org/5.6/userguide/command_line_interface.html#sec:command_line_warnings
 
-BUILD SUCCESSFUL in 7s
+BUILD SUCCESSFUL in 11s
 6 actionable tasks: 2 executed, 4 up-to-date

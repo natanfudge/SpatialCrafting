@@ -2,33 +2,25 @@
 
 package spatialcrafting.util
 
-import com.mojang.blaze3d.platform.GlStateManager
-import net.fabricmc.fabric.api.network.PacketContext
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
-import net.minecraft.block.Material
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.font.TextRenderer
-import net.minecraft.client.gui.DrawableHelper
-import net.minecraft.client.sound.PositionedSoundInstance
+import net.minecraft.client.sound.SoundInstance
 import net.minecraft.entity.ItemEntity
-import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemConvertible
 import net.minecraft.item.ItemStack
 import net.minecraft.item.ToolMaterial
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.LongTag
 import net.minecraft.recipe.Ingredient
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
-import net.minecraft.sound.SoundEvents
-import net.minecraft.text.LiteralText
 import net.minecraft.util.Hand
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.IWorld
 import net.minecraft.world.World
-import org.lwjgl.opengl.GL11
 import spatialcrafting.client.particle.plus
 import spatialcrafting.client.particle.toVec3d
 import kotlin.math.roundToInt
@@ -44,20 +36,28 @@ operator fun BlockPos.plus(vec3d: Vec3d) = this.toVec3d() + vec3d
 
 fun CompoundTag.putBlockPos(key: String, pos: BlockPos?) = if (pos != null) putLong(key, pos.asLong()) else Unit
 
-fun CompoundTag.getBlockPos(key: String): BlockPos? = getLong(key).let { if (it == 0.toLong()) null else BlockPos.fromLong(it) }
+fun CompoundTag.getBlockPos(key: String): BlockPos? {
+    val tag = getTag(key) ?: return null
+    if (tag !is LongTag) return null
+    return BlockPos.fromLong(tag.long)
+}
 
 fun Vec3d.toBlockPos() = BlockPos(x.roundToInt(), y.roundToInt(), z.roundToInt())
 fun vec3d(x: Double, y: Double, z: Double) = Vec3d(x, y, z)
 
 fun IWorld.play(soundEvent: SoundEvent, at: BlockPos,
-               ofCategory: SoundCategory, toPlayer: PlayerEntity? = null, volumeMultiplier: Float = 1.0f, pitchMultiplier: Float = 1.0f): Unit = playSound(toPlayer, at, soundEvent, ofCategory, volumeMultiplier, pitchMultiplier)
+                ofCategory: SoundCategory, toPlayer: PlayerEntity? = null, volumeMultiplier: Float = 1.0f, pitchMultiplier: Float = 1.0f) {
+    playSound(toPlayer, at, soundEvent, ofCategory, volumeMultiplier, pitchMultiplier)
+}
+
+const val TicksPerSecond = 20
+
 
 fun IWorld.getBlock(location: BlockPos): Block = getBlockState(location).block
 
-fun IWorld.setBlock(block: Block, pos: BlockPos, blockState: BlockState = block.defaultState): Boolean
-        = world.setBlockState(pos, blockState)
+fun IWorld.setBlock(block: Block, pos: BlockPos, blockState: BlockState = block.defaultState): Boolean = world.setBlockState(pos, blockState)
 
-val IWorld.isServer get() = !isClient
+val World.isServer get() = !isClient
 
 val IWorld.name get() = if (isClient) "Client" else "Server"
 
@@ -66,7 +66,6 @@ fun IWorld.dropItemStack(stack: ItemStack, pos: BlockPos): ItemEntity = dropItem
 fun IWorld.dropItemStack(stack: ItemStack, pos: Vec3d): ItemEntity {
     return ItemEntity(world, pos.x, pos.y, pos.z, stack).also { world.spawnEntity(it) }
 }
-
 
 
 fun ItemStack.copy(count: Int): ItemStack = copy().apply { this.count = count }

@@ -13,7 +13,8 @@ import spatialcrafting.client.Speed
 import kotlin.math.roundToLong
 
 inline val World.durationTime get() = time.ticks
-inline fun <T> TickScheduler<T>.schedule(blockPos: BlockPos, target: T, scheduleDuration: Duration) = schedule(blockPos, target, scheduleDuration.inTicks.toInt())
+inline fun <T> TickScheduler<T>.schedule(blockPos: BlockPos, target: T, scheduleDuration: Duration)
+        = schedule(blockPos, target, scheduleDuration.inTicks.toInt())
 
 fun CompoundTag.putDuration(key: String, duration: Duration) = putLong(key, duration.inTicks)
 fun CompoundTag.getDuration(key: String) = getLong(key).ticks

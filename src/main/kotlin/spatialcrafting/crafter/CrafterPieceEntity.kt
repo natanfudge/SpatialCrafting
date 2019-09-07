@@ -8,7 +8,7 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.util.*
-import spatialcrafting.util.kotlinwrappers.Builders
+import spatialcrafting.util.Builders
 
 
 class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
@@ -38,7 +38,6 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
         }
 
         private object Keys {
-            const val multiblock = "multiblock"
             const val masterEntity = "master"
         }
     }
@@ -80,7 +79,7 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
     private val masterEntity: CrafterPieceEntity?
         get() = masterEntityPos?.let { masterPos ->
             if (isMaster) this
-            else world?.getCrafterEntity(masterPos)
+            else world?.getCrafterEntityOrNull(masterPos)
         }
 
     /**

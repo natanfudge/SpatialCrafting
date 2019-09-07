@@ -2,7 +2,7 @@ package spatialcrafting.item
 
 import net.minecraft.item.Items
 import net.minecraft.recipe.Ingredient
-import spatialcrafting.util.kotlinwrappers.Builders
+import spatialcrafting.util.Builders
 
 
 val ShapelessSword = Builders.sword(durability = 3, attackSpeed = 3f, damage = 15, enchantability = 0) {

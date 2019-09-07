@@ -13,7 +13,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
 import spatialcrafting.GuiId
-import spatialcrafting.util.kotlinwrappers.Builders
+import spatialcrafting.util.Builders
 
 
 object TestBlock : Block(Settings.of(Material.STONE)), BlockEntityProvider {

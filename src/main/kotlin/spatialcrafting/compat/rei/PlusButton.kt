@@ -7,16 +7,18 @@ import me.shedaniel.math.api.Point
 import me.shedaniel.rei.gui.widget.ButtonWidget
 import me.shedaniel.rei.gui.widget.QueuedTooltip
 import me.shedaniel.rei.impl.ScreenHelper
-import net.minecraft.client.world.ClientWorld
 import net.minecraft.text.Style
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
+import net.minecraft.world.World
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
+import spatialcrafting.crafter.startRecipeHelpCommon
+import spatialcrafting.crafter.stopRecipeHelpCommon
 import spatialcrafting.recipe.ComponentSatisfaction
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.recipe.getRecipeSatisfaction
@@ -43,7 +45,7 @@ fun stopCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock) {
     crafterMultiblock.stopRecipeHelpCommon()
 }
 
-fun getNearestCrafter(world: ClientWorld, pos: Vec3d) =
+fun getNearestCrafter(world: World, pos: Vec3d) =
         world.blockEntities.filterIsInstance<CrafterPieceEntity>()
                 .minBy { it.pos.distanceFrom(pos) }?.multiblockIn
 

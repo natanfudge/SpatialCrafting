@@ -3,8 +3,6 @@ package spatialcrafting.util
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding
 import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry
 import net.fabricmc.fabric.api.client.render.BlockEntityRendererRegistry
-import net.fabricmc.fabric.api.network.ClientSidePacketRegistry
-import net.fabricmc.fabric.api.network.PacketContext
 import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.render.block.entity.BlockEntityRenderer
@@ -12,7 +10,6 @@ import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
 import net.minecraft.util.Identifier
-import net.minecraft.util.PacketByteBuf
 import net.minecraft.util.registry.Registry
 
 /**
@@ -22,8 +19,13 @@ inline fun initCommon(modId: String, group: ItemGroup? = null, init: CommonModIn
     CommonModInitializationContext(modId, group).init()
 }
 
+
 inline fun initClientOnly(modId: String, init: ClientModInitializationContext.() -> Unit) {
-    ClientModInitializationContext(modId).init()
+    ClientModInitializationContext(modId).apply {
+        init()
+        registerS2C(Packet.InbuiltS2CPackets)
+    }
+
 }
 
 
@@ -42,6 +44,7 @@ class ClientModInitializationContext(val modId: String) {
     inline fun <reified T : BlockEntity> register(renderer: BlockEntityRenderer<T>) {
         BlockEntityRendererRegistry.INSTANCE.register(T::class.java, renderer)
     }
+
     fun register(keyBinding: FabricKeyBinding) = KeyBindingRegistry.INSTANCE.register(keyBinding)
 
 }

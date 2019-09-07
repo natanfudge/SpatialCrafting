@@ -1,4 +1,4 @@
-@file:UseSerializers(ForBlockPos::class, ForIdentifier::class, ForItemStack::class, ForUuid::class)
+@file:UseSerializers(ForBlockPos::class, ForIdentifier::class, ForItemStack::class, ForUuid::class,ForSoundEvent::class, ForVec3d::class)
 
 package spatialcrafting
 
@@ -11,28 +11,25 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.client.particle.ItemMovementParticle
-import spatialcrafting.client.particle.playCraftParticles
-import spatialcrafting.crafter.CrafterMultiblock
-import spatialcrafting.crafter.CrafterPieceEntity
-import spatialcrafting.crafter.assertIs
-import spatialcrafting.crafter.getCrafterEntity
+import spatialcrafting.client.particle.playAllCraftParticles
+import spatialcrafting.crafter.*
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.util.*
 import java.util.*
 
 
-interface C2SPacket<T : Packet<T>> : InternalC2SPacket<T>{
-    override val modId get() = ModId
-}
-interface S2CPacket<T : Packet<T>> : InternalS2CPacket<T>{
+interface C2SPacket<T : Packet<T>> : InternalC2SPacket<T> {
     override val modId get() = ModId
 }
 
-interface TwoSidedPacket<T: Packet<T>> : InternalTwoSidedPacket<T>{
+interface S2CPacket<T : Packet<T>> : InternalS2CPacket<T> {
     override val modId get() = ModId
 }
 
+interface TwoSidedPacket<T : Packet<T>> : InternalTwoSidedPacket<T> {
+    override val modId get() = ModId
+}
 
 
 object Packets {
@@ -47,19 +44,25 @@ object Packets {
 
     }
 
+    //TODO: the backup pos is probably not needed considering what is happening
     @Serializable
     data class UnassignMultiblockState(val anyCrafterPiecePos: BlockPos,
                                        /**
-                                        * In case the first pos was a block that was destroyed in which case not multiblock can be gathered from it.
+                                        * In case the first pos was a block that was destroyed in which case no multiblock can be gathered from it.
                                         */
                                        val backupCrafterPiecePos: BlockPos) : S2CPacket<UnassignMultiblockState> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val crafter = context.world.getBlockEntity(anyCrafterPiecePos) as? CrafterPieceEntity
-                    ?: context.world.getCrafterEntity(backupCrafterPiecePos)
+                    ?: context.world.getCrafterEntity(backupCrafterPiecePos).also { logDebug { "Using backup crafterPiecePos" } }
 
-                CrafterPieceEntity.unassignMultiblockState(context.world, crafter.multiblockIn
-                        ?: error("No multiblock to unassign"))
+            crafter.multiblockIn?.let {
+                CrafterPieceEntity.unassignMultiblockState(context.world, it)
+                it.cancellationTokens.craftingParticles?.cancel(context.world)
+            }
+
+            if(crafter.multiblockIn == null) logInfo { "No multiblock to unassign" }
+
 
         }
     }
@@ -83,29 +86,34 @@ object Packets {
     }
 
 
+
+
     @Serializable
-    data class StartCraftingParticles(val multiblock: CrafterMultiblock, private val _duration: Long) : S2CPacket<StartCraftingParticles> {
+    data class StartCraftingParticles(val anyCrafterPiecePos: BlockPos, private val _duration: Long) : S2CPacket<StartCraftingParticles> {
         override val serializer get() = serializer()
 
         val duration: Duration get() = _duration.ticks
 
         /**workaround is used to make this constructor not clash with the primary constructor*/
-        constructor(multiblock: CrafterMultiblock, duration: Duration, workaround: Byte = 0.toByte())
-                : this(multiblock, duration.inTicks)
+        constructor(anyCrafterPiecePos: BlockPos, duration: Duration, workaround: Byte = 0.toByte())
+                : this(anyCrafterPiecePos, duration.inTicks)
 
 
         override fun use(context: PacketContext) {
-            // We do this so we can later change the state of the multiblock through one of the crafter entities,
-            // so we can tell the client to cancel the particles.
-            CrafterPieceEntity.assignMultiblockState(context.world,
-                    anyCrafterPos = multiblock.arbitraryCrafterPos(),
-                    multiblock = multiblock)
-
-            playCraftParticles(context.world, multiblock, duration)
+            val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
+            playAllCraftParticles(context.world, multiblock, duration)
         }
-
-
     }
+
+    @Serializable
+    data class StopCraftingParticles(val anyCrafterPiecePos: BlockPos) : S2CPacket<StopCraftingParticles>{
+        override val serializer get() = serializer()
+        override fun use(context: PacketContext) {
+            val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
+            multiblock.cancellationTokens.craftingParticles?.cancel(context.world)
+        }
+    }
+
 
     @Serializable
     data class StartRecipeHelp(val anyCrafterPiecePos: BlockPos, val recipeId: Identifier) : C2SPacket<StartRecipeHelp> {
@@ -119,7 +127,7 @@ object Packets {
 
 
     @Serializable
-    data class StopRecipeHelp(val anyCrafterPiecePos: BlockPos) : TwoSidedPacket<StopRecipeHelp>{
+    data class StopRecipeHelp(val anyCrafterPiecePos: BlockPos) : TwoSidedPacket<StopRecipeHelp> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
@@ -192,6 +200,8 @@ object Packets {
         }
 
     }
+
+
 
 
     private fun getAndValidateRecipe(recipeId: Identifier, world: World): SpatialRecipe? {

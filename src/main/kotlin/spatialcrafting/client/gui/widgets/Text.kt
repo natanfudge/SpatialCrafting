@@ -2,6 +2,7 @@ package spatialcrafting.client.gui.widgets
 
 import io.github.cottonmc.cotton.gui.widget.WLabel
 import net.minecraft.client.MinecraftClient
+import net.minecraft.text.Text
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
 import spatialcrafting.client.gui.widgets.core.Overlay
@@ -9,7 +10,6 @@ import spatialcrafting.util.getMinecraftClient
 
 
 const val StringHeight = 8
-
 
 class TextClass(private val text: String, private val color: Int, overlay: Overlay?) : NoChildDevWidget(overlay) {
     override val composeDirectChildren: DevWidget.() -> Unit = {}
