@@ -19,8 +19,17 @@ import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.crafter.bumpRecipeHelpCurrentLayerIfNeeded
 import spatialcrafting.crafter.hologramGhostIngredientFor
 import spatialcrafting.util.*
+import java.io.FileInputStream
+import java.util.*
 
 private const val TicksPerSecond = 20
+fun x() {
+    val props = Properties()
+    val inputStream = FileInputStream("gradle.properties")
+    props.load(inputStream)
+    val replacements = props.map { (k, v) -> "\"${k.toString().replace("_", "-").replace("_version", "")}\" : \"$v\"" }
+}
+
 
 class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, RenderAttachmentBlockEntity, Tickable {
 
@@ -149,8 +158,10 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
     fun dropInventory() = world!!.dropItemStack(getItem(), pos)
 
 
-    fun getMultiblock() = getMultiblockOrNull() ?: error("A hologram should always have a multiblock," +
-                                    " and yet when looking at a crafter piece below at position $pos he did not have a multiblock instance.")
+    fun getMultiblock() = getMultiblockOrNull()
+            ?: error("A hologram should always have a multiblock," +
+                    " and yet when looking at a crafter piece below at position $pos he did not have a multiblock instance.")
+
     fun getMultiblockOrNull(): CrafterMultiblock? {
         val world = world!!
         // We just go down until we find a crafter

@@ -123,6 +123,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
 
 
     override fun onBreak(world: World, pos: BlockPos, blockState: BlockState?, player: PlayerEntity) {
+        if(world.isClient) return
         val hologramEntity = world.getHologramEntity(pos)
         // This is to make it so in creative mod you won't get unnecessary items. (onBlockRemoved is called afterwards)
         val extractedItem = hologramEntity.extractItem()
