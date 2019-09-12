@@ -78,13 +78,40 @@ abstract class DevWidget(
         return this@DevWidget.add(Clickable(overlay, callback) { add(this@onClick) })
     }
 
-    fun DevWidget.onHover(callback: RuntimeWidget.(mouseX: Int, mouseY: Int) -> Unit): DevWidget {
-        this@DevWidget.devChildren.remove(this)
-        return this@DevWidget.add(TightSingleChildDevWidget(composeDirectChildren = { add(this@onHover) }, drawer = {
-            it.draw()
-            if (it.constraints.contains(getClientMouseX(), getClientMouseY())) it.callback(getClientMouseX(), getClientMouseY())
-        }, overlay = overlay))
-    }
+
+    fun DevWidget.onHover(callback: RuntimeWidget.(mouseX: Int, mouseY: Int) -> Unit): DevWidget = wrapWithHover(
+            parent = this@DevWidget,
+            toBeWrapped = this,
+            callback = callback
+    )
+
+    fun DevWidget.tooltip(tooltip: String?): DevWidget = wrapWithHover(
+            parent = this@DevWidget,
+            toBeWrapped = this,
+            callback = { _, _ -> overlay!!.tooltip = tooltip }
+    )
+
+//    fun DevWidget.tooltip(tooltipProvider: () -> String): DevWidget = wrapWithHover(
+//            parent = this@DevWidget,
+//            toBeWrapped = this,
+//            callback = { _, _ -> overlay!!.tooltip = tooltip }
+//    )
+
+    //    fun DevWidget.tooltip(tooltip: String?): DevWidget {
+//        this@DevWidget.devChildren.remove(this)
+//        return this@DevWidget.add(TightSingleChildDevWidget(composeDirectChildren = { add(this@tooltip) }, drawer = {
+//            it.draw()
+//            if (it.constraints.contains(getClientMouseX(), getClientMouseY())) it.apply { overlay!!.tooltip = tooltip }
+//        }, overlay = overlay))
+//    }
+//
+//    fun DevWidget.tooltip(tooltip: String?): DevWidget {
+//        this@DevWidget.devChildren.remove(this)
+//        return this@DevWidget.add(TightSingleChildDevWidget(composeDirectChildren = { add(this@tooltip) }, drawer = {
+//            it.draw()
+//            if (it.constraints.contains(getClientMouseX(), getClientMouseY())) it.apply { overlay!!.tooltip = tooltip }
+//        }, overlay = overlay))
+//    }
 
 
     fun recompose(target: DevWidget) = target.apply {
@@ -98,6 +125,14 @@ abstract class DevWidget(
     }
 
 
+}
+
+private fun wrapWithHover(parent: DevWidget, toBeWrapped: DevWidget, callback: RuntimeWidget.(mouseX: Int, mouseY: Int) -> Unit): DevWidget {
+    parent.devChildren.remove(toBeWrapped)
+    return parent.add(TightSingleChildDevWidget(composeDirectChildren = { add(toBeWrapped) }, drawer = {
+        it.draw()
+        if (it.constraints.contains(getClientMouseX(), getClientMouseY())) it.callback(getClientMouseX(), getClientMouseY())
+    }, overlay = parent.overlay))
 }
 
 

@@ -42,10 +42,11 @@ val waila_version: String by project
 val drawer_version: String by project
 val fabric_keybindings_version: String by project
 val curseforge_api_key: String by project
+val scheduler_version: String by project
 
 val standalone: String by project
 
-val isStandalone : Boolean = !project.hasProperty("standalone") || standalone == "true"
+val isStandalone: Boolean = !project.hasProperty("standalone") || standalone == "true"
 
 
 base {
@@ -90,11 +91,14 @@ dependencies {
     }
 
     modDependency("com.lettuce.fudge:fabric-drawer:$drawer_version")
+    modDependency("com.lettuce.fudge:working-scheduler:$scheduler_version")
 
     devEnvMod("mcp.mobius.waila:Hwyla:$waila_version")
     devEnvMod("com.jamieswhiteshirt:developer-mode:1.0.14")
     devEnvMod("gamemodeoverhaul:GamemodeOverhaul:1.0.1.0")
     devEnvMod(CurseMavenResolver().resolve("data-loader", "2749923"))
+    modImplementation(CurseMavenResolver().resolve("engination-fabric", "2732432"))
+
 
 }
 
@@ -105,12 +109,12 @@ fun DependencyHandlerScope.fabric() {
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 }
 
-fun String.runCommand(logFile : String/*workingDir: File*/) {
+fun String.runCommand(logFile: String/*workingDir: File*/) {
     ProcessBuilder(*split(" ").toTypedArray())
             .redirectOutput(ProcessBuilder.Redirect.to(File(logFile)))
             .redirectError(ProcessBuilder.Redirect.INHERIT)
             .start()
-            .waitFor(300,TimeUnit.SECONDS)
+            .waitFor(300, TimeUnit.SECONDS)
 }
 
 tasks.register("publishVariants") {

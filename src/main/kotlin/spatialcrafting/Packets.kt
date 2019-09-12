@@ -1,4 +1,4 @@
-@file:UseSerializers(ForBlockPos::class, ForIdentifier::class, ForItemStack::class, ForUuid::class,ForSoundEvent::class, ForVec3d::class)
+@file:UseSerializers(ForBlockPos::class, ForIdentifier::class, ForItemStack::class, ForUuid::class, ForSoundEvent::class, ForVec3d::class)
 
 package spatialcrafting
 
@@ -11,9 +11,12 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.client.particle.ItemMovementParticle
+import spatialcrafting.client.particle.centerOfHolograms
 import spatialcrafting.client.particle.playAllCraftParticles
 import spatialcrafting.crafter.*
+import spatialcrafting.hologram.CraftingItemMovementData
 import spatialcrafting.hologram.HologramBlockEntity
+import spatialcrafting.recipe.CraftingEffect
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.util.*
 import java.util.*
@@ -61,7 +64,7 @@ object Packets {
                 it.cancellationTokens.craftingParticles?.cancel(context.world)
             }
 
-            if(crafter.multiblockIn == null) logInfo { "No multiblock to unassign" }
+            if (crafter.multiblockIn == null) logInfo { "No multiblock to unassign" }
 
 
         }
@@ -86,30 +89,38 @@ object Packets {
     }
 
 
-
-
     @Serializable
-    data class StartCraftingParticles(val anyCrafterPiecePos: BlockPos, private val _duration: Long) : S2CPacket<StartCraftingParticles> {
+    data class StartCraftingParticles(val anyCrafterPiecePos: BlockPos, private val duration: Long,
+                                      private val effect: CraftingEffect) : S2CPacket<StartCraftingParticles> {
         override val serializer get() = serializer()
-
-        val duration: Duration get() = _duration.ticks
-
-        /**workaround is used to make this constructor not clash with the primary constructor*/
-        constructor(anyCrafterPiecePos: BlockPos, duration: Duration, workaround: Byte = 0.toByte())
-                : this(anyCrafterPiecePos, duration.inTicks)
 
 
         override fun use(context: PacketContext) {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
-            playAllCraftParticles(context.world, multiblock, duration)
+            if (effect == CraftingEffect.itemMovement) {
+                for (hologram in multiblock.getHologramEntities(context.world)) {
+                    hologram.craftingItemMovement = CraftingItemMovementData(
+                            targetLocation = multiblock.centerOfHolograms(),
+                            startTime = context.world.time,
+                            endTime = context.world.time + duration
+                    )
+                }
+            }
+            else {
+                playAllCraftParticles(context.world, multiblock, duration.ticks)
+            }
+
         }
     }
 
     @Serializable
-    data class StopCraftingParticles(val anyCrafterPiecePos: BlockPos) : S2CPacket<StopCraftingParticles>{
+    data class StopCraftingParticles(val anyCrafterPiecePos: BlockPos) : S2CPacket<StopCraftingParticles> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
+            for (hologram in multiblock.getHologramEntities(context.world)) {
+                hologram.craftingItemMovement = null
+            }
             multiblock.cancellationTokens.craftingParticles?.cancel(context.world)
         }
     }
@@ -200,8 +211,6 @@ object Packets {
         }
 
     }
-
-
 
 
     private fun getAndValidateRecipe(recipeId: Identifier, world: World): SpatialRecipe? {

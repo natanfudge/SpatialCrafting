@@ -5,10 +5,8 @@ import alexiil.mc.lib.attributes.AttributeProvider
 import net.minecraft.block.*
 import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.entity.EntityContext
-import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.SidedInventory
-import net.minecraft.item.ItemStack
 import net.minecraft.state.StateFactory
 import net.minecraft.state.property.BooleanProperty
 import net.minecraft.util.Hand

@@ -18,8 +18,7 @@ data class ParticleBuilder(val world: World, val originalEndPos: Vec3d, val star
     }
 }
 
-fun BlockPos.toVec3d() = Vec3d(this)
-operator fun Vec3d.plus(other: Vec3d) = Vec3d(this.x + other.x, this.y + other.y, this.z + other.z)
+
 
 fun CrafterMultiblock.centerOfHolograms(): Vec3d {
     val locations = hologramLocations

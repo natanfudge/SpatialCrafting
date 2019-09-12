@@ -179,6 +179,7 @@ private fun buildJsonRecipeFromInventory(multiblock: CrafterMultiblock, options:
             result = RecipeResult(
                     item = Registry.ITEM.getId(heldItem.item).toString(),
                     count = heldItem.count
-            )
+            ),
+            effect = if(options.useItemMovementEffect) CraftingEffect.itemMovement else CraftingEffect.particles
     )
 }

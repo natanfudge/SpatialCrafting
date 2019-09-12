@@ -1,0 +1,13 @@
+- Packets:
+    - S2C: Need to do taskQueue thing, needs to be registered on the client only
+    - C2S: Need to do taskQueue thing and beware of vulns (isLoaded, etc)
+- Custom Recipes
+- PersistentState
+- Add Tools and true meaning of attackSpeed
+- Custom Renderers
+- Advanced sounds (soundinstance)
+- Avoiding invalid state in block entities
+- Adding a tag to the common namespace
+- How to add a FabricBakedModel
+- What does markDirty() do?
+- The state of scheduling in minecraft

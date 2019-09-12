@@ -58,7 +58,7 @@ private fun sendPacketToServer(packetId: Identifier, packetBuilder: PacketByteBu
     }
 }
 
-fun ClientModInitializationContext.registerS2C(vararg serializers: KSerializer<out InternalS2CPacket<*>>, context: SerialModule = EmptyModule) {
+fun ClientModInitializationContext.registerS2CPackets(vararg serializers: KSerializer<out InternalS2CPacket<*>>, context: SerialModule = EmptyModule) {
     for (serializer in serializers) registerS2C(serializer, context)
 }
 
@@ -81,7 +81,7 @@ fun CommonModInitializationContext.registerC2S(serializers: List<KSerializer<out
     for (serializer in serializers) registerC2S(serializer, context)
 }
 
-fun CommonModInitializationContext.registerC2S(vararg serializers: KSerializer<out InternalC2SPacket<*>>, context: SerialModule = EmptyModule) {
+fun CommonModInitializationContext.registerC2SPackets(vararg serializers: KSerializer<out InternalC2SPacket<*>>, context: SerialModule = EmptyModule) {
     for (serializer in serializers) registerC2S(serializer, context)
 }
 

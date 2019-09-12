@@ -9,6 +9,7 @@ import spatialcrafting.client.gui.widgets.core.*
 import spatialcrafting.compat.rei.getNearestCrafter
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.RecipeCreatorCurrentLayerInactive
+import spatialcrafting.recipe.CraftingEffect
 import spatialcrafting.util.Client
 import spatialcrafting.util.getMinecraftClient
 import spatialcrafting.util.sendPacketToServer
@@ -19,7 +20,9 @@ data class RecipeOptions(var shaped: Boolean = true,
                          var craftTime: String,
                          var energyCost: Int = 1000,
                          var minimumCrafterSize: String,
-                         var useTags: Boolean = true)
+                         var useTags: Boolean = true,
+                         var useItemMovementEffect: Boolean = false
+)
 
 
 class RecipeCreatorGui : LightweightGuiDescription() {
@@ -32,7 +35,7 @@ class RecipeCreatorGui : LightweightGuiDescription() {
         val options = RecipeOptions(craftTime = (nearestCrafter.multiblockSize * 5f).toString(),
                 minimumCrafterSize = nearestCrafter.multiblockSize.toString())
 
-        drawWidgets(250, 160) {
+        drawWidgets(300, 160) {
             Row {
                 UpDownButtons(nearestCrafter)
 
@@ -54,6 +57,14 @@ class RecipeCreatorGui : LightweightGuiDescription() {
                         recompose(this@Column)
                     }
                     VerticalSpace(2)
+                    Text("Use Item","Movement Effect")
+                    VerticalSpace(1)
+                    Switch(enabled = options.useItemMovementEffect).onClick {
+                        options.useItemMovementEffect = !options.useItemMovementEffect
+                        recompose(this@Column)
+                    }.tooltip("Turn on for short recipes like crafting ingredients")
+                }
+                Column(MainAxisAlignment.Center, crossAxisAlignment = CrossAxisAlignment.Baseline) {
                     Text("Craft Time", "(Seconds)")
                     VerticalSpace(2)
                     TextField(description = this@RecipeCreatorGui, width = 40, defaultText = options.craftTime) {
@@ -65,7 +76,6 @@ class RecipeCreatorGui : LightweightGuiDescription() {
                     TextField(description = this@RecipeCreatorGui, width = 14, defaultText = options.minimumCrafterSize) {
                         options.minimumCrafterSize = it
                     }
-
                 }
 
             }
@@ -84,10 +94,10 @@ class RecipeCreatorGui : LightweightGuiDescription() {
                 generatedRecipeState.result = generateRecipe(nearestCrafter, options)
                 recompose(this)
                 getMinecraftClient().server?.reload()
-            }).onHover { _, _ ->
-                if (!playerHoldsItem) overlay!!.tooltip = errorText("Hold the result item in your hand")
-                if (!thereAreAnyItemsInCrafter) overlay!!.tooltip = errorText("Put the input items in the crafter")
-            }
+            }).tooltip(
+                    if (!playerHoldsItem) errorText("Hold the result item in your hand")
+                    else if (!thereAreAnyItemsInCrafter) errorText("Put the input items in the crafter")
+                    else null)
 
             Padding(3, 3, 3, 3) {
                 Row(MainAxisAlignment.Center, mainAxisSize = FlexSize.Wrap) {
@@ -146,11 +156,7 @@ private fun DevWidget.DisableableImage(enabledTexture: String,
         if (enabled) HoverableImage(enabledTexture, width, height).onClick {
             Client.playButtonClickSound()
             onClick(it)
-        }.onHover { _, _ ->
-            if (hoverText != "") {
-                overlay!!.tooltip = hoverText
-            }
-        }
+        }.tooltip (if (hoverText != "") hoverText else null)
         else Image(disabledTexture, width, height)
 
 
@@ -166,6 +172,6 @@ private fun DevWidget.changeCurrentLayer(nearestCrafter: CrafterMultiblock, chan
 
 
     sendPacketToServer(
-            Packets.ChangeActiveLayer(nearestCrafter.arbitraryCrafterPos(), nearestCrafter.recipeCreatorCurrentLayer)
+            Packets.ChangeActiveLayer(nearestCrafter.arbitraryCrafterPos, nearestCrafter.recipeCreatorCurrentLayer)
     )
 }

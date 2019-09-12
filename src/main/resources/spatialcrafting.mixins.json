@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "spatialcrafting.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "RecipeManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

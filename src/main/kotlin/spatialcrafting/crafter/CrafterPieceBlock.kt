@@ -1,13 +1,11 @@
 package spatialcrafting.crafter
 
-import net.minecraft.block.Block
-import net.minecraft.block.BlockEntityProvider
-import net.minecraft.block.BlockState
-import net.minecraft.block.Blocks
+import net.minecraft.block.*
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.inventory.SidedInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.text.Text
@@ -18,12 +16,9 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.BlockView
 import net.minecraft.world.IWorld
 import net.minecraft.world.World
+import scheduler.Scheduleable
 import spatialcrafting.client.particle.playRoundOfCraftParticles
-import spatialcrafting.ticker.Scheduleable
-import spatialcrafting.util.isServer
-import spatialcrafting.util.logDebug
-import spatialcrafting.util.logWarning
-import spatialcrafting.util.xz
+import spatialcrafting.util.*
 
 
 val CraftersPieces = mapOf(
@@ -42,10 +37,6 @@ inline fun <reified T> BlockEntity?.assertIs(pos: BlockPos? = null, world: IWorl
 
 }
 
-//inline fun <reified T> World.get(pos : BlockPos) : T = world.getBlockEntity(pos).assertIs(pos)
-//inline fun <reified T> World.getNullable(pos : BlockPos) : T? = world.getBlockEntity(pos) as? T
-
-
 fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>(pos)
 fun World.getCrafterEntityOrNull(pos: BlockPos) = world.getBlockEntity(pos) as? CrafterPieceEntity
 class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
@@ -56,13 +47,21 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
             5 -> Blocks.DIAMOND_BLOCK
             else -> error("unexpected size")
         }
-)), BlockEntityProvider, Scheduleable {
+)), BlockEntityProvider, Scheduleable, InventoryProvider {
+    override fun getInventory(blockState: BlockState, world: IWorld, pos: BlockPos): SidedInventory {
+        if (world is World && world.isServer && Thread.currentThread() == world.server!!.thread) {
+            return CrafterPieceInventoryDelegator(pos, world, this)
+        }
+        else return EmptyInventory
+    }
 
 
     companion object {
         const val FinishCraft = 1
         const val BeginCraftSoundLoop = 2
         const val EmitRoundOfCraftingParticles = 3
+
+        const val CraftIsAutomatedKey = "automated"
     }
 
     override fun neighborUpdate(blockState_1: BlockState?, world: World, pos: BlockPos, block_1: Block?, blockPos_2: BlockPos?, boolean_1: Boolean) {
@@ -84,7 +83,7 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
         assert(world.isServer)
         val multiblock = world.getCrafterEntity(pos).multiblockIn
                 ?: return super.onBlockRemoved(blockState, world, pos, blockState_2, boolean_1)
-        if(multiblock.isCrafting) multiblock.stopCrafting(world)
+        if (multiblock.isCrafting) multiblock.stopCrafting(world)
         destroyMultiblockFromServer(world, multiblock)
         super.onBlockRemoved(blockState, world, pos, blockState_2, boolean_1)
     }
@@ -94,7 +93,7 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
         assert(world.isServer)
         logDebug { "Scheduling ended at world time ${world.time}" }
         when (scheduleId) {
-            FinishCraft -> attemptToFinishCraft(world, pos)
+            FinishCraft -> attemptToFinishCraft(world, pos, stopRecipeHelp = !additionalData.getBoolean(CraftIsAutomatedKey))
             BeginCraftSoundLoop -> beginCraftSoundLoop(world, pos)
             EmitRoundOfCraftingParticles -> playRoundOfCraftParticles(world, pos, additionalData)
             else -> logWarning { "Nothing is expected to be scheduled with id $scheduleId" }
@@ -126,7 +125,7 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
             clickedBy?.sendMessage(TranslatableText("message.spatialcrafting.no_match"))
             return true
         }
-        else craft(matches, world, multiblockIn, pos)
+        else craft(matches, world, multiblockIn, pos, automated = false)
 
         return true
     }

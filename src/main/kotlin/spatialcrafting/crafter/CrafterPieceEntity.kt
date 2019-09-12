@@ -27,7 +27,6 @@ class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
         }
 
         fun unassignMultiblockState(world: World, multiblock: CrafterMultiblock) {
-            multiblock.setNotCrafting()
             // The block which was destroyed will give a null block entity, so we need to ignore it.
             multiblock.crafterLocations.mapNotNull {
                 world.getBlockEntity(it) as? CrafterPieceEntity

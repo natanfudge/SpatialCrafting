@@ -39,7 +39,7 @@ fun CrafterMultiblock.autoCraft(world: World, withInventoryOfPlayer: PlayerEntit
 
     insertRecipeToMultiblock(satisfaction, world, relativeHologramPositions, particlesToSendFromPlayerToMultiblock)
 
-    PlayerStream.watching(world, arbitraryCrafterPos()).sendPacket(Packets.ItemMovementFromPlayerToMultiblockParticles(
+    PlayerStream.watching(world, arbitraryCrafterPos).sendPacket(Packets.ItemMovementFromPlayerToMultiblockParticles(
             withInventoryOfPlayer.uuid,
             itemsFromMultiblockToPlayer = particlesToSendFromMultiblockToPlayer,
             itemsFromPlayerToMultiblock = particlesToSendFromPlayerToMultiblock
@@ -48,7 +48,7 @@ fun CrafterMultiblock.autoCraft(world: World, withInventoryOfPlayer: PlayerEntit
 
 
 
-private fun CrafterMultiblock.insertRecipeToMultiblock(satisfaction: List<ComponentSatisfaction>, world: World, relativeHologramPositions: List<HologramPos>, particlesToSendFromPlayerToMultiblock: MutableList<Pair<BlockPos, ItemStack>>) {
+private fun CrafterMultiblock.insertRecipeToMultiblock(satisfaction: List<ComponentSatisfaction>, world: World, relativeHologramPositions: List<AbsoluteAndRelativePos>, particlesToSendFromPlayerToMultiblock: MutableList<Pair<BlockPos, ItemStack>>) {
     for ((componentPos, satisfiedByStack, isAlreadyInMultiblock) in satisfaction) {
         if (!isAlreadyInMultiblock) {
             val hologram = world.getHologramEntity(relativeHologramPositions.first { it.relativePos == componentPos }.absolutePos)

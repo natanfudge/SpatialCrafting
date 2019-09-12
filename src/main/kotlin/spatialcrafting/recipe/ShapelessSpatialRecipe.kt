@@ -17,21 +17,14 @@ import spatialcrafting.util.Duration
 import spatialcrafting.util.matches
 
 @Serializable
-class ShapelessSpatialRecipe private constructor( val components: List<ShapelessRecipeComponent>,
+class ShapelessSpatialRecipe private constructor(val components: List<ShapelessRecipeComponent>,
                                                  override val minimumCrafterSize: Int,
                                                  override val energyCost: Long,
                                                  override val _craftTime: Long,
                                                  override val outputStack: ItemStack,
-                                                 override val identifier: Identifier) : SpatialRecipe() {
+                                                 override val identifier: Identifier,
+                                                 override val craftingEffect: CraftingEffect) : SpatialRecipe() {
 
-    constructor(components: List<ShapelessRecipeComponent>,
-                minimumCrafterSize: Int,
-                energyCost: Long,
-                craftTime: Duration,
-                outputStack: ItemStack,
-                identifier: Identifier,
-                workaround: Byte = 0.toByte()
-    ) : this(components, minimumCrafterSize, energyCost, craftTime.inTicks, outputStack, identifier)
 
     override val previewComponents: List<ShapedRecipeComponent> by lazy {
         val input = mutableListOf<ShapedRecipeComponent>()
@@ -97,7 +90,7 @@ class ShapelessSpatialRecipe private constructor( val components: List<Shapeless
             get() = serializer()
 
         override fun build(components: List<ShapedRecipeComponent>, id: Identifier, output: ItemStack,
-                           minimumCrafterSize: Int, energyCost: Long, craftTime: Duration): ShapelessSpatialRecipe {
+                           minimumCrafterSize: Int, energyCost: Long, craftTime: Long, effect: CraftingEffect): ShapelessSpatialRecipe {
 
             // We only care about the ingredients and the amount of each one. Position has no meaning.
             val shapelessComponents = components.groupBy { it.ingredient.ids }
@@ -109,7 +102,8 @@ class ShapelessSpatialRecipe private constructor( val components: List<Shapeless
                     outputStack = output,
                     identifier = id,
                     energyCost = energyCost,
-                    craftTime = craftTime
+                    _craftTime = craftTime,
+                    craftingEffect = effect
             )
         }
 

@@ -2,16 +2,17 @@ package spatialcrafting.crafter
 
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
+import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.getHologramEntity
+import spatialcrafting.recipe.ComponentPosition
 import spatialcrafting.recipe.ShapedRecipeComponent
 import spatialcrafting.recipe.SpatialRecipe
+import spatialcrafting.util.fastGet
 import spatialcrafting.util.isServer
 import spatialcrafting.util.logDebug
 import spatialcrafting.util.matches
-
-
 
 
 fun CrafterMultiblock.bumpRecipeHelpCurrentLayerIfNeeded(world: World) {
@@ -54,10 +55,9 @@ fun CrafterMultiblock.stopRecipeHelpCommon() {
 }
 
 
-
 fun CrafterMultiblock.hologramGhostIngredientFor(hologram: HologramBlockEntity): Ingredient? {
     val components = helpRecipeComponents(hologram.world!!) ?: return null
-    val relativePos = hologram.pos.relativeTo(originHologramPos())
+    val relativePos = hologram.pos.relativeTo(originHologramPos)
     return components.find { it.position == relativePos }?.ingredient
 }
 
@@ -87,8 +87,10 @@ private fun CrafterMultiblock.showAllHolograms(world: World) {
     }
 }
 
-private fun CrafterMultiblock.helpRecipeComponents(world: World): List<ShapedRecipeComponent>? = recipeHelpRecipeId?.let {
-    (world.recipeManager.get(it).orElse(null)!! as SpatialRecipe).previewComponents
+
+
+fun CrafterMultiblock.helpRecipeComponents(world: World): List<ShapedRecipeComponent>? = recipeHelpRecipeId?.let {
+    (world.recipeManager.fastGet(SpatialRecipe.Type, it) as SpatialRecipe).previewComponents
 }
 
 

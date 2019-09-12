@@ -14,7 +14,8 @@ data class SpatialRecipeJsonFormat(
         val result: RecipeResult,
         val minimumCrafterSize: Int?,
         val energyCost: Long?,
-        val craftTime: Float?
+        val craftTime: Float?,
+        val effect: CraftingEffect?
 )
 
 //data class KeyMapping(val tag: String?, val ingredient: String?)

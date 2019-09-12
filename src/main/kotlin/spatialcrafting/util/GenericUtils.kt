@@ -68,8 +68,7 @@ inline fun <T, R> Iterable<T>.mapIndexed(transform: (Int, T) -> R): List<R> {
     return destination
 }
 
-//TODO: turn this on in debug
-const val assertionsEnabled = false
+ val assertionsEnabled = ManagementFactory.getRuntimeMXBean().inputArguments.toString().indexOf("-agentlib:jdwp") > 0
 
 inline fun assert(message: String = "Assertion failure", test: () -> Boolean) {
     if (assertionsEnabled && !test()) throw AssertionError(message)

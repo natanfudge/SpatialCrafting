@@ -33,7 +33,7 @@ private fun createMultiblockFromServer(world: World, northernEasternCrafter: Blo
             masterPos = northernEasternCrafter,
             multiblock = multiblock
     )
-    PlayerStream.watching(world, multiblock.arbitraryCrafterPos()).sendPacket(Packets.AssignMultiblockState(
+    PlayerStream.watching(world, multiblock.arbitraryCrafterPos).sendPacket(Packets.AssignMultiblockState(
             multiblock = multiblock,
             masterEntityPos = northernEasternCrafter
     ))
@@ -123,10 +123,10 @@ fun destroyMultiblock(world: World, multiblock: CrafterMultiblock) {
 fun destroyMultiblockFromServer(world: World, multiblock: CrafterMultiblock) {
     assert(world.isServer)
     destroyMultiblock(world, multiblock)
-    PlayerStream.watching(world, multiblock.arbitraryCrafterPos())
+    PlayerStream.watching(world, multiblock.arbitraryCrafterPos)
             .sendPacket(Packets.UnassignMultiblockState(
-                    multiblock.arbitraryCrafterPos(),
-                    multiblock.differentArbitraryCrafterPos()
+                    multiblock.arbitraryCrafterPos,
+                    multiblock.differentArbitraryCrafterPos
             ))
 }
 

@@ -32,6 +32,11 @@ import spatialcrafting.util.seconds
 import spatialcrafting.util.ticks
 import kotlin.math.max
 
+enum class CraftingEffect{
+    particles,
+    itemMovement
+}
+
 @Serializable
 abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
 
@@ -40,6 +45,7 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
     abstract val minimumCrafterSize: Int
     protected abstract val energyCost: Long
     protected abstract val _craftTime: Long
+    abstract val craftingEffect : CraftingEffect
 
     val craftTime: Duration get() = _craftTime.ticks
 
@@ -81,7 +87,8 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
         override fun read(id: Identifier, buf: PacketByteBuf): SpatialRecipe = serializer.readFrom(buf)
 
         abstract fun build(components: List<ShapedRecipeComponent>,
-                           id: Identifier, output: ItemStack, minimumCrafterSize: Int, energyCost: Long, craftTime: Duration): T
+                           id: Identifier, output: ItemStack, minimumCrafterSize: Int, energyCost: Long,
+                           craftTime: Long, effect: CraftingEffect): T
 
         override fun read(id: Identifier, jsonObject: JsonObject): SpatialRecipe {
             val deserialized = deserializeJson(jsonObject, id)
@@ -129,11 +136,13 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
             val craftTime = json.craftTime?.seconds ?: (defaultCraftTimes[minimumCrafterSize]
                     ?: error("impossible crafter size"))
 
-            return build(components, id, output, max(minimumCrafterSize, SmallestCrafterSize), energyCost, craftTime)
+            val effect = json.effect ?: CraftingEffect.particles
+
+            return build(components, id, output, max(minimumCrafterSize, SmallestCrafterSize), energyCost, craftTime.inTicks,effect)
         }
 
 
-         fun deserializeJson(jsonObject: JsonObject, id: Identifier): SpatialRecipeJsonFormat {
+         private fun deserializeJson(jsonObject: JsonObject, id: Identifier): SpatialRecipeJsonFormat {
             val json: SpatialRecipeJsonFormat
             try {
                 json = Gson().fromJson(jsonObject, SpatialRecipeJsonFormat::class.java)

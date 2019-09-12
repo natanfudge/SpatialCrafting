@@ -8,13 +8,13 @@ import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
+import scheduler.BlockScheduler
 import spatialcrafting.client.Speed
 import spatialcrafting.client.bps
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceBlock
 import spatialcrafting.crafter.CraftersPieces
 import spatialcrafting.crafter.getCrafterEntityOrNull
-import spatialcrafting.ticker.Scheduler
 import spatialcrafting.util.*
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -37,16 +37,16 @@ fun playAllCraftParticles(world: World, multiblock: CrafterMultiblock, duration:
         putDuration(DurationDataKey, duration)
         putLong(StartTimeKey, world.time)
     }
-    multiblock.cancellationTokens.craftingParticles = Scheduler.repeatFor(duration.inTicks.toInt(),
+    multiblock.cancellationTokens.craftingParticles = BlockScheduler.repeatFor(duration.inTicks.toInt(),
             tickInterval = TimeBetweenParticles.inTicks.toInt(),
             block = block,
             scheduleId = CrafterPieceBlock.EmitRoundOfCraftingParticles,
-            blockPos = multiblock.arbitraryCrafterPos(),
+            blockPos = multiblock.arbitraryCrafterPos,
             world = world,
             additionalData = durationData
     )
     // Execute the first one immediately
-    block.onScheduleEnd(world, multiblock.arbitraryCrafterPos(), scheduleId = CrafterPieceBlock.EmitRoundOfCraftingParticles,
+    block.onScheduleEnd(world, multiblock.arbitraryCrafterPos, scheduleId = CrafterPieceBlock.EmitRoundOfCraftingParticles,
             additionalData = durationData)
 }
 
@@ -95,7 +95,7 @@ private fun playRoundOfCraftParticles(world: World, multiblock: CrafterMultibloc
     ).emit()
 }
 
-
+//TODO: the objects here seem overcomplicated
 data class HologramParticleData(val corner1Location: Vec3d,
                                 val corner2Location: Vec3d,
                                 val corner3Location: Vec3d,
@@ -106,26 +106,11 @@ class CraftParticleEmitter(val world: World, val craftDuration: Duration, val or
                            val craftYEndPos: Double, val allHologramData: List<HologramParticleData>, val timePassed: Duration) {
 
     fun emit() {
-
-
-//        GlobalScope.launch {
-//            while (timePassed < craftDuration
-//                    // Make it so we can cancel the crafting
-//                    && multiblock.isCrafting
-//                    // Make sure this stops when the player exits
-//                    && world == MinecraftClient.getInstance().world)
-//            {
         for (hologram in allHologramData) {
             if (hologram.itemStack.item != Items.AIR) {
                 emitHologramParticles(hologram)
             }
         }
-//                delay(TimeBetweenParticles.inMilliseconds)
-//                timePassed = (world.time - startTime).ticks
-//
-//            }
-//
-//        }
     }
 
     // This is used to make particles stop appearing slightly before the crafting stops, such that it looks like once ALL particles have stopped the crafting is done.

@@ -13,23 +13,20 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Tickable
+import net.minecraft.util.math.Vec3d
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.crafter.bumpRecipeHelpCurrentLayerIfNeeded
 import spatialcrafting.crafter.hologramGhostIngredientFor
 import spatialcrafting.util.*
-import java.io.FileInputStream
-import java.util.*
 
 private const val TicksPerSecond = 20
-fun x() {
-    val props = Properties()
-    val inputStream = FileInputStream("gradle.properties")
-    props.load(inputStream)
-    val replacements = props.map { (k, v) -> "\"${k.toString().replace("_", "-").replace("_version", "")}\" : \"$v\"" }
-}
 
+/**
+ * Used to determine when to put the hologram inventory when doing the material crafting 'particles'
+ */
+data class CraftingItemMovementData(val targetLocation: Vec3d, val startTime: Long, val endTime: Long)
 
 class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, RenderAttachmentBlockEntity, Tickable {
 
@@ -64,28 +61,14 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
         }
     }
 
-
     private val ghostIngredient: Ingredient?
         get() = getMultiblockOrNull()?.hologramGhostIngredientFor(this)
                 .also { ghostIngredientActive = it != null }
-
 
     /**
      * A way to avoid checking if there is a ghost ingredient every tick
      */
     private var ghostIngredientActive: Boolean = false
-
-    override fun tick() {
-        // Value is always incremented to avoid desyncs
-        if (world?.isClient == true) {
-            ghostIngredientCycleIndex++
-            if (ghostIngredientActive) {
-                if (ghostIngredientCycleIndex % TicksPerSecond == 0) Client.scheduleRenderUpdate(pos)
-            }
-        }
-
-
-    }
 
     /**
      * Measured in ticks and then divided by 20. Used to change the item that is showed in the ghost item constantly
@@ -104,6 +87,13 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
      */
     var lastChangeTime: Long = 0
 
+    /**
+     * Used to determine when to put the hologram inventory when doing the material crafting 'particles'
+     * in [HologramBlockEntityRenderer]
+     * (client only)
+     */
+    var craftingItemMovement: CraftingItemMovementData? = null
+
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
         tag.put(Keys.Inventory, inventory.toTag())
@@ -121,17 +111,31 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
 
     override fun fromClientTag(p0: CompoundTag) = fromTag(p0)
 
+    override fun tick() {
+        // Value is always incremented to avoid desyncs
+        if (world?.isClient == true) {
+            ghostIngredientCycleIndex++
+            if (ghostIngredientActive) {
+                if (ghostIngredientCycleIndex % TicksPerSecond == 0) Client.scheduleRenderUpdate(pos)
+            }
+        }
+
+
+    }
+
     /**
      * Inserts only one of the itemStack
+     * Specify multiblock to reduce overhead
      */
-    fun insertItem(itemStack: ItemStack) {
+    fun insertItem( itemStack: ItemStack,multiblock: CrafterMultiblock = getMultiblock()) {
         val world = world!!
         markDirty()
         assert(isEmpty())
         lastChangeTime = world.time
         inventory.insert(itemStack.copy(count = 1))
+
+        if (!itemStack.isEmpty) multiblock.filledHologramsCount++
         if (world.isServer) {
-            val multiblock = getMultiblock()
             if (multiblock.recipeHelpActive) {
                 multiblock.bumpRecipeHelpCurrentLayerIfNeeded(world)
             }
@@ -144,7 +148,8 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
     /**
      * May return an empty stack
      */
-    fun extractItem(): ItemStack {
+    fun extractItem(multiblock: CrafterMultiblock = getMultiblock()): ItemStack {
+        if(!this.isEmpty()) multiblock.filledHologramsCount--
         val item = inventory.extract(1)
         markDirty()
         return item

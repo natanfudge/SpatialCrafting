@@ -1,0 +1,46 @@
+{
+  "type": "spatialcrafting:shaped",
+  "effect": "itemMovement",
+  "pattern": [
+    [
+      "G I",
+      "",
+      "N R"
+    ],
+    [],
+    [
+      "S A",
+      "",
+      "D G"
+    ]
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "N": {
+      "item": "minecraft:nether_brick"
+    },
+    "R" : {
+      "item": "minecraft:redstone"
+    },
+    "S": {
+      "item": "minecraft:stone"
+    },
+    "A": {
+      "item": "minecraft:andesite"
+    },
+    "D": {
+      "item": "minecraft:diorite"
+    },
+    "T": {
+      "item": "minecraft:granite"
+    }
+  },
+  "result": {
+    "item": "minecraft:clay_ball"
+  }
+}

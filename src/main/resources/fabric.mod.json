@@ -28,6 +28,9 @@
       "spatialcrafting.compat.rei.ReiSpatialCraftingPlugin"
     ]
   },
+  "mixins":[
+   "spatialcrafting.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.4.0",
     "fabric": "*",

@@ -30,18 +30,18 @@ private const val height = 10
 
 
 fun fillInRecipeFromPlayerInventory(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
-    sendPacketToServer(Packets.AutoCraft(crafterMultiblock.arbitraryCrafterPos(), getMinecraftClient().player.uuid, recipeId))
+    sendPacketToServer(Packets.AutoCraft(crafterMultiblock.arbitraryCrafterPos, getMinecraftClient().player.uuid, recipeId))
 }
 
 
 fun startCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
-    sendPacketToServer(Packets.StartRecipeHelp(crafterMultiblock.arbitraryCrafterPos(), recipeId))
-    Client.scheduleRenderUpdate(crafterMultiblock.arbitraryCrafterPos())
+    sendPacketToServer(Packets.StartRecipeHelp(crafterMultiblock.arbitraryCrafterPos, recipeId))
+    Client.scheduleRenderUpdate(crafterMultiblock.arbitraryCrafterPos)
     crafterMultiblock.startRecipeHelpCommon(recipeId)
 }
 
 fun stopCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock) {
-    sendPacketToServer(Packets.StopRecipeHelp(crafterMultiblock.arbitraryCrafterPos()))
+    sendPacketToServer(Packets.StopRecipeHelp(crafterMultiblock.arbitraryCrafterPos))
     crafterMultiblock.stopRecipeHelpCommon()
 }
 

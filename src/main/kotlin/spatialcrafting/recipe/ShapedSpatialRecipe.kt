@@ -10,6 +10,7 @@ import kotlinx.serialization.UseSerializers
 import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
+import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.crafter.CopyableWithPosition
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
@@ -19,19 +20,12 @@ import spatialcrafting.util.matches
 
 @Serializable
 class ShapedSpatialRecipe private constructor(val components: List<ShapedRecipeComponent>,
-                          override val minimumCrafterSize: Int,
-                          override val energyCost: Long,
-                          override val _craftTime: Long,
-                          override val outputStack: ItemStack,
-                          override val identifier: Identifier) : SpatialRecipe() {
-    constructor(components: List<ShapedRecipeComponent>,
-                minimumCrafterSize: Int,
-                energyCost: Long,
-                craftTime: Duration,
-                outputStack: ItemStack,
-                identifier: Identifier,
-                workaround: Byte = 0.toByte()
-    ) : this(components, minimumCrafterSize, energyCost, craftTime.inTicks, outputStack, identifier)
+                                              override val minimumCrafterSize: Int,
+                                              override val energyCost: Long,
+                                              override val _craftTime: Long,
+                                              override val outputStack: ItemStack,
+                                              override val identifier: Identifier,
+                                              override val craftingEffect: CraftingEffect) : SpatialRecipe() {
 
     override val previewComponents: List<ShapedRecipeComponent>
         get() = components
@@ -80,15 +74,15 @@ class ShapedSpatialRecipe private constructor(val components: List<ShapedRecipeC
             get() = serializer()
 
         override fun build(components: List<ShapedRecipeComponent>, id: Identifier, output: ItemStack,
-                           minimumCrafterSize: Int, energyCost: Long, craftTime: Duration): ShapedSpatialRecipe {
+                           minimumCrafterSize: Int, energyCost: Long, craftTime: Long, effect: CraftingEffect): ShapedSpatialRecipe {
             return ShapedSpatialRecipe(
                     components = components,
                     outputStack = output,
                     identifier = id,
                     minimumCrafterSize = minimumCrafterSize,
-                    craftTime = craftTime,
-                    energyCost = energyCost
-
+                    _craftTime = craftTime,
+                    energyCost = energyCost,
+                    craftingEffect = effect
             )
         }
 
@@ -114,6 +108,11 @@ data class ShapedRecipeComponent(override val position: ComponentPosition, val i
 // The 'x' 'y' 'z' coordinates of are offset based, meaning they range from 0 to 4, based on how big the multiblock is.
 @Serializable
 data class ComponentPosition(val x: Int, val y: Int, val z: Int)
+
+
+fun BlockPos.offsetBy(relativePos: ComponentPosition) =
+        BlockPos(this.x + relativePos.x, this.y + relativePos.y ,this.z + relativePos.z)
+
 
 
 

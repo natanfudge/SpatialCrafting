@@ -1,6 +1,5 @@
 package spatialcrafting
 
-
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
 import net.fabricmc.fabric.api.client.model.ModelVariantProvider
@@ -26,26 +25,13 @@ import spatialcrafting.item.DeceptivelySmallSword
 import spatialcrafting.item.PointyStick
 import spatialcrafting.item.ShapelessSword
 import spatialcrafting.recipe.*
-import spatialcrafting.ticker.registerTickerC2SPackets
-import spatialcrafting.ticker.worldTick
 import spatialcrafting.util.*
 import java.util.function.Function
 
-//TODO: remove dies irae song (before commit)
 
-//TODO: need examples for:
-// power
-
-
-//TODO: ask to add to AOF
-//TODO: power consumption
+//TODO: power consumption and example
 //TODO: config file: can store energy
-//TODO: remove useless shit for tutorials and such, go through everything and make sure its needed
-//TODO: document packets:
-// - S2C -  Need to do taskQueue thing, needs to be registered on the client only
-// - C2S - Need to do taskQueue thing and beware of vulns (isLoaded, etc)
-//TODO: document recipes (remember that you need to implement read and write properly...)
-//TODO: better example recipes (some op items - sword of you want to craft this etc)
+
 
 const val ModId = "spatialcrafting"
 
@@ -66,7 +52,6 @@ private const val HologramId = "hologram"
 
 @Suppress("unused")
 fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
-    WorldTickCallback.EVENT.register(WorldTickCallback { if (it is ServerWorld && it.isServer) worldTick(it) })
 
     registerBlocksWithItemBlocks {
         for (crafterPiece in CraftersPieces.values) {
@@ -105,38 +90,23 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
     }
 
 
-    registerC2S(
+    registerC2SPackets(
             Packets.StartRecipeHelp.serializer(),
             Packets.AutoCraft.serializer(),
             Packets.ChangeActiveLayer.serializer(),
             Packets.StopRecipeHelp.serializer()
     )
-
-    registerTickerC2SPackets()
 }
+
+
 
 
 @Suppress("unused")
 fun initClient() = initClientOnly(ModId) {
 
-    ModelLoadingRegistry.INSTANCE.registerVariantProvider {
-        ModelVariantProvider { modelId, _ ->
-            if (modelId.namespace == ModId && modelId.path == HologramId) {
-                object : UnbakedModel {
-                    override fun bake(modelLoader: ModelLoader, spriteFunction: Function<Identifier, Sprite>, settings: ModelBakeSettings): BakedModel {
-                        return HologramBakedModel()
-                    }
+    registerBlockModel(HologramId,HologramBakedModel.Texture){ HologramBakedModel() }
 
-                    override fun getModelDependencies(): List<Identifier> = listOf()
-                    override fun getTextureDependencies(unbakedModelFunction: Function<Identifier, UnbakedModel>, strings: MutableSet<String>): List<Identifier> =
-                            listOf(HologramBakedModel.Texture)
-                }
-            }
-            else null
-        }
-    }
-
-    registerS2C(
+    registerS2CPackets(
             Packets.AssignMultiblockState.serializer(),
             Packets.UnassignMultiblockState.serializer(),
             Packets.StopRecipeHelp.serializer(),
@@ -146,10 +116,8 @@ fun initClient() = initClientOnly(ModId) {
             Packets.StopCraftingParticles.serializer()
     )
 
-    registerTickerC2SPackets()
-
-    register(HologramBlockEntityRenderer)
-    register(RecipeCreatorKeyBinding)
+    registerBlockEntityRenderer(HologramBlockEntityRenderer)
+    registerKeyBinding(RecipeCreatorKeyBinding)
 
 }
 
