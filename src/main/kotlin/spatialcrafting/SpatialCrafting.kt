@@ -28,6 +28,7 @@ import spatialcrafting.recipe.*
 import spatialcrafting.util.*
 import java.util.function.Function
 
+//TODO: test on the server
 
 //TODO: power consumption and example
 //TODO: config file: can store energy
