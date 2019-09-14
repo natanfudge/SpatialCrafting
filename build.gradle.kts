@@ -97,7 +97,7 @@ dependencies {
     devEnvMod("com.jamieswhiteshirt:developer-mode:1.0.14")
     devEnvMod("gamemodeoverhaul:GamemodeOverhaul:1.0.1.0")
     devEnvMod(CurseMavenResolver().resolve("data-loader", "2749923"))
-    modImplementation(CurseMavenResolver().resolve("engination-fabric", "2732432"))
+    modImplementation(CurseMavenResolver().resolve("united-conveyors", "2784017"))
 
 
 }

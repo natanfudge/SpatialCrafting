@@ -1,6 +1,7 @@
 {
   "type": "spatialcrafting:shaped",
   "effect": "itemMovement",
+  "craftTime": 0.5,
   "pattern": [
     [
       "G I",
@@ -24,7 +25,7 @@
     "N": {
       "item": "minecraft:nether_brick"
     },
-    "R" : {
+    "R": {
       "item": "minecraft:redstone"
     },
     "S": {
