@@ -16,8 +16,8 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import spatialcrafting.S2CPacket
+import java.util.*
 import kotlin.math.max
-
 
 
 @Serializable
@@ -28,9 +28,9 @@ data class PlaySoundPacket(val soundInstance: CommonPositionedSoundInstance)
 }
 
 @Serializable
-data class StopSoundPacket(val pos: Vec3d,val soundId: Identifier) : S2CPacket<StopSoundPacket> {
+data class StopSoundPacket(val pos: Vec3d, val soundId: Identifier) : S2CPacket<StopSoundPacket> {
     override val serializer get() = serializer()
-    override fun use(context: PacketContext) = context.world.stopSound(soundId,pos)
+    override fun use(context: PacketContext) = context.world.stopSound(soundId, pos)
 }
 
 @Serializable
@@ -42,8 +42,7 @@ data class CommonPositionedSoundInstance(val soundEvent: SoundEvent,
                                          val repeats: Boolean = false,
                                          val repeatDelay: Int = 0,
                                          val attenuationType: CommonAttenuationType = CommonAttenuationType.LINEAR,
-                                         val relative: Boolean = false
-) {
+                                         val relative: Boolean = false) {
     internal fun toClientOnly() = ClientBuilders.soundInstance(
             soundEvent, category, pos, volume, pitch, repeats, repeatDelay,
             when (attenuationType) {
@@ -68,18 +67,11 @@ enum class CommonAttenuationType {
 }
 
 
-//private val clientSounds = mutableMapOf<String, SoundInstance>()
-
-///**
-// * @param keyForStopping Only pass if you intend to stop
-// */
-fun World.play(soundInstance: CommonPositionedSoundInstance/*, keyForStopping: String? = null*/) {
+fun World.play(soundInstance: CommonPositionedSoundInstance) {
     if (world.isClient) {
         val clientSound = soundInstance.toClientOnly()
         getMinecraftClient().soundManager.play(clientSound)
-//        if (keyForStopping != null) clientSounds[keyForStopping] = clientSound
-    }
-    else soundInstance.sendToNearbyClients(world/*, keyForStopping*/)
+    } else soundInstance.sendToNearbyClients(world/*, keyForStopping*/)
 
 }
 
@@ -88,11 +80,10 @@ fun World.play(soundInstance: CommonPositionedSoundInstance/*, keyForStopping: S
 /**
  * @param originalVolume Make sure to pass the same value as in [CommonPositionedSoundInstance] if that's customized
  */
-fun World.stopSound(soundKey: Identifier,pos: Vec3d,  originalVolume: Float = 1.0f) {
+fun World.stopSound(soundKey: Identifier, pos: Vec3d, originalVolume: Float = 1.0f) {
     if (world.isClient) {
         //TODO: use stopSounds instead
-        getMinecraftClient().soundManager.stopSounds(soundKey,null)
-    }
-    else playersThatCanHear(pos, originalVolume).sendPacket(StopSoundPacket(pos,soundKey))
+        getMinecraftClient().soundManager.stopSounds(soundKey, null)
+    } else playersThatCanHear(pos, originalVolume).sendPacket(StopSoundPacket(pos, soundKey))
 
 }

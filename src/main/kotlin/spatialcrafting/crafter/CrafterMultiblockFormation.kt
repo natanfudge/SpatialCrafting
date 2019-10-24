@@ -39,11 +39,20 @@ private fun createMultiblockFromServer(world: World, northernEasternCrafter: Blo
     ))
 
 }
-
+// Gets all pairs of the form (0,0), (0,1) ... (0,size -1) ... (1,0) ...
+private fun pairsUntil(num : Int) : List<Pair<Int,Int>>{
+    val list = mutableListOf<Pair<Int,Int>>()
+    for(i in 0 until num){
+        for(j in 0 until num){
+            list.add(Pair(i,j))
+        }
+    }
+    return list
+}
 
 private fun CrafterPieceBlock.findPossibleMultiblock(world: World, northernEasternCrafterPos: BlockPos): CrafterMultiblock? {
     val blocks = mutableListOf<BlockPos>()
-    for ((westDistance, southDistance) in (0 to 0) until (size to size)) {
+    for ((westDistance, southDistance) in pairsUntil(size)) {
         val location = northernEasternCrafterPos.west(westDistance).south(southDistance)
         if (!thereIsACompatibleCrafterPieceIn(world, location)) {
             logDebug { "Refusing to build multiblock due to a '${world.getBlock(location)}' existing in a position that needs to hold a crafter piece: ${location.xz}" }

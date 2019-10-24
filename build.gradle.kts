@@ -1,19 +1,22 @@
 import com.matthewprenger.cursegradle.CurseArtifact
 import com.matthewprenger.cursegradle.CurseProject
 import com.matthewprenger.cursegradle.Options
-import com.wynprice.cursemaven.CurseMavenResolver
 import net.fabricmc.loom.task.RemapJarTask
 import net.fabricmc.loom.task.RemapSourcesJarTask
-import org.jetbrains.kotlin.fir.resolve.calls.TowerScopeLevel
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import java.util.*
-import java.io.*
+
+buildscript {
+    repositories {
+        mavenLocal()
+    }
+
+}
 
 plugins {
-    id("fabric-loom") version "0.2.5-SNAPSHOT"
+    id("fabric-loom")
     `maven-publish`
-    id("org.jetbrains.kotlin.jvm") version "1.3.50"
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.3.50"
+    id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.kotlin.plugin.serialization")
     id("com.wynprice.cursemaven") version "1.2.2"
     id("com.matthewprenger.cursegradle") version "1.4.0"
 }
@@ -49,6 +52,19 @@ val standalone: String by project
 val isStandalone: Boolean = !project.hasProperty("standalone") || standalone == "true"
 
 
+configurations.all {
+    resolutionStrategy {
+        eachDependency {
+            if (requested.group == "net.fabricmc") {
+                if (requested.name == "tiny-mappings-parser") {
+                    useVersion("0.2.0")
+                }
+
+            }
+        }
+    }
+}
+
 base {
     archivesBaseName = archives_base_name
 }
@@ -60,6 +76,7 @@ minecraft {
 }
 
 repositories {
+    mavenLocal()
     maven(url = "http://maven.fabricmc.net/")
     maven(url = "https://kotlin.bintray.com/kotlinx")
     maven(url = "https://mod-buildcraft.com/maven")
@@ -70,14 +87,15 @@ repositories {
     maven(url = "https://maven.abusedmaster.xyz")
     maven(url = "http://server.bbkr.space:8081/artifactory/libs-release/")
     jcenter()
-    mavenCentral()
-    mavenLocal()
+
 }
+
 
 
 dependencies {
 
     fabric()
+
 
     modDependency("alexiil.mc.lib:libblockattributes-items:$lba_version")
     modDependency("alexiil.mc.lib:libblockattributes-core:$lba_version")
@@ -96,15 +114,16 @@ dependencies {
     devEnvMod("mcp.mobius.waila:Hwyla:$waila_version")
     devEnvMod("com.jamieswhiteshirt:developer-mode:1.0.14")
     devEnvMod("gamemodeoverhaul:GamemodeOverhaul:1.0.1.0")
-    devEnvMod(CurseMavenResolver().resolve("data-loader", "2749923"))
-    modImplementation(CurseMavenResolver().resolve("united-conveyors", "2784017"))
+//    devEnvMod(CurseMavenResolver().resolve("data-loader", "2749923"))
+//    devEnvMod(CurseMavenResolver().resolve("united-conveyors", "2784017"))
 
 
 }
 
 fun DependencyHandlerScope.fabric() {
     minecraft("com.mojang:minecraft:$minecraft_version")
-    mappings("net.fabricmc:yarn:$yarn_mappings")
+//    mappings("net.fabricmc:yarn-unmerged:1.14.4+build.local:v2")
+    mappings("net.fabricmc:yarn:1.14.4+build.14")
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 }

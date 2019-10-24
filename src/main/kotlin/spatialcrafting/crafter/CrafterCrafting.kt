@@ -1,11 +1,15 @@
 package spatialcrafting.crafter
 
 import net.fabricmc.fabric.api.server.PlayerStream
+import net.minecraft.entity.ItemEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.sound.SoundCategory
+import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
+import net.minecraft.world.IWorld
+import net.minecraft.world.RayTraceContext
 import net.minecraft.world.World
 import scheduler.BlockScheduler
 import spatialcrafting.Packets
@@ -189,3 +193,38 @@ fun CrafterMultiblock.getMatchingRecipes(world: World): List<SpatialRecipe> = wo
         .getAllMatches(SpatialRecipe.Type,
                 CrafterMultiblockInventoryWrapper(getInventory(world), crafterSize = multiblockSize),
                 world)
+
+
+private class HomingItemEntity(world: World, pos: Vec3d,
+                       stack: ItemStack,
+                       val targetBlockPos: BlockPos,
+                       val onHitBlock: HomingItemEntity.(Vec3d) -> Unit)
+    : ItemEntity(world, pos.x, pos.y, pos.z, stack) {
+    private val targetPos = targetBlockPos + Vec3d(0.5, 0.5, 0.5)
+    override fun tick() {
+        super.tick()
+        this.velocity = (targetPos - this.pos).normalize()
+        val currentPos = Vec3d(x, y, z)
+        val nextPos = currentPos + velocity
+        val hitResult = world.rayTrace(
+                RayTraceContext(currentPos, nextPos, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, this)
+        )
+
+        if (hitResult.type == HitResult.Type.BLOCK) {
+            if (hitResult.blockPos == targetBlockPos) {
+                onHitBlock(this.pos)
+            }
+        }
+    }
+}
+
+
+private fun IWorld.dropItemStackOnBlock(stack: ItemStack,
+                                fromPos: Vec3d,
+                                toPos: BlockPos,
+                                onHitBlock: HomingItemEntity.(Vec3d) -> Unit): HomingItemEntity = HomingItemEntity(
+        world, fromPos, stack, toPos, onHitBlock
+).also {
+    it.velocity = (toPos + Vec3d(0.5, 0.5, 0.5) - fromPos).normalize()
+    world.spawnEntity(it)
+}

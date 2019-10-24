@@ -15,6 +15,7 @@ object Client {
 
     private const val RerenderFlag = 8
 
+
     fun scheduleRenderUpdate(pos: BlockPos) = getMinecraftClient().worldRenderer.updateBlock(
             null, pos, null, null, RerenderFlag
     )

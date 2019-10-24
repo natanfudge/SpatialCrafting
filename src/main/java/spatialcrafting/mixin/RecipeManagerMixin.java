@@ -1,5 +1,6 @@
 package spatialcrafting.mixin;
 
+import net.minecraft.block.Block;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeManager;
 import net.minecraft.recipe.RecipeType;

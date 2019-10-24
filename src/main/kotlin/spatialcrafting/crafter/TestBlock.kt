@@ -18,18 +18,22 @@ import spatialcrafting.util.Builders
 
 object TestBlock : Block(Settings.of(Material.STONE)), BlockEntityProvider {
     override fun createBlockEntity(var1: BlockView?): BlockEntity? = TestBlockEntity()
-
-    override fun activate(blockState_1: BlockState?, world: World, pos: BlockPos, player: PlayerEntity?, hand_1: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
-         if (world.isClient) return true
-
-        val be = world.getBlockEntity(pos)
-        if (be != null && be is TestBlockEntity) {
-            ContainerProviderRegistry.INSTANCE.openContainer(GuiId, player) { buf->
-                buf.writeBlockPos(pos);
-            }
-        }
-        return true
+    override fun activate(blockState_1: BlockState?, world_1: World?, blockPos_1: BlockPos?, playerEntity_1: PlayerEntity?, hand_1: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
+        return super.activate(blockState_1, world_1, blockPos_1, playerEntity_1, hand_1, blockHitResult_1)
     }
+
+
+//    override fun activate(blockState_1: BlockState?, world: World, pos: BlockPos, player: PlayerEntity?, hand_1: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
+//         if (world.isClient) return true
+//
+//        val be = world.getBlockEntity(pos)
+//        if (be != null && be is TestBlockEntity) {
+//            ContainerProviderRegistry.INSTANCE.openContainer(GuiId, player) { buf->
+//                buf.writeBlockPos(pos);
+//            }
+//        }
+//        return true
+//    }
 }
 
 class TestBlockEntity : BlockEntity(Type) {

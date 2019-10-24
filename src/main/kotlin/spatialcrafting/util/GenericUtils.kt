@@ -36,12 +36,12 @@ operator fun Pair<Int, Int>.rangeTo(that: Pair<Int, Int>) = object : Iterable<Pa
     }
 }
 
+
 fun Double.isWholeNumber() = this.toInt().toDouble() == this
 
-fun max(num1: Int, num2: Int, num3: Int): Int = max(max(num1, num2), num3)
+fun max3(num1: Int, num2: Int, num3: Int): Int = max(max(num1, num2), num3)
 
 infix fun Pair<Int, Int>.until(that: Pair<Int, Int>) = this..Pair(that.first - 1, that.second - 1)
-data class Point(val x: Int, val y: Int, val z: Int)
 
 
 /**
@@ -68,17 +68,11 @@ inline fun <T, R> Iterable<T>.mapIndexed(transform: (Int, T) -> R): List<R> {
     return destination
 }
 
- val assertionsEnabled = ManagementFactory.getRuntimeMXBean().inputArguments.toString().indexOf("-agentlib:jdwp") > 0
 
-inline fun assert(message: String = "Assertion failure", test: () -> Boolean) {
-    if (assertionsEnabled && !test()) throw AssertionError(message)
-}
 
 inline fun Int.squared() = this * this
 inline fun Double.squared() = this * this
-inline fun sqrt(num: Int): Double = sqrt(num.toDouble())
 
-//inline fun<T> min(comparable: Comparable<T>)
 
 val Int.d get() = this.toDouble()
 val Long.d get() = this.toDouble()
@@ -102,7 +96,7 @@ inline fun <T, R : Comparable<R>> Iterable<T>.maxValueBy(selector: (T) -> R): R?
     return maxValue
 }
 
- val LogDebug = /*ManagementFactory.getRuntimeMXBean().inputArguments.toString().indexOf("-agentlib:jdwp") > 0*/ false
+ val LogDebug = ManagementFactory.getRuntimeMXBean().inputArguments.toString().indexOf("-agentlib:jdwp") > 0
 
 
 const val LogInfo = true
@@ -112,15 +106,10 @@ inline fun logDebug(lazyMessage: () -> String) = if (LogDebug) println("${Date()
 inline fun logInfo(lazyMessage: () -> String) = if (LogInfo) println("${Date()} [SC/INFO]: ${lazyMessage()}") else Unit
 inline fun logWarning(lazyMessage: () -> String) = if (LogWarning) println("${Date()} [SC/WARN]: ${lazyMessage()}") else Unit
 
-fun cubeOfSize(size: Int) = (0 until size)
-        .map { 0 until size }
-        .map { it.map { 0 until size } }
+val assertionsEnabled = ManagementFactory.getRuntimeMXBean().inputArguments.toString().indexOf("-agentlib:jdwp") > 0
 
-fun List<List<IntRange>>.mapCube(mapping: (ComponentPosition) -> Char) = mapIndexed { y, layer ->
-    layer.mapIndexed { x, row ->
-        row.map { z -> mapping(ComponentPosition(x, y, z)) }.joinToString("")
-    }
+inline fun assert(message: String = "Assertion failure", test: () -> Boolean) {
+    if (assertionsEnabled && !test()) throw AssertionError(message)
 }
-
 
 operator fun String.times(num: Int) = (1..num).joinToString("") { this }

@@ -11,6 +11,7 @@ import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.client.sound.*
 import net.minecraft.item.Item
 import net.minecraft.item.SwordItem
+import net.minecraft.item.ToolMaterial
 import net.minecraft.recipe.Ingredient
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
@@ -102,6 +103,9 @@ object Builders {
         if (dropsLike != null) dropsLike(dropsLike)
     }
 
+    /**
+     * Creates a new sword
+     */
     fun sword(durability: Int, damage: Int, attackSpeed: Float, enchantability: Int, repairMaterial: () -> Ingredient) = SwordItem(ToolMaterialImpl(
             _miningLevel = 0,
             _durability = durability,
@@ -118,10 +122,29 @@ object Builders {
 
 }
 
+class ToolMaterialImpl(private val _miningLevel: Int,
+                       private val _durability: Int,
+                       private val _miningSpeed: Float,
+                       private val _attackDamage: Float,
+                       private val _enchantability: Int,
+                       private val _repairIngredient: () -> Ingredient) : ToolMaterial {
+    override fun getRepairIngredient(): Ingredient = _repairIngredient()
+    override fun getDurability(): Int = _durability
+    override fun getEnchantability(): Int = _enchantability
+    override fun getMiningSpeed(): Float = _miningSpeed
+    override fun getMiningLevel(): Int = _miningLevel
+    override fun getAttackDamage(): Float = _attackDamage
+
+}
+
+
 
 
 object ClientBuilders {
 
+    /**
+     * Creates a new SoundInstance (client only)
+     */
     @Environment(EnvType.CLIENT)
     fun soundInstance(soundEvent: SoundEvent,
                       category: SoundCategory,

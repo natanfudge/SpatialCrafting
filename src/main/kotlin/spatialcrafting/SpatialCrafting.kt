@@ -1,16 +1,7 @@
 package spatialcrafting
 
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
-import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
-import net.fabricmc.fabric.api.client.model.ModelVariantProvider
-import net.fabricmc.fabric.api.event.world.WorldTickCallback
-import net.minecraft.client.render.model.BakedModel
-import net.minecraft.client.render.model.ModelBakeSettings
-import net.minecraft.client.render.model.ModelLoader
-import net.minecraft.client.render.model.UnbakedModel
-import net.minecraft.client.texture.Sprite
 import net.minecraft.item.ItemGroup
-import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
 import spatialcrafting.client.Sounds
@@ -27,7 +18,6 @@ import spatialcrafting.item.PointyStick
 import spatialcrafting.item.ShapelessSword
 import spatialcrafting.recipe.*
 import spatialcrafting.util.*
-import java.util.function.Function
 
 //TODO: test on the server
 
@@ -101,12 +91,10 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 }
 
 
-
-
 @Suppress("unused")
 fun initClient() = initClientOnly(ModId) {
 
-    registerBlockModel(HologramId,HologramBakedModel.Texture){ HologramBakedModel() }
+    registerBlockModel(HologramId, HologramBakedModel.Texture) { HologramBakedModel() }
 
     registerS2CPackets(
             Packets.AssignMultiblockState.serializer(),

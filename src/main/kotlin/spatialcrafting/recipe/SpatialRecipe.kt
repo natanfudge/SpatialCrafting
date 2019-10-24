@@ -27,7 +27,7 @@ import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
 import spatialcrafting.util.Duration
 import spatialcrafting.util.flatMapIndexed
-import spatialcrafting.util.max
+import spatialcrafting.util.max3
 import spatialcrafting.util.seconds
 import spatialcrafting.util.ticks
 import kotlin.math.max
@@ -124,7 +124,7 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
 
             // The default is that the minimum craft size based on how far spread the components are. If he wants a smaller size
             // If he groups them together he gets a smaller size and if he puts them farther apart he gets a bigger size.
-            val recipeSize = max(
+            val recipeSize = max3(
                     components.maxBy { it.position.x }!!.position.x,
                     components.maxBy { it.position.y }!!.position.y,
                     components.maxBy { it.position.z }!!.position.z

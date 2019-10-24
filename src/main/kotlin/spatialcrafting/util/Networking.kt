@@ -36,11 +36,9 @@ private fun PlayerEntity.sendPacket(packetId: Identifier, packetBuilder: PacketB
 
 }
 
-
 private fun sendPacketToServer(packetId: Identifier, packetBuilder: PacketByteBuf.() -> Unit) {
     val packet = PacketByteBuf(Unpooled.buffer()).apply(packetBuilder)
     ClientSidePacketRegistry.INSTANCE.sendToServer(packetId, packet)
-
 }
 
 /******************************
@@ -48,9 +46,10 @@ private fun sendPacketToServer(packetId: Identifier, packetBuilder: PacketByteBu
  ******************************/
 
 
- fun CommonModInitializationContext.registerC2S(serializer: KSerializer<out InternalC2SPacket<*>>, context: SerialModule) {
+fun CommonModInitializationContext.registerC2S(serializer: KSerializer<out InternalC2SPacket<*>>,
+                                               context: SerialModule) {
     registerClientToServerPacket(serializer.packetId) { packetContext, packetByteBuf ->
-        serializer.readFrom(packetByteBuf,context = context).apply {
+        serializer.readFrom(packetByteBuf, context = context).apply {
             packetContext.taskQueue.execute {
                 use(packetContext)
             }
@@ -58,18 +57,21 @@ private fun sendPacketToServer(packetId: Identifier, packetBuilder: PacketByteBu
     }
 }
 
-fun ClientModInitializationContext.registerS2CPackets(vararg serializers: KSerializer<out InternalS2CPacket<*>>, context: SerialModule = EmptyModule) {
+fun ClientModInitializationContext.registerS2CPackets(vararg serializers: KSerializer<out InternalS2CPacket<*>>,
+                                                      context: SerialModule = EmptyModule) {
     for (serializer in serializers) registerS2C(serializer, context)
 }
 
-fun ClientModInitializationContext.registerS2C(serializers: List<KSerializer<out InternalS2CPacket<*>>>, context: SerialModule = EmptyModule) {
+fun ClientModInitializationContext.registerS2C(serializers: List<KSerializer<out InternalS2CPacket<*>>>,
+                                               context: SerialModule = EmptyModule) {
     for (serializer in serializers) registerS2C(serializer, context)
 }
 
 
- fun ClientModInitializationContext.registerS2C(serializer: KSerializer<out InternalS2CPacket<*>>, context: SerialModule) {
+fun ClientModInitializationContext.registerS2C(serializer: KSerializer<out InternalS2CPacket<*>>,
+                                               context: SerialModule) {
     registerServerToClientPacket(serializer.packetId) { packetContext, packetByteBuf ->
-        serializer.readFrom(packetByteBuf,context = context).apply {
+        serializer.readFrom(packetByteBuf, context = context).apply {
             packetContext.taskQueue.execute {
                 use(packetContext)
             }
@@ -77,11 +79,13 @@ fun ClientModInitializationContext.registerS2C(serializers: List<KSerializer<out
     }
 }
 
-fun CommonModInitializationContext.registerC2S(serializers: List<KSerializer<out InternalC2SPacket<*>>>, context: SerialModule = EmptyModule) {
+fun CommonModInitializationContext.registerC2S(serializers: List<KSerializer<out InternalC2SPacket<*>>>,
+                                               context: SerialModule = EmptyModule) {
     for (serializer in serializers) registerC2S(serializer, context)
 }
 
-fun CommonModInitializationContext.registerC2SPackets(vararg serializers: KSerializer<out InternalC2SPacket<*>>, context: SerialModule = EmptyModule) {
+fun CommonModInitializationContext.registerC2SPackets(vararg serializers: KSerializer<out InternalC2SPacket<*>>,
+                                                      context: SerialModule = EmptyModule) {
     for (serializer in serializers) registerC2S(serializer, context)
 }
 
@@ -90,7 +94,7 @@ fun CommonModInitializationContext.registerC2SPackets(vararg serializers: KSeria
  * Sends a packet from the server to the client for all the players in the stream.
  */
 fun <T : InternalS2CPacket<T>> Stream<PlayerEntity>.sendPacket(packet: T) {
-    for(player in this) player.sendPacket(packet)
+    for (player in this) player.sendPacket(packet)
 }
 
 /**
@@ -117,7 +121,7 @@ val PacketContext.world: World get() = player.world
 private val <T : Packet<out T>> KSerializer<out T>.packetId get() = descriptor.name.toLowerCase()
 
 
-interface Packet<T : Packet<T>> /*: ISerializable<T>*/ {
+interface Packet<T : Packet<T>> {
     companion object {
         val InbuiltS2CPackets = listOf(PlaySoundPacket.serializer(), StopSoundPacket.serializer())
     }
@@ -126,7 +130,7 @@ interface Packet<T : Packet<T>> /*: ISerializable<T>*/ {
 
     val modId: String
     fun use(context: PacketContext)
-    val serializationContext : SerialModule get() = EmptyModule
+    val serializationContext: SerialModule get() = EmptyModule
 }
 
 interface InternalC2SPacket<T : Packet<T>> : Packet<T>

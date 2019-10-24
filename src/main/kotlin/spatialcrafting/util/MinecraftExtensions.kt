@@ -13,27 +13,18 @@ import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.item.ItemConvertible
 import net.minecraft.item.ItemStack
-import net.minecraft.item.ToolMaterial
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.LongTag
 import net.minecraft.recipe.Ingredient
-import net.minecraft.recipe.Recipe
-import net.minecraft.recipe.RecipeManager
-import net.minecraft.recipe.RecipeType
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
 import net.minecraft.util.Hand
-import net.minecraft.util.Identifier
-import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.IWorld
-import net.minecraft.world.RayTraceContext
 import net.minecraft.world.World
-import spatialcrafting.mixin.RecipeManagerMixin
 import kotlin.math.min
-import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 
@@ -42,9 +33,10 @@ val BlockPos.xz get() = "($x,$z)"
 fun BlockPos.distanceFrom(otherPos: Vec3d) =
         sqrt((otherPos.x - this.x).squared() + (otherPos.y - this.y).squared() + (otherPos.z - this.z).squared())
 
-operator fun BlockPos.plus(vec3d: Vec3d) = this.toVec3d() + vec3d
 operator fun BlockPos.plus(other: BlockPos): BlockPos = this.add(other)
+operator fun BlockPos.plus(vec3d: Vec3d): Vec3d = this.toVec3d() + vec3d
 operator fun BlockPos.minus(other: BlockPos): BlockPos = this.subtract(other)
+operator fun BlockPos.minus(other: Vec3d): Vec3d = this.toVec3d().subtract(other)
 
 fun BlockPos.toVec3d() = Vec3d(this)
 
@@ -57,7 +49,6 @@ fun CompoundTag.getBlockPos(key: String): BlockPos? {
     return BlockPos.fromLong(tag.long)
 }
 
-fun Vec3d.toBlockPos() = BlockPos(x.roundToInt(), y.roundToInt(), z.roundToInt())
 fun vec3d(x: Double, y: Double, z: Double) = Vec3d(x, y, z)
 operator fun Vec3d.plus(other: Vec3d) = Vec3d(this.x + other.x, this.y + other.y, this.z + other.z)
 operator fun Vec3d.minus(other: Vec3d): Vec3d = this.subtract(other)
@@ -80,47 +71,11 @@ val IWorld.name get() = if (isClient) "Client" else "Server"
 
 fun IWorld.dropItemStack(stack: ItemStack, pos: BlockPos): ItemEntity = dropItemStack(stack, pos.toVec3d())
 
-class HomingItemEntity(world: World, pos: Vec3d,
-                       stack: ItemStack,
-                       val targetBlockPos: BlockPos,
-                       val onHitBlock: HomingItemEntity.(Vec3d) -> Unit)
-    : ItemEntity(world, pos.x, pos.y, pos.z, stack) {
-    private val targetPos = targetBlockPos + Vec3d(0.5, 0.5, 0.5)
-    override fun tick() {
-        super.tick()
-        this.velocity = (targetPos - this.pos).normalize()
-        val currentPos = Vec3d(x, y, z)
-        val nextPos = currentPos + velocity
-        val hitResult = world.rayTrace(
-                RayTraceContext(currentPos, nextPos, RayTraceContext.ShapeType.COLLIDER, RayTraceContext.FluidHandling.NONE, this)
-        )
-
-        //TODO: it seems to be just barely missing it
-        if (hitResult.type == HitResult.Type.BLOCK) {
-            if (hitResult.blockPos == targetBlockPos) {
-                onHitBlock(this.pos)
-            }
-        }
-    }
-}
-
-
-fun IWorld.dropItemStackOnBlock(stack: ItemStack,
-                                fromPos: Vec3d,
-                                toPos: BlockPos,
-                                onHitBlock: HomingItemEntity.(Vec3d) -> Unit): HomingItemEntity = HomingItemEntity(
-        world, fromPos, stack, toPos, onHitBlock
-).also {
-    it.velocity = (toPos + Vec3d(0.5, 0.5, 0.5) - fromPos).normalize()
-    world.spawnEntity(it)
-}
 
 fun IWorld.dropItemStack(stack: ItemStack, pos: Vec3d): ItemEntity =
         ItemEntity(world, pos.x, pos.y, pos.z, stack).also {
             world.spawnEntity(it)
         }
-
-//fun IWorld.getInventory()
 
 
 fun ItemStack.copy(count: Int): ItemStack = copy().apply { this.count = count }
@@ -146,6 +101,36 @@ private fun Inventory.stackIsNotEmptyAndCanAddMore(toStack: ItemStack, stackToAd
             && toStack.count < toStack.maxCount
             && toStack.count < this.invMaxStackAmount
 }
+
+
+/**
+ * Returns the remaining stack
+ */
+fun Inventory.insert(stack: ItemStack, direction: Direction = Direction.UP): ItemStack {
+    val remainingAfterNonEmptySlots = distributeToAvailableSlots(stack, acceptEmptySlots = false, direction = direction)
+    return distributeToAvailableSlots(remainingAfterNonEmptySlots, acceptEmptySlots = true, direction = direction)
+}
+
+fun World.inventoryExistsIn(pos: BlockPos): Boolean = world.getBlock(pos) is InventoryProvider
+        || world.getBlockEntity(pos) is Inventory
+
+
+fun World.getInventoryIn(pos: BlockPos): Inventory? {
+    val blockEntityInventory = world.getBlockEntity(pos)
+
+    // Fuck you notch
+    if (blockEntityInventory is ChestBlockEntity) {
+        val blockState = world.getBlockState(pos)
+        if (blockState.block is ChestBlock) {
+            return ChestBlock.getInventory(blockState, this, pos, true)
+        }
+    }
+
+    if (blockEntityInventory is Inventory) return blockEntityInventory
+    val blockState = world.getBlockState(pos)
+    return (blockState.block as? InventoryProvider)?.getInventory(blockState, this, pos)
+}
+
 
 private fun areItemsEqual(stack1: ItemStack, stack2: ItemStack): Boolean {
     return stack1.item === stack2.item && ItemStack.areTagsEqual(stack1, stack2)
@@ -182,54 +167,3 @@ private fun Inventory.distributeToAvailableSlots(stack: ItemStack, acceptEmptySl
 
     return stack.copy(count = stackCountLeftToDistribute)
 }
-
-/**
- * Returns the remaining stack
- */
-fun Inventory.insert(stack: ItemStack, direction: Direction = Direction.UP): ItemStack {
-    val remainingAfterNonEmptySlots = distributeToAvailableSlots(stack, acceptEmptySlots = false,direction = direction)
-    return distributeToAvailableSlots(remainingAfterNonEmptySlots, acceptEmptySlots = true,direction = direction)
-}
-
-fun World.inventoryExistsIn(pos: BlockPos) = world.getBlock(pos) is InventoryProvider
-        || world.getBlockEntity(pos) is Inventory
-
-
-fun World.getInventoryIn(pos: BlockPos): Inventory? {
-    val blockEntityInventory = world.getBlockEntity(pos)
-
-    // Fuck you notch
-    if (blockEntityInventory is ChestBlockEntity) {
-        val blockState = world.getBlockState(pos)
-        if (blockState.block is ChestBlock) {
-            return ChestBlock.getInventory(blockState, this, pos, true)
-        }
-    }
-
-    if (blockEntityInventory is Inventory) return blockEntityInventory
-    val blockState = world.getBlockState(pos)
-    return (blockState.block as? InventoryProvider)?.getInventory(blockState, this, pos)
-}
-
-
-fun <T : Recipe<*>> RecipeManager.fastGet(recipeType: RecipeType<T>, recipeId: Identifier): Recipe<*>? {
-    return (this as RecipeManagerMixin).recipeMap[recipeType]?.get(recipeId)
-}
-
-
-
-class ToolMaterialImpl(private val _miningLevel: Int,
-                       private val _durability: Int,
-                       private val _miningSpeed: Float,
-                       private val _attackDamage: Float,
-                       private val _enchantability: Int,
-                       private val _repairIngredient: () -> Ingredient) : ToolMaterial {
-    override fun getRepairIngredient(): Ingredient = _repairIngredient()
-    override fun getDurability(): Int = _durability
-    override fun getEnchantability(): Int = _enchantability
-    override fun getMiningSpeed(): Float = _miningSpeed
-    override fun getMiningLevel(): Int = _miningLevel
-    override fun getAttackDamage(): Float = _attackDamage
-
-}
-

@@ -28,6 +28,9 @@ inline fun initCommon(modId: String, group: ItemGroup? = null, init: CommonModIn
 }
 
 
+/**
+ * Should be called at the client init method
+ */
 inline fun initClientOnly(modId: String, init: ClientModInitializationContext.() -> Unit) {
     ClientModInitializationContext(modId).apply {
         init()
@@ -37,7 +40,9 @@ inline fun initClientOnly(modId: String, init: ClientModInitializationContext.()
 }
 
 
-class CommonModInitializationContext(val modId: String, val group: ItemGroup?) {
+class CommonModInitializationContext(@PublishedApi internal val modId: String,
+                                     @PublishedApi internal val group: ItemGroup?) {
+
     inline fun <T> registerTo(registry: Registry<T>, init: RegistryContext<T>.() -> Unit) {
         init(RegistryContext(modId, registry))
     }
@@ -48,36 +53,35 @@ class CommonModInitializationContext(val modId: String, val group: ItemGroup?) {
 
 }
 
-class ClientModInitializationContext(val modId: String) {
+class ClientModInitializationContext(@PublishedApi internal val modId: String) {
     inline fun <reified T : BlockEntity> registerBlockEntityRenderer(renderer: BlockEntityRenderer<T>) {
         BlockEntityRendererRegistry.INSTANCE.register(T::class.java, renderer)
     }
 
     fun registerKeyBinding(keyBinding: FabricKeyBinding) = KeyBindingRegistry.INSTANCE.register(keyBinding)
-    fun registerKeyBindingCategory(name : String) = KeyBindingRegistry.INSTANCE.addCategory(name)
+    fun registerKeyBindingCategory(name: String) = KeyBindingRegistry.INSTANCE.addCategory(name)
 
-}
+    fun registerBlockModel(blockPath: String, vararg textures: Identifier, bakery: () -> BakedModel) {
+        ModelLoadingRegistry.INSTANCE.registerVariantProvider {
+            ModelVariantProvider { modelId, _ ->
+                if (modelId.namespace == modId && modelId.path == blockPath) {
+                    object : UnbakedModel {
+                        override fun bake(modelLoader: ModelLoader, spriteFunction: Function<Identifier, Sprite>, settings: ModelBakeSettings): BakedModel = bakery()
 
-fun ClientModInitializationContext.registerBlockModel(blockPath : String, vararg textures : Identifier, bakery : () -> BakedModel){
-    ModelLoadingRegistry.INSTANCE.registerVariantProvider {
-        ModelVariantProvider { modelId, _ ->
-            if (modelId.namespace == modId && modelId.path == blockPath) {
-                object : UnbakedModel {
-                    override fun bake(modelLoader: ModelLoader, spriteFunction: Function<Identifier, Sprite>, settings: ModelBakeSettings): BakedModel = bakery()
-
-                    override fun getModelDependencies(): List<Identifier> = listOf()
-                    override fun getTextureDependencies(unbakedModelFunction: Function<Identifier, UnbakedModel>,
-                                                        strings: MutableSet<String>): List<Identifier> = textures.toList()
-                }
+                        override fun getModelDependencies(): List<Identifier> = listOf()
+                        override fun getTextureDependencies(unbakedModelFunction: Function<Identifier, UnbakedModel>,
+                                                            strings: MutableSet<String>): List<Identifier> = textures.toList()
+                    }
+                } else null
             }
-            else null
         }
     }
 }
 
-open class RegistryContext<T>(private val namespace: String, private val registry: Registry<T>) {
-    open infix fun T.withId(name: String): T = Registry.register(registry, Identifier(namespace, name), this)
-    open infix fun T.withId(id: Identifier): T = Registry.register(registry, id, this)
+
+class RegistryContext<T>(private val namespace: String, private val registry: Registry<T>) {
+    infix fun T.withId(name: String): T = Registry.register(registry, Identifier(namespace, name), this)
+    infix fun T.withId(id: Identifier): T = Registry.register(registry, id, this)
 }
 
 class BlockWithItemRegistryContext(private val namespace: String, private val group: ItemGroup?) {

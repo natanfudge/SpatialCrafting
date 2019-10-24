@@ -13,13 +13,11 @@ import spatialcrafting.client.Speed
 import kotlin.math.roundToLong
 
 inline val World.durationTime get() = time.ticks
-inline fun <T> TickScheduler<T>.schedule(blockPos: BlockPos, target: T, scheduleDuration: Duration)
-        = schedule(blockPos, target, scheduleDuration.inTicks.toInt())
+
 
 fun CompoundTag.putDuration(key: String, duration: Duration) = putLong(key, duration.inTicks)
 fun CompoundTag.getDuration(key: String) = getLong(key).ticks
 
-suspend fun CoroutineScope.delay(duration: Duration) = delay(duration.inMilliseconds)
 
 
 inline val Float.seconds get() = Duration.seconds(this)
@@ -31,7 +29,6 @@ inline val Long.ticks get() = Duration.ticks(this)
 
 inline fun distancePassedIn(calc: () -> Double) = calc()
 
-inline fun min(duration1: Duration, duration2: Duration) = if (duration1 < duration2) duration1 else duration2
 
 inline class Duration(val inTicks: Long) {
     companion object {
@@ -60,5 +57,3 @@ inline class Duration(val inTicks: Long) {
     inline operator fun compareTo(other: Duration) = (this.inTicks - other.inTicks).toInt()
 }
 
-fun ByteBuf.writeDuration(duration: Duration): ByteBuf = writeLong(duration.inTicks)
-fun ByteBuf.readDuration() = readLong().ticks

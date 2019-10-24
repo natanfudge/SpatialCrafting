@@ -13,9 +13,8 @@ import spatialcrafting.ModId
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.modId
 import spatialcrafting.recipe.*
-import spatialcrafting.util.cubeOfSize
 import spatialcrafting.util.getMinecraftClient
-import spatialcrafting.util.mapCube
+import spatialcrafting.util.mapIndexed
 import java.io.File
 import java.nio.file.Paths
 
@@ -128,6 +127,16 @@ private fun checkForRecipeInvalidation(jsonRecipe: SpatialRecipeJsonFormat, shap
     return null
 
 
+}
+
+private fun cubeOfSize(size: Int) = (0 until size)
+        .map { 0 until size }
+        .map { it.map { 0 until size } }
+
+private  fun List<List<IntRange>>.mapCube(mapping: (ComponentPosition) -> Char) = mapIndexed { y, layer ->
+    layer.mapIndexed { x, row ->
+        row.map { z -> mapping(ComponentPosition(x, y, z)) }.joinToString("")
+    }
 }
 
 private fun buildJsonRecipeFromInventory(multiblock: CrafterMultiblock, options: RecipeOptions,
