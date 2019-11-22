@@ -4,6 +4,7 @@ import com.matthewprenger.cursegradle.Options
 import net.fabricmc.loom.task.RemapJarTask
 import net.fabricmc.loom.task.RemapSourcesJarTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.matthewprenger.cursegradle.CurseRelation
 
 buildscript {
     repositories {
@@ -25,12 +26,15 @@ java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
-
+fun prop(name: String): String = project.property(name).toString()
 val minecraft_version: String by project
+val mod_name: String by project
+
 val yarn_mappings: String by project
 val loader_version: String by project
 val archives_base_name: String by project
-val mod_version: String by project
+
+val mod_version = prop("mod_version") + "-" + minecraft_version
 val maven_group: String by project
 val fabric_version: String by project
 val fabric_language_kotlin_version: String by project
@@ -47,23 +51,9 @@ val fabric_keybindings_version: String by project
 val curseforge_api_key: String by project
 val scheduler_version: String by project
 
-val standalone: String by project
-
-val isStandalone: Boolean = !project.hasProperty("standalone") || standalone == "true"
 
 
-configurations.all {
-    resolutionStrategy {
-        eachDependency {
-            if (requested.group == "net.fabricmc") {
-                if (requested.name == "tiny-mappings-parser") {
-                    useVersion("0.2.0")
-                }
 
-            }
-        }
-    }
-}
 
 base {
     archivesBaseName = archives_base_name
@@ -91,11 +81,9 @@ repositories {
 }
 
 
-
 dependencies {
 
     fabric()
-
 
     modDependency("alexiil.mc.lib:libblockattributes-items:$lba_version")
     modDependency("alexiil.mc.lib:libblockattributes-core:$lba_version")
@@ -111,40 +99,19 @@ dependencies {
     modDependency("com.lettuce.fudge:fabric-drawer:$drawer_version")
     modDependency("com.lettuce.fudge:working-scheduler:$scheduler_version")
 
-    devEnvMod("mcp.mobius.waila:Hwyla:$waila_version")
-    devEnvMod("com.jamieswhiteshirt:developer-mode:1.0.14")
-    devEnvMod("gamemodeoverhaul:GamemodeOverhaul:1.0.1.0")
-//    devEnvMod(CurseMavenResolver().resolve("data-loader", "2749923"))
-//    devEnvMod(CurseMavenResolver().resolve("united-conveyors", "2784017"))
+    modRuntime("mcp.mobius.waila:Hwyla:$waila_version")
+    modRuntime("com.jamieswhiteshirt:developer-mode:1.0.14")
+    modRuntime("gamemodeoverhaul:GamemodeOverhaul:1.0.1.0")
 
 
 }
 
 fun DependencyHandlerScope.fabric() {
     minecraft("com.mojang:minecraft:$minecraft_version")
-//    mappings("net.fabricmc:yarn-unmerged:1.14.4+build.local:v2")
-    mappings("net.fabricmc:yarn:1.14.4+build.14")
+    mappings("net.fabricmc:yarn:$yarn_mappings")
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 }
-
-fun String.runCommand(logFile: String/*workingDir: File*/) {
-    ProcessBuilder(*split(" ").toTypedArray())
-            .redirectOutput(ProcessBuilder.Redirect.to(File(logFile)))
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-            .waitFor(300, TimeUnit.SECONDS)
-}
-
-tasks.register("publishVariants") {
-    group = "upload"
-    doLast {
-        ("gradlew.bat curseforge300824 -Pstandalone=true").runCommand("standalone_log.txt")
-        ("gradlew.bat curseforge300824 -Pstandalone=false").runCommand("modpack_log.txt")
-    }
-
-}
-
 
 
 fun DependencyHandlerScope.modDependency(dep: String, dependencyConfiguration: Action<ExternalModuleDependency> = Action {}) {
@@ -153,27 +120,13 @@ fun DependencyHandlerScope.modDependency(dep: String, dependencyConfiguration: A
         dependencyConfiguration.execute(this)
     }
 
-    if (isStandalone) include(dep)
+    include(dep)
 }
 
-fun DependencyHandlerScope.devEnvMod(dep: String, dependencyConfiguration: Action<ExternalModuleDependency> = Action {}) {
-    modRuntime(dep) {
-        exclude(group = "net.fabricmc.fabric-api")
-        dependencyConfiguration.execute(this)
-    }
-}
-
-fun DependencyHandlerScope.devEnvMod(dep: Dependency) {
-    modRuntime(dep)
-}
 
 tasks.getByName<ProcessResources>("processResources") {
     filesMatching("fabric.mod.json") {
-        expand(
-                mutableMapOf(
-                        "version" to mod_version
-                )
-        )
+        expand(mutableMapOf("version" to mod_version))
     }
 }
 
@@ -187,7 +140,55 @@ val sourcesJar = tasks.create<Jar>("sourcesJar") {
 }
 
 val remapJar = tasks.getByName<RemapJarTask>("remapJar")
+
+val remapModpackJar = tasks.create<RemapJarTask>("remapModpackJar") {
+    dependsOn(remapJar)
+    addNestedDependencies.set(false)
+    input.set(remapJar.input)
+    archiveFileName.set("$archives_base_name-$mod_version-modpack.jar")
+}
+
+val remapStandaloneJar = tasks.create<RemapJarTask>("remapStandaloneJar") {
+    dependsOn(remapJar)
+    addNestedDependencies.set(true)
+    input.set(remapJar.input)
+    archiveFileName.set("$archives_base_name-$mod_version-standalone.jar")
+}
+
 val remapSourcesJar = tasks.getByName<RemapSourcesJarTask>("remapSourcesJar")
+
+curseforge {
+    apiKey = if (project.hasProperty("curseforge_api_key")) curseforge_api_key else ""
+    project(closureOf<CurseProject> {
+        id = prop("curseforge_id")
+        releaseType = "release"
+        addGameVersion("Fabric")
+        addGameVersion(minecraft_version)
+        changelogType = "markdown"
+        changelog = file("changelog.md")
+
+        mainArtifact(remapModpackJar, closureOf<CurseArtifact> {
+            displayName = "$mod_name $mod_version-Modpack"
+        })
+
+        addArtifact(remapStandaloneJar, closureOf<CurseArtifact> {
+            displayName = "$mod_name $mod_version-Standalone"
+        })
+        relations(closureOf<CurseRelation>{
+            requiredDependency("fabric-language-kotlin")
+            requiredDependency("libblockattributes")
+            requiredDependency("fabric-api")
+            requiredDependency("libgui")
+            requiredDependency("fabric-drawer")
+            requiredDependency("working-scheduler")
+            optionalDependency("roughly-enough-items")
+        })
+    })
+
+    options(closureOf<Options> {
+        forgeGradleIntegration = false
+    })
+}
 
 
 // configure the maven publication
@@ -195,27 +196,27 @@ publishing {
     publications {
         create("standalone", MavenPublication::class.java) {
             // add all the jars that should be included when publishing to maven
-            artifact(remapJar) {
-                builtBy(remapJar)
+            artifact(remapStandaloneJar) {
+                builtBy(remapStandaloneJar)
             }
             artifact(sourcesJar) {
                 builtBy(remapSourcesJar)
             }
             groupId = maven_group
-            artifactId = archives_base_name + "-standalone"
+            artifactId = "$archives_base_name-standalone"
             version = mod_version
         }
 
         create("modpack", MavenPublication::class.java) {
             // add all the jars that should be included when publishing to maven
-            artifact(remapJar) {
-                builtBy(remapJar)
+            artifact(remapModpackJar) {
+                builtBy(remapModpackJar)
             }
             artifact(sourcesJar) {
                 builtBy(remapSourcesJar)
             }
             groupId = maven_group
-            artifactId = archives_base_name + "-modpack"
+            artifactId = "$archives_base_name-modpack"
             version = mod_version
         }
     }
@@ -227,29 +228,7 @@ publishing {
     }
 }
 
-curseforge {
-    apiKey = if (project.hasProperty("curseforge_api_key")) curseforge_api_key else ""
-    project(closureOf<CurseProject> {
-        id = "300824"
-        releaseType = "release"
-        addGameVersion("Fabric")
-        changelogType = "markdown"
-        changelog = file("changelog.md")
 
-        mainArtifact(remapJar, closureOf<CurseArtifact> {
-            displayName = "Spatial Crafting $mod_version(${if (isStandalone) "Standalone" else "Modpack"})"
-        })
-
-        afterEvaluate {
-            mainArtifact(remapJar)
-            uploadTask.dependsOn(remapJar)
-        }
-    })
-
-    options(closureOf<Options> {
-        forgeGradleIntegration = false
-    })
-}
 
 
 tasks.withType<KotlinCompile> {

@@ -37,7 +37,7 @@
     "fabric-language-kotlin": ">=1.3.50",
     "libblockattributes_items" : ">=0.4.10",
     "libgui" : ">=1.3.2",
-    "fabricdrawer": ">=1.1.1"
+    "fabricdrawer": ">=3.0.0"
   },
   "recommends": {
     "roughly-enough-items": "*",

@@ -1,7 +1,7 @@
 package spatialcrafting.crafter
 
 import drawer.getFrom
-import drawer.nullable
+import kotlinx.serialization.internal.nullable
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
