@@ -1,9 +1,6 @@
 package spatialcrafting.compat.rei
 
 import com.mojang.blaze3d.platform.GlStateManager
-import me.shedaniel.math.compat.RenderHelper
-import me.shedaniel.rei.gui.renderers.ItemStackRenderer
-import me.shedaniel.rei.gui.widget.SlotWidget
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.GuiLighting
 import net.minecraft.item.ItemStack

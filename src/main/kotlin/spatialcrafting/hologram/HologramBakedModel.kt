@@ -7,18 +7,21 @@ import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel
 import net.fabricmc.fabric.api.renderer.v1.model.ModelHelper
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView
-import net.minecraft.block.BlockRenderLayer
+//import net.minecraft.block.RenderLayer
 import net.minecraft.block.BlockState
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.model.BakedModel
 import net.minecraft.client.render.model.BakedQuad
 import net.minecraft.client.render.model.json.ModelItemPropertyOverrideList
 import net.minecraft.client.render.model.json.ModelTransformation
 import net.minecraft.client.texture.Sprite
+import net.minecraft.client.texture.SpriteAtlasTexture
+import net.minecraft.container.PlayerContainer
 import net.minecraft.item.ItemStack
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
-import net.minecraft.world.ExtendedBlockView
+import net.minecraft.world.BlockRenderView
 import spatialcrafting.modId
 import spatialcrafting.util.getMinecraftClient
 import java.util.*
@@ -32,7 +35,7 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
         private const val AlphaMask = (Alpha shl (6 * 4))
         private const val FullRGB = 0xFFFFFF
         private val quadTransform: RenderContext.QuadTransform = RenderContext.QuadTransform { quad ->
-            quad.material(RendererAccess.INSTANCE.renderer.materialFinder().blendMode(0, BlockRenderLayer.TRANSLUCENT).find())
+            quad.material(RendererAccess.INSTANCE.renderer.materialFinder().blendMode(0, RenderLayer.getTranslucent()).find())
             // Get the color of the stored stack in all 4 vertices
             val c0 = quad.spriteColor(0, 0)
             val c1 = quad.spriteColor(1, 0)
@@ -64,9 +67,9 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
             val renderer = RendererAccess.INSTANCE.renderer
             val mb = renderer.meshBuilder()
             val qe = mb.emitter
-            val mat = renderer.materialFinder().blendMode(0, BlockRenderLayer.TRANSLUCENT).find()
-            val atlas = MinecraftClient.getInstance().spriteAtlas
-            val spriteBase = atlas.getSprite(Texture)
+            val mat = renderer.materialFinder().blendMode(0, RenderLayer.getTranslucent()).find()
+            val atlas = MinecraftClient.getInstance().getSpriteAtlas(PlayerContainer.field_21668)
+            val spriteBase = atlas.apply(Texture)
             qe.material(mat).square(Direction.UP, 0f, 0f, 1f, 1f, 0f)
                     .spriteBake(0, spriteBase, MutableQuadView.BAKE_LOCK_UV or MutableQuadView.BAKE_NORMALIZED)
                     .spriteColor(0, baseColor, baseColor, baseColor, baseColor).emit()
@@ -96,7 +99,7 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
     override fun emitItemQuads(stack: ItemStack, randomSupplier: Supplier<Random>, context: RenderContext) {
     }
 
-    override fun emitBlockQuads(blockView: ExtendedBlockView, state: BlockState, pos: BlockPos,
+    override fun emitBlockQuads(blockView: BlockRenderView, state: BlockState, pos: BlockPos,
                                 randomSupplier: Supplier<Random>, context: RenderContext) {
         val minecraft = getMinecraftClient()
 
@@ -106,7 +109,7 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
         val stack = blockView.getBlockEntityRenderAttachment(pos) as ItemStack
         if (!stack.isEmpty) {
             context.pushTransform(quadTransform)
-            context.fallbackConsumer().accept(minecraft.itemRenderer.getModel(stack))
+            context.fallbackConsumer().accept(minecraft.itemRenderer.models.getModel(stack))
             context.popTransform()
         }
 
@@ -116,7 +119,7 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
     override fun isVanillaAdapter(): Boolean = false
     override fun getQuads(var1: BlockState?, var2: Direction?, var3: Random?): List<BakedQuad> = listOf()
     // Not actually used
-    override fun getSprite(): Sprite = getMinecraftClient().spriteAtlas.getSprite(Texture)
+    override fun getSprite(): Sprite = getMinecraftClient().getSpriteAtlas(PlayerContainer.field_21668).apply(Texture)
 
     override fun useAmbientOcclusion(): Boolean = true
     override fun hasDepthInGui(): Boolean = false

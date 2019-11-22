@@ -226,7 +226,7 @@ object Packets {
     }
 
     private fun getAndValidateMultiblock(anyCrafterPiecePos: BlockPos, world: World): CrafterMultiblock? {
-        if (world.isHeightValidAndBlockLoaded(anyCrafterPiecePos)) {
+        if (world.canSetBlock(anyCrafterPiecePos)) {
             val multiblock = world.getCrafterEntity(anyCrafterPiecePos).multiblockIn!!
             if (multiblock.isLoadedAndHeightIsValid(world)) {
                 return multiblock

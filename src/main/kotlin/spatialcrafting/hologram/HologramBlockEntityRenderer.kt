@@ -1,17 +1,19 @@
 package spatialcrafting.hologram
 
+import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher
 import net.minecraft.client.render.block.entity.BlockEntityRenderer
 import net.minecraft.client.render.model.json.ModelTransformation
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
 import spatialcrafting.util.GL
 import spatialcrafting.util.d
 import kotlin.math.sin
 
 
-object HologramBlockEntityRenderer : BlockEntityRenderer<HologramBlockEntity>() {
-
-    override fun render(tile: HologramBlockEntity, x: Double, y: Double, z: Double, partialTicks: Float, destroyStage: Int) {
+object HologramBlockEntityRenderer : BlockEntityRenderer<HologramBlockEntity>(BlockEntityRenderDispatcher.INSTANCE) {
+    override fun render(tile: HologramBlockEntity, partialTicks: Float, matrixStack: MatrixStack,
+                        vertexConsumerProvider: VertexConsumerProvider, i: Int, j: Int) {
         if (tile.contentsAreTravelling) return
         val stack = tile.getItem()
         if (!stack.isEmpty) {
@@ -21,20 +23,20 @@ object HologramBlockEntityRenderer : BlockEntityRenderer<HologramBlockEntity>() 
                 // Changes the position of the item to float up and down like a sine wave.
                 val offset = sin((time - tile.lastChangeTime) * OffsetChangeSpeedMultiplier) * OffsetAmountMultiplier
 
-                val targetX = x + MoveToMidBlockOffset
-                val targetY = y + offset + HeightIncrease
-                val targetZ = z + MoveToMidBlockOffset
+                val targetX = MoveToMidBlockOffset
+                val targetY = offset + HeightIncrease
+                val targetZ = MoveToMidBlockOffset
 
                 if (tile.craftingItemMovement == null) {
                     translate(targetX, targetY, targetZ)
                     // Makes the item bigger
                     scale(SizeMultiplier, SizeMultiplier, SizeMultiplier) {
                         rotate(angle = time * SpinSpeed, x = 0, y = 1, z = 0)
-                        minecraft.itemRenderer.renderItem(stack, ModelTransformation.Type.GROUND)
+                        minecraft.itemRenderer.method_23178(stack, ModelTransformation.Type.GROUND, i, j, matrixStack, vertexConsumerProvider)
                     }
-                }
-                else {
-                    renderCraftingItemMovementAnimation(tile, targetX, targetY, targetZ, tile.craftingItemMovement!!, time, stack)
+                } else {
+                    renderCraftingItemMovementAnimation(tile, targetX, targetY, targetZ, tile.craftingItemMovement!!,
+                            time, stack,matrixStack,vertexConsumerProvider, i, j)
                 }
 
 
@@ -43,16 +45,19 @@ object HologramBlockEntityRenderer : BlockEntityRenderer<HologramBlockEntity>() 
         }
     }
 
+
     private fun GL.renderCraftingItemMovementAnimation(tile: HologramBlockEntity,
                                                        targetX: Double, targetY: Double, targetZ: Double,
-                                                       movementData: CraftingItemMovementData, time: Float, stack: ItemStack) {
+                                                       movementData: CraftingItemMovementData, time: Float, stack: ItemStack, matrixStack: MatrixStack,
+                                                       vertexConsumerProvider: VertexConsumerProvider, i: Int, j: Int) {
         val craftingTargetLocation = movementData.targetLocation
-        val portionOfTimePassed = (world.time - movementData.startTime).d / (movementData.endTime - movementData.startTime)
+        val portionOfTimePassed = (tile.world!!.time - movementData.startTime).d / (movementData.endTime - movementData.startTime)
         val portionOfTimeLeft = 1 - portionOfTimePassed
         if (portionOfTimeLeft > 0) {
-            val relativeCraftingTargetX = craftingTargetLocation.x - BlockEntityRenderDispatcher.renderOffsetX
-            val relativeCraftingTargetY = craftingTargetLocation.y - BlockEntityRenderDispatcher.renderOffsetY
-            val relativeCraftingTargetZ = craftingTargetLocation.z - BlockEntityRenderDispatcher.renderOffsetZ
+            //TODO: this is probably broke
+            val relativeCraftingTargetX = craftingTargetLocation.x /*- BlockEntityRenderDispatcher.renderOffsetX*/
+            val relativeCraftingTargetY = craftingTargetLocation.y /*- BlockEntityRenderDispatcher.renderOffsetY*/
+            val relativeCraftingTargetZ = craftingTargetLocation.z /*- BlockEntityRenderDispatcher.renderOffsetZ*/
 
 
             // Lean more towards the target crafting location as time goes on
@@ -66,14 +71,11 @@ object HologramBlockEntityRenderer : BlockEntityRenderer<HologramBlockEntity>() 
 
             scale(sizeMultiplier, sizeMultiplier, sizeMultiplier) {
                 rotate(angle = time * MaterialCraftingSpinSpeed, x = 0, y = 1, z = 0)
-                minecraft.itemRenderer.renderItem(stack, ModelTransformation.Type.GROUND)
+                minecraft.itemRenderer.method_23178(stack, ModelTransformation.Type.GROUND, i, j, matrixStack, vertexConsumerProvider)
             }
 
 
         }
-//        else {
-//            tile.craftingItemMovement = null
-//        }
 
 
     }

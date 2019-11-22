@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
+import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
@@ -103,31 +104,31 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
     }
 
 
-    override fun activate(blockState_1: BlockState, world: World, pos: BlockPos, clickedBy: PlayerEntity?,
-                          hand: Hand, blockHitResult_1: BlockHitResult?): Boolean {
+    override fun onUse(blockState_1: BlockState, world: World, pos: BlockPos, clickedBy: PlayerEntity?,
+                          hand: Hand, blockHitResult_1: BlockHitResult?): ActionResult {
 
         // Prevent it being called twice
-        if (hand == Hand.OFF_HAND) return false
+        if (hand == Hand.OFF_HAND) return ActionResult.FAIL
 
         logDebug {
             val multiblockIn = world.getCrafterEntity(pos).multiblockIn
             "${if (world.isClient) "CLIENT" else "SERVER"}: Right clicked on crafter piece at ${pos.xz}. Formed = ${multiblockIn != null}"
         }
-        val multiblockIn = world.getCrafterEntity(pos).multiblockIn ?: return false
+        val multiblockIn = world.getCrafterEntity(pos).multiblockIn ?: return ActionResult.FAIL
 
 
 
-        if (world.isClient || multiblockIn.isCrafting) return true
+        if (world.isClient || multiblockIn.isCrafting) return ActionResult.SUCCESS
 
         val matches = multiblockIn.getMatchingRecipes(world)
 
         if (matches.isEmpty()) {
             clickedBy?.sendMessage(TranslatableText("message.spatialcrafting.no_match"))
-            return true
+            return ActionResult.SUCCESS
         }
         else craft(matches, world, multiblockIn, pos, automated = false)
 
-        return true
+        return ActionResult.SUCCESS
     }
 
 

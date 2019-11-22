@@ -1,10 +1,12 @@
 package spatialcrafting.compat.rei
 
 import me.shedaniel.rei.api.DisplayHelper
+import me.shedaniel.rei.api.EntryStack
 import me.shedaniel.rei.api.RecipeDisplay
 import me.shedaniel.rei.api.RecipeHelper
 import me.shedaniel.rei.api.plugins.REIPluginV0
 import net.fabricmc.loader.api.SemanticVersion
+import net.minecraft.item.ItemStack
 import net.minecraft.recipe.Recipe
 import net.minecraft.util.Identifier
 import spatialcrafting.MaxCrafterSize
@@ -14,6 +16,8 @@ import spatialcrafting.modId
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.util.itemStack
 import java.util.function.Function
+
+val ItemStack.reiEntry: EntryStack get() = EntryStack.create(this)
 
 class ReiSpatialCraftingPlugin : REIPluginV0 {
     companion object {
@@ -55,13 +59,11 @@ class ReiSpatialCraftingPlugin : REIPluginV0 {
         for (i in CrafterSizes) {
             // Every category gets the crafters from that size onwards
             for (j in i..MaxCrafterSize) {
-                recipeHelper.registerWorkingStations(ReiSpatialCraftingCategory.id(i), CraftersPieces.getValue(j).itemStack)
+                recipeHelper.registerWorkingStations(ReiSpatialCraftingCategory.id(i), CraftersPieces.getValue(j).itemStack.reiEntry)
 
             }
 
-            recipeHelper.removeSpeedCraftButton(ReiSpatialCraftingCategory.id(i))
-//            recipeHelper.registerSpeedCraftFunctional()
-
+            recipeHelper.removeAutoCraftButton(ReiSpatialCraftingCategory.id(i))
         }
     }
 

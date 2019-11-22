@@ -1,17 +1,11 @@
 import com.matthewprenger.cursegradle.CurseArtifact
 import com.matthewprenger.cursegradle.CurseProject
+import com.matthewprenger.cursegradle.CurseRelation
 import com.matthewprenger.cursegradle.Options
 import net.fabricmc.loom.task.RemapJarTask
 import net.fabricmc.loom.task.RemapSourcesJarTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import com.matthewprenger.cursegradle.CurseRelation
 
-buildscript {
-    repositories {
-        mavenLocal()
-    }
-
-}
 
 plugins {
     id("fabric-loom")
@@ -76,6 +70,7 @@ repositories {
     maven(url = "http://server.bbkr.space:8081/artifactory/libs-snapshot")
     maven(url = "https://maven.abusedmaster.xyz")
     maven(url = "http://server.bbkr.space:8081/artifactory/libs-release/")
+    maven(url = "https://dl.bintray.com/shedaniel/autoconfig1u/")
     jcenter()
 
 }
@@ -174,7 +169,7 @@ curseforge {
         addArtifact(remapStandaloneJar, closureOf<CurseArtifact> {
             displayName = "$mod_name $mod_version-Standalone"
         })
-        relations(closureOf<CurseRelation>{
+        relations(closureOf<CurseRelation> {
             requiredDependency("fabric-language-kotlin")
             requiredDependency("libblockattributes")
             requiredDependency("fabric-api")

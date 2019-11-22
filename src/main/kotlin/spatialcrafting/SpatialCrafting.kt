@@ -1,6 +1,8 @@
 package spatialcrafting
 
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
+import net.minecraft.client.render.RenderLayer
 import net.minecraft.item.ItemGroup
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
@@ -94,6 +96,8 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 @Suppress("unused")
 fun initClient() = initClientOnly(ModId) {
 
+    HologramBlock.setRenderLayer(RenderLayer.getTranslucent())
+
     registerBlockModel(HologramId, HologramBakedModel.Texture) { HologramBakedModel() }
 
     registerS2CPackets(
@@ -106,7 +110,7 @@ fun initClient() = initClientOnly(ModId) {
             Packets.StopCraftingParticles.serializer()
     )
 
-    registerBlockEntityRenderer(HologramBlockEntityRenderer)
+    registerBlockEntityRenderer(HologramBlockEntity.Type, HologramBlockEntityRenderer)
     registerKeyBinding(RecipeCreatorKeyBinding)
     registerKeyBindingCategory(SpatialCraftingKeyBindingCategory)
 

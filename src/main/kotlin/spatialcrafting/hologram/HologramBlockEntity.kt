@@ -13,6 +13,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Tickable
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
@@ -32,7 +33,7 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
 
     override fun getRenderAttachmentData(): Any = ghostIngredient?.let {
         if (it.matches(getItem())) ItemStack.EMPTY
-        else it.stackArray[(ghostIngredientCycleIndex / TicksPerSecond) % it.stackArray.size]
+        else it.matchingStacksClient[(ghostIngredientCycleIndex / TicksPerSecond) % it.matchingStacksClient.size]
     } ?: ItemStack.EMPTY
 
 
@@ -170,14 +171,14 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
     fun getMultiblockOrNull(): CrafterMultiblock? {
         val world = world!!
         // We just go down until we find a crafter
-        var currentPos = pos.down()
+        var currentPos = pos.downBlockPos()
         while (true) {
             val entityBelow = world.getBlockEntity(currentPos)
             if (entityBelow !is HologramBlockEntity) {
                 return if (entityBelow is CrafterPieceEntity) entityBelow.multiblockIn
                 else null
             }
-            currentPos = currentPos.down()
+            currentPos = currentPos.downBlockPos()
         }
     }
 

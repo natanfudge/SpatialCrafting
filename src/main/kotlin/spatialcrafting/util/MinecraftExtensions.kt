@@ -33,6 +33,8 @@ val BlockPos.xz get() = "($x,$z)"
 fun BlockPos.distanceFrom(otherPos: Vec3d) =
         sqrt((otherPos.x - this.x).squared() + (otherPos.y - this.y).squared() + (otherPos.z - this.z).squared())
 
+fun BlockPos.downBlockPos(): BlockPos = method_10074()
+
 operator fun BlockPos.plus(other: BlockPos): BlockPos = this.add(other)
 operator fun BlockPos.plus(vec3d: Vec3d): Vec3d = this.toVec3d() + vec3d
 operator fun BlockPos.minus(other: BlockPos): BlockPos = this.subtract(other)
@@ -44,7 +46,7 @@ fun BlockPos.toVec3d() = Vec3d(this)
 fun CompoundTag.putBlockPos(key: String, pos: BlockPos?) = if (pos != null) putLong(key, pos.asLong()) else Unit
 
 fun CompoundTag.getBlockPos(key: String): BlockPos? {
-    val tag = getTag(key) ?: return null
+    val tag = get(key) ?: return null
     if (tag !is LongTag) return null
     return BlockPos.fromLong(tag.long)
 }

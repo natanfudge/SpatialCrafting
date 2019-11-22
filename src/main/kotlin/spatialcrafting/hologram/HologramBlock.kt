@@ -4,11 +4,13 @@ import alexiil.mc.lib.attributes.AttributeList
 import alexiil.mc.lib.attributes.AttributeProvider
 import net.minecraft.block.*
 import net.minecraft.block.piston.PistonBehavior
+import net.minecraft.client.render.RenderLayer
 import net.minecraft.entity.EntityContext
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.SidedInventory
-import net.minecraft.state.StateFactory
+import net.minecraft.state.StateManager
 import net.minecraft.state.property.BooleanProperty
+import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
@@ -71,17 +73,12 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
 
     override fun createBlockEntity(var1: BlockView?) = HologramBlockEntity()
 
-    override fun appendProperties(stateFactory: StateFactory.Builder<Block, BlockState>) {
+    override fun appendProperties(stateFactory: StateManager.Builder<Block, BlockState>) {
         stateFactory.add(IsHidden)
     }
 
     init {
-        defaultState = stateFactory.defaultState.with(IsHidden, false)
-    }
-
-
-    override fun getRenderLayer(): BlockRenderLayer {
-        return BlockRenderLayer.TRANSLUCENT
+        defaultState = stateManager.defaultState.with(IsHidden, false)
     }
 
 
@@ -96,8 +93,8 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
     }
 
 
-    override fun activate(blockState: BlockState, world: World, pos: BlockPos, clickedBy: PlayerEntity?, hand: Hand?, blockHitResult_1: BlockHitResult?): Boolean {
-        if (clickedBy == null || hand == null) return false
+    override fun onUse(blockState: BlockState, world: World, pos: BlockPos, clickedBy: PlayerEntity?, hand: Hand?, blockHitResult_1: BlockHitResult?): ActionResult {
+        if (clickedBy == null || hand == null) return ActionResult.FAIL
 
 
         val hologramEntity = world.getHologramEntity(pos)
@@ -116,7 +113,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
         if (world.isClient && clickedBy.isCreative && RecipeCreatorKeyBinding.isPressed) {
             getMinecraftClient().openScreen(RecipeCreatorScreen(RecipeCreatorGui()))
         }
-        return true
+        return ActionResult.SUCCESS
     }
 
 

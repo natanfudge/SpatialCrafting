@@ -41,19 +41,19 @@ class CraftParticle(world: World,
     }
 
     override fun getMinU(): Float {
-        return sprite.getU(((randomFloat + 1.0f) / 4.0f * 16.0f).toDouble())
+        return sprite.getFrameU(((randomFloat + 1.0f) / 4.0f * 16.0f).toDouble())
     }
 
     override fun getMaxU(): Float {
-        return sprite.getU((randomFloat / 4.0f * 16.0f).toDouble())
+        return sprite.getFrameU((randomFloat / 4.0f * 16.0f).toDouble())
     }
 
     override fun getMinV(): Float {
-        return sprite.getV((anotherRandomFloat / 4.0f * 16.0f).toDouble())
+        return sprite.getFrameV((anotherRandomFloat / 4.0f * 16.0f).toDouble())
     }
 
     override fun getMaxV(): Float {
-        return sprite.getV(((anotherRandomFloat + 1.0f) / 4.0f * 16.0f).toDouble())
+        return sprite.getFrameV(((anotherRandomFloat + 1.0f) / 4.0f * 16.0f).toDouble())
     }
 
 

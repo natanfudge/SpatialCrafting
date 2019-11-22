@@ -27,7 +27,7 @@ data class RecipeOptions(var shaped: Boolean = true,
 
 class RecipeCreatorGui : LightweightGuiDescription() {
     init {
-        val nearestCrafter = getNearestCrafter(getMinecraftClient().world, getMinecraftClient().player.pos)
+        val nearestCrafter = getNearestCrafter(getMinecraftClient().world!!, getMinecraftClient().player!!.pos)
                 ?: error("Crafter GUI opened without a crafter multiblock")
 
         val generatedRecipeState = GeneratedRecipeState()
@@ -88,8 +88,8 @@ class RecipeCreatorGui : LightweightGuiDescription() {
 
     private fun DevWidget.GenerateRecipeButton(nearestCrafter: CrafterMultiblock, generatedRecipeState: GeneratedRecipeState, options: RecipeOptions) {
         Column(MainAxisAlignment.Center, crossAxisAlignment = CrossAxisAlignment.Baseline, crossAxisSize = FlexSize.Expand) {
-            val thereAreAnyItemsInCrafter = nearestCrafter.getInventory(getMinecraftClient().world).isNotEmpty()
-            val playerHoldsItem = getMinecraftClient().player.mainHandStack.item != Items.AIR
+            val thereAreAnyItemsInCrafter = nearestCrafter.getInventory(getMinecraftClient().world!!).isNotEmpty()
+            val playerHoldsItem = getMinecraftClient().player!!.mainHandStack.item != Items.AIR
             Button("Generate Recipe", enabled = thereAreAnyItemsInCrafter && playerHoldsItem, onClick = {
                 generatedRecipeState.result = generateRecipe(nearestCrafter, options)
                 recompose(this)
@@ -142,7 +142,7 @@ private fun DevWidget.UpDownButtons(nearestCrafter: CrafterMultiblock) {
 
 private fun DevWidget.HoverableImage(path: String, width: Int, height: Int): DevWidget {
     return Image(path = path, width = width, height = height).onHover { _, _ ->
-        ScreenDrawing.rect(constraints.x, constraints.y, constraints.width, constraints.height, 0x40_00_00_FF)
+        ScreenDrawing.coloredRect(constraints.x, constraints.y, constraints.width, constraints.height, 0x40_00_00_FF)
     }
 }
 

@@ -1,9 +1,13 @@
 package spatialcrafting.compat.rei
 
+//import com.mojang.blaze3d.platform.GlStateManager
+//import com.mojang.blaze3d.platform.GlStateManager.DestFactor
+//import com.mojang.blaze3d.platform.GlStateManager.SourceFactor
 import com.mojang.blaze3d.platform.GlStateManager
-import com.mojang.blaze3d.platform.GlStateManager.DestFactor
 import com.mojang.blaze3d.platform.GlStateManager.SourceFactor
+import com.mojang.blaze3d.platform.GlStateManager.DestFactor
 import me.shedaniel.math.api.Point
+import me.shedaniel.math.api.Rectangle
 import me.shedaniel.rei.gui.widget.ButtonWidget
 import me.shedaniel.rei.gui.widget.QueuedTooltip
 import me.shedaniel.rei.impl.ScreenHelper
@@ -30,7 +34,7 @@ private const val height = 10
 
 
 fun fillInRecipeFromPlayerInventory(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
-    sendPacketToServer(Packets.AutoCraft(crafterMultiblock.arbitraryCrafterPos, getMinecraftClient().player.uuid, recipeId))
+    sendPacketToServer(Packets.AutoCraft(crafterMultiblock.arbitraryCrafterPos, getMinecraftClient().player!!.uuid, recipeId))
 }
 
 
@@ -51,7 +55,7 @@ fun getNearestCrafter(world: World, pos: Vec3d) =
 
 class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
                  private var setLayer: (Int, () -> List<ComponentSatisfaction>?) -> Unit, val display: ReiSpatialCraftingDisplay)
-    : ButtonWidget(x, y, width, height, "+") {
+    : ButtonWidget(Rectangle(x, y, width, height),  "+") {
     enum class State {
         NO_NEARBY_CRAFTER,
         NEARBY_CRAFTER_TOO_SMALL,
@@ -85,9 +89,9 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
     }
 
     override fun onPressed() {
-        val pos = minecraft.player.pos
+        val pos = minecraft.player!!.pos
         val world = minecraft.world
-        val nearestCrafter = getNearestCrafter(world, pos) ?: return
+        val nearestCrafter = getNearestCrafter(world!!, pos) ?: return
         when (state) {
             State.READY_FOR_RECIPE_HELP -> startCrafterRecipeHelp(nearestCrafter, recipe.identifier)
             State.ALL_COMPONENTS_AVAILABLE -> fillInRecipeFromPlayerInventory(nearestCrafter, recipe.identifier)
@@ -96,25 +100,25 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
             else -> error("Impossible")
         }
 
-        minecraft.player.closeScreen()
+        minecraft.player!!.closeScreen()
 
     }
 
 
     override fun render(mouseX: Int, mouseY: Int, delta: Float) {
         var shouldHighlightMissingComponents = false
-        val pos = minecraft.player.pos
+        val pos = minecraft.player!!.pos
         val world = minecraft.world
-        val nearestCrafter = world.blockEntities.filterIsInstance<CrafterPieceEntity>()
+        val nearestCrafter = world!!.blockEntities.filterIsInstance<CrafterPieceEntity>()
                 .minBy { it.pos.distanceFrom(pos) }?.multiblockIn
-        if (nearestCrafter != null && nearestCrafter.canBeUsedByPlayer(minecraft.player)) {
+        if (nearestCrafter != null && nearestCrafter.canBeUsedByPlayer(minecraft.player!!)) {
             if (nearestCrafter.multiblockSize >= recipe.minimumCrafterSize) {
 
                 val (recipeSatisfaction, fullySatisfied) = getRecipeSatisfaction(
                         recipe = recipe,
                         nearestCrafter = nearestCrafter,
                         world = world,
-                        player = getMinecraftClient().player
+                        player = getMinecraftClient().player!!
                 )
 
                 state = when {
@@ -177,8 +181,9 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
         minecraft.textureManager.bindTexture(if (ScreenHelper.isDarkModeEnabled()) BUTTON_LOCATION_DARK else BUTTON_LOCATION)
         val textureOffset = getTextureId(isHovered(mouseX, mouseY))
         GlStateManager.enableBlend()
-        GlStateManager.blendFuncSeparate(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO)
-        GlStateManager.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA)
+        GlStateManager.blendFuncSeparate(SourceFactor.SRC_ALPHA.value,
+                DestFactor.ONE_MINUS_SRC_ALPHA.value, SourceFactor.ONE.value, DestFactor.ZERO.value)
+        GlStateManager.blendFunc(SourceFactor.SRC_ALPHA.value, DestFactor.ONE_MINUS_SRC_ALPHA.value)
         //Four Corners
 
         //Four Corners

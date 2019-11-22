@@ -3,8 +3,8 @@ package spatialcrafting.compat.rei
 import com.mojang.blaze3d.platform.GlStateManager
 import me.shedaniel.math.api.Point
 import me.shedaniel.math.api.Rectangle
+import me.shedaniel.rei.api.EntryStack
 import me.shedaniel.rei.api.RecipeCategory
-import me.shedaniel.rei.api.Renderer
 import me.shedaniel.rei.gui.widget.LabelWidget
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget
 import me.shedaniel.rei.gui.widget.Widget
@@ -100,7 +100,7 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
         return id(recipeSize)
     }
 
-    override fun getIcon(): Renderer = Renderer.fromItemStack(ItemStack(CraftersPieces[recipeSize]))
+    override fun getLogo(): EntryStack = EntryStack.create(ItemStack(CraftersPieces[recipeSize]))
 
     override fun getCategoryName(): String = I18n.translate("category.rei.spatialcrafting.x$recipeSize")
 
@@ -141,7 +141,7 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
         }
 
         val seconds = display.recipe.craftTime.inSeconds
-        val time = if (seconds.isWholeNumber()) seconds.roundToInt() else seconds
+        val time = if (seconds.isWholeNumber()) seconds.roundToInt().toDouble() else seconds
         val text = LiteralText(time.toString() + "s")
                 .setStyle(Style().setColor(Formatting.DARK_GRAY))
 
@@ -152,7 +152,7 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
                 text.asFormattedString()
         ) {
             override fun render(mouseX: Int, mouseY: Int, delta: Float) {
-                Client.drawCenteredStringWithoutShadow(font, this.text, x, y, -1)
+                Client.drawCenteredStringWithoutShadow(font, this.text, mouseX, mouseY, -1)
             }
         }
 
@@ -241,16 +241,16 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
 
     }
 
-    private fun inputSlots(display: ReiSpatialCraftingDisplay, startPoint: Point, satisfaction: () -> List<ComponentSatisfaction>?): List<Widget> {
+    private fun inputSlots(display: ReiSpatialCraftingDisplay, startPoint: Point, satisfaction: () -> List<ComponentSatisfaction>?): List<HighlightableSlotWidget> {
         return display.recipe.previewComponents.filter { it.position.y == display.currentLayer }.map { component ->
             HighlightableSlotWidget(
                     x = startPoint.x + component.position.x * 18 + 1 + WidthIncrease,
                     y = startPoint.y + component.position.z * 18 + 1,
-                    itemStackList = component.ingredient.stackArray.toList(),
+                    itemStackList = component.ingredient.matchingStacksClient.toList(),
                     highlighted = {
-                        val satisfaction = satisfaction()
-                        if (satisfaction == null) false
-                        else satisfaction.find { it.pos == component.position }!!.satisfiedBy == null
+                        val satisfactionResult = satisfaction()
+                        if (satisfactionResult == null) false
+                        else satisfactionResult.find { it.pos == component.position }!!.satisfiedBy == null
                     }
             )
         }

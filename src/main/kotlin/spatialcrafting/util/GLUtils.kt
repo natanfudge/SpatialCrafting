@@ -22,7 +22,7 @@ class GL {
      * Moves the model to the specified [x] [y] [z] coordinates.
      */
     fun translate(x: Double, y: Double, z: Double) {
-        GlStateManager.translated(x, y, z)
+        GlStateManager.translatef(x.toFloat(), y.toFloat(), z.toFloat())
     }
 
 

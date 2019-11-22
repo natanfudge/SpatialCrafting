@@ -1,18 +1,24 @@
 package spatialcrafting.util
 
+import com.mojang.datafixers.util.Pair
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding
 import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
 import net.fabricmc.fabric.api.client.model.ModelVariantProvider
-import net.fabricmc.fabric.api.client.render.BlockEntityRendererRegistry
+import net.fabricmc.fabric.api.client.rendereregistry.v1.BlockEntityRendererRegistry
 import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
+import net.minecraft.block.entity.BlockEntityType
+import net.minecraft.class_4730
+import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.block.entity.BlockEntityRenderer
 import net.minecraft.client.render.model.BakedModel
 import net.minecraft.client.render.model.ModelBakeSettings
 import net.minecraft.client.render.model.ModelLoader
 import net.minecraft.client.render.model.UnbakedModel
 import net.minecraft.client.texture.Sprite
+import net.minecraft.container.PlayerContainer
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
@@ -54,8 +60,10 @@ class CommonModInitializationContext(@PublishedApi internal val modId: String,
 }
 
 class ClientModInitializationContext(@PublishedApi internal val modId: String) {
-    inline fun <reified T : BlockEntity> registerBlockEntityRenderer(renderer: BlockEntityRenderer<T>) {
-        BlockEntityRendererRegistry.INSTANCE.register(T::class.java, renderer)
+    fun Block.setRenderLayer(renderLayer: RenderLayer) = BlockRenderLayerMap.INSTANCE.putBlock(this, renderLayer)
+
+    inline fun <reified T : BlockEntity> registerBlockEntityRenderer(be: BlockEntityType<T>, renderer: BlockEntityRenderer<T>) {
+        BlockEntityRendererRegistry.INSTANCE.register(be, renderer)
     }
 
     fun registerKeyBinding(keyBinding: FabricKeyBinding) = KeyBindingRegistry.INSTANCE.register(keyBinding)
@@ -66,11 +74,18 @@ class ClientModInitializationContext(@PublishedApi internal val modId: String) {
             ModelVariantProvider { modelId, _ ->
                 if (modelId.namespace == modId && modelId.path == blockPath) {
                     object : UnbakedModel {
-                        override fun bake(modelLoader: ModelLoader, spriteFunction: Function<Identifier, Sprite>, settings: ModelBakeSettings): BakedModel = bakery()
-
                         override fun getModelDependencies(): List<Identifier> = listOf()
-                        override fun getTextureDependencies(unbakedModelFunction: Function<Identifier, UnbakedModel>,
-                                                            strings: MutableSet<String>): List<Identifier> = textures.toList()
+
+                        override fun bake(loader: ModelLoader?, textureGetter: Function<class_4730, Sprite>?,
+                                          rotationContainer: ModelBakeSettings?, modelId: Identifier?): BakedModel? =
+                                bakery()
+
+
+                        //TODO: this is likely broke
+                        override fun getTextureDependencies(unbakedModelGetter: Function<Identifier, UnbakedModel>?,
+                                                            unresolvedTextureReferences: MutableSet<Pair<String, String>>?):
+                                List<class_4730> = textures.map { class_4730(PlayerContainer.field_21668, it) }
+
                     }
                 } else null
             }

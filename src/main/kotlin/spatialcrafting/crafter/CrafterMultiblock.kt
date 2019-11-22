@@ -145,7 +145,7 @@ class CrafterMultiblock(
     fun BlockPos.relativeTo(originPos: BlockPos) = ComponentPosition(x - originPos.x, y - originPos.y, z - originPos.z)
 
 
-    fun isLoadedAndHeightIsValid(world: World) = crafterLocations.all { world.isHeightValidAndBlockLoaded(it) }
+    fun isLoadedAndHeightIsValid(world: World) = crafterLocations.all { world.canSetBlock(it) }
 
 
     fun hologramsNotOfLayer(layer: Int): List<AbsoluteAndRelativePos> = hologramsRelativePositions()

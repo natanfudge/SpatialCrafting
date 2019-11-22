@@ -27,7 +27,7 @@ fun generateRecipe(multiblock: CrafterMultiblock, recipeOptions: RecipeOptions):
     // If useTags is enabled and an item has multiple tags then we can't resolve the recipe currently.
     //TODO: enable useTags with multiple tags with more advanced GUI.
     if (recipeOptions.useTags) {
-        for (slot in multiblock.getInventory(getMinecraftClient().world)) {
+        for (slot in multiblock.getInventory(getMinecraftClient().world!!)) {
             if (ItemTags.getContainer().getTagsFor(slot.itemStack.item).size > 1) {
                 return errorText("There are multiple tags for '${slot.itemStack.item.name.asFormattedString()}', please create this recipe manually or don't use tags for now.")
             }
@@ -49,7 +49,7 @@ fun generateRecipe(multiblock: CrafterMultiblock, recipeOptions: RecipeOptions):
     if (invalidation != null) return invalidation
 
 
-    val heldItem = getMinecraftClient().player.mainHandStack
+    val heldItem = getMinecraftClient().player!!.mainHandStack
     val relativePathToRecipes = Paths.get("config", "datapacks", GeneratedDataPackName, "data",
             ModId, "recipes")
 
@@ -102,7 +102,7 @@ private fun checkForRecipeInvalidation(jsonRecipe: SpatialRecipeJsonFormat, shap
         ShapelessSpatialRecipe.readFromDeserialized(jsonRecipe, modId("for_validation"))
     }
 
-    val existingRecipeWithSameInput = getMinecraftClient().world.recipeManager.values()
+    val existingRecipeWithSameInput = getMinecraftClient().world!!.recipeManager.values()
             .find {
                 if (it is ShapedSpatialRecipe && parsedRecipeForValidation is ShapedSpatialRecipe) {
                     it.components == parsedRecipeForValidation.components
@@ -141,8 +141,8 @@ private  fun List<List<IntRange>>.mapCube(mapping: (ComponentPosition) -> Char) 
 
 private fun buildJsonRecipeFromInventory(multiblock: CrafterMultiblock, options: RecipeOptions,
                                          craftTime : Float, minimumCrafterSize : Int): SpatialRecipeJsonFormat {
-    val heldItem = getMinecraftClient().player.mainHandStack
-    val items = multiblock.getInventory(getMinecraftClient().world)
+    val heldItem = getMinecraftClient().player!!.mainHandStack
+    val items = multiblock.getInventory(getMinecraftClient().world!!)
     // Map of items in their keys
     val ingredientKeys = mutableMapOf<Item, Char>()
     for (slot in items) {
