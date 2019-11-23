@@ -14,6 +14,6 @@ import java.util.Map;
 //TODO: export this when separating kotlin extensions from spatialcrafting
 @Mixin(RecipeManager.class)
 public interface RecipeManagerMixin {
-    @Accessor
-    Map<RecipeType<?>, Map<Identifier, Recipe<?>>> getRecipeMap();
+    @Accessor("recipes")
+    Map<RecipeType<?>, Map<Identifier, Recipe<?>>> getRecipes();
 }

@@ -94,9 +94,9 @@ dependencies {
     modDependency("com.lettuce.fudge:fabric-drawer:$drawer_version")
     modDependency("com.lettuce.fudge:working-scheduler:$scheduler_version")
 
-    modRuntime("mcp.mobius.waila:Hwyla:$waila_version")
-    modRuntime("com.jamieswhiteshirt:developer-mode:1.0.14")
-    modRuntime("gamemodeoverhaul:GamemodeOverhaul:1.0.1.0")
+    devEnvMod("mcp.mobius.waila:Hwyla:$waila_version")
+//    devEnvMod("com.jamieswhiteshirt:developer-mode:1.0.14")
+    devEnvMod("gamemodeoverhaul:GamemodeOverhaul:1.0.1.0")
 
 
 }
@@ -118,6 +118,11 @@ fun DependencyHandlerScope.modDependency(dep: String, dependencyConfiguration: A
     include(dep)
 }
 
+fun DependencyHandlerScope.devEnvMod(dep: String) {
+    modRuntime(dep) {
+        exclude(group = "net.fabricmc.fabric-api")
+    }
+}
 
 tasks.getByName<ProcessResources>("processResources") {
     filesMatching("fabric.mod.json") {

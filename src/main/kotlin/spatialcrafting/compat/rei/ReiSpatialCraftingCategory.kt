@@ -1,6 +1,7 @@
 package spatialcrafting.compat.rei
 
 import com.mojang.blaze3d.platform.GlStateManager
+import com.mojang.blaze3d.systems.RenderSystem
 import me.shedaniel.math.api.Point
 import me.shedaniel.math.api.Rectangle
 import me.shedaniel.rei.api.EntryStack
@@ -30,7 +31,7 @@ import kotlin.math.roundToInt
 //TODO: show energy cost if that's enabled (and exists)
 
 
-class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatialCraftingDisplay> {
+class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<ReiSpatialCraftingDisplay> {
     private fun <V> Map<Int, V>.ofRecipeSize() = getValue(recipeSize)
 
     companion object {
@@ -54,10 +55,6 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
             val DownOn = guiTexture("button/down_on.png")
             val UpOff = guiTexture("button/up_off.png")
             val UpOn = guiTexture("button/up_on.png")
-
-            val PlusOff = guiTexture("button/plus_off.png")
-            val PlusOn = guiTexture("button/plus_on.png")
-            val PlusRed = guiTexture("button/plus_red.png")
         }
 
 
@@ -147,12 +144,11 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
 
 
         val craftTimeText = object : LabelWidget(
-                startPoint.x + CraftTimeXOffset.ofRecipeSize(),
-                startPoint.y + OutputSlotYOffset.ofRecipeSize() + 20,
+                Point(startPoint.x + CraftTimeXOffset.ofRecipeSize(),startPoint.y + OutputSlotYOffset.ofRecipeSize() + 20),
                 text.asFormattedString()
         ) {
             override fun render(mouseX: Int, mouseY: Int, delta: Float) {
-                Client.drawCenteredStringWithoutShadow(font, this.text, mouseX, mouseY, -1)
+                Client.drawCenteredStringWithoutShadow(font, this.text, x, y, -1)
             }
         }
 
@@ -196,7 +192,7 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
         val background = object : RecipeBaseWidget(bounds) {
             override fun render(mouseX: Int, mouseY: Int, delta: Float) {
                 super.render(mouseX, mouseY, delta)
-                GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f)
+                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f)
                 GuiLighting.disable()
                 MinecraftClient.getInstance().textureManager.bindTexture(Background.ofRecipeSize())
                 blit(startPoint.x + WidthIncrease, startPoint.y, 0, 0, RecipeWidth.ofRecipeSize(),
@@ -234,14 +230,13 @@ class ReiSpatialCraftingCategory(val recipeSize: Int) : RecipeCategory<ReiSpatia
                 .setStyle(Style().setColor(Formatting.AQUA))
 
         return LabelWidget(
-                startPoint.x + UpDownButtonsXOffset + 6,
-                startPoint.y + UpDownButtonsYOffset.ofRecipeSize() - 11,
+                Point(startPoint.x + UpDownButtonsXOffset + 6, startPoint.y + UpDownButtonsYOffset.ofRecipeSize() - 11),
                 text.asFormattedString()
         )
 
     }
 
-    private fun inputSlots(display: ReiSpatialCraftingDisplay, startPoint: Point, satisfaction: () -> List<ComponentSatisfaction>?): List<HighlightableSlotWidget> {
+    private fun inputSlots(display: ReiSpatialCraftingDisplay, startPoint: Point, satisfaction: () -> List<ComponentSatisfaction>?): List<Widget> {
         return display.recipe.previewComponents.filter { it.position.y == display.currentLayer }.map { component ->
             HighlightableSlotWidget(
                     x = startPoint.x + component.position.x * 18 + 1 + WidthIncrease,

@@ -5,12 +5,10 @@ import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeManager
 import net.minecraft.recipe.RecipeType
 import net.minecraft.util.Identifier
-import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.getHologramEntity
 import spatialcrafting.mixin.RecipeManagerMixin
-import spatialcrafting.recipe.ComponentPosition
 import spatialcrafting.recipe.ShapedRecipeComponent
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.util.isServer
@@ -91,7 +89,7 @@ private fun CrafterMultiblock.showAllHolograms(world: World) {
 }
 
 private fun <T : Recipe<*>> RecipeManager.fastGet(recipeType: RecipeType<T>, recipeId: Identifier): Recipe<*>? {
-    return (this as RecipeManagerMixin).recipeMap[recipeType]?.get(recipeId)
+    return (this as RecipeManagerMixin).recipes[recipeType]?.get(recipeId)
 }
 
 fun CrafterMultiblock.helpRecipeComponents(world: World): List<ShapedRecipeComponent>? = recipeHelpRecipeId?.let {
