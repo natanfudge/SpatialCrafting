@@ -1,17 +1,25 @@
 package spatialcrafting.compat.rei
 
 import com.mojang.blaze3d.platform.GlStateManager
+import me.shedaniel.rei.gui.widget.EntryWidget
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.GuiLighting
 import net.minecraft.item.ItemStack
-
-class HighlightableSlotWidget(x: Int, y: Int, itemStackList: List<ItemStack>, drawBackground: Boolean = true,
+class HighlightableSlotWidget(val x: Int,val y: Int, itemStackList: List<ItemStack>, drawBackground: Boolean = true,
                               showToolTips: Boolean = true, clickToMoreRecipes: Boolean = true,
                               val highlighted: () -> Boolean,
                               itemCountOverlay: (ItemStack) -> String = { "" },
                               extraTooltips: ((ItemStack) -> List<String>)? = null)
-    : SlotWidget(x, y, SlotItemStackRenderer(itemStackList, itemCountOverlay, extraTooltips), drawBackground, showToolTips, clickToMoreRecipes) {
+    : EntryWidget(x, y, SlotItemStackRenderer(itemCountOverlay, extraTooltips)) {
 
+    init {
+        background(drawBackground)
+        tooltips(showToolTips)
+        interactable(clickToMoreRecipes)
+
+        entries(itemStackList.map { it.reiEntry })
+
+    }
     override fun render(mouseX: Int, mouseY: Int, delta: Float) {
         super.render(mouseX, mouseY, delta)
         if (highlighted()) {
