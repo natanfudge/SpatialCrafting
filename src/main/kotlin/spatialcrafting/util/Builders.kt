@@ -84,6 +84,7 @@ object Builders {
                       requiresTool: Boolean = false,
                       burnable: Boolean = false,
                       replaceable: Boolean = false,
+//                      opaque : Boolean = true
                       pistonBehavior: PistonBehavior = PistonBehavior.NORMAL
     ): Block.Settings = Block.Settings.of(Material(
             materialColor,
@@ -101,6 +102,7 @@ object Builders {
         slipperiness(slipperiness)
         strength(hardness, resistance)
         if (dropsLike != null) dropsLike(dropsLike)
+        nonOpaque()
     }
 
     /**

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package spatialcrafting.client.gui.widgets
 
 import io.github.cottonmc.cotton.gui.widget.WWidget

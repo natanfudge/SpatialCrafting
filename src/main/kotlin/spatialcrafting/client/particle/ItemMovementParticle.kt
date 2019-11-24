@@ -1,17 +1,11 @@
 package spatialcrafting.client.particle
 
-import com.mojang.blaze3d.platform.GLX
-import com.mojang.blaze3d.platform.GlStateManager
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.particle.Particle
 import net.minecraft.client.particle.ParticleTextureSheet
-import net.minecraft.client.render.BufferBuilder
-import net.minecraft.client.render.BufferBuilderStorage
 import net.minecraft.client.render.Camera
 import net.minecraft.client.render.VertexConsumer
-import net.minecraft.client.render.VertexConsumerProvider.Immediate
-import net.minecraft.client.render.entity.EntityRenderDispatcher
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.entity.ItemEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -33,8 +27,9 @@ abstract class ItemMovementParticle(world: World,
                                     private val itemEntity: ItemEntity,
                                     private val targetLocation: Vec3d
 ) : Particle(world, itemEntity.x, itemEntity.y, itemEntity.z, 0.0, 0.0, 0.0) {
-    private val bufferBuilderStorage  = getMinecraftClient().bufferBuilders
+    private val bufferBuilderStorage = getMinecraftClient().bufferBuilders
     private val entityRenderDispatcher = getMinecraftClient().entityRenderManager
+
     companion object {
 
         fun playItemMovementFromPlayerToMultiblock(player: PlayerEntity,
@@ -85,32 +80,6 @@ abstract class ItemMovementParticle(world: World,
         immediate.draw()
     }
 
-//    override fun buildGeometry(bufferBuilder_1: BufferBuilder?, camera_1: Camera?, magicFloat: Float, float_2: Float, float_3: Float, float_4: Float, float_5: Float, float_6: Float) {
-//
-//
-//        var float7 = (progress.toFloat() + magicFloat) / maxProgress.toFloat()
-//        float7 *= float7
-//        val double1 = itemEntity.x
-//        val double2 = itemEntity.y
-//        val double3 = itemEntity.z
-//        val double4 = targetLocationX(magicFloat)
-//        val double5 = targetLocationY(magicFloat)
-//        val double6 = targetLocationZ(magicFloat)
-//
-//        var double7 = MathHelper.lerp(float7.toDouble(), double1, double4)
-//        var double8 = MathHelper.lerp(float7.toDouble(), double2, double5)
-//        var double9 = MathHelper.lerp(float7.toDouble(), double3, double6)
-//        val int1 = getColorMultiplier(magicFloat)
-//        val int2 = int1 % 65536
-//        val int3 = int1 / 65536
-//        GLX.glMultiTexCoord2f(GLX.GL_TEXTURE1, int2.toFloat(), int3.toFloat())
-//        GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f)
-//        double7 -= cameraX
-//        double8 -= cameraY
-//        double9 -= cameraZ
-//        GlStateManager.enableLighting()
-//        entityRenderManager!!.render(itemEntity, double7, double8, double9, itemEntity.yaw, magicFloat, false)
-//    }
 
     override fun tick() {
         ++progress

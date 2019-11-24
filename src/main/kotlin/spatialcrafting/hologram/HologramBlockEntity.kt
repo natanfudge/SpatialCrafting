@@ -158,7 +158,7 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
 
     fun isEmpty() = getItem().isEmpty
 
-    fun registerInventory(to: AttributeList<*>) = inventory.offerSelfAsAttribute(to, null, null)
+    fun registerInventory(to: AttributeList<*>) = to.offer(inventory)
 
     // Note: we don't change recipe help here because this is only called when the entire multiblock is destroyed
     fun dropInventory() = world!!.dropItemStack(getItem(), pos)

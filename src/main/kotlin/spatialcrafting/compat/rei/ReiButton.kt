@@ -1,6 +1,6 @@
 package spatialcrafting.compat.rei
 
-import com.mojang.blaze3d.platform.GlStateManager
+import com.mojang.blaze3d.systems.RenderSystem
 import me.shedaniel.math.api.Rectangle
 import me.shedaniel.rei.gui.widget.WidgetWithBounds
 import net.minecraft.client.MinecraftClient
@@ -58,9 +58,9 @@ open class ReiButton(
 }
 
 fun emitHoverColor() {
-    GlStateManager.color4f(0.7f, 0.7f, 1.0f, 1.0f)
+    RenderSystem.color4f(0.7f, 0.7f, 1.0f, 1.0f)
 }
 
 fun clearColor() {
-    GlStateManager.color4f(1.0f, 1.0f, 1.0f, 1.0f)
+    RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f)
 }

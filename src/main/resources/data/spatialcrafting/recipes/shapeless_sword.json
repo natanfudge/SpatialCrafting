@@ -1,5 +1,6 @@
 {
   "type": "spatialcrafting:shapeless",
+  "effect": "itemMovement",
   "pattern": [
     [
       "GGG",

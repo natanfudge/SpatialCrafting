@@ -1,11 +1,13 @@
+@file:Suppress("DEPRECATION")
+
 package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.AttributeList
 import alexiil.mc.lib.attributes.AttributeProvider
 import net.minecraft.block.*
 import net.minecraft.block.piston.PistonBehavior
-import net.minecraft.client.render.RenderLayer
 import net.minecraft.entity.EntityContext
+import net.minecraft.entity.EntityType
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.state.StateManager
@@ -14,6 +16,7 @@ import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
 import net.minecraft.world.BlockView
@@ -51,9 +54,18 @@ val IsHidden: BooleanProperty = BooleanProperty.of(IsHiddenPropertyName)
 object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributeProvider, InventoryProvider {
     const val IsHiddenPropertyName = "is_hidden"
 
+
     override fun getInventory(blockState: BlockState?, world: IWorld, pos: BlockPos): SidedInventory {
         return HologramInventoryWrapper(world.getHologramEntity(pos).inventory, pos)
     }
+
+    override fun isTranslucent(state: BlockState?, view: BlockView?, pos: BlockPos?): Boolean = true
+
+    override fun canSuffocate(state: BlockState?, view: BlockView?, pos: BlockPos?): Boolean = false
+
+    override fun isSimpleFullBlock(state: BlockState?, view: BlockView?, pos: BlockPos?) = false
+
+    override fun allowsSpawning(state: BlockState?, view: BlockView?, pos: BlockPos?, type: EntityType<*>?) = false
 
     override fun addAllAttributes(
             world: World,
@@ -118,7 +130,7 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
 
 
     override fun onBreak(world: World, pos: BlockPos, blockState: BlockState?, player: PlayerEntity) {
-        if(world.isClient) return
+        if (world.isClient) return
         val hologramEntity = world.getHologramEntity(pos)
         // This is to make it so in creative mod you won't get unnecessary items. (onBlockRemoved is called afterwards)
         val extractedItem = hologramEntity.extractItem()

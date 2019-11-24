@@ -1,6 +1,7 @@
 package spatialcrafting.hologram
 
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess
+import net.fabricmc.fabric.api.renderer.v1.material.BlendMode
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel
@@ -35,7 +36,7 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
         private const val AlphaMask = (Alpha shl (6 * 4))
         private const val FullRGB = 0xFFFFFF
         private val quadTransform: RenderContext.QuadTransform = RenderContext.QuadTransform { quad ->
-            quad.material(RendererAccess.INSTANCE.renderer.materialFinder().blendMode(0, RenderLayer.getTranslucent()).find())
+            quad.material(RendererAccess.INSTANCE.renderer.materialFinder().blendMode(0, BlendMode.TRANSLUCENT).find())
             // Get the color of the stored stack in all 4 vertices
             val c0 = quad.spriteColor(0, 0)
             val c1 = quad.spriteColor(1, 0)
@@ -62,12 +63,12 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
             true
         }
 
-        fun hologramCubeMesh(): Mesh {
+        private fun hologramCubeMesh(): Mesh {
             val baseColor = 0xFF_FF_FF_FF.toInt()
             val renderer = RendererAccess.INSTANCE.renderer
             val mb = renderer.meshBuilder()
             val qe = mb.emitter
-            val mat = renderer.materialFinder().blendMode(0, RenderLayer.getTranslucent()).find()
+            val mat = renderer.materialFinder().blendMode(0, BlendMode.TRANSLUCENT).find()
             val atlas = MinecraftClient.getInstance().getSpriteAtlas(PlayerContainer.field_21668)
             val spriteBase = atlas.apply(Texture)
             qe.material(mat).square(Direction.UP, 0f, 0f, 1f, 1f, 0f)

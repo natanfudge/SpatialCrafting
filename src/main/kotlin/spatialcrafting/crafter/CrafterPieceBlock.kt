@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package spatialcrafting.crafter
 
 import net.minecraft.block.*

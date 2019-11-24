@@ -21,7 +21,8 @@ import spatialcrafting.item.ShapelessSword
 import spatialcrafting.recipe.*
 import spatialcrafting.util.*
 
-//TODO: test on the server
+//TODO: things not working:
+// crafting particles
 
 //TODO: power consumption and example
 //TODO: config file: can store energy
@@ -29,7 +30,6 @@ import spatialcrafting.util.*
 
 const val ModId = "spatialcrafting"
 
-val GuiId = modId("test_gui")
 
 const val MaxCrafterSize = 5
 const val SmallestCrafterSize = 2

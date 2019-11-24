@@ -82,6 +82,7 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
             )
         }
 
+        @Suppress("UNCHECKED_CAST")
         override fun write(buf: PacketByteBuf, recipe: SpatialRecipe) = serializer.write(recipe as T, buf)
 
         override fun read(id: Identifier, buf: PacketByteBuf): SpatialRecipe = serializer.readFrom(buf)

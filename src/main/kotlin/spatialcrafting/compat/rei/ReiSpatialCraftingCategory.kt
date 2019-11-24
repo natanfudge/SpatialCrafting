@@ -1,6 +1,5 @@
 package spatialcrafting.compat.rei
 
-import com.mojang.blaze3d.platform.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
 import me.shedaniel.math.api.Point
 import me.shedaniel.math.api.Rectangle
@@ -23,7 +22,6 @@ import spatialcrafting.compat.rei.util.SwappableChildrenWidget
 import spatialcrafting.crafter.CraftersPieces
 import spatialcrafting.modId
 import spatialcrafting.recipe.ComponentSatisfaction
-import spatialcrafting.util.Client
 import spatialcrafting.util.isWholeNumber
 import java.util.function.Supplier
 import kotlin.math.roundToInt
@@ -143,14 +141,15 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
                 .setStyle(Style().setColor(Formatting.DARK_GRAY))
 
 
-        val craftTimeText = object : LabelWidget(
-                Point(startPoint.x + CraftTimeXOffset.ofRecipeSize(),startPoint.y + OutputSlotYOffset.ofRecipeSize() + 20),
+        val craftTimeText = LabelWidget(
+                Point(startPoint.x + CraftTimeXOffset.ofRecipeSize(), startPoint.y + OutputSlotYOffset.ofRecipeSize() + 20),
                 text.asFormattedString()
-        ) {
-            override fun render(mouseX: Int, mouseY: Int, delta: Float) {
-                Client.drawCenteredStringWithoutShadow(font, this.text, x, y, -1)
-            }
-        }
+        ).noShadow()
+//        {
+//            override fun render(mouseX: Int, mouseY: Int, delta: Float) {
+//                Client.drawCenteredStringWithoutShadow(font, this.text, x, y, -1)
+//            }
+//        }
 
         fun refreshLayerWidgets() {
             // Refresh inputs slots
@@ -180,13 +179,7 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
 
         val outputSlot = SlotWidget(x = startPoint.x + OutputSlotXOffset.ofRecipeSize(),
                 y = startPoint.y + OutputSlotYOffset.ofRecipeSize(),
-                itemStack = display.recipe.outputStack, drawBackground = false) {
-            when {
-                it.count == 1 -> ""
-                it.count < 1 -> Formatting.RED.toString() + it.count
-                else -> it.count.toString() + ""
-            }
-        }
+                itemStack = display.recipe.outputStack, drawBackground = false)
 
 
         val background = object : RecipeBaseWidget(bounds) {

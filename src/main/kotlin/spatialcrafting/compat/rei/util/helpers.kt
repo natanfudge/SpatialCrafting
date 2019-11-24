@@ -9,13 +9,7 @@ import spatialcrafting.compat.rei.HighlightableSlotWidget
 
 
 fun SlotWidget(x: Int, y: Int, itemStack: ItemStack, drawBackground: Boolean = true,
-               showToolTips: Boolean = true, clickToMoreRecipes: Boolean = true,
-               itemCountOverlay: (ItemStack) -> String = { "" }): EntryWidget {
-    return SlotWidget(x, y, listOf(itemStack), drawBackground, showToolTips, clickToMoreRecipes, itemCountOverlay)
+               showToolTips: Boolean = true, clickToMoreRecipes: Boolean = true): EntryWidget {
+    return HighlightableSlotWidget(x, y, listOf(itemStack), drawBackground, showToolTips, clickToMoreRecipes, { false })
 }
 
-fun SlotWidget(x: Int, y: Int, itemStackList: List<ItemStack>, drawBackground: Boolean = true,
-               showToolTips: Boolean = true, clickToMoreRecipes: Boolean = true,
-               itemCountOverlay: (ItemStack) -> String = { "" }): EntryWidget {
-    return HighlightableSlotWidget(x, y, itemStackList, drawBackground, showToolTips, clickToMoreRecipes, { false }, itemCountOverlay)
-}

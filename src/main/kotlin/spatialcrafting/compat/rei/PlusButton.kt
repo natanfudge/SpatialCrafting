@@ -1,11 +1,5 @@
 package spatialcrafting.compat.rei
 
-//import com.mojang.blaze3d.platform.GlStateManager
-//import com.mojang.blaze3d.platform.GlStateManager.DestFactor
-//import com.mojang.blaze3d.platform.GlStateManager.SourceFactor
-import com.mojang.blaze3d.platform.GlStateManager
-import com.mojang.blaze3d.platform.GlStateManager.SourceFactor
-import com.mojang.blaze3d.platform.GlStateManager.DestFactor
 import me.shedaniel.math.api.Point
 import me.shedaniel.math.api.Rectangle
 import me.shedaniel.rei.gui.widget.ButtonWidget
@@ -15,7 +9,6 @@ import net.minecraft.text.Style
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
-import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import spatialcrafting.Packets
@@ -26,8 +19,12 @@ import spatialcrafting.crafter.stopRecipeHelpCommon
 import spatialcrafting.recipe.ComponentSatisfaction
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.recipe.getRecipeSatisfaction
-import spatialcrafting.util.*
+import spatialcrafting.util.Client
+import spatialcrafting.util.distanceFrom
+import spatialcrafting.util.getMinecraftClient
+import spatialcrafting.util.sendPacketToServer
 import java.util.*
+
 
 private const val width = 10
 private const val height = 10
@@ -55,7 +52,7 @@ fun getNearestCrafter(world: World, pos: Vec3d) =
 
 class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
                  private var setLayer: (Int, () -> List<ComponentSatisfaction>?) -> Unit, val display: ReiSpatialCraftingDisplay)
-    : ButtonWidget(Rectangle(x, y, width, height),  "+") {
+    : ButtonWidget(Rectangle(x, y, width, height), "+") {
     enum class State {
         NO_NEARBY_CRAFTER,
         NEARBY_CRAFTER_TOO_SMALL,
@@ -133,26 +130,23 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
                 }
 
 
-            }
-            else {
+            } else {
                 state = State.NEARBY_CRAFTER_TOO_SMALL
             }
 
-        }
-        else {
+        } else {
             state = State.NO_NEARBY_CRAFTER
         }
 
-        when (state) {
-            State.ALL_COMPONENTS_AVAILABLE -> emitGreenColor()
-            State.RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS -> emitRedColor()
-            else -> {
-            }
+        val color : Int? = when (state) {
+            State.ALL_COMPONENTS_AVAILABLE -> Green
+            State.RECIPE_HELP_ACTIVE_WITH_MISSING_COMPONENTS -> Red
+            else -> null
         }
 
         if (!shouldHighlightMissingComponents) this.recipeSatisfactionForHighlight = null
 
-        renderLowLevel(mouseX, mouseY, delta)
+        renderLowLevel(mouseX, mouseY, color)
     }
 
     private fun highlightMissingComponents(satisfaction: List<ComponentSatisfaction>) {
@@ -173,64 +167,37 @@ class PlusButton(x: Int, y: Int, val recipe: SpatialRecipe,
     }
 
 
-    private fun renderLowLevel(mouseX: Int, mouseY: Int, delta: Float) {
+    private fun renderLowLevel(mouseX: Int, mouseY: Int, color: Int?) {
         val x = bounds.x
         val y = bounds.y
         val width = bounds.width
         val height = bounds.height
-        minecraft.textureManager.bindTexture(if (ScreenHelper.isDarkModeEnabled()) BUTTON_LOCATION_DARK else BUTTON_LOCATION)
-        val textureOffset = getTextureId(isHovered(mouseX, mouseY))
-        GlStateManager.enableBlend()
-        GlStateManager.blendFuncSeparate(SourceFactor.SRC_ALPHA.value,
-                DestFactor.ONE_MINUS_SRC_ALPHA.value, SourceFactor.ONE.value, DestFactor.ZERO.value)
-        GlStateManager.blendFunc(SourceFactor.SRC_ALPHA.value, DestFactor.ONE_MINUS_SRC_ALPHA.value)
-        //Four Corners
-
-        //Four Corners
-        //Four Corners
-        blit(x, y, 0, textureOffset * 80, 4, 4)
-        blit(x + width - 4, y, 252, textureOffset * 80, 4, 4)
-        blit(x, y + height - 4, 0, textureOffset * 80 + 76, 4, 4)
-        blit(x + width - 4, y + height - 4, 252, textureOffset * 80 + 76, 4, 4)
-
-        //Sides
-
-
-        //Sides
-        //Sides
-        blit(x + 4, y, 4, textureOffset * 80, MathHelper.ceil((width - 8) / 2f), 4)
-        blit(x + 4, y + height - 4, 4, textureOffset * 80 + 76, MathHelper.ceil((width - 8) / 2f), 4)
-        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y + height - 4, 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80 + 76, MathHelper.floor((width - 8) / 2f), 4)
-        blit(x + 4 + MathHelper.ceil((width - 8) / 2f), y, 252 - MathHelper.floor((width - 8) / 2f), textureOffset * 80, MathHelper.floor((width - 8) / 2f), 4)
-
-
-        var i = y + 4
-        while (i < y + height - 4) {
-            blit(x, i, 0, 4 + textureOffset * 80, MathHelper.ceil(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76))
-            blit(x + MathHelper.ceil(width / 2f), i, 256 - MathHelper.floor(width / 2f), 4 + textureOffset * 80, MathHelper.floor(width / 2f), MathHelper.clamp(y + height - 4 - i, 0, 76))
-            i += 76
-        }
-
+        renderBackground(x, y, width, height, getTextureId(isHovered(mouseX, mouseY)))
 
         var colour = 14737632
         if (!enabled) {
             colour = 10526880
-        }
-        else if (isHovered(mouseX, mouseY)) {
+        } else if (isHovered(mouseX, mouseY)) {
             colour = 16777120
         }
 
+        if (color != null) fillGradient(x, y, x + width, y + height, color, color)
         drawCenteredString(font, text, x + width / 2, y + (height - 8) / 2, colour)
 
-        if (tooltips.isPresent) if (!focused && containsMouse(mouseX, mouseY)) ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(*tooltips.get().split("\n").toTypedArray())) else if (focused) ScreenHelper.getLastOverlay().addTooltip(QueuedTooltip.create(Point(x + width / 2, y + height / 2), *tooltips.get().split("\n").toTypedArray()))
+        if (tooltips.isPresent) {
+            if (!focused && containsMouse(mouseX, mouseY)) {
+                ScreenHelper.getLastOverlay()
+                        .addTooltip(QueuedTooltip.create(*tooltips.get().split("\n".toRegex()).toTypedArray()))
+            } else if (focused) {
+                ScreenHelper.getLastOverlay()
+                        .addTooltip(QueuedTooltip.create(Point(x + width / 2, y + height / 2),
+                                *tooltips.get().split("\n".toRegex()).toTypedArray())
+                        )
+            }
+        }
     }
 
-
-    private fun emitRedColor() {
-        GlStateManager.color4f(1f, 0f, 0f, 1.0f)
-    }
-
-    private fun emitGreenColor() {
-        GlStateManager.color4f(0f, 1f, 0f, 1.0f)
-    }
 }
+
+private const val Red : Int = 0xA0ff0000.toInt()
+private const val Green  : Int = 0xA000ff00.toInt()

@@ -1,5 +1,6 @@
 {
   "type": "spatialcrafting:shaped",
+  "effect": "itemMovement",
   "pattern": [
     [
       "I I",

@@ -80,8 +80,6 @@ class ClientModInitializationContext(@PublishedApi internal val modId: String) {
                                           rotationContainer: ModelBakeSettings?, modelId: Identifier?): BakedModel? =
                                 bakery()
 
-
-                        //TODO: this is likely broke
                         override fun getTextureDependencies(unbakedModelGetter: Function<Identifier, UnbakedModel>?,
                                                             unresolvedTextureReferences: MutableSet<Pair<String, String>>?):
                                 List<class_4730> = textures.map { class_4730(PlayerContainer.field_21668, it) }
