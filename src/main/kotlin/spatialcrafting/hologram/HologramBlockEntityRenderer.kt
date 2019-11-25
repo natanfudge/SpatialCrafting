@@ -11,7 +11,7 @@ import spatialcrafting.util.d
 import kotlin.math.sin
 
 
-object HologramBlockEntityRenderer : BlockEntityRenderer<HologramBlockEntity>(BlockEntityRenderDispatcher.INSTANCE) {
+class HologramBlockEntityRenderer(dispatcher: BlockEntityRenderDispatcher) : BlockEntityRenderer<HologramBlockEntity>(dispatcher) {
     override fun render(tile: HologramBlockEntity, partialTicks: Float, matrixStack: MatrixStack,
                         vertexConsumerProvider: VertexConsumerProvider, i: Int, j: Int) {
         if (tile.contentsAreTravelling) return
@@ -57,7 +57,7 @@ object HologramBlockEntityRenderer : BlockEntityRenderer<HologramBlockEntity>(Bl
         if (portionOfTimeLeft > 0) {
             val relativeCraftingTargetX = craftingTargetLocation.x - tile.pos.x
             val relativeCraftingTargetY = craftingTargetLocation.y - tile.pos.y
-            val relativeCraftingTargetZ = craftingTargetLocation.z -tile.pos.z
+            val relativeCraftingTargetZ = craftingTargetLocation.z - tile.pos.z
 
 
             // Lean more towards the target crafting location as time goes on
@@ -80,15 +80,16 @@ object HologramBlockEntityRenderer : BlockEntityRenderer<HologramBlockEntity>(Bl
 
     }
 
-
-    //FIXME: thing that pops above head when you place stuff in hologram
-    private const val OffsetAmountMultiplier = 0.05
-    private const val OffsetChangeSpeedMultiplier = 0.125
-    private const val MoveToMidBlockOffset = 0.5
-    private const val HeightIncrease = 0.3
-    private const val SizeMultiplier = 2
-    private const val SpinSpeed = 1
-    private const val MaterialCraftingSpinSpeed = 20
+    companion object {
+        //FIXME: thing that pops above head when you place stuff in hologram
+        private const val OffsetAmountMultiplier = 0.05
+        private const val OffsetChangeSpeedMultiplier = 0.125
+        private const val MoveToMidBlockOffset = 0.5
+        private const val HeightIncrease = 0.3
+        private const val SizeMultiplier = 2
+        private const val SpinSpeed = 1
+        private const val MaterialCraftingSpinSpeed = 20
+    }
 
 
 }

@@ -110,7 +110,7 @@ fun initClient() = initClientOnly(ModId) {
             Packets.StopCraftingParticles.serializer()
     )
 
-    registerBlockEntityRenderer(HologramBlockEntity.Type, HologramBlockEntityRenderer)
+    registerBlockEntityRenderer(HologramBlockEntity.Type, ::HologramBlockEntityRenderer)
     registerKeyBinding(RecipeCreatorKeyBinding)
     registerKeyBindingCategory(SpatialCraftingKeyBindingCategory)
 

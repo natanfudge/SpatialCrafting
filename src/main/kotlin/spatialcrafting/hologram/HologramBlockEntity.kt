@@ -171,14 +171,14 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
     fun getMultiblockOrNull(): CrafterMultiblock? {
         val world = world!!
         // We just go down until we find a crafter
-        var currentPos = pos.downBlockPos()
+        var currentPos = pos.down()
         while (true) {
             val entityBelow = world.getBlockEntity(currentPos)
             if (entityBelow !is HologramBlockEntity) {
                 return if (entityBelow is CrafterPieceEntity) entityBelow.multiblockIn
                 else null
             }
-            currentPos = currentPos.downBlockPos()
+            currentPos = currentPos.down()
         }
     }
 

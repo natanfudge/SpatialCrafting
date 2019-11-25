@@ -10,14 +10,15 @@ import net.fabricmc.fabric.api.client.rendereregistry.v1.BlockEntityRendererRegi
 import net.minecraft.block.Block
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.block.entity.BlockEntityType
-import net.minecraft.class_4730
 import net.minecraft.client.render.RenderLayer
+import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher
 import net.minecraft.client.render.block.entity.BlockEntityRenderer
 import net.minecraft.client.render.model.BakedModel
 import net.minecraft.client.render.model.ModelBakeSettings
 import net.minecraft.client.render.model.ModelLoader
 import net.minecraft.client.render.model.UnbakedModel
 import net.minecraft.client.texture.Sprite
+import net.minecraft.client.util.SpriteIdentifier
 import net.minecraft.container.PlayerContainer
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
@@ -62,8 +63,8 @@ class CommonModInitializationContext(@PublishedApi internal val modId: String,
 class ClientModInitializationContext(@PublishedApi internal val modId: String) {
     fun Block.setRenderLayer(renderLayer: RenderLayer) = BlockRenderLayerMap.INSTANCE.putBlock(this, renderLayer)
 
-    inline fun <reified T : BlockEntity> registerBlockEntityRenderer(be: BlockEntityType<T>, renderer: BlockEntityRenderer<T>) {
-        BlockEntityRendererRegistry.INSTANCE.register(be, renderer)
+    fun <T : BlockEntity> registerBlockEntityRenderer(be: BlockEntityType<T>, rendererFactory: (BlockEntityRenderDispatcher) -> BlockEntityRenderer<T>) {
+        BlockEntityRendererRegistry.INSTANCE.register(be, rendererFactory)
     }
 
     fun registerKeyBinding(keyBinding: FabricKeyBinding) = KeyBindingRegistry.INSTANCE.register(keyBinding)
@@ -76,13 +77,14 @@ class ClientModInitializationContext(@PublishedApi internal val modId: String) {
                     object : UnbakedModel {
                         override fun getModelDependencies(): List<Identifier> = listOf()
 
-                        override fun bake(loader: ModelLoader?, textureGetter: Function<class_4730, Sprite>?,
+
+                        override fun bake(loader: ModelLoader?, textureGetter: Function<SpriteIdentifier, Sprite>?,
                                           rotationContainer: ModelBakeSettings?, modelId: Identifier?): BakedModel? =
                                 bakery()
 
                         override fun getTextureDependencies(unbakedModelGetter: Function<Identifier, UnbakedModel>?,
                                                             unresolvedTextureReferences: MutableSet<Pair<String, String>>?):
-                                List<class_4730> = textures.map { class_4730(PlayerContainer.field_21668, it) }
+                                List<SpriteIdentifier> = textures.map { SpriteIdentifier(PlayerContainer.field_21668, it) }
 
                     }
                 } else null

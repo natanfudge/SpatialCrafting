@@ -35,7 +35,6 @@ val BlockPos.xyz get() = "(x = $x,y = $y,z = $z)"
 fun BlockPos.distanceFrom(otherPos: Vec3d) =
         sqrt((otherPos.x - this.x).squared() + (otherPos.y - this.y).squared() + (otherPos.z - this.z).squared())
 
-fun BlockPos.downBlockPos(): BlockPos = method_10074()
 
 operator fun BlockPos.plus(other: BlockPos): BlockPos = this.add(other)
 operator fun BlockPos.plus(vec3d: Vec3d): Vec3d = this.toVec3d() + vec3d
@@ -103,7 +102,7 @@ fun ItemStack.copy(count: Int): ItemStack = copy().apply { this.count = count }
 
 val ItemConvertible.itemStack get() = ItemStack(this)
 
-inline fun Ingredient.matches(itemStack: ItemStack) = method_8093(itemStack)
+inline fun Ingredient.matches(itemStack: ItemStack) = test(itemStack)
 
 /**
  * Note that what is held in the main hand still exists in the inventory, so it includes that.
@@ -142,8 +141,9 @@ fun World.getInventoryIn(pos: BlockPos): Inventory? {
     // Fuck you notch
     if (blockEntityInventory is ChestBlockEntity) {
         val blockState = world.getBlockState(pos)
-        if (blockState.block is ChestBlock) {
-            return ChestBlock.getInventory(blockState, this, pos, true)
+        val block = blockState.block
+        if (block is ChestBlock) {
+            return ChestBlock.getInventory(block, blockState, this, pos, true)
         }
     }
 
@@ -166,7 +166,7 @@ private fun Inventory.canInsert(slot: Int, stack: ItemStack, direction: Directio
 }
 
 private fun Inventory.distributeToAvailableSlots(stack: ItemStack, acceptEmptySlots: Boolean, direction: Direction): ItemStack {
-    val maxStackSize = min(invMaxStackAmount,stack.maxCount)
+    val maxStackSize = min(invMaxStackAmount, stack.maxCount)
     var stackCountLeftToDistribute = stack.count
     for (slot in availableSlots(direction)) {
         if (!canInsert(slot, stack, direction)) continue
