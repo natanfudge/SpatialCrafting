@@ -3,7 +3,6 @@
 package spatialcrafting.crafter
 
 import net.minecraft.block.*
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -31,16 +30,9 @@ val CraftersPieces = mapOf(
         5 to CrafterPieceBlock(5)
 )
 
-inline fun <reified T> BlockEntity?.assertIs(pos: BlockPos? = null, world: IWorld? = null): T {
-    val result = this as? T
-    return (result
-            ?: error("BlockEntity at location ${pos
-                    ?: this?.pos} is not a ${T::class.qualifiedName} as expected. Rather, it is '${this
-                    ?: "AIR"}'." + if (world != null) " This happened on the ${if (world.isClient) "CLIENT" else "SERVER"}" else ""))
 
-}
 
-fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>(pos)
+fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>(pos, this)
 fun World.getCrafterEntityOrNull(pos: BlockPos) = world.getBlockEntity(pos) as? CrafterPieceEntity
 class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
         when (size) {
@@ -54,8 +46,7 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
     override fun getInventory(blockState: BlockState, world: IWorld, pos: BlockPos): SidedInventory {
         if (world is World && world.isServer && Thread.currentThread() == world.server!!.thread) {
             return CrafterPieceInventoryDelegator(pos, world, this)
-        }
-        else return EmptyInventory
+        } else return EmptyInventory
     }
 
 
@@ -107,7 +98,7 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
 
 
     override fun onUse(blockState_1: BlockState, world: World, pos: BlockPos, clickedBy: PlayerEntity?,
-                          hand: Hand, blockHitResult_1: BlockHitResult?): ActionResult {
+                       hand: Hand, blockHitResult_1: BlockHitResult?): ActionResult {
 
         // Prevent it being called twice
         if (hand == Hand.OFF_HAND) return ActionResult.FAIL
@@ -127,8 +118,7 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
         if (matches.isEmpty()) {
             clickedBy?.sendMessage(TranslatableText("message.spatialcrafting.no_match"))
             return ActionResult.SUCCESS
-        }
-        else craft(matches, world, multiblockIn, pos, automated = false)
+        } else craft(matches, world, multiblockIn, pos, automated = false)
 
         return ActionResult.SUCCESS
     }

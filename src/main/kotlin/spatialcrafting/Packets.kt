@@ -22,6 +22,7 @@ import spatialcrafting.client.particle.playAllCraftParticles
 import spatialcrafting.crafter.*
 import spatialcrafting.hologram.CraftingItemMovementData
 import spatialcrafting.hologram.HologramBlockEntity
+import spatialcrafting.hologram.getHologramEntity
 import spatialcrafting.recipe.CraftingEffect
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.util.*
@@ -77,7 +78,7 @@ object Packets {
     data class UpdateHologramContent(val hologramPos: BlockPos, val newItem: ItemStack) : S2CPacket<UpdateHologramContent> {
         override val serializer get() = serializer()
         override fun use(context: PacketContext) {
-            val hologram = context.world.getBlockEntity(hologramPos).assertIs<HologramBlockEntity>(hologramPos)
+            val hologram = context.world.getHologramEntity(hologramPos)
             if (newItem.isEmpty) {
                 hologram.extractItem()
             }

@@ -163,7 +163,7 @@ curseforge {
         id = prop("curseforge_id")
         releaseType = "release"
         addGameVersion("Fabric")
-        addGameVersion(minecraft_version)
+        addGameVersion(prop("curseforge_mc_version"))
         changelogType = "markdown"
         changelog = file("changelog.md")
 
