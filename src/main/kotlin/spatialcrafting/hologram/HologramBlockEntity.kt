@@ -128,7 +128,8 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
      * Inserts only one of the itemStack
      * Specify multiblock to reduce overhead
      */
-    fun insertItem( itemStack: ItemStack,multiblock: CrafterMultiblock = getMultiblock()) {
+    fun insertItem( itemStack: ItemStack,multiblock: CrafterMultiblock? = null) {
+        val multiblock = multiblock ?: getMultiblockOrNull() ?: complainAboutMissingMultiblock().run { return }
         val world = world!!
         markDirty()
         assert(isEmpty())
@@ -149,7 +150,8 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
     /**
      * May return an empty stack
      */
-    fun extractItem(multiblock: CrafterMultiblock = getMultiblock()): ItemStack {
+    fun extractItem(multiblock: CrafterMultiblock? = null): ItemStack {
+        val multiblock = multiblock ?: getMultiblockOrNull() ?: complainAboutMissingMultiblock().run { return ItemStack.EMPTY}
         if(!this.isEmpty()) multiblock.filledHologramsCount--
         val item = inventory.extract(1)
         markDirty()
@@ -164,9 +166,6 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
     fun dropInventory() = world!!.dropItemStack(getItem(), pos)
 
 
-    fun getMultiblock() = getMultiblockOrNull()
-            ?: error("A hologram should always have a multiblock," +
-                    " and yet when looking at a crafter piece below at position $pos he did not have a multiblock instance.")
 
     fun getMultiblockOrNull(): CrafterMultiblock? {
         val world = world!!
@@ -180,6 +179,13 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
             }
             currentPos = currentPos.down()
         }
+    }
+
+     fun complainAboutMissingMultiblock(){
+        println("********************** IF YOU SEE THIS, THIS IS A BUG, REPORT IT **********************\n" +
+                "A hologram should always have a multiblock," +
+                " and yet when looking at a crafter piece below at position $pos he did not have a multiblock instance.\n" +
+                "*******************************************************************************************")
     }
 
 }

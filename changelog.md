@@ -12,3 +12,5 @@ If recipe help is active, the items will be inserted into the correct places.
 - Fixed inserting into slots more than the allowed amount for that specific item.
 ### 1.2.3 
 - Improved crash diagnostics.
+### 1.2.4
+- Fixed 2 crash cases

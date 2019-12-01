@@ -103,7 +103,7 @@ dependencies {
 
 fun DependencyHandlerScope.fabric() {
     minecraft("com.mojang:minecraft:$minecraft_version")
-    mappings("net.fabricmc:yarn:$yarn_mappings")
+    mappings("net.fabricmc:yarn:$yarn_mappings:v2")
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 }

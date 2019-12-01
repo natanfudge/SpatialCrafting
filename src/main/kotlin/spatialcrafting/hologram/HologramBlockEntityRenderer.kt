@@ -11,7 +11,7 @@ import spatialcrafting.util.d
 import kotlin.math.sin
 
 
-class HologramBlockEntityRenderer(dispatcher: BlockEntityRenderDispatcher) : BlockEntityRenderer<HologramBlockEntity>(dispatcher) {
+class HologramBlockEntityRenderer(dispatcher: BlockEntityRenderDispatcher?) : BlockEntityRenderer<HologramBlockEntity>(dispatcher) {
     override fun render(tile: HologramBlockEntity, partialTicks: Float, matrixStack: MatrixStack,
                         vertexConsumerProvider: VertexConsumerProvider, i: Int, j: Int) {
         if (tile.contentsAreTravelling) return

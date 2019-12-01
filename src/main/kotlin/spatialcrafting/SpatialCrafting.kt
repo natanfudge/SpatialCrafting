@@ -1,6 +1,5 @@
 package spatialcrafting
 
-import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.item.ItemGroup
@@ -93,6 +92,7 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 }
 
 
+
 @Suppress("unused")
 fun initClient() = initClientOnly(ModId) {
 
@@ -110,7 +110,9 @@ fun initClient() = initClientOnly(ModId) {
             Packets.StopCraftingParticles.serializer()
     )
 
-    registerBlockEntityRenderer(HologramBlockEntity.Type, ::HologramBlockEntityRenderer)
+    registerBlockEntityRenderer(HologramBlockEntity.Type) {
+        HologramBlockEntityRenderer(it)
+    }
     registerKeyBinding(RecipeCreatorKeyBinding)
     registerKeyBindingCategory(SpatialCraftingKeyBindingCategory)
 

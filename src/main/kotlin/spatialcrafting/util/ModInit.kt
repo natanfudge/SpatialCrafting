@@ -63,7 +63,7 @@ class CommonModInitializationContext(@PublishedApi internal val modId: String,
 class ClientModInitializationContext(@PublishedApi internal val modId: String) {
     fun Block.setRenderLayer(renderLayer: RenderLayer) = BlockRenderLayerMap.INSTANCE.putBlock(this, renderLayer)
 
-    fun <T : BlockEntity> registerBlockEntityRenderer(be: BlockEntityType<T>, rendererFactory: (BlockEntityRenderDispatcher) -> BlockEntityRenderer<T>) {
+    fun <T : BlockEntity> registerBlockEntityRenderer(be: BlockEntityType<T>, rendererFactory: (BlockEntityRenderDispatcher?) -> BlockEntityRenderer<T>) {
         BlockEntityRendererRegistry.INSTANCE.register(be, rendererFactory)
     }
 

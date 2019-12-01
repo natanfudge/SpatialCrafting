@@ -24,7 +24,6 @@ import net.minecraft.world.World
 import spatialcrafting.client.gui.RecipeCreatorGui
 import spatialcrafting.client.gui.RecipeCreatorScreen
 import spatialcrafting.client.keybinding.RecipeCreatorKeyBinding
-import spatialcrafting.util.assertIs
 import spatialcrafting.crafter.stopCrafting
 import spatialcrafting.hologram.HologramBlock.IsHiddenPropertyName
 import spatialcrafting.util.*
@@ -135,9 +134,9 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
         val extractedItem = hologramEntity.extractItem()
         // Cancel crafting if needed
         if (!extractedItem.isEmpty) {
-            val multiblock = hologramEntity.getMultiblock()
+            val multiblock = hologramEntity.getMultiblockOrNull()
+                    ?: hologramEntity.complainAboutMissingMultiblock().run { return }
             if (multiblock.isCrafting) multiblock.stopCrafting(world)
-
 
         }
 

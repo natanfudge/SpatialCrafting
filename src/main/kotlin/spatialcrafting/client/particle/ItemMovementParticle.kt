@@ -31,7 +31,7 @@ abstract class ItemMovementParticle(world: World,
     private val entityRenderDispatcher = getMinecraftClient().entityRenderManager
 
     companion object {
-
+//FIXME: this only displays for the player doing it
         fun playItemMovementFromPlayerToMultiblock(player: PlayerEntity,
                                                    itemsFromPlayerToMultiblock: List<Pair<BlockPos, ItemStack>>,
                                                    itemsFromMultiblockToPlayer: List<Pair<BlockPos, ItemStack>>) {
