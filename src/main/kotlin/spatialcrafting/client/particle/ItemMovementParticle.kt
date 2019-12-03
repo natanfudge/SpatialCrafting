@@ -31,7 +31,7 @@ abstract class ItemMovementParticle(world: World,
     private val entityRenderDispatcher = getMinecraftClient().entityRenderManager
 
     companion object {
-//FIXME: this only displays for the player doing it
+        //FIXME: this only displays for the player doing it
         fun playItemMovementFromPlayerToMultiblock(player: PlayerEntity,
                                                    itemsFromPlayerToMultiblock: List<Pair<BlockPos, ItemStack>>,
                                                    itemsFromMultiblockToPlayer: List<Pair<BlockPos, ItemStack>>) {
@@ -76,7 +76,7 @@ abstract class ItemMovementParticle(world: World,
         val vec3d: Vec3d = camera.pos
         entityRenderManager.render(itemEntity, h - vec3d.getX(), i - vec3d.getY(),
                 j - vec3d.getZ(), itemEntity.yaw, tickDelta, MatrixStack(), immediate,
-                entityRenderDispatcher.method_23839(itemEntity, tickDelta))
+                entityRenderDispatcher.getLight(itemEntity, tickDelta))
         immediate.draw()
     }
 
@@ -102,7 +102,7 @@ class ItemMovementParticleToPlayer(world: World,
                                    itemEntity: ItemEntity,
                                    private val targetPlayer: PlayerEntity
 ) : ItemMovementParticle(world, itemEntity, targetPlayer.pos) {
-    override fun targetLocationX(magicFloat: Float) = MathHelper.lerp(magicFloat.toDouble(), targetPlayer.prevRenderX, targetPlayer.x)
-    override fun targetLocationY(magicFloat: Float) = MathHelper.lerp(magicFloat.toDouble(), targetPlayer.prevRenderY, targetPlayer.y)
-    override fun targetLocationZ(magicFloat: Float) = MathHelper.lerp(magicFloat.toDouble(), targetPlayer.prevRenderZ, targetPlayer.z)
+    override fun targetLocationX(magicFloat: Float) = MathHelper.lerp(magicFloat.toDouble(), targetPlayer.lastRenderX, targetPlayer.x)
+    override fun targetLocationY(magicFloat: Float) = MathHelper.lerp(magicFloat.toDouble(), targetPlayer.lastRenderY, targetPlayer.y)
+    override fun targetLocationZ(magicFloat: Float) = MathHelper.lerp(magicFloat.toDouble(), targetPlayer.lastRenderZ, targetPlayer.z)
 }

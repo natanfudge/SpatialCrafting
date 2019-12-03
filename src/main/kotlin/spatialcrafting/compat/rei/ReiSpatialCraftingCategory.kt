@@ -9,7 +9,7 @@ import me.shedaniel.rei.gui.widget.LabelWidget
 import me.shedaniel.rei.gui.widget.RecipeBaseWidget
 import me.shedaniel.rei.gui.widget.Widget
 import net.minecraft.client.MinecraftClient
-import net.minecraft.client.render.GuiLighting
+import net.minecraft.client.render.DiffuseLighting
 import net.minecraft.client.resource.language.I18n
 import net.minecraft.item.ItemStack
 import net.minecraft.text.LiteralText
@@ -186,7 +186,7 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
             override fun render(mouseX: Int, mouseY: Int, delta: Float) {
                 super.render(mouseX, mouseY, delta)
                 RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f)
-                GuiLighting.disable()
+                DiffuseLighting.disable()
                 MinecraftClient.getInstance().textureManager.bindTexture(Background.ofRecipeSize())
                 blit(startPoint.x + WidthIncrease, startPoint.y, 0, 0, RecipeWidth.ofRecipeSize(),
                         RecipeHeight.ofRecipeSize())
