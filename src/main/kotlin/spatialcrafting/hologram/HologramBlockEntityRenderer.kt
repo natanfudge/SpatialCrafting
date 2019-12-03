@@ -18,6 +18,7 @@ class HologramBlockEntityRenderer(dispatcher: BlockEntityRenderDispatcher?) : Bl
         val stack = tile.getItem()
         if (!stack.isEmpty) {
             GL.begin(matrixStack) {
+
                 val time = tile.world!!.time + partialTicks
 
                 // Changes the position of the item to float up and down like a sine wave.

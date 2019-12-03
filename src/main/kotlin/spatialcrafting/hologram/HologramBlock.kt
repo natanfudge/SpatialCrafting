@@ -91,10 +91,12 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
         defaultState = stateManager.defaultState.with(IsHidden, false)
     }
 
+    private val halfBlock = VoxelShapes.cuboid(0.25, 0.25, 0.25, 0.75, 0.75, 0.75)
 
-    override fun getOutlineShape(blockState: BlockState, blockView_1: BlockView?, blockPos_1: BlockPos?, entityContext_1: EntityContext?): VoxelShape {
-        return if (blockState.get(IsHidden)) VoxelShapes.empty()
-        else super.getOutlineShape(blockState, blockView_1, blockPos_1, entityContext_1)
+
+    override fun getOutlineShape(state: BlockState, view: BlockView?, pos: BlockPos, ePos: EntityContext): VoxelShape {
+        return if (state.get(IsHidden)) VoxelShapes.empty()
+        else halfBlock
     }
 
 

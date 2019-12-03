@@ -9,7 +9,6 @@ import spatialcrafting.client.gui.widgets.core.*
 import spatialcrafting.compat.rei.getNearestCrafter
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.RecipeCreatorCurrentLayerInactive
-import spatialcrafting.recipe.CraftingEffect
 import spatialcrafting.util.Client
 import spatialcrafting.util.getMinecraftClient
 import spatialcrafting.util.sendPacketToServer
@@ -57,7 +56,7 @@ class RecipeCreatorGui : LightweightGuiDescription() {
                         recompose(this@Column)
                     }
                     VerticalSpace(2)
-                    Text("Use Item","Movement Effect")
+                    Text("Use Item", "Movement Effect")
                     VerticalSpace(1)
                     Switch(enabled = options.useItemMovementEffect).onClick {
                         options.useItemMovementEffect = !options.useItemMovementEffect
@@ -156,15 +155,14 @@ private fun DevWidget.DisableableImage(enabledTexture: String,
         if (enabled) HoverableImage(enabledTexture, width, height).onClick {
             Client.playButtonClickSound()
             onClick(it)
-        }.tooltip (if (hoverText != "") hoverText else null)
+        }.tooltip(if (hoverText != "") hoverText else null)
         else Image(disabledTexture, width, height)
 
 
 private fun DevWidget.changeCurrentLayer(nearestCrafter: CrafterMultiblock, change: Int, recompositionTarget: DevWidget) {
     if (nearestCrafter.recipeCreatorCurrentLayer == RecipeCreatorCurrentLayerInactive) {
         nearestCrafter.recipeCreatorCurrentLayer = 0
-    }
-    else {
+    } else {
         nearestCrafter.recipeCreatorCurrentLayer += change
     }
 

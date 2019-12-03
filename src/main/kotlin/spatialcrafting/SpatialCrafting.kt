@@ -6,6 +6,7 @@ import net.minecraft.item.ItemGroup
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
 import spatialcrafting.client.Sounds
+import spatialcrafting.client.keybinding.MinimizeHologramsKeyBinding
 import spatialcrafting.client.keybinding.RecipeCreatorKeyBinding
 import spatialcrafting.client.keybinding.SpatialCraftingKeyBindingCategory
 import spatialcrafting.crafter.CrafterPieceEntity
@@ -113,8 +114,10 @@ fun initClient() = initClientOnly(ModId) {
     registerBlockEntityRenderer(HologramBlockEntity.Type) {
         HologramBlockEntityRenderer(it)
     }
-    registerKeyBinding(RecipeCreatorKeyBinding)
+
     registerKeyBindingCategory(SpatialCraftingKeyBindingCategory)
+    registerKeyBinding(RecipeCreatorKeyBinding)
+    registerKeyBinding(MinimizeHologramsKeyBinding)
 
 }
 

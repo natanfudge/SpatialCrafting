@@ -24,7 +24,7 @@ class LibGuiWidgetClass(val libGuiWidget: WWidget,
     override val minimumWidth = width
 
     override fun getLayout(constraints: Constraints) = runtimeWidget(constraints) {
-        libGuiWidget.paintBackground(constraints.x, constraints.y)
+        libGuiWidget.paintBackground(constraints.x, constraints.y, getClientMouseX(), getClientMouseY())
         libGuiWidget.paintForeground(constraints.x, constraints.y, getClientMouseX(), getClientMouseY())
     }.also { libGuiWidget.setSize(constraints.width, constraints.height) }
 

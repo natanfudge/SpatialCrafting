@@ -2,7 +2,6 @@ package spatialcrafting.util
 
 import com.mojang.datafixers.util.Pair
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
-import net.fabricmc.fabric.api.client.keybinding.FabricKeyBinding
 import net.fabricmc.fabric.api.client.keybinding.KeyBindingRegistry
 import net.fabricmc.fabric.api.client.model.ModelLoadingRegistry
 import net.fabricmc.fabric.api.client.model.ModelVariantProvider
@@ -61,13 +60,15 @@ class CommonModInitializationContext(@PublishedApi internal val modId: String,
 }
 
 class ClientModInitializationContext(@PublishedApi internal val modId: String) {
+
     fun Block.setRenderLayer(renderLayer: RenderLayer) = BlockRenderLayerMap.INSTANCE.putBlock(this, renderLayer)
 
     fun <T : BlockEntity> registerBlockEntityRenderer(be: BlockEntityType<T>, rendererFactory: (BlockEntityRenderDispatcher?) -> BlockEntityRenderer<T>) {
         BlockEntityRendererRegistry.INSTANCE.register(be, rendererFactory)
     }
 
-    fun registerKeyBinding(keyBinding: FabricKeyBinding) = KeyBindingRegistry.INSTANCE.register(keyBinding)
+    fun registerKeyBinding(keyBinding: KotlinKeyBinding): Boolean = KeyBindingRegistry.INSTANCE.register(keyBinding)
+
     fun registerKeyBindingCategory(name: String) = KeyBindingRegistry.INSTANCE.addCategory(name)
 
     fun registerBlockModel(blockPath: String, vararg textures: Identifier, bakery: () -> BakedModel) {
@@ -91,6 +92,7 @@ class ClientModInitializationContext(@PublishedApi internal val modId: String) {
             }
         }
     }
+
 }
 
 
