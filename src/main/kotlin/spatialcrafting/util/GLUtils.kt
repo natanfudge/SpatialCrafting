@@ -1,11 +1,13 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package spatialcrafting.util
 
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.client.util.math.Vector3f
 
-class GL(val matrixStack: MatrixStack) {
-    val minecraft: MinecraftClient = MinecraftClient.getInstance()
+inline class GL(val matrixStack: MatrixStack) {
+    val minecraft get() = MinecraftClient.getInstance()
 
     companion object {
         /**
@@ -21,7 +23,7 @@ class GL(val matrixStack: MatrixStack) {
     /**
      * Moves the model to the specified [x] [y] [z] coordinates.
      */
-    fun translate(x: Double, y: Double, z: Double) {
+    inline fun translate(x: Double, y: Double, z: Double) {
         matrixStack.translate(x, y, z)
     }
 
@@ -41,7 +43,7 @@ class GL(val matrixStack: MatrixStack) {
     /**
      * Rotates the model's [x] [y] and [z] axis by the specified amount.
      */
-    fun rotateY(angle: Float) {
+    inline fun rotateY(angle: Float) {
         matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(angle))
     }
 

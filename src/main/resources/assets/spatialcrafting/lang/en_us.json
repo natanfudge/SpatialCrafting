@@ -2,6 +2,8 @@
   "block.spatialcrafting.x2crafter_piece": "Wood-carved Crafter",
   "block.spatialcrafting.crafter_piece.tooltip_1": "Place %d of these in a %dx%d pattern",
   "block.spatialcrafting.crafter_piece.tooltip_2": "to form the multiblock",
+  "block.spatialcrafting.crafter_piece.tooltip_big_1": "After placing, Hold Y (by default) to",
+  "block.spatialcrafting.crafter_piece.tooltip_big_2": "clear up space for you to insert things",
   "block.spatialcrafting.x3crafter_piece": "Stone-formed crafter",
   "block.spatialcrafting.x4crafter_piece": "Ironforged crafter",
   "block.spatialcrafting.x5crafter_piece": "Gem-infused Crafter",

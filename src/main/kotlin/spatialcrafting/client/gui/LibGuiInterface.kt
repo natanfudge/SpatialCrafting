@@ -41,12 +41,11 @@ fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidg
     val absoluteX = (screenWidth - width) / 2
     val absoluteY = (screenHeight - height) / 2
 
-    val runtimeRoot: RuntimeWidget = root.layout(Constraints(absoluteX, absoluteY /*- PaddingOffset*/, width, height))
+    val runtimeRoot: RuntimeWidget = root.layout(Constraints(absoluteX, absoluteY , width, height))
 
     val libGuiRoot = object : WWidget() {
         override fun paintBackground(x: Int, y: Int) {
             runtimeRoot.draw()
-//            runtimeRoot.walk { it.draw() }
         }
     }
 
@@ -64,9 +63,6 @@ fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidg
 
     }
     rootPanel.setSize(width, height)
-
-
-
 
     logDebug {
         "Opening screen with widget tree =\n ${runtimeRoot.infoString()}"

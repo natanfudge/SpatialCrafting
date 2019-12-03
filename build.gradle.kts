@@ -12,7 +12,7 @@ plugins {
     `maven-publish`
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("com.wynprice.cursemaven") version "1.2.2"
+    id("com.wynprice.cursemaven") version "2.1.1"
     id("com.matthewprenger.cursegradle") version "1.4.0"
 }
 
@@ -44,7 +44,6 @@ val drawer_version: String by project
 val fabric_keybindings_version: String by project
 val curseforge_api_key: String by project
 val scheduler_version: String by project
-
 
 
 
@@ -97,6 +96,8 @@ dependencies {
     devEnvMod("mcp.mobius.waila:Hwyla:$waila_version")
 //    devEnvMod("com.jamieswhiteshirt:developer-mode:1.0.14")
     devEnvMod("gamemodeoverhaul:GamemodeOverhaul:1.0.1.0")
+
+    devEnvMod("curse.maven:data-loader:2749923")
 
 
 }

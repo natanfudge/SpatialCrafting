@@ -6,6 +6,7 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderer
 import net.minecraft.client.render.model.json.ModelTransformation
 import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.item.ItemStack
+import spatialcrafting.client.keybinding.MinimizeHologramsKeyBinding
 import spatialcrafting.util.GL
 import spatialcrafting.util.d
 import kotlin.math.sin
@@ -21,21 +22,27 @@ class HologramBlockEntityRenderer(dispatcher: BlockEntityRenderDispatcher?) : Bl
 
                 val time = tile.world!!.time + partialTicks
 
+                val offsetAmountMultiplier = if(MinimizeHologramsKeyBinding.isPressed) 0.03 else OffsetAmountMultiplier
                 // Changes the position of the item to float up and down like a sine wave.
-                val offset = sin((time - tile.lastChangeTime) * OffsetChangeSpeedMultiplier) * OffsetAmountMultiplier
+                val offset = sin((time - tile.lastChangeTime) * OffsetChangeSpeedMultiplier) * offsetAmountMultiplier
 
+                val heightIncrease = if(MinimizeHologramsKeyBinding.isPressed) 0.4 else HeightIncrease
                 val targetX = MoveToMidBlockOffset
-                val targetY = offset + HeightIncrease
+                val targetY = offset + heightIncrease
                 val targetZ = MoveToMidBlockOffset
 
                 if (tile.craftingItemMovement == null) {
                     translate(targetX, targetY, targetZ)
                     // Makes the item bigger
-                    scale(SizeMultiplier, SizeMultiplier, SizeMultiplier) {
+
+                    val sizeMultiplier = if (MinimizeHologramsKeyBinding.isPressed) 1f else SizeMultiplier
+
+                    scale(sizeMultiplier, sizeMultiplier, sizeMultiplier) {
                         rotateY(angle = time * SpinSpeed)
                         minecraft.itemRenderer.method_23178(stack, ModelTransformation.Type.GROUND, i, j,
                                 matrixStack, vertexConsumerProvider)
                     }
+
                 } else {
                     renderCraftingItemMovementAnimation(tile, targetX, targetY, targetZ, tile.craftingItemMovement!!,
                             time, stack, matrixStack, vertexConsumerProvider, i, j)
@@ -82,12 +89,12 @@ class HologramBlockEntityRenderer(dispatcher: BlockEntityRenderDispatcher?) : Bl
     }
 
     companion object {
-        //FIXME: thing that pops above head when you place stuff in hologram
         private const val OffsetAmountMultiplier = 0.05
         private const val OffsetChangeSpeedMultiplier = 0.125
         private const val MoveToMidBlockOffset = 0.5
         private const val HeightIncrease = 0.3
-        private const val SizeMultiplier = 2
+        private const val SizeMultiplier = 2f
+        private const val MinimizedSizeMultiplier = 1.2f
         private const val SpinSpeed = 1
         private const val MaterialCraftingSpinSpeed = 20
     }

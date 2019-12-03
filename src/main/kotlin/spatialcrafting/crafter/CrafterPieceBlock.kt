@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.text.LiteralText
 import net.minecraft.text.Text
 import net.minecraft.text.TranslatableText
 import net.minecraft.util.ActionResult
@@ -29,7 +30,6 @@ val CraftersPieces = mapOf(
         4 to CrafterPieceBlock(4),
         5 to CrafterPieceBlock(5)
 )
-
 
 
 fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>(pos, this)
@@ -70,6 +70,11 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
     override fun buildTooltip(itemstack: ItemStack, blockView: BlockView?, tooltip: MutableList<Text>, tooltipContext: TooltipContext) {
         tooltip.add(TranslatableText("block.spatialcrafting.crafter_piece.tooltip_1", size * size, size, size))
         tooltip.add(TranslatableText("block.spatialcrafting.crafter_piece.tooltip_2"))
+        if (size >= 3) {
+            tooltip.add(LiteralText(""))
+            tooltip.add(TranslatableText("block.spatialcrafting.crafter_piece.tooltip_big_1"))
+            tooltip.add(TranslatableText("block.spatialcrafting.crafter_piece.tooltip_big_2"))
+        }
     }
 
 

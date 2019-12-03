@@ -23,6 +23,7 @@ import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import spatialcrafting.client.gui.RecipeCreatorGui
 import spatialcrafting.client.gui.RecipeCreatorScreen
+import spatialcrafting.client.keybinding.MinimizeHologramsKeyBinding
 import spatialcrafting.client.keybinding.RecipeCreatorKeyBinding
 import spatialcrafting.crafter.stopCrafting
 import spatialcrafting.hologram.HologramBlock.IsHiddenPropertyName
@@ -95,8 +96,11 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
 
 
     override fun getOutlineShape(state: BlockState, view: BlockView?, pos: BlockPos, ePos: EntityContext): VoxelShape {
-        return if (state.get(IsHidden)) VoxelShapes.empty()
-        else halfBlock
+        return when {
+            state.get(IsHidden) -> VoxelShapes.empty()
+            MinimizeHologramsKeyBinding.isPressed -> halfBlock
+            else -> super.getOutlineShape(state, view, pos, ePos)
+        }
     }
 
 
