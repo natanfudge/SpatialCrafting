@@ -22,11 +22,13 @@ class HologramBlockEntityRenderer(dispatcher: BlockEntityRenderDispatcher?) : Bl
 
                 val time = tile.world!!.time + partialTicks
 
-                val offsetAmountMultiplier = if(MinimizeHologramsKeyBinding.isPressed) 0.03 else OffsetAmountMultiplier
+                val offsetAmountMultiplier = if (MinimizeHologramsKeyBinding.isPressed) {
+                    MinimizedOffsetAmountMultiplier
+                } else OffsetAmountMultiplier
                 // Changes the position of the item to float up and down like a sine wave.
                 val offset = sin((time - tile.lastChangeTime) * OffsetChangeSpeedMultiplier) * offsetAmountMultiplier
 
-                val heightIncrease = if(MinimizeHologramsKeyBinding.isPressed) 0.4 else HeightIncrease
+                val heightIncrease = if (MinimizeHologramsKeyBinding.isPressed) MinimizedHeightIncrease else HeightIncrease
                 val targetX = MoveToMidBlockOffset
                 val targetY = offset + heightIncrease
                 val targetZ = MoveToMidBlockOffset
@@ -35,7 +37,7 @@ class HologramBlockEntityRenderer(dispatcher: BlockEntityRenderDispatcher?) : Bl
                     translate(targetX, targetY, targetZ)
                     // Makes the item bigger
 
-                    val sizeMultiplier = if (MinimizeHologramsKeyBinding.isPressed) 1f else SizeMultiplier
+                    val sizeMultiplier = if (MinimizeHologramsKeyBinding.isPressed) MinimizedSizeMultiplier else SizeMultiplier
 
                     scale(sizeMultiplier, sizeMultiplier, sizeMultiplier) {
                         rotateY(angle = time * SpinSpeed)
@@ -90,11 +92,13 @@ class HologramBlockEntityRenderer(dispatcher: BlockEntityRenderDispatcher?) : Bl
 
     companion object {
         private const val OffsetAmountMultiplier = 0.05
+        private const val MinimizedOffsetAmountMultiplier = 0.03
         private const val OffsetChangeSpeedMultiplier = 0.125
         private const val MoveToMidBlockOffset = 0.5
         private const val HeightIncrease = 0.3
+        private const val MinimizedHeightIncrease = 0.4
         private const val SizeMultiplier = 2f
-        private const val MinimizedSizeMultiplier = 1.2f
+        private const val MinimizedSizeMultiplier = 1f
         private const val SpinSpeed = 1
         private const val MaterialCraftingSpinSpeed = 20
     }
