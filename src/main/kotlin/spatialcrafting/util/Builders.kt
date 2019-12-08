@@ -84,8 +84,8 @@ object Builders {
                       requiresTool: Boolean = false,
                       burnable: Boolean = false,
                       replaceable: Boolean = false,
-//                      opaque : Boolean = true
                       pistonBehavior: PistonBehavior = PistonBehavior.NORMAL
+
     ): Block.Settings = Block.Settings.of(Material(
             materialColor,
             isLiquid,
@@ -98,6 +98,24 @@ object Builders {
             pistonBehavior
     )
     ).apply {
+        if (!collidable) noCollision()
+        slipperiness(slipperiness)
+        strength(hardness, resistance)
+        if (dropsLike != null) dropsLike(dropsLike)
+        nonOpaque()
+    }
+
+    /**
+     * Creates a new [Block.Settings] by building its material on the spot.
+     */
+    fun blockSettingsOfMaterial(material : Material,
+                      collidable: Boolean = true,
+                      slipperiness: Float = 0.6F,
+                      hardness: Float = 0.0f,
+                      resistance: Float = 0.0f,
+                      dropsLike: Block? = null
+
+    ): Block.Settings = Block.Settings.of(material).apply {
         if (!collidable) noCollision()
         slipperiness(slipperiness)
         strength(hardness, resistance)

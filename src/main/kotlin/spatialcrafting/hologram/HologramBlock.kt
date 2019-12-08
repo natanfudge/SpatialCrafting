@@ -33,18 +33,19 @@ import spatialcrafting.util.*
 private const val Unbreakable = -1.0f
 private const val Indestructible = 3600000.0f
 
-private val HologramSettings = Builders.blockSettings(
+private val HologramSettings = Builders.blockSettingsOfMaterial(
+        Material.STRUCTURE_VOID,
         collidable = false,
-        materialColor = MaterialColor.WHITE,
-        blocksLight = false,
-        blocksMovement = false,
-        burnable = false,
+//        materialColor = MaterialColor.WHITE,
+//        blocksLight = false,
+//        blocksMovement = false,wher
+//        burnable = false,
         hardness = Unbreakable,
-        resistance = Indestructible,
-        isLiquid = false,
-        isSolid = false,
-        pistonBehavior = PistonBehavior.IGNORE,
-        replaceable = false
+        resistance = Indestructible
+//        isLiquid = false,
+//        isSolid = false,
+//        pistonBehavior = PistonBehavior.IGNORE,
+//        replaceable = false
 )
 
 

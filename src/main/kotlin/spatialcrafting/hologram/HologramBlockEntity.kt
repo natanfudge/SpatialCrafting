@@ -13,7 +13,6 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Tickable
-import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import spatialcrafting.Packets
 import spatialcrafting.crafter.CrafterMultiblock
@@ -128,8 +127,9 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
      * Inserts only one of the itemStack
      * Specify multiblock to reduce overhead
      */
-    fun insertItem( itemStack: ItemStack,multiblock: CrafterMultiblock? = null) {
-        val multiblock = multiblock ?: getMultiblockOrNull() ?: complainAboutMissingMultiblock().run { return }
+    fun insertItem(itemStack: ItemStack, multiblock: CrafterMultiblock? = null) {
+        val multiblock = multiblock ?: getMultiblockOrNull()
+        ?: complainAboutMissingMultiblock().run { return }
         val world = world!!
         markDirty()
         assert(isEmpty())
@@ -151,8 +151,9 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
      * May return an empty stack
      */
     fun extractItem(multiblock: CrafterMultiblock? = null): ItemStack {
-        val multiblock = multiblock ?: getMultiblockOrNull() ?: complainAboutMissingMultiblock().run { return ItemStack.EMPTY}
-        if(!this.isEmpty()) multiblock.filledHologramsCount--
+        val multiblock = multiblock ?: getMultiblockOrNull()
+        ?: complainAboutMissingMultiblock().run { return ItemStack.EMPTY }
+        if (!this.isEmpty()) multiblock.filledHologramsCount--
         val item = inventory.extract(1)
         markDirty()
         return item
@@ -164,7 +165,6 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
 
     // Note: we don't change recipe help here because this is only called when the entire multiblock is destroyed
     fun dropInventory() = world!!.dropItemStack(getItem(), pos)
-
 
 
     fun getMultiblockOrNull(): CrafterMultiblock? {
@@ -181,7 +181,7 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
         }
     }
 
-     fun complainAboutMissingMultiblock(){
+    fun complainAboutMissingMultiblock() {
         println("********************** IF YOU SEE THIS, THIS IS A BUG, REPORT IT **********************\n" +
                 "A hologram should always have a multiblock," +
                 " and yet when looking at a crafter piece below at position $pos he did not have a multiblock instance.\n" +

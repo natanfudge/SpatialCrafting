@@ -59,8 +59,7 @@ minecraft {
 }
 
 repositories {
-    mavenLocal()
-    maven(url = "http://maven.fabricmc.net/")
+    jcenter()
     maven(url = "https://kotlin.bintray.com/kotlinx")
     maven(url = "https://mod-buildcraft.com/maven")
     maven(url = "https://minecraft.curseforge.com/api/maven")
@@ -70,8 +69,9 @@ repositories {
     maven(url = "https://maven.abusedmaster.xyz")
     maven(url = "http://server.bbkr.space:8081/artifactory/libs-release/")
     maven(url = "https://dl.bintray.com/shedaniel/autoconfig1u/")
-    jcenter()
+    mavenLocal()
 
+    maven (url ="https://jitpack.io")
 }
 
 
@@ -99,6 +99,9 @@ dependencies {
 
     devEnvMod("curse.maven:data-loader:2749923")
 
+    devEnvMod("com.lettuce.fudge:notenoughcrashes:1.0.5+1.15-pre6")
+
+    devEnvMod("de.siphalor:mouse-wheelie:1.3.8-local+1.15-pre5")
 
 }
 

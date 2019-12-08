@@ -85,7 +85,7 @@ class ClientModInitializationContext(@PublishedApi internal val modId: String) {
 
                         override fun getTextureDependencies(unbakedModelGetter: Function<Identifier, UnbakedModel>?,
                                                             unresolvedTextureReferences: MutableSet<Pair<String, String>>?):
-                                List<SpriteIdentifier> = textures.map { SpriteIdentifier(PlayerContainer.field_21668, it) }
+                                List<SpriteIdentifier> = textures.map { SpriteIdentifier(PlayerContainer.BLOCK_ATLAS_TEXTURE, it) }
 
                     }
                 } else null

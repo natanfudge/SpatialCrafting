@@ -11,8 +11,6 @@ private fun hotkey(name: String, hotkey: Int, init: KotlinKeyBindingBuilder.() -
 
 val RecipeCreatorKeyBinding = hotkey("open_recipe_creator", GLFW.GLFW_KEY_GRAVE_ACCENT)
 
-//TODO: make the floating items 70% smaller while this is active
-//TODO: on activation, update in a radius of 1 chunk around, and on release, update in a radius of 2 chunks around.
 val MinimizeHologramsKeyBinding = hotkey("minimize_holograms", GLFW.GLFW_KEY_Y) {
     onPressStart {
         logDebug { "Minimize holograms keyBinding press started" }

@@ -104,6 +104,7 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
 
     override fun onUse(blockState_1: BlockState, world: World, pos: BlockPos, clickedBy: PlayerEntity?,
                        hand: Hand, blockHitResult_1: BlockHitResult?): ActionResult {
+        // 5 71 1-51
 
         // Prevent it being called twice
         if (hand == Hand.OFF_HAND) return ActionResult.FAIL

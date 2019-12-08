@@ -68,7 +68,7 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
             val mb = renderer.meshBuilder()
             val qe = mb.emitter
             val mat = renderer.materialFinder().blendMode(0, BlendMode.TRANSLUCENT).find()
-            val atlas = MinecraftClient.getInstance().getSpriteAtlas(PlayerContainer.field_21668)
+            val atlas = MinecraftClient.getInstance().getSpriteAtlas(PlayerContainer.BLOCK_ATLAS_TEXTURE)
             val spriteBase = atlas.apply(Texture)
 
             fun emitSquare(side: Direction) {
@@ -120,7 +120,7 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
     override fun isVanillaAdapter(): Boolean = false
     override fun getQuads(var1: BlockState?, var2: Direction?, var3: Random?): List<BakedQuad> = listOf()
     // Not actually used
-    override fun getSprite(): Sprite = getMinecraftClient().getSpriteAtlas(PlayerContainer.field_21668).apply(Texture)
+    override fun getSprite(): Sprite = getMinecraftClient().getSpriteAtlas(PlayerContainer.BLOCK_ATLAS_TEXTURE).apply(Texture)
 
     override fun useAmbientOcclusion(): Boolean = true
     override fun hasDepthInGui(): Boolean = false
