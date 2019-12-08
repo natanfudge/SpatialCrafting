@@ -18,3 +18,5 @@ If recipe help is active, the items will be inserted into the correct places.
 - Items that have remainders (like buckets and bottles) will now drop their remainders when used as crafting ingredients (Thanks Juuz!).
 - The recipe creator GUI is not longer broken.
 - You can now hold Y (by default) to make holograms smaller. This makes inserting into inner holograms without REI easier. (You should still use REI though.)
+### 1.3.1
+- Fixed holograms being replaceable by water. 
