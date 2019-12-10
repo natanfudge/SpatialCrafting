@@ -28,7 +28,7 @@ val yarn_mappings: String by project
 val loader_version: String by project
 val archives_base_name: String by project
 
-val mod_version = prop("mod_version") + "-" + minecraft_version
+val mod_version = prop("mod_version") + "+" + minecraft_version
 val maven_group: String by project
 val fabric_version: String by project
 val fabric_language_kotlin_version: String by project

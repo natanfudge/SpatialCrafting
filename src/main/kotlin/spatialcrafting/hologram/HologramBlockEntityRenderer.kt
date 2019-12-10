@@ -41,7 +41,7 @@ class HologramBlockEntityRenderer(dispatcher: BlockEntityRenderDispatcher?) : Bl
 
                     scale(sizeMultiplier, sizeMultiplier, sizeMultiplier) {
                         rotateY(angle = time * SpinSpeed)
-                        minecraft.itemRenderer.method_23178(stack, ModelTransformation.Type.GROUND, i, j,
+                        minecraft.itemRenderer.renderItem(stack, ModelTransformation.Type.GROUND, i, j,
                                 matrixStack, vertexConsumerProvider)
                     }
 
@@ -81,7 +81,7 @@ class HologramBlockEntityRenderer(dispatcher: BlockEntityRenderDispatcher?) : Bl
 
             scale(sizeMultiplier, sizeMultiplier, sizeMultiplier) {
                 rotateY(angle = time * MaterialCraftingSpinSpeed)
-                minecraft.itemRenderer.method_23178(stack, ModelTransformation.Type.GROUND, i, j, matrixStack, vertexConsumerProvider)
+                minecraft.itemRenderer.renderItem(stack, ModelTransformation.Type.GROUND, i, j, matrixStack, vertexConsumerProvider)
             }
 
 
