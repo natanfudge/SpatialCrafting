@@ -34,11 +34,7 @@
   "depends": {
     "fabricloader": ">=0.4.0",
     "fabric": "*",
-    "fabric-language-kotlin": ">=1.3.50",
-    "libblockattributes_items" : ">=0.4.10",
-    "libgui" : ">=1.3.3-beta.7",
-    "fabricdrawer": ">=3.2.0-1.15-pre1",
-    "working-scheduler": ">=1.1.3-1.15-pre1"
+    "fabric-language-kotlin": ">=1.3.50"
   },
   "recommends": {
     "roughly-enough-items": "*",

@@ -17,6 +17,6 @@ pluginManagement {
     }
 }
 
-//if (file("../fabric-ktx").exists()) {
+if (file("../fabric-ktx").exists() && (!hasProperty("publish") || !publish)) {
     includeBuild "../fabric-ktx"
-//}
+}

@@ -69,8 +69,7 @@ repositories {
     maven(url = "http://server.bbkr.space:8081/artifactory/libs-snapshot")
     maven(url = "https://maven.abusedmaster.xyz")
     maven(url = "http://server.bbkr.space:8081/artifactory/libs-release/")
-    maven(url = "https://dl.bintray.com/shedaniel/autoconfig1u/")
-
+maven(url = "https://dl.bintray.com/natanfudge/libs")
     maven(url = "https://jitpack.io")
 }
 
@@ -86,12 +85,13 @@ dependencies {
 
     modDependency("net.fabricmc:fabric-language-kotlin:$fabric_language_kotlin_version")
 
-    modDependency("me.shedaniel:RoughlyEnoughItems:$rei_version") {
+    optionalDependency("me.shedaniel:RoughlyEnoughItems:$rei_version") {
         exclude(group = "io.github.prospector.modmenu")
     }
 
     modDependency("com.lettuce.fudge:fabric-drawer:$drawer_version")
-    compile("com.lettuce.fudge:fabric-ktx:${prop("fabric_ktx_version")}")
+    modImplementation("com.lettuce.fudge:fabric-ktx:${prop("fabric_ktx_version")}+$minecraft_version")
+    include("com.lettuce.fudge:fabric-ktx:${prop("fabric_ktx_version")}+$minecraft_version")
     modDependency("com.lettuce.fudge:working-scheduler:$scheduler_version")
 
     devEnvMod("mcp.mobius.waila:Hwyla:$waila_version")
@@ -158,7 +158,7 @@ val remapJar = tasks.getByName<RemapJarTask>("remapJar")
 val remapModpackJar = tasks.create<RemapJarTask>("remapModpackJar") {
     dependsOn(remapJar)
     addNestedDependencies.set(false)
-    forcedNestedDependencies.set(listOf("working-scheduler", "fabric-ktx", "LibGui", "libblockattributes-items","fabric-drawer"))
+    forcedNestedDependencies.set(listOf("working-scheduler", "fabric-ktx", "LibGui", "libblockattributes-items","libblockattributes-core","fabric-drawer"))
     input.set(remapJar.input)
     archiveFileName.set("$archives_base_name-$mod_version-modpack.jar")
 }
@@ -191,11 +191,7 @@ curseforge {
         })
         relations(closureOf<CurseRelation> {
             requiredDependency("fabric-language-kotlin")
-            requiredDependency("libblockattributes")
             requiredDependency("fabric-api")
-            requiredDependency("libgui")
-            requiredDependency("fabric-drawer")
-            requiredDependency("working-scheduler")
             optionalDependency("roughly-enough-items")
         })
     })
@@ -234,6 +230,11 @@ publishing {
 }
 
 
+tasks.withType<RemapJarTask>{
+    doFirst {
+        if(!project.hasProperty("publish") || !prop("publish").toBoolean()) throw IllegalArgumentException("Cannot publish without publish flag!")
+    }
+}
 
 
 tasks.withType<KotlinCompile> {

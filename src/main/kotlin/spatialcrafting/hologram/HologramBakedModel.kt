@@ -107,7 +107,7 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
         )
 
         blockView as RenderAttachedBlockView
-        val stack = blockView.getBlockEntityRenderAttachment(pos) as ItemStack
+        val stack = blockView.getBlockEntityRenderAttachment(pos) as ItemStack? ?: return
         if (!stack.isEmpty) {
             context.pushTransform(quadTransform)
             context.fallbackConsumer().accept(minecraft.itemRenderer.models.getModel(stack))
@@ -127,6 +127,4 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
     override fun getTransformation(): ModelTransformation = ModelHelper.MODEL_TRANSFORM_BLOCK
     override fun isBuiltin(): Boolean = false
     override fun getItemPropertyOverrides(): ModelItemPropertyOverrideList = ModelItemPropertyOverrideList.EMPTY
-
-
 }
