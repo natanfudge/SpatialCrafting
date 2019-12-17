@@ -59,6 +59,7 @@ minecraft {
 }
 
 repositories {
+    mavenLocal()
     jcenter()
     maven(url = "https://kotlin.bintray.com/kotlinx")
     maven(url = "https://mod-buildcraft.com/maven")
@@ -69,9 +70,8 @@ repositories {
     maven(url = "https://maven.abusedmaster.xyz")
     maven(url = "http://server.bbkr.space:8081/artifactory/libs-release/")
     maven(url = "https://dl.bintray.com/shedaniel/autoconfig1u/")
-    mavenLocal()
 
-    maven (url ="https://jitpack.io")
+    maven(url = "https://jitpack.io")
 }
 
 
@@ -91,6 +91,7 @@ dependencies {
     }
 
     modDependency("com.lettuce.fudge:fabric-drawer:$drawer_version")
+    compile("com.lettuce.fudge:fabric-ktx:${prop("fabric_ktx_version")}")
     modDependency("com.lettuce.fudge:working-scheduler:$scheduler_version")
 
     devEnvMod("mcp.mobius.waila:Hwyla:$waila_version")
@@ -99,19 +100,28 @@ dependencies {
 
     devEnvMod("curse.maven:data-loader:2749923")
 
-    devEnvMod("com.lettuce.fudge:notenoughcrashes:1.0.5+1.15-pre6")
-
-    devEnvMod("de.siphalor:mouse-wheelie:1.3.8-local+1.15-pre5")
+    devEnvMod("com.lettuce.fudge:notenoughcrashes:1.0.12+1.15")
 
 }
 
 fun DependencyHandlerScope.fabric() {
     minecraft("com.mojang:minecraft:$minecraft_version")
-    mappings("net.fabricmc:yarn:$yarn_mappings:v2")
+    mappings("net.fabricmc:yarn:$minecraft_version+$yarn_mappings:v2")
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 }
 
+fun DependencyHandlerScope.optionalDependency(dep: String, dependencyConfiguration: Action<ExternalModuleDependency> = Action {}) {
+    modCompileOnly(dep) {
+        dependencyConfiguration.execute(this)
+    }
+
+    modRuntime(dep) {
+        exclude(group = "net.fabricmc.fabric-api")
+        dependencyConfiguration.execute(this)
+    }
+
+}
 
 fun DependencyHandlerScope.modDependency(dep: String, dependencyConfiguration: Action<ExternalModuleDependency> = Action {}) {
     modImplementation(dep) {
@@ -148,6 +158,7 @@ val remapJar = tasks.getByName<RemapJarTask>("remapJar")
 val remapModpackJar = tasks.create<RemapJarTask>("remapModpackJar") {
     dependsOn(remapJar)
     addNestedDependencies.set(false)
+    forcedNestedDependencies.set(listOf("working-scheduler", "fabric-ktx", "LibGui", "libblockattributes-items","fabric-drawer"))
     input.set(remapJar.input)
     archiveFileName.set("$archives_base_name-$mod_version-modpack.jar")
 }
@@ -200,12 +211,7 @@ publishing {
     publications {
         create("standalone", MavenPublication::class.java) {
             // add all the jars that should be included when publishing to maven
-            artifact(remapStandaloneJar) {
-                builtBy(remapStandaloneJar)
-            }
-            artifact(sourcesJar) {
-                builtBy(remapSourcesJar)
-            }
+            artifact(remapStandaloneJar)
             groupId = maven_group
             artifactId = "$archives_base_name-standalone"
             version = mod_version
@@ -213,12 +219,7 @@ publishing {
 
         create("modpack", MavenPublication::class.java) {
             // add all the jars that should be included when publishing to maven
-            artifact(remapModpackJar) {
-                builtBy(remapModpackJar)
-            }
-            artifact(sourcesJar) {
-                builtBy(remapSourcesJar)
-            }
+            artifact(remapModpackJar)
             groupId = maven_group
             artifactId = "$archives_base_name-modpack"
             version = mod_version
@@ -236,6 +237,6 @@ publishing {
 
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.freeCompilerArgs = listOf("-XXLanguage:+InlineClasses", "-Xuse-experimental=kotlin.Experimental")
+    kotlinOptions.freeCompilerArgs = listOf("-XXLanguage:+InlineClasses", "-Xuse-experimental=kotlin.time.ExperimentalTime")
     kotlinOptions.jvmTarget = "1.8"
 }

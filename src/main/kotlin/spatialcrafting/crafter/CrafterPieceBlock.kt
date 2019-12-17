@@ -2,6 +2,7 @@
 
 package spatialcrafting.crafter
 
+import fabricktx.api.*
 import net.minecraft.block.*
 import net.minecraft.client.item.TooltipContext
 import net.minecraft.entity.LivingEntity
@@ -21,28 +22,28 @@ import net.minecraft.world.IWorld
 import net.minecraft.world.World
 import scheduler.Scheduleable
 import spatialcrafting.client.particle.playRoundOfCraftParticles
-import spatialcrafting.util.*
+import spatialcrafting.logDebug
+import spatialcrafting.logWarning
 
 
-val CraftersPieces = mapOf(
-        2 to CrafterPieceBlock(2),
-        3 to CrafterPieceBlock(3),
-        4 to CrafterPieceBlock(4),
-        5 to CrafterPieceBlock(5)
-)
+
+
+//fun craf
+
+private fun settings(size: Int) = Block.Settings.copy(when (size) {
+    2 -> Blocks.OAK_LOG
+    3 -> Blocks.STONE
+    4 -> Blocks.IRON_BLOCK
+    5 -> Blocks.DIAMOND_BLOCK
+    else -> error("unexpected size")
+})
 
 
 fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>(pos, this)
 fun World.getCrafterEntityOrNull(pos: BlockPos) = world.getBlockEntity(pos) as? CrafterPieceEntity
-class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
-        when (size) {
-            2 -> Blocks.OAK_LOG
-            3 -> Blocks.STONE
-            4 -> Blocks.IRON_BLOCK
-            5 -> Blocks.DIAMOND_BLOCK
-            else -> error("unexpected size")
-        }
-)), BlockEntityProvider, Scheduleable, InventoryProvider {
+class CrafterPieceBlock(val size: Int) : MultipleStateBlock<CrafterPieceEntity>(settings(size), ::CrafterPieceEntity),
+         Scheduleable, InventoryProvider {
+
     override fun getInventory(blockState: BlockState, world: IWorld, pos: BlockPos): SidedInventory {
         if (world is World && world.isServer && Thread.currentThread() == world.server!!.thread) {
             return CrafterPieceInventoryDelegator(pos, world, this)
@@ -51,6 +52,16 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
 
 
     companion object {
+        private val craftersPieces = mapOf(
+                2 to CrafterPieceBlock(2),
+                3 to CrafterPieceBlock(3),
+                4 to CrafterPieceBlock(4),
+                5 to CrafterPieceBlock(5)
+        )
+
+        val All = BlockList(craftersPieces.values.toList())
+        fun ofSize(size: Int) = craftersPieces.getValue(size)
+
         const val FinishCraft = 1
         const val BeginCraftSoundLoop = 2
         const val EmitRoundOfCraftingParticles = 3
@@ -64,8 +75,6 @@ class CrafterPieceBlock(val size: Int) : Block(Settings.copy(
 
         super.neighborUpdate(blockState_1, world, pos, block_1, blockPos_2, boolean_1)
     }
-
-    override fun createBlockEntity(var1: BlockView?) = CrafterPieceEntity()
 
     override fun buildTooltip(itemstack: ItemStack, blockView: BlockView?, tooltip: MutableList<Text>, tooltipContext: TooltipContext) {
         tooltip.add(TranslatableText("block.spatialcrafting.crafter_piece.tooltip_1", size * size, size, size))

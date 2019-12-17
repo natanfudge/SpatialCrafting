@@ -1,11 +1,11 @@
 package spatialcrafting.client.gui.widgets.core
 
+import fabricktx.api.getMinecraftClient
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.widgets.NoChildDevWidget
 import spatialcrafting.client.gui.widgets.getClientMouseX
 import spatialcrafting.client.gui.widgets.getClientMouseY
 import spatialcrafting.client.gui.widgets.runtimeWidget
-import spatialcrafting.util.getMinecraftClient
 
 class Overlay : NoChildDevWidget(null) {
     override val minimumHeight = 0

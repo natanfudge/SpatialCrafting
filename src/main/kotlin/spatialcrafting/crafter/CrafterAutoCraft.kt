@@ -1,5 +1,9 @@
 package spatialcrafting.crafter
 
+import fabricktx.api.copy
+import fabricktx.api.isServer
+import fabricktx.api.offerOrDrop
+import fabricktx.api.sendPacket
 import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
@@ -7,10 +11,10 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.Packets
 import spatialcrafting.hologram.getHologramEntity
+import spatialcrafting.logWarning
 import spatialcrafting.recipe.ComponentSatisfaction
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.recipe.getRecipeSatisfaction
-import spatialcrafting.util.*
 
 /**
  * - Checks the recipe matches with the player inventory + multiblock inventory

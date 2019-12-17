@@ -1,8 +1,8 @@
 package spatialcrafting.client.gui
 
+import fabricktx.api.getMinecraftClient
 import io.github.cottonmc.cotton.gui.GuiDescription
 import io.github.cottonmc.cotton.gui.client.CottonClientScreen
-import spatialcrafting.util.getMinecraftClient
 
 
 class RecipeCreatorScreen(description: GuiDescription) : CottonClientScreen(description){

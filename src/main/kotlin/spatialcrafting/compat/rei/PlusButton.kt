@@ -1,5 +1,9 @@
 package spatialcrafting.compat.rei
 
+import fabricktx.api.distanceFrom
+import fabricktx.api.getMinecraftClient
+import fabricktx.api.scheduleRenderUpdate
+import fabricktx.api.sendPacketToServer
 import me.shedaniel.math.api.Point
 import me.shedaniel.math.api.Rectangle
 import me.shedaniel.rei.gui.widget.ButtonWidget
@@ -19,10 +23,6 @@ import spatialcrafting.crafter.stopRecipeHelpCommon
 import spatialcrafting.recipe.ComponentSatisfaction
 import spatialcrafting.recipe.SpatialRecipe
 import spatialcrafting.recipe.getRecipeSatisfaction
-import spatialcrafting.util.Client
-import spatialcrafting.util.distanceFrom
-import spatialcrafting.util.getMinecraftClient
-import spatialcrafting.util.sendPacketToServer
 import java.util.*
 
 
@@ -37,7 +37,7 @@ fun fillInRecipeFromPlayerInventory(crafterMultiblock: CrafterMultiblock, recipe
 
 fun startCrafterRecipeHelp(crafterMultiblock: CrafterMultiblock, recipeId: Identifier) {
     sendPacketToServer(Packets.StartRecipeHelp(crafterMultiblock.arbitraryCrafterPos, recipeId))
-    Client.scheduleRenderUpdate(crafterMultiblock.arbitraryCrafterPos)
+    getMinecraftClient().scheduleRenderUpdate(crafterMultiblock.arbitraryCrafterPos)
     crafterMultiblock.startRecipeHelpCommon(recipeId)
 }
 

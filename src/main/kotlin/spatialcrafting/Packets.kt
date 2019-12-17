@@ -3,17 +3,12 @@
 package spatialcrafting
 
 import drawer.*
+import fabricktx.api.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import net.fabricmc.fabric.api.network.PacketContext
-import net.minecraft.block.Block
-import net.minecraft.block.BlockState
-import net.minecraft.block.Material
-import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
-import net.minecraft.util.Hand
 import net.minecraft.util.Identifier
-import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 import spatialcrafting.client.particle.ItemMovementParticle
@@ -21,24 +16,12 @@ import spatialcrafting.client.particle.centerOfHolograms
 import spatialcrafting.client.particle.playAllCraftParticles
 import spatialcrafting.crafter.*
 import spatialcrafting.hologram.CraftingItemMovementData
-import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.getHologramEntity
 import spatialcrafting.recipe.CraftingEffect
 import spatialcrafting.recipe.SpatialRecipe
-import spatialcrafting.util.*
 import java.util.*
 
-interface C2SPacket<T : Packet<T>> : InternalC2SPacket<T> {
-    override val modId get() = ModId
-}
 
-interface S2CPacket<T : Packet<T>> : InternalS2CPacket<T> {
-    override val modId get() = ModId
-}
-
-interface TwoSidedPacket<T : Packet<T>> : InternalTwoSidedPacket<T> {
-    override val modId get() = ModId
-}
 
 object Packets {
 
@@ -81,20 +64,19 @@ object Packets {
             val hologram = context.world.getHologramEntity(hologramPos)
             if (newItem.isEmpty) {
                 hologram.extractItem()
-            }
-            else {
+            } else {
                 if (hologram.isEmpty()) hologram.insertItem(newItem)
             }
 
 
-            Client.scheduleRenderUpdate(hologramPos)
+            getMinecraftClient().scheduleRenderUpdate(hologramPos)
 
         }
     }
 
 
     @Serializable
-    data class StartCraftingParticles(val anyCrafterPiecePos: BlockPos, private val duration: Long,
+    data class StartCraftingParticles(val anyCrafterPiecePos: BlockPos, private val duration: Double,
                                       private val effect: CraftingEffect) : S2CPacket<StartCraftingParticles> {
         override val serializer get() = serializer()
 
@@ -106,11 +88,10 @@ object Packets {
                     hologram.craftingItemMovement = CraftingItemMovementData(
                             targetLocation = multiblock.centerOfHolograms(),
                             startTime = context.world.time,
-                            endTime = context.world.time + duration
+                            endTime = context.world.time + duration.toLong()
                     )
                 }
-            }
-            else {
+            } else {
                 playAllCraftParticles(context.world, multiblock, duration.ticks)
             }
 
@@ -148,8 +129,7 @@ object Packets {
             val multiblock = getAndValidateMultiblock(anyCrafterPiecePos, context.world) ?: return
             if (context.world.isClient) {
                 multiblock.stopRecipeHelpCommon()
-            }
-            else {
+            } else {
                 multiblock.stopRecipeHelpServer(context.world)
             }
 
@@ -231,14 +211,12 @@ object Packets {
             val multiblock = world.getCrafterEntity(anyCrafterPiecePos).multiblockIn!!
             if (multiblock.isLoadedAndHeightIsValid(world)) {
                 return multiblock
-            }
-            else {
+            } else {
                 logWarning {
                     "Attempt to use packet with unloaded multiblock '$multiblock'! Packet will not apply."
                 }
             }
-        }
-        else {
+        } else {
             logWarning {
                 "Attempt to use packet in unloaded position '$anyCrafterPiecePos'! Packet will not apply."
             }

@@ -1,5 +1,6 @@
 package spatialcrafting.client.gui
 
+import fabricktx.api.getMinecraftClient
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel
 import io.github.cottonmc.cotton.gui.widget.WWidget
@@ -7,9 +8,7 @@ import spatialcrafting.client.gui.widgets.core.Clickable
 import spatialcrafting.client.gui.widgets.core.ColumnClass
 import spatialcrafting.client.gui.widgets.core.Overlay
 import spatialcrafting.client.gui.widgets.core.Stack
-import spatialcrafting.util.getMinecraftClient
-import spatialcrafting.util.logDebug
-import spatialcrafting.util.times
+import spatialcrafting.logDebug
 
 private fun RuntimeWidget.walk(visitor: (RuntimeWidget) -> Unit) {
     visitor(this)
@@ -71,11 +70,11 @@ fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidg
 }
 
 fun RuntimeWidget.infoString(nestingLevel: Int = 0): String =
-        "  " * nestingLevel + "${this.debugIdentifier}($constraints) " +
+        "  ".repeat(nestingLevel)  + "${this.debugIdentifier}($constraints) " +
                 if (runtimeChildren.isNotEmpty()) {
                     "{\n" +
                             runtimeChildren.joinToString("\n") { it.infoString(nestingLevel + 1) } +
-                            "\n${("  " * nestingLevel)}}"
+                            "\n${("  ".repeat(nestingLevel) )}}"
                 }
                 else {
                     ""

@@ -5,6 +5,8 @@ package spatialcrafting.recipe
 import drawer.ForIdentifier
 import drawer.ForIngredient
 import drawer.ForItemStack
+import fabricktx.api.inTicks
+import fabricktx.api.matches
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -13,14 +15,13 @@ import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
 import net.minecraft.world.World
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
-import spatialcrafting.util.Duration
-import spatialcrafting.util.matches
+import kotlin.time.Duration
 
 @Serializable
 class ShapelessSpatialRecipe private constructor(val components: List<ShapelessRecipeComponent>,
                                                  override val minimumCrafterSize: Int,
                                                  override val energyCost: Long,
-                                                 override val _craftTime: Long,
+                                                 override val _craftTime: Double,
                                                  override val outputStack: ItemStack,
                                                  override val identifier: Identifier,
                                                  override val craftingEffect: CraftingEffect) : SpatialRecipe() {
@@ -90,7 +91,7 @@ class ShapelessSpatialRecipe private constructor(val components: List<ShapelessR
             get() = serializer()
 
         override fun build(components: List<ShapedRecipeComponent>, id: Identifier, output: ItemStack,
-                           minimumCrafterSize: Int, energyCost: Long, craftTime: Long, effect: CraftingEffect): ShapelessSpatialRecipe {
+                           minimumCrafterSize: Int, energyCost: Long, craftTime: Duration, effect: CraftingEffect): ShapelessSpatialRecipe {
 
             // We only care about the ingredients and the amount of each one. Position has no meaning.
             val shapelessComponents = components.groupBy { it.ingredient.ids }
@@ -102,7 +103,7 @@ class ShapelessSpatialRecipe private constructor(val components: List<ShapelessR
                     outputStack = output,
                     identifier = id,
                     energyCost = energyCost,
-                    _craftTime = craftTime,
+                    _craftTime = craftTime.inTicks,
                     craftingEffect = effect
             )
         }

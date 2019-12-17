@@ -1,6 +1,7 @@
 package spatialcrafting.hologram
 
 //import net.minecraft.block.RenderLayer
+import fabricktx.api.getMinecraftClient
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode
 import net.fabricmc.fabric.api.renderer.v1.mesh.Mesh
@@ -23,7 +24,6 @@ import net.minecraft.util.math.Direction
 import net.minecraft.world.BlockRenderView
 import spatialcrafting.client.keybinding.MinimizeHologramsKeyBinding
 import spatialcrafting.modId
-import spatialcrafting.util.getMinecraftClient
 import java.util.*
 import java.util.function.Supplier
 

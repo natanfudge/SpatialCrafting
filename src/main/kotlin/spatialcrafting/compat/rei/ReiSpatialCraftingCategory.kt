@@ -1,6 +1,7 @@
 package spatialcrafting.compat.rei
 
 import com.mojang.blaze3d.systems.RenderSystem
+import fabricktx.api.isWholeNumber
 import me.shedaniel.math.api.Point
 import me.shedaniel.math.api.Rectangle
 import me.shedaniel.rei.api.EntryStack
@@ -19,10 +20,9 @@ import net.minecraft.util.Identifier
 import spatialcrafting.compat.rei.util.SlotWidget
 import spatialcrafting.compat.rei.util.SwappableChildWidget
 import spatialcrafting.compat.rei.util.SwappableChildrenWidget
-import spatialcrafting.crafter.CraftersPieces
+import spatialcrafting.crafter.CrafterPieceBlock
 import spatialcrafting.modId
 import spatialcrafting.recipe.ComponentSatisfaction
-import spatialcrafting.util.isWholeNumber
 import java.util.function.Supplier
 import kotlin.math.roundToInt
 
@@ -95,7 +95,7 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
         return id(recipeSize)
     }
 
-    override fun getLogo(): EntryStack = EntryStack.create(ItemStack(CraftersPieces[recipeSize]))
+    override fun getLogo(): EntryStack = EntryStack.create(ItemStack(CrafterPieceBlock.ofSize(recipeSize)))
 
     override fun getCategoryName(): String = I18n.translate("category.rei.spatialcrafting.x$recipeSize")
 
@@ -145,11 +145,7 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
                 Point(startPoint.x + CraftTimeXOffset.ofRecipeSize(), startPoint.y + OutputSlotYOffset.ofRecipeSize() + 20),
                 text.asFormattedString()
         ).noShadow()
-//        {
-//            override fun render(mouseX: Int, mouseY: Int, delta: Float) {
-//                Client.drawCenteredStringWithoutShadow(font, this.text, x, y, -1)
-//            }
-//        }
+
 
         fun refreshLayerWidgets() {
             // Refresh inputs slots

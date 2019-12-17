@@ -19,4 +19,7 @@ If recipe help is active, the items will be inserted into the correct places.
 - The recipe creator GUI is not longer broken.
 - You can now hold Y (by default) to make holograms smaller. This makes inserting into inner holograms without REI easier. (You should still use REI though.)
 ### 1.3.1
-- Fixed holograms being replaceable by water. 
+- Fixed holograms being replaceable by water.
+## 1.14.0
+- The _modpack_ variant no longer requires **LibGUI**, **Lib Block Attributes**, **Fabric Drawer**, and **Working Scheduler**. You now only need **Fabric API** and **Fabric Language Kotlin**.
+- The _standalone_ variant no longer bundles **Roughly Enough Items**. It now only bundles **Fabric Language Kotlin**. 

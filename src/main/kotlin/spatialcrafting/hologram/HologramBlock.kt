@@ -4,8 +4,8 @@ package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.AttributeList
 import alexiil.mc.lib.attributes.AttributeProvider
+import fabricktx.api.*
 import net.minecraft.block.*
-import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.entity.EntityContext
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.player.PlayerEntity
@@ -27,31 +27,23 @@ import spatialcrafting.client.keybinding.MinimizeHologramsKeyBinding
 import spatialcrafting.client.keybinding.RecipeCreatorKeyBinding
 import spatialcrafting.crafter.stopCrafting
 import spatialcrafting.hologram.HologramBlock.IsHiddenPropertyName
-import spatialcrafting.util.*
+import spatialcrafting.logDebug
 
 
 private const val Unbreakable = -1.0f
 private const val Indestructible = 3600000.0f
 
-private val HologramSettings = Builders.blockSettingsOfMaterial(
+private val HologramSettings = Builders.blockSettings(
         Material.STRUCTURE_VOID,
         collidable = false,
-//        materialColor = MaterialColor.WHITE,
-//        blocksLight = false,
-//        blocksMovement = false,wher
-//        burnable = false,
         hardness = Unbreakable,
         resistance = Indestructible
-//        isLiquid = false,
-//        isSolid = false,
-//        pistonBehavior = PistonBehavior.IGNORE,
-//        replaceable = false
 )
 
 
 val IsHidden: BooleanProperty = BooleanProperty.of(IsHiddenPropertyName)
 
-object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributeProvider, InventoryProvider {
+object HologramBlock : SingularStateBlock<HologramBlockEntity>(HologramSettings, ::HologramBlockEntity), AttributeProvider, InventoryProvider {
     const val IsHiddenPropertyName = "is_hidden"
 
 
@@ -81,9 +73,6 @@ object HologramBlock : Block(HologramSettings), BlockEntityProvider, AttributePr
 
     }
     // This must be set to false to make be able to remove an hologram
-
-
-    override fun createBlockEntity(var1: BlockView?) = HologramBlockEntity()
 
     override fun appendProperties(stateFactory: StateManager.Builder<Block, BlockState>) {
         stateFactory.add(IsHidden)

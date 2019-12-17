@@ -1,13 +1,14 @@
 package spatialcrafting.compat.rei
 
 import com.mojang.blaze3d.systems.RenderSystem
+import fabricktx.api.getMinecraftClient
+import fabricktx.api.playButtonClickSound
 import me.shedaniel.math.api.Rectangle
 import me.shedaniel.rei.gui.widget.WidgetWithBounds
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawableHelper
 import net.minecraft.client.gui.Element
 import net.minecraft.util.Identifier
-import spatialcrafting.util.Client.playButtonClickSound
 
 open class ReiButton(
         private var x: Int, private var y: Int, private val width: Int, private val height: Int,
@@ -46,7 +47,7 @@ open class ReiButton(
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, buttonId: Int): Boolean {
         if (containsMouse(mouseX, mouseY) && isEnabled(minecraft) && buttonId == 0) {
-            playButtonClickSound()
+            getMinecraftClient().playButtonClickSound()
             onClick(minecraft)
             return true
         }

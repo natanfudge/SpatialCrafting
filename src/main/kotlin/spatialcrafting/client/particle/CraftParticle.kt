@@ -1,5 +1,6 @@
 package spatialcrafting.client.particle
 
+import fabricktx.api.ticks
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.particle.ParticleTextureSheet
 import net.minecraft.client.particle.SpriteBillboardParticle
@@ -7,8 +8,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import spatialcrafting.client.particle.MathUtil.euclideanDistanceOf
-import spatialcrafting.util.Duration
-import spatialcrafting.util.ticks
+import kotlin.time.Duration
 
 class CraftParticle(world: World,
                     sourcePos: Vec3d,

@@ -1,5 +1,7 @@
 package spatialcrafting.client.gui.widgets
 
+import fabricktx.api.getMinecraftClient
+import fabricktx.api.playButtonClickSound
 import io.github.cottonmc.cotton.gui.GuiDescription
 import io.github.cottonmc.cotton.gui.widget.WButton
 import io.github.cottonmc.cotton.gui.widget.WSprite
@@ -10,7 +12,6 @@ import net.minecraft.util.Identifier
 import org.lwjgl.glfw.GLFW
 import spatialcrafting.ModId
 import spatialcrafting.client.gui.DevWidget
-import spatialcrafting.util.Client
 
 fun DevWidget.Image(texture: Identifier, width: Int, height: Int): DevWidget = LibGuiWidget(WSprite(texture), width, height)
 fun DevWidget.Image(path: String, width: Int, height: Int): DevWidget = Image(Identifier("$ModId:textures/$path"), width, height)
@@ -21,7 +22,7 @@ fun DevWidget.Button(text: String, enabled: Boolean = true, onClick: () -> Unit)
         WButton(LiteralText(text)).apply { isEnabled = enabled }, width = widthOf(text) + 5, height = 20)
         .onClick {
             if (enabled) {
-                Client.playButtonClickSound()
+                getMinecraftClient().playButtonClickSound()
                 onClick()
             }
         }

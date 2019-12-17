@@ -1,5 +1,7 @@
 package spatialcrafting.crafter
 
+import fabricktx.api.copy
+import fabricktx.api.matches
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.inventory.SidedInventory
@@ -9,8 +11,6 @@ import net.minecraft.util.math.Direction
 import net.minecraft.world.World
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.getHologramEntity
-import spatialcrafting.util.copy
-import spatialcrafting.util.matches
 
 /**
  * This makes it so machines can input and output into a singular crafterPiece,

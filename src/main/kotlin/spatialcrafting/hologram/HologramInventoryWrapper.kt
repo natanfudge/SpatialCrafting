@@ -2,9 +2,9 @@ package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.item.FixedItemInv
 import alexiil.mc.lib.attributes.item.compat.SidedInventoryFixedWrapper
+import fabricktx.api.d
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.util.math.BlockPos
-import spatialcrafting.util.d
 
 
 private const val MAXIMUM_DISTANCE_TO_HOLOGRAM = 100

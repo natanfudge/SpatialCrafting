@@ -1,5 +1,6 @@
 package spatialcrafting.crafter
 
+import fabricktx.api.*
 import net.fabricmc.fabric.api.server.PlayerStream
 import net.minecraft.entity.ItemEntity
 import net.minecraft.item.ItemStack
@@ -13,12 +14,14 @@ import net.minecraft.world.RayTraceContext
 import net.minecraft.world.World
 import scheduler.BlockScheduler
 import spatialcrafting.Packets
+import spatialcrafting.assert
 import spatialcrafting.client.Sounds
 import spatialcrafting.client.particle.centerOfHolograms
 import spatialcrafting.crafter.CrafterPieceBlock.Companion.CraftIsAutomatedKey
+import spatialcrafting.logDebug
+import spatialcrafting.logWarning
 import spatialcrafting.recipe.CraftingEffect
 import spatialcrafting.recipe.SpatialRecipe
-import spatialcrafting.util.*
 
 fun CrafterPieceBlock.craft(matches: List<SpatialRecipe>, world: World, multiblockIn: CrafterMultiblock, pos: BlockPos, automated: Boolean) {
     assert(world.isServer)
@@ -70,7 +73,7 @@ private fun CrafterPieceBlock.playCraftingSounds(world: World, pos: BlockPos) {
 
 fun beginCraftSoundLoop(world: World, pos: BlockPos) {
     if (world.getCrafterEntityOrNull(pos)?.multiblockIn?.isCrafting == true) {
-        world.play(CommonPositionedSoundInstance(
+        world.playSound(CommonPositionedSoundInstance(
                 soundEvent = Sounds.CraftLoop,
                 category = SoundCategory.BLOCKS,
                 pos = pos.toVec3d(),
@@ -127,7 +130,7 @@ private fun CrafterMultiblock.finishCraft(world: World,
     for (hologram in multiblock.getHologramEntities(world)) {
         val ingredient = hologram.extractItem()
         ingredient.item.recipeRemainder?.let {
-            world.dropItemStack(it.itemStack, multiblock.centerOfHolograms())
+            world.dropItemStack(ItemStack(it), multiblock.centerOfHolograms())
         }
     }
 
@@ -138,8 +141,7 @@ private fun CrafterMultiblock.insertResultToNearbyInventories(world: World, craf
 
     if (attachedInventories.isEmpty()) {
         world.dropItemStack(craftedRecipe.outputStack, multiblock.centerOfHolograms())
-    }
-    else {
+    } else {
         world.shootResultToNextInventory(craftedRecipe.outputStack.copy(),
                 fromPos = multiblock.centerOfHolograms(),
                 inventoryPosIterator = attachedInventories.iterator()
@@ -160,8 +162,7 @@ fun World.shootResultToNextInventory(stack: ItemStack, fromPos: Vec3d, inventory
         if (!remainingStack.isEmpty) {
             if (inventoryPosIterator.hasNext()) {
                 shootResultToNextInventory(stack, fromPos = hitPosition, inventoryPosIterator = inventoryPosIterator)
-            }
-            else {
+            } else {
                 dropItemStack(remainingStack, hitPosition)
             }
         }
@@ -192,6 +193,8 @@ private fun MultiblockBoundaries.positionsInHollowBoundaries(): List<BlockPos> {
 }
 
 
+
+
 fun CrafterMultiblock.getMatchingRecipes(world: World): List<SpatialRecipe> = world.recipeManager
         .getAllMatches(SpatialRecipe.Type,
                 CrafterMultiblockInventoryWrapper(getInventory(world), crafterSize = multiblockSize),
@@ -199,9 +202,9 @@ fun CrafterMultiblock.getMatchingRecipes(world: World): List<SpatialRecipe> = wo
 
 
 private class HomingItemEntity(world: World, pos: Vec3d,
-                       stack: ItemStack,
-                       val targetBlockPos: BlockPos,
-                       val onHitBlock: HomingItemEntity.(Vec3d) -> Unit)
+                               stack: ItemStack,
+                               val targetBlockPos: BlockPos,
+                               val onHitBlock: HomingItemEntity.(Vec3d) -> Unit)
     : ItemEntity(world, pos.x, pos.y, pos.z, stack) {
     private val targetPos = targetBlockPos + Vec3d(0.5, 0.5, 0.5)
     override fun tick() {
@@ -223,9 +226,9 @@ private class HomingItemEntity(world: World, pos: Vec3d,
 
 
 private fun IWorld.dropItemStackOnBlock(stack: ItemStack,
-                                fromPos: Vec3d,
-                                toPos: BlockPos,
-                                onHitBlock: HomingItemEntity.(Vec3d) -> Unit): HomingItemEntity = HomingItemEntity(
+                                        fromPos: Vec3d,
+                                        toPos: BlockPos,
+                                        onHitBlock: HomingItemEntity.(Vec3d) -> Unit): HomingItemEntity = HomingItemEntity(
         world, fromPos, stack, toPos, onHitBlock
 ).also {
     it.velocity = (toPos + Vec3d(0.5, 0.5, 0.5) - fromPos).normalize()

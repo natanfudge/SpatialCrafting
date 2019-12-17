@@ -2,7 +2,7 @@ package spatialcrafting.client.gui.widgets.core
 
 import spatialcrafting.client.gui.*
 import spatialcrafting.client.gui.widgets.runtimeWidget
-import spatialcrafting.util.maxValueBy
+import spatialcrafting.maxValueBy
 
 class StackClass(override val composeDirectChildren: DevWidget.() -> Unit, overlay: Overlay?) : DevWidget(overlay) {
     override val minimumHeight get() = devChildren.maxValueBy { it.minimumHeight } ?: 0

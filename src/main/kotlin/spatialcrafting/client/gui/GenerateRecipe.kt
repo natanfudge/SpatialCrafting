@@ -2,6 +2,7 @@ package spatialcrafting.client.gui
 
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
+import fabricktx.api.getMinecraftClient
 import net.minecraft.item.Item
 import net.minecraft.tag.ItemTags
 import net.minecraft.text.LiteralText
@@ -13,8 +14,6 @@ import spatialcrafting.ModId
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.modId
 import spatialcrafting.recipe.*
-import spatialcrafting.util.getMinecraftClient
-import spatialcrafting.util.mapIndexed
 import java.io.File
 import java.nio.file.Paths
 

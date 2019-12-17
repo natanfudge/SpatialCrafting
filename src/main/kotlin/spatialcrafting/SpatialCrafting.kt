@@ -1,16 +1,17 @@
 package spatialcrafting
 
+import fabricktx.api.*
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.item.ItemGroup
+import net.minecraft.item.ItemStack
 import net.minecraft.util.Identifier
 import net.minecraft.util.registry.Registry
 import spatialcrafting.client.Sounds
 import spatialcrafting.client.keybinding.MinimizeHologramsKeyBinding
 import spatialcrafting.client.keybinding.RecipeCreatorKeyBinding
 import spatialcrafting.client.keybinding.SpatialCraftingKeyBindingCategory
-import spatialcrafting.crafter.CrafterPieceEntity
-import spatialcrafting.crafter.CraftersPieces
+import spatialcrafting.crafter.CrafterPieceBlock
 import spatialcrafting.hologram.HologramBakedModel
 import spatialcrafting.hologram.HologramBlock
 import spatialcrafting.hologram.HologramBlockEntity
@@ -19,11 +20,8 @@ import spatialcrafting.item.DeceptivelySmallSword
 import spatialcrafting.item.PointyStick
 import spatialcrafting.item.ShapelessSword
 import spatialcrafting.recipe.*
-import spatialcrafting.util.*
 
-//TODO: things not working:
-// crafting particles
-
+//TODO:  crafting particles not working:
 //TODO: power consumption and example
 //TODO: config file: can store energy
 
@@ -36,36 +34,37 @@ const val SmallestCrafterSize = 2
 
 val SpatialCraftingItemGroup: ItemGroup = FabricItemGroupBuilder.build(
         Identifier(ModId, "spatial_crafting")
-) { CraftersPieces.getValue(SmallestCrafterSize).itemStack }
+) { ItemStack(CrafterPieceBlock.ofSize(SmallestCrafterSize)) }
 
 
 fun modId(str: String) = Identifier(ModId, str)
 
 private const val HologramId = "hologram"
 
+val Logger = Logger(
+        name = "Spatial Crafting"
+)
+
+inline fun logDebug(log: () -> String) = Logger.debug(log)
+inline fun logInfo(log: () -> String) = Logger.info(log)
+inline fun logWarning(log: () -> String) = Logger.warning(log)
+
+inline fun assert(message: String? = null, function: () -> Boolean) {
+    if (!function()) throw AssertionError(message)
+}
 
 @Suppress("unused")
 fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 
-    registerBlocksWithItemBlocks {
-        for (crafterPiece in CraftersPieces.values) {
-            crafterPiece withId "x${crafterPiece.size}crafter_piece"
-        }
+    registerBlocks {
+        CrafterPieceBlock.All.withId { "x${it.size}crafter_piece" }
+        HologramBlock.withId(HologramId, registerItem = false)
     }
 
     registerTo(Registry.ITEM) {
         ShapelessSword withId "shapeless_sword"
         DeceptivelySmallSword withId "deceptively_small_sword"
         PointyStick withId "pointy_stick"
-    }
-
-    registerTo(Registry.BLOCK) {
-        HologramBlock withId HologramId
-    }
-
-    registerTo(Registry.BLOCK_ENTITY) {
-        CrafterPieceEntity.Type withId "crafter_piece_entity"
-        HologramBlockEntity.Type withId "hologram_entity"
     }
 
     registerTo(Registry.RECIPE_SERIALIZER) {
@@ -93,7 +92,6 @@ fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
 }
 
 
-
 @Suppress("unused")
 fun initClient() = initClientOnly(ModId) {
 
@@ -111,7 +109,7 @@ fun initClient() = initClientOnly(ModId) {
             Packets.StopCraftingParticles.serializer()
     )
 
-    registerBlockEntityRenderer(HologramBlockEntity.Type) {
+    registerBlockEntityRenderer(HologramBlock.blockEntityType) {
         HologramBlockEntityRenderer(it)
     }
 

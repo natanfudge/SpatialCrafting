@@ -4,6 +4,8 @@ package spatialcrafting.recipe
 import drawer.ForIdentifier
 import drawer.ForIngredient
 import drawer.ForItemStack
+import fabricktx.api.inTicks
+import fabricktx.api.matches
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -12,17 +14,17 @@ import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import spatialcrafting.assert
 import spatialcrafting.crafter.CopyableWithPosition
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
-import spatialcrafting.util.Duration
-import spatialcrafting.util.matches
+import kotlin.time.Duration
 
 @Serializable
 class ShapedSpatialRecipe private constructor(val components: List<ShapedRecipeComponent>,
                                               override val minimumCrafterSize: Int,
                                               override val energyCost: Long,
-                                              override val _craftTime: Long,
+                                              override val _craftTime: Double,
                                               override val outputStack: ItemStack,
                                               override val identifier: Identifier,
                                               override val craftingEffect: CraftingEffect) : SpatialRecipe() {
@@ -37,7 +39,7 @@ class ShapedSpatialRecipe private constructor(val components: List<ShapedRecipeC
         val recipe = components.normalizePositions()
 
         // Make sure they have been sorted before, as it's a requirement.
-        spatialcrafting.util.assert { inventory.sortedByXYZ() == inventory && recipe.sortedByXYZ() == recipe }
+        assert { inventory.sortedByXYZ() == inventory && recipe.sortedByXYZ() == recipe }
 
         // Note: because currently "minimumCrafterSize" is determined by the recipe side,
         // this comparison already does not accept inventories that their crafterSize are too small.
@@ -74,13 +76,13 @@ class ShapedSpatialRecipe private constructor(val components: List<ShapedRecipeC
             get() = serializer()
 
         override fun build(components: List<ShapedRecipeComponent>, id: Identifier, output: ItemStack,
-                           minimumCrafterSize: Int, energyCost: Long, craftTime: Long, effect: CraftingEffect): ShapedSpatialRecipe {
+                           minimumCrafterSize: Int, energyCost: Long, craftTime: Duration, effect: CraftingEffect): ShapedSpatialRecipe {
             return ShapedSpatialRecipe(
                     components = components,
                     outputStack = output,
                     identifier = id,
                     minimumCrafterSize = minimumCrafterSize,
-                    _craftTime = craftTime,
+                    _craftTime = craftTime.inTicks,
                     energyCost = energyCost,
                     craftingEffect = effect
             )

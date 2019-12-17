@@ -1,11 +1,11 @@
 package spatialcrafting.recipe
 
+import fabricktx.api.itemsInInventoryAndOffhand
+import fabricktx.api.matches
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.world.World
 import spatialcrafting.crafter.CrafterMultiblock
-import spatialcrafting.util.itemsInInventoryAndOffhand
-import spatialcrafting.util.matches
 
 //TODO: doesn't work for the same reason as the shapeless crafting ( when there is multiple matching stacks of the same ingredient)
 // Probably want to unify the 2 concepts.

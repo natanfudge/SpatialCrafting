@@ -10,6 +10,7 @@ import drawer.ForIdentifier
 import drawer.ForItemStack
 import drawer.readFrom
 import drawer.write
+import fabricktx.api.*
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -25,12 +26,9 @@ import spatialcrafting.MaxCrafterSize
 import spatialcrafting.SmallestCrafterSize
 import spatialcrafting.crafter.CrafterMultiblockInventoryWrapper
 import spatialcrafting.crafter.sortedByXYZ
-import spatialcrafting.util.Duration
-import spatialcrafting.util.flatMapIndexed
-import spatialcrafting.util.max3
-import spatialcrafting.util.seconds
-import spatialcrafting.util.ticks
 import kotlin.math.max
+import kotlin.time.Duration
+import kotlin.time.seconds
 
 enum class CraftingEffect{
     particles,
@@ -44,7 +42,7 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
     abstract val identifier: Identifier
     abstract val minimumCrafterSize: Int
     protected abstract val energyCost: Long
-    protected abstract val _craftTime: Long
+    protected abstract val _craftTime: Double
     abstract val craftingEffect : CraftingEffect
 
     val craftTime: Duration get() = _craftTime.ticks
@@ -89,7 +87,7 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
 
         abstract fun build(components: List<ShapedRecipeComponent>,
                            id: Identifier, output: ItemStack, minimumCrafterSize: Int, energyCost: Long,
-                           craftTime: Long, effect: CraftingEffect): T
+                           craftTime: Duration, effect: CraftingEffect): T
 
         override fun read(id: Identifier, jsonObject: JsonObject): SpatialRecipe {
             val deserialized = deserializeJson(jsonObject, id)
@@ -134,12 +132,11 @@ abstract class SpatialRecipe : Recipe<CrafterMultiblockInventoryWrapper> {
             val minimumCrafterSize = json.minimumCrafterSize ?: recipeSize
 
             val energyCost = json.energyCost ?: defaultEnergyCost
-            val craftTime = json.craftTime?.seconds ?: (defaultCraftTimes[minimumCrafterSize]
-                    ?: error("impossible crafter size"))
+            val craftTime = json.craftTime?.d?.seconds ?: (defaultCraftTimes[minimumCrafterSize] ?: error("impossible crafter size"))
 
             val effect = json.effect ?: CraftingEffect.particles
 
-            return build(components, id, output, max(minimumCrafterSize, SmallestCrafterSize), energyCost, craftTime.inTicks,effect)
+            return build(components, id, output, max(minimumCrafterSize, SmallestCrafterSize), energyCost, craftTime,effect)
         }
 
 

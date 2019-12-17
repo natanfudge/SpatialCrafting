@@ -1,21 +1,19 @@
 package spatialcrafting.crafter
 
 import drawer.getFrom
+import fabricktx.api.*
 import kotlinx.serialization.internal.nullable
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
-import spatialcrafting.util.*
-import spatialcrafting.util.Builders
+import spatialcrafting.logDebug
 
 
-class CrafterPieceEntity : BlockEntity(Type), BlockEntityClientSerializable {
+class CrafterPieceEntity : KBlockEntity(CrafterPieceBlock.All), BlockEntityClientSerializable {
 
 
     companion object {
-        val Type = Builders.blockEntityType(CraftersPieces.values.toList()) { CrafterPieceEntity() }
 
         fun assignMultiblockState(world: World, anyCrafterPos: BlockPos, multiblock: CrafterMultiblock) {
             for (crafterEntity in multiblock.getCrafterEntities(world)) {

@@ -2,12 +2,12 @@
 
 package spatialcrafting.client.gui.widgets
 
+import fabricktx.api.getMinecraftClient
 import io.github.cottonmc.cotton.gui.widget.WWidget
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
 import spatialcrafting.client.gui.RuntimeWidget
 import spatialcrafting.client.gui.widgets.core.Overlay
-import spatialcrafting.util.getMinecraftClient
 
 private val mc = getMinecraftClient()
 

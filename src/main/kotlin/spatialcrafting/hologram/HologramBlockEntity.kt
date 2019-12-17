@@ -4,11 +4,11 @@ package spatialcrafting.hologram
 
 import alexiil.mc.lib.attributes.AttributeList
 import drawer.ForIngredient
+import fabricktx.api.*
 import kotlinx.serialization.UseSerializers
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity
 import net.fabricmc.fabric.api.server.PlayerStream
-import net.minecraft.block.entity.BlockEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.recipe.Ingredient
@@ -19,7 +19,6 @@ import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceEntity
 import spatialcrafting.crafter.bumpRecipeHelpCurrentLayerIfNeeded
 import spatialcrafting.crafter.hologramGhostIngredientFor
-import spatialcrafting.util.*
 
 private const val TicksPerSecond = 20
 
@@ -28,7 +27,7 @@ private const val TicksPerSecond = 20
  */
 data class CraftingItemMovementData(val targetLocation: Vec3d, val startTime: Long, val endTime: Long)
 
-class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, RenderAttachmentBlockEntity, Tickable {
+class HologramBlockEntity : KBlockEntity(HologramBlock), BlockEntityClientSerializable, RenderAttachmentBlockEntity, Tickable {
 
     override fun getRenderAttachmentData(): Any = ghostIngredient?.let {
         if (it.matches(getItem())) ItemStack.EMPTY
@@ -37,8 +36,6 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
 
 
     companion object {
-        val Type = Builders.blockEntityType(HologramBlock) { HologramBlockEntity() }
-
         private object Keys {
             const val Inventory = "inventory"
             const val LastChangeTime = "last_change_time"
@@ -116,7 +113,7 @@ class HologramBlockEntity : BlockEntity(Type), BlockEntityClientSerializable, Re
         if (world?.isClient == true) {
             ghostIngredientCycleIndex++
             if (ghostIngredientActive) {
-                if (ghostIngredientCycleIndex % TicksPerSecond == 0) Client.scheduleRenderUpdate(pos)
+                if (ghostIngredientCycleIndex % TicksPerSecond == 0) getMinecraftClient().scheduleRenderUpdate(pos)
             }
         }
 

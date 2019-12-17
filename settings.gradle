@@ -16,3 +16,7 @@ pluginManagement {
         maven { url "https://plugins.gradle.org/m2/" }
     }
 }
+
+//if (file("../fabric-ktx").exists()) {
+    includeBuild "../fabric-ktx"
+//}

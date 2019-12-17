@@ -1,8 +1,12 @@
 package spatialcrafting.client.keybinding
 
+import fabricktx.api.KotlinKeyBinding
+import fabricktx.api.KotlinKeyBindingBuilder
+import fabricktx.api.getMinecraftClient
+import fabricktx.api.scheduleRenderUpdate
 import org.lwjgl.glfw.GLFW
+import spatialcrafting.logDebug
 import spatialcrafting.modId
-import spatialcrafting.util.*
 
 const val SpatialCraftingKeyBindingCategory = "Spatial Crafting"
 
@@ -35,7 +39,7 @@ private fun scheduleRenderUpdateInChunkRadius(radius: Int) {
         for (y in range) {
             for (z in range) {
                 val posInChunk = pos.add(x * ChunkSize, y * ChunkSize, z * ChunkSize)
-                Client.scheduleRenderUpdate(posInChunk)
+                getMinecraftClient().scheduleRenderUpdate(posInChunk)
             }
         }
     }

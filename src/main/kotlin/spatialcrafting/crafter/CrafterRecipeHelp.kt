@@ -1,5 +1,7 @@
 package spatialcrafting.crafter
 
+import fabricktx.api.isServer
+import fabricktx.api.matches
 import net.minecraft.recipe.Ingredient
 import net.minecraft.recipe.Recipe
 import net.minecraft.recipe.RecipeManager
@@ -8,13 +10,10 @@ import net.minecraft.util.Identifier
 import net.minecraft.world.World
 import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.getHologramEntity
+import spatialcrafting.logDebug
 import spatialcrafting.mixin.RecipeManagerMixin
 import spatialcrafting.recipe.ShapedRecipeComponent
 import spatialcrafting.recipe.SpatialRecipe
-import spatialcrafting.util.isServer
-import spatialcrafting.util.logDebug
-import spatialcrafting.util.matches
-
 
 fun CrafterMultiblock.bumpRecipeHelpCurrentLayerIfNeeded(world: World) {
     if (layerIsComplete(recipeHelpCurrentLayer, world)) {

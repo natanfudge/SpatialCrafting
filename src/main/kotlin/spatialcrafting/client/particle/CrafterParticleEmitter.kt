@@ -1,5 +1,6 @@
 package spatialcrafting.client.particle
 
+import fabricktx.api.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.item.ItemStack
@@ -9,15 +10,15 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import scheduler.BlockScheduler
-import spatialcrafting.client.Speed
-import spatialcrafting.client.bps
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.CrafterPieceBlock
-import spatialcrafting.crafter.CraftersPieces
 import spatialcrafting.crafter.getCrafterEntityOrNull
-import spatialcrafting.util.*
+import spatialcrafting.logInfo
+import spatialcrafting.logWarning
 import kotlin.math.max
 import kotlin.math.roundToInt
+import kotlin.time.Duration
+import kotlin.time.seconds
 
 private val TimeBetweenParticles = 0.1.seconds
 
@@ -32,7 +33,7 @@ private const val DurationDataKey = "particle_craft_duration"
 private const val StartTimeKey = "particle_craft_start_time"
 
 fun playAllCraftParticles(world: World, multiblock: CrafterMultiblock, duration: Duration) {
-    val block = CraftersPieces.values.first()
+    val block = CrafterPieceBlock.All.first()
     val durationData = CompoundTag().apply {
         putDuration(DurationDataKey, duration)
         putLong(StartTimeKey, world.time)

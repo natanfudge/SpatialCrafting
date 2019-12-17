@@ -11,10 +11,9 @@ import net.minecraft.recipe.Recipe
 import net.minecraft.util.Identifier
 import spatialcrafting.MaxCrafterSize
 import spatialcrafting.SmallestCrafterSize
-import spatialcrafting.crafter.CraftersPieces
+import spatialcrafting.crafter.CrafterPieceBlock
 import spatialcrafting.modId
 import spatialcrafting.recipe.SpatialRecipe
-import spatialcrafting.util.itemStack
 import java.util.function.Function
 
 val ItemStack.reiEntry: EntryStack get() = EntryStack.create(this)
@@ -59,7 +58,7 @@ class ReiSpatialCraftingPlugin : REIPluginV0 {
         for (i in CrafterSizes) {
             // Every category gets the crafters from that size onwards
             for (j in i..MaxCrafterSize) {
-                recipeHelper.registerWorkingStations(ReiSpatialCraftingCategory.id(i), CraftersPieces.getValue(j).itemStack.reiEntry)
+                recipeHelper.registerWorkingStations(ReiSpatialCraftingCategory.id(i), ItemStack(CrafterPieceBlock.ofSize(j)).reiEntry)
 
             }
 

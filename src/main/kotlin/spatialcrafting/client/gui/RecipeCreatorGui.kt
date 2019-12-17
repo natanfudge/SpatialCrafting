@@ -1,5 +1,8 @@
 package spatialcrafting.client.gui
 
+import fabricktx.api.getMinecraftClient
+import fabricktx.api.playButtonClickSound
+import fabricktx.api.sendPacketToServer
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing
 import net.minecraft.item.Items
@@ -9,9 +12,6 @@ import spatialcrafting.client.gui.widgets.core.*
 import spatialcrafting.compat.rei.getNearestCrafter
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.RecipeCreatorCurrentLayerInactive
-import spatialcrafting.util.Client
-import spatialcrafting.util.getMinecraftClient
-import spatialcrafting.util.sendPacketToServer
 
 data class GeneratedRecipeState(var result: String? = null)
 
@@ -153,7 +153,7 @@ private fun DevWidget.DisableableImage(enabledTexture: String,
                                        hoverText: String = "",
                                        onClick: DevWidget.(RuntimeWidget) -> Unit) =
         if (enabled) HoverableImage(enabledTexture, width, height).onClick {
-            Client.playButtonClickSound()
+            getMinecraftClient().playButtonClickSound()
             onClick(it)
         }.tooltip(if (hoverText != "") hoverText else null)
         else Image(disabledTexture, width, height)

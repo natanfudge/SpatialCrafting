@@ -8,7 +8,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import spatialcrafting.crafter.CrafterMultiblock
-import spatialcrafting.util.Duration
+import kotlin.time.Duration
 
 
 data class ParticleBuilder(val world: World, val originalEndPos: Vec3d, val startTimeDelay: Duration, val craftDuration: Duration,

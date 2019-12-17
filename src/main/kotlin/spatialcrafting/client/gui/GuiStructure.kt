@@ -5,7 +5,7 @@ import spatialcrafting.client.gui.widgets.core.Overlay
 import spatialcrafting.client.gui.widgets.core.TightSingleChildDevWidget
 import spatialcrafting.client.gui.widgets.getClientMouseX
 import spatialcrafting.client.gui.widgets.getClientMouseY
-import spatialcrafting.util.logDebug
+import spatialcrafting.logDebug
 import java.lang.Integer.min
 
 data class Constraints(val x: Int, val y: Int, val width: Int, val height: Int) {
