@@ -1,6 +1,8 @@
 package spatialcrafting
 
 import fabricktx.api.*
+import net.fabricmc.api.ClientModInitializer
+import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.item.ItemGroup
@@ -14,12 +16,12 @@ import spatialcrafting.client.keybinding.SpatialCraftingKeyBindingCategory
 import spatialcrafting.crafter.CrafterPieceBlock
 import spatialcrafting.hologram.HologramBakedModel
 import spatialcrafting.hologram.HologramBlock
-import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.hologram.HologramBlockEntityRenderer
 import spatialcrafting.item.DeceptivelySmallSword
 import spatialcrafting.item.PointyStick
 import spatialcrafting.item.ShapelessSword
 import spatialcrafting.recipe.*
+import kotlin.math.max
 
 //TODO:  crafting particles not working:
 //TODO: power consumption and example
@@ -53,69 +55,69 @@ inline fun assert(message: String? = null, function: () -> Boolean) {
     if (!function()) throw AssertionError(message)
 }
 
-@Suppress("unused")
-fun init() = initCommon(ModId, group = SpatialCraftingItemGroup) {
+class SpatialCraftingInit : ModInitializer {
+    override fun onInitialize() = initCommon(ModId, group = SpatialCraftingItemGroup) {
+        registerBlocks {
+            CrafterPieceBlock.All.withId { "x${it.size}crafter_piece" }
+            HologramBlock.withId(HologramId, registerItem = false)
+        }
 
-    registerBlocks {
-        CrafterPieceBlock.All.withId { "x${it.size}crafter_piece" }
-        HologramBlock.withId(HologramId, registerItem = false)
+        registerTo(Registry.ITEM) {
+            ShapelessSword withId "shapeless_sword"
+            DeceptivelySmallSword withId "deceptively_small_sword"
+            PointyStick withId "pointy_stick"
+        }
+
+        registerTo(Registry.RECIPE_SERIALIZER) {
+            ShapedSpatialRecipe withId Identifier(ShapedRecipeType)
+            ShapelessSpatialRecipe withId Identifier(ShapelessRecipeType)
+        }
+
+        registerTo(Registry.RECIPE_TYPE) {
+            SpatialRecipe.Type withId SpatialRecipe.Type.Id
+        }
+
+        registerTo(Registry.SOUND_EVENT) {
+            Sounds.CraftEnd withId Sounds.CraftEndId
+            Sounds.CraftLoop withId Sounds.CraftLoopId
+            Sounds.CraftStart withId Sounds.CraftStartId
+        }
+
+
+        registerC2SPackets(
+                Packets.StartRecipeHelp.serializer(),
+                Packets.AutoCraft.serializer(),
+                Packets.ChangeActiveLayer.serializer(),
+                Packets.StopRecipeHelp.serializer()
+        )
     }
 
-    registerTo(Registry.ITEM) {
-        ShapelessSword withId "shapeless_sword"
-        DeceptivelySmallSword withId "deceptively_small_sword"
-        PointyStick withId "pointy_stick"
-    }
-
-    registerTo(Registry.RECIPE_SERIALIZER) {
-        ShapedSpatialRecipe withId Identifier(ShapedRecipeType)
-        ShapelessSpatialRecipe withId Identifier(ShapelessRecipeType)
-    }
-
-    registerTo(Registry.RECIPE_TYPE) {
-        SpatialRecipe.Type withId SpatialRecipe.Type.Id
-    }
-
-    registerTo(Registry.SOUND_EVENT) {
-        Sounds.CraftEnd withId Sounds.CraftEndId
-        Sounds.CraftLoop withId Sounds.CraftLoopId
-        Sounds.CraftStart withId Sounds.CraftStartId
-    }
-
-
-    registerC2SPackets(
-            Packets.StartRecipeHelp.serializer(),
-            Packets.AutoCraft.serializer(),
-            Packets.ChangeActiveLayer.serializer(),
-            Packets.StopRecipeHelp.serializer()
-    )
 }
 
+class SpatialCraftingClientInit : ClientModInitializer {
+    override fun onInitializeClient() = initClientOnly(ModId) {
+        HologramBlock.setRenderLayer(RenderLayer.getTranslucent())
 
-@Suppress("unused")
-fun initClient() = initClientOnly(ModId) {
+        registerBlockModel(HologramId, HologramBakedModel.Texture) { HologramBakedModel() }
 
-    HologramBlock.setRenderLayer(RenderLayer.getTranslucent())
+        registerS2CPackets(
+                Packets.AssignMultiblockState.serializer(),
+                Packets.UnassignMultiblockState.serializer(),
+                Packets.StopRecipeHelp.serializer(),
+                Packets.UpdateHologramContent.serializer(),
+                Packets.StartCraftingParticles.serializer(),
+                Packets.ItemMovementFromPlayerToMultiblockParticles.serializer(),
+                Packets.StopCraftingParticles.serializer()
+        )
 
-    registerBlockModel(HologramId, HologramBakedModel.Texture) { HologramBakedModel() }
+        registerBlockEntityRenderer(HologramBlock.blockEntityType) {
+            HologramBlockEntityRenderer(it)
+        }
 
-    registerS2CPackets(
-            Packets.AssignMultiblockState.serializer(),
-            Packets.UnassignMultiblockState.serializer(),
-            Packets.StopRecipeHelp.serializer(),
-            Packets.UpdateHologramContent.serializer(),
-            Packets.StartCraftingParticles.serializer(),
-            Packets.ItemMovementFromPlayerToMultiblockParticles.serializer(),
-            Packets.StopCraftingParticles.serializer()
-    )
-
-    registerBlockEntityRenderer(HologramBlock.blockEntityType) {
-        HologramBlockEntityRenderer(it)
+        registerKeyBindingCategory(SpatialCraftingKeyBindingCategory)
+        registerKeyBinding(RecipeCreatorKeyBinding)
+        registerKeyBinding(MinimizeHologramsKeyBinding)
     }
-
-    registerKeyBindingCategory(SpatialCraftingKeyBindingCategory)
-    registerKeyBinding(RecipeCreatorKeyBinding)
-    registerKeyBinding(MinimizeHologramsKeyBinding)
 
 }
 

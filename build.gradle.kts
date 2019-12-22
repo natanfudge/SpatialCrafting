@@ -45,6 +45,7 @@ val fabric_keybindings_version: String by project
 val curseforge_api_key: String by project
 val scheduler_version: String by project
 
+val publish = project.hasProperty("publish") && prop("publish").toBoolean()
 
 
 
@@ -69,7 +70,7 @@ repositories {
     maven(url = "http://server.bbkr.space:8081/artifactory/libs-snapshot")
     maven(url = "https://maven.abusedmaster.xyz")
     maven(url = "http://server.bbkr.space:8081/artifactory/libs-release/")
-maven(url = "https://dl.bintray.com/natanfudge/libs")
+    maven(url = "https://dl.bintray.com/natanfudge/libs")
     maven(url = "https://jitpack.io")
 }
 
@@ -90,8 +91,7 @@ dependencies {
     }
 
     modDependency("com.lettuce.fudge:fabric-drawer:$drawer_version")
-    modImplementation("com.lettuce.fudge:fabric-ktx:${prop("fabric_ktx_version")}+$minecraft_version")
-    include("com.lettuce.fudge:fabric-ktx:${prop("fabric_ktx_version")}+$minecraft_version")
+    compositeDep("com.lettuce.fudge:fabric-ktx:${prop("fabric_ktx_version")}+$minecraft_version")
     modDependency("com.lettuce.fudge:working-scheduler:$scheduler_version")
 
     devEnvMod("mcp.mobius.waila:Hwyla:$waila_version")
@@ -109,6 +109,12 @@ fun DependencyHandlerScope.fabric() {
     mappings("net.fabricmc:yarn:$minecraft_version+$yarn_mappings:v2")
     modImplementation("net.fabricmc:fabric-loader:$loader_version")
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
+}
+
+fun DependencyHandlerScope.compositeDep(name: String) {
+    if (publish) modImplementation(name)
+    else modImplementation(name)
+    include(name)
 }
 
 fun DependencyHandlerScope.optionalDependency(dep: String, dependencyConfiguration: Action<ExternalModuleDependency> = Action {}) {
@@ -158,7 +164,7 @@ val remapJar = tasks.getByName<RemapJarTask>("remapJar")
 val remapModpackJar = tasks.create<RemapJarTask>("remapModpackJar") {
     dependsOn(remapJar)
     addNestedDependencies.set(false)
-    forcedNestedDependencies.set(listOf("working-scheduler", "fabric-ktx", "LibGui", "libblockattributes-items","libblockattributes-core","fabric-drawer"))
+    forcedNestedDependencies.set(listOf("working-scheduler", "fabric-ktx", "LibGui", "libblockattributes-items", "libblockattributes-core", "fabric-drawer"))
     input.set(remapJar.input)
     archiveFileName.set("$archives_base_name-$mod_version-modpack.jar")
 }
@@ -230,9 +236,9 @@ publishing {
 }
 
 
-tasks.withType<RemapJarTask>{
+tasks.withType<RemapJarTask> {
     doFirst {
-        if(!project.hasProperty("publish") || !prop("publish").toBoolean()) throw IllegalArgumentException("Cannot publish without publish flag!")
+        if (!publish) throw IllegalArgumentException("Cannot publish without publish flag!")
     }
 }
 

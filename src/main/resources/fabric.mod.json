@@ -16,12 +16,12 @@
   "entrypoints": {
     "main": [
       {
-        "value": "spatialcrafting.SpatialCraftingKt::init"
+        "value": "spatialcrafting.SpatialCraftingInit"
       }
     ],
     "client": [
       {
-        "value": "spatialcrafting.SpatialCraftingKt::initClient"
+        "value": "spatialcrafting.SpatialCraftingClientInit"
       }
     ],
     "rei_plugins": [
