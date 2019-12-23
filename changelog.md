@@ -23,3 +23,5 @@ If recipe help is active, the items will be inserted into the correct places.
 ## 1.14.0
 - The _modpack_ variant no longer requires **LibGUI**, **Lib Block Attributes**, **Fabric Drawer**, and **Working Scheduler**. You now only need **Fabric API** and **Fabric Language Kotlin**.
 - The _standalone_ variant no longer bundles **Roughly Enough Items**. It now only bundles **Fabric Language Kotlin**. 
+### 1.4.1
+- Fixed issues regarding holograms.
