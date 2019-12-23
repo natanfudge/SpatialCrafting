@@ -13,12 +13,11 @@ import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.recipe.Ingredient
 import net.minecraft.util.Tickable
+import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
+import net.minecraft.world.World
 import spatialcrafting.Packets
-import spatialcrafting.crafter.CrafterMultiblock
-import spatialcrafting.crafter.CrafterPieceEntity
-import spatialcrafting.crafter.bumpRecipeHelpCurrentLayerIfNeeded
-import spatialcrafting.crafter.hologramGhostIngredientFor
+import spatialcrafting.crafter.*
 
 private const val TicksPerSecond = 20
 
@@ -29,6 +28,8 @@ data class CraftingItemMovementData(val targetLocation: Vec3d, val startTime: Lo
 
 class HologramBlockEntity : KBlockEntity(HologramBlock), BlockEntityClientSerializable, RenderAttachmentBlockEntity, Tickable {
 
+
+
     override fun getRenderAttachmentData(): Any = ghostIngredient?.let {
         if (it.matches(getItem())) ItemStack.EMPTY
         else it.matchingStacksClient[(ghostIngredientCycleIndex / TicksPerSecond) % it.matchingStacksClient.size]
@@ -36,9 +37,19 @@ class HologramBlockEntity : KBlockEntity(HologramBlock), BlockEntityClientSerial
 
 
     companion object {
+        fun assignMultiblockState(multiblock: CrafterMultiblock, world: World, masterEntityPos : BlockPos){
+            for (hologramPos in multiblock.hologramLocations) {
+                world.setBlock(HologramBlock, pos = hologramPos)
+                world.getHologramEntity(hologramPos).masterEntityPos = masterEntityPos
+            }
+//            multiblock.hologramLocations.forEach { world.getHologramEntity(it).masterEntityPos = masterEntityPos }
+        }
+
+
         private object Keys {
             const val Inventory = "inventory"
             const val LastChangeTime = "last_change_time"
+            const val MasterPos = "master_pos"
         }
     }
 
@@ -58,8 +69,29 @@ class HologramBlockEntity : KBlockEntity(HologramBlock), BlockEntityClientSerial
         }
     }
 
+
+    val multiblockIn: CrafterMultiblock?
+        get() = masterEntity?.multiblockIn
+
+    /**
+     * This is the northern-eastern most block
+     */
+    private var masterEntityPos: BlockPos? = null
+        set(value) {
+            field = value
+            markDirty()
+        }
+
+
+    /**
+     * When part of a multiblock, one of the pieces must be a master that stores the multiblock information
+     */
+    private val masterEntity: CrafterPieceEntity?
+        get() = masterEntityPos?.let { world?.getCrafterEntityOrNull(it) }
+
+
     private val ghostIngredient: Ingredient?
-        get() = getMultiblockOrNull()?.hologramGhostIngredientFor(this)
+        get() = multiblockIn?.hologramGhostIngredientFor(this)
                 .also { ghostIngredientActive = it != null }
 
     /**
@@ -95,6 +127,7 @@ class HologramBlockEntity : KBlockEntity(HologramBlock), BlockEntityClientSerial
         super.toTag(tag)
         tag.put(Keys.Inventory, inventory.toTag())
         tag.putLong(Keys.LastChangeTime, lastChangeTime)
+        tag.putBlockPos(Keys.MasterPos, masterEntityPos)
         return tag
     }
 
@@ -102,6 +135,7 @@ class HologramBlockEntity : KBlockEntity(HologramBlock), BlockEntityClientSerial
         super.fromTag(tag)
         inventory.fromTag(tag.getCompound(Keys.Inventory))
         lastChangeTime = tag.getLong(Keys.LastChangeTime)
+        masterEntityPos = tag.getBlockPos(Keys.MasterPos)
     }
 
     override fun toClientTag(p0: CompoundTag): CompoundTag = toTag(p0)
@@ -122,11 +156,12 @@ class HologramBlockEntity : KBlockEntity(HologramBlock), BlockEntityClientSerial
 
     /**
      * Inserts only one of the itemStack
-     * Specify multiblock to reduce overhead
+     *
+     * @return How many of the stack was taken
      */
-    fun insertItem(itemStack: ItemStack, multiblock: CrafterMultiblock? = null) {
-        val multiblock = multiblock ?: getMultiblockOrNull()
-        ?: complainAboutMissingMultiblock().run { return }
+
+    fun insertItem(itemStack: ItemStack): Int {
+        val multiblock = multiblockIn ?: return 0
         val world = world!!
         markDirty()
         assert(isEmpty())
@@ -140,16 +175,17 @@ class HologramBlockEntity : KBlockEntity(HologramBlock), BlockEntityClientSerial
             }
         }
 
+        return 1
     }
 
     fun getItem(): ItemStack = inventory.getInvStack(0)
 
     /**
      * May return an empty stack
+     * @return A stack from the hologram everything went fine, null if the state is invalid
      */
-    fun extractItem(multiblock: CrafterMultiblock? = null): ItemStack {
-        val multiblock = multiblock ?: getMultiblockOrNull()
-        ?: complainAboutMissingMultiblock().run { return ItemStack.EMPTY }
+    fun extractItem(): ItemStack? {
+        val multiblock = multiblockIn ?: return null
         if (!this.isEmpty()) multiblock.filledHologramsCount--
         val item = inventory.extract(1)
         markDirty()
@@ -177,6 +213,25 @@ class HologramBlockEntity : KBlockEntity(HologramBlock), BlockEntityClientSerial
             currentPos = currentPos.down()
         }
     }
+//=======
+////    fun getMultiblock() = getMultiblockOrNull()
+////            ?: error("A hologram should always have a multiblock," +
+////                    " and yet when looking at a crafter piece below at position $pos he did not have a multiblock instance.")
+////
+////    fun getMultiblockOrNull(): CrafterMultiblock? {
+////        val world = world!!
+////        // We just go down until we find a crafter
+////        var currentPos = pos.down()
+////        while (true) {
+////            val entityBelow = world.getBlockEntity(currentPos)
+////            if (entityBelow !is HologramBlockEntity) {
+////                return if (entityBelow is CrafterPieceEntity) entityBelow.multiblockIn
+////                else null
+////            }
+////            currentPos = currentPos.down()
+////        }
+////    }
+//>>>>>>> ee6e919... commit of fix
 
     fun complainAboutMissingMultiblock() {
         println("********************** IF YOU SEE THIS, THIS IS A BUG, REPORT IT **********************\n" +

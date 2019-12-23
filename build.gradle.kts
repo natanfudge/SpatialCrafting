@@ -100,7 +100,8 @@ dependencies {
 
     devEnvMod("curse.maven:data-loader:2749923")
 
-    devEnvMod("com.lettuce.fudge:notenoughcrashes:1.0.12+1.15")
+    devEnvMod("com.lettuce.fudge:notenoughcrashes:1.1.4+1.15.1")
+    devEnvMod("com.lettuce.fudge:notenoughcrashes-api:1.0.0")
 
 }
 

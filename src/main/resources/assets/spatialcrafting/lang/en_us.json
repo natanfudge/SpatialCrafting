@@ -8,6 +8,7 @@
   "block.spatialcrafting.x4crafter_piece": "Ironforged crafter",
   "block.spatialcrafting.x5crafter_piece": "Gem-infused Crafter",
   "block.spatialcrafting.hologram": "Hologram",
+  "block.spatialcrafting.hologram.invalid_state": "Something went wrong with this hologram, please destroy and re-place the multiblock.",
   "item.spatialcrafting.shapeless_sword": "Shapeless Sword",
   "item.spatialcrafting.deceptively_small_sword": "Deceptively Small Sword",
   "item.spatialcrafting.pointy_stick": "Pointy Stick",

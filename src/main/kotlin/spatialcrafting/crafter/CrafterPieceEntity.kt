@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
+import spatialcrafting.hologram.HologramBlockEntity
 import spatialcrafting.logDebug
 
 
@@ -18,10 +19,12 @@ class CrafterPieceEntity : KBlockEntity(CrafterPieceBlock.All), BlockEntityClien
         fun assignMultiblockState(world: World, anyCrafterPos: BlockPos, multiblock: CrafterMultiblock) {
             for (crafterEntity in multiblock.getCrafterEntities(world)) {
                 with(crafterEntity) {
-                    setMasterEntityPos(anyCrafterPos)
-                    if (isMaster) setMultiblockIn(multiblock)
+                    masterEntityPos = anyCrafterPos
+                    if (isMaster) multiblockIn = multiblock
                 }
             }
+
+            HologramBlockEntity.assignMultiblockState(multiblock, world, anyCrafterPos)
         }
 
         fun unassignMultiblockState(world: World, multiblock: CrafterMultiblock) {
@@ -29,8 +32,8 @@ class CrafterPieceEntity : KBlockEntity(CrafterPieceBlock.All), BlockEntityClien
             multiblock.crafterLocations.mapNotNull {
                 world.getBlockEntity(it) as? CrafterPieceEntity
             }.forEach { crafterEntity ->
-                crafterEntity.setMasterEntityPos(null)
-                if (crafterEntity.isMaster) crafterEntity.setMultiblockIn(null)
+                crafterEntity.masterEntityPos = null
+                if (crafterEntity.isMaster) crafterEntity.multiblockIn = null
             }
         }
 
@@ -39,35 +42,26 @@ class CrafterPieceEntity : KBlockEntity(CrafterPieceBlock.All), BlockEntityClien
         }
     }
 
-
-    fun setMultiblockIn(multiblock: CrafterMultiblock?) {
-        assert(!isMaster) { "Only the master should be assigned the multiblock" }
-        this.multiblockIn = multiblock
-        markDirty()
-    }
-
-    private fun setMasterEntityPos(pos: BlockPos?) {
-        this.masterEntityPos = pos
-        markDirty()
-    }
-
-    /**
-     * Setting directly should only be done with the setter method
-     */
     var multiblockIn: CrafterMultiblock? = null
         get() = when {
             masterEntityPos == null -> null
             isMaster -> field
             else -> masterEntity?.multiblockIn
         }
-        private set
+        set(value) {
+            assert(isMaster) { "Only the master should be assigned the multiblock" }
+            field = value
+            markDirty()
+        }
 
     /**
      * This is the northern-eastern most block
-     *
-     * Setting directly should only be done with the setter method
      */
     private var masterEntityPos: BlockPos? = null
+        set(value) {
+            field = value
+            markDirty()
+        }
 
 
     /**
@@ -96,7 +90,7 @@ class CrafterPieceEntity : KBlockEntity(CrafterPieceBlock.All), BlockEntityClien
             multiblockIn?.putIn(tag)
         }
 
-        if (masterEntityPos != null) tag.putBlockPos(Keys.masterEntity,masterEntityPos)
+        if (masterEntityPos != null) tag.putBlockPos(Keys.masterEntity, masterEntityPos)
         return tag
 
     }
@@ -111,7 +105,7 @@ class CrafterPieceEntity : KBlockEntity(CrafterPieceBlock.All), BlockEntityClien
         if (isMaster) {
             multiblockIn = CrafterMultiblock.serializer().nullable.getFrom(tag)
             // If this is true it means something went wrong with the data
-            if(multiblockIn?.crafterLocations?.size != multiblockIn?.multiblockSize?.squared()){
+            if (multiblockIn?.crafterLocations?.size != multiblockIn?.multiblockSize?.squared()) {
                 multiblockIn = null
             }
         }

@@ -58,8 +58,8 @@ private fun CrafterMultiblock.insertRecipeToMultiblock(satisfaction: List<Compon
             val hologram = world.getHologramEntity(relativeHologramPositions.first { it.relativePos == componentPos }.absolutePos)
             assert(hologram.isEmpty())
             particlesToSendFromPlayerToMultiblock.add(Pair(hologram.pos, satisfiedByStack!!))
-            hologram.insertItem(satisfiedByStack.copy(1))
-            satisfiedByStack.count--
+            val amountTaken = hologram.insertItem(satisfiedByStack.copy(1))
+            satisfiedByStack.count -= amountTaken
         }
     }
 }
@@ -71,7 +71,7 @@ fun CrafterMultiblock.givePlayerMismatchingItems(world: World, player: PlayerEnt
         val item = hologram.getItem()
         if (satisfaction.none { it.satisfiedBy == item }) {
             particlesToSendFromMultiblockToPlayer.add(Pair(hologram.pos, item))
-            player.offerOrDrop(hologram.extractItem())
+            hologram.extractItem()?.let { player.offerOrDrop(it) }
         }
     }
 }

@@ -22,7 +22,6 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
     private val multiblock: CrafterMultiblock? get() = world.getCrafterEntity(pos).multiblockIn
 
 
-
     override fun getInvMaxStackAmount() = 1
 
     override fun isValidInvStack(slot: Int, stack: ItemStack): Boolean {
@@ -51,8 +50,7 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
         val recipe = multiblock.helpRecipeComponents(world)
         if (recipe != null) {
             return multiblock.getHologramByRelativePosition(world, recipe[slot].position)
-        }
-        else {
+        } else {
             return world.getHologramEntity(multiblock.hologramLocations[slot])
         }
     }
@@ -80,7 +78,7 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
     /**
      * Removes the current stack in the `slot` and returns it.
      */
-    override fun removeInvStack(slot: Int): ItemStack = getHologramForSlot(slot).extractItem(multiblock!!)
+    override fun removeInvStack(slot: Int): ItemStack = getHologramForSlot(slot).extractItem() ?: ItemStack.EMPTY
 
 
     /**
@@ -95,12 +93,10 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
         val multiblock = multiblock ?: return
 
         // Remove the previous item so we can put a new one instead
-        if (!hologram.isEmpty()) hologram.extractItem(multiblock)
+        if (!hologram.isEmpty()) hologram.extractItem()
 
-
-        hologram.insertItem(stack.copy(count = 1), multiblock)
-
-
+        val amountTaken = hologram.insertItem(stack.copy(count = 1))
+        if (amountTaken == 0) return
 
         // Try to craft when the last slot is filled
         if (multiblock.filledHologramsCount == invSize) {
@@ -117,7 +113,7 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
     override fun clear() {
         val multiblock = multiblock ?: return
         for (hologram in multiblock.getHologramEntities(world)) {
-            hologram.extractItem(multiblock)
+            hologram.extractItem()
         }
     }
 

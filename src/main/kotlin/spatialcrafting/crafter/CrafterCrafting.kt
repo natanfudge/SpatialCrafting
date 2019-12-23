@@ -129,7 +129,7 @@ private fun CrafterMultiblock.finishCraft(world: World,
 
     for (hologram in multiblock.getHologramEntities(world)) {
         val ingredient = hologram.extractItem()
-        ingredient.item.recipeRemainder?.let {
+        ingredient?.item?.recipeRemainder?.let {
             world.dropItemStack(ItemStack(it), multiblock.centerOfHolograms())
         }
     }

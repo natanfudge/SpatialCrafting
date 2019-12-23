@@ -109,11 +109,12 @@ fun createMultiblock(world: World, masterPos: BlockPos, multiblock: CrafterMulti
     assert(world.isServer)
 
     logDebug { "Building multiblock. [${multiblock.logString()}]" }
-    CrafterPieceEntity.assignMultiblockState(world, masterPos, multiblock)
 
-    for (hologramPos in multiblock.hologramLocations) {
-        world.setBlock(HologramBlock, pos = hologramPos)
-    }
+//    for (hologramPos in multiblock.hologramLocations) {
+//        world.setBlock(HologramBlock, pos = hologramPos)
+//    }
+
+    CrafterPieceEntity.assignMultiblockState(world, masterPos, multiblock)
 
 }
 

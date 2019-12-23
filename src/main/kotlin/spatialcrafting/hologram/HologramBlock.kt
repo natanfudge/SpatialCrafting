@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.SidedInventory
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.BooleanProperty
+import net.minecraft.text.TranslatableText
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
@@ -102,14 +103,14 @@ object HologramBlock : SingularStateBlock<HologramBlockEntity>(HologramSettings,
     override fun onUse(blockState: BlockState, world: World, pos: BlockPos, clickedBy: PlayerEntity?, hand: Hand?, blockHitResult_1: BlockHitResult?): ActionResult {
         if (clickedBy == null || hand == null) return ActionResult.FAIL
 
-
         val hologramEntity = world.getHologramEntity(pos)
 
 
         if (clickedBy.isHoldingItemIn(hand)) {
             if (hologramEntity.isEmpty()) {
-                hologramEntity.insertItem(clickedBy.getStackInHand(hand))
-                if (!clickedBy.isCreative) clickedBy.getStackInHand(hand).count--
+                val amountTaken = hologramEntity.insertItem(clickedBy.getStackInHand(hand))
+                if(amountTaken == 0 && world.isServer) clickedBy.sendInvalidStateMessage()
+                if (!clickedBy.isCreative) clickedBy.getStackInHand(hand).count -= amountTaken
                 logDebug {
                     "Inserted item into hologram. New Content: " + hologramEntity.getItem()
                 }
@@ -128,16 +129,14 @@ object HologramBlock : SingularStateBlock<HologramBlockEntity>(HologramSettings,
         val hologramEntity = world.getHologramEntity(pos)
         // This is to make it so in creative mod you won't get unnecessary items. (onBlockRemoved is called afterwards)
         val extractedItem = hologramEntity.extractItem()
+                ?: player.sendInvalidStateMessage().run { return }
+
         // Cancel crafting if needed
         if (!extractedItem.isEmpty) {
-            val multiblock = hologramEntity.getMultiblockOrNull()
-                    ?: hologramEntity.complainAboutMissingMultiblock().run { return }
+            val multiblock = hologramEntity.multiblockIn ?: return
             if (multiblock.isCrafting) multiblock.stopCrafting(world)
-
         }
-
     }
-
 
     override fun onBlockRemoved(stateBefore: BlockState, world: World, pos: BlockPos, stateAfter: BlockState, boolean_1: Boolean) {
         // Only happens when the entire multiblock is destroyed or in creative mode.
@@ -154,7 +153,6 @@ object HologramBlock : SingularStateBlock<HologramBlockEntity>(HologramSettings,
             "Left Click on hologram in position $pos. Block Entity: ${world.getBlockEntity(pos)}"
         }
 
-
         super.onBroken(world, pos, blockState)
     }
 
@@ -166,7 +164,15 @@ object HologramBlock : SingularStateBlock<HologramBlockEntity>(HologramSettings,
     private fun giveItemInHologramToPlayer(player: PlayerEntity?, world: World, pos: BlockPos) {
         if (player == null) return
         val itemInHologram = world.getHologramEntity(pos).extractItem()
-        player.offerOrDrop(itemInHologram)
+        if (itemInHologram != null) {
+            player.offerOrDrop(itemInHologram)
+        } else player.sendInvalidStateMessage()
+
+
+    }
+
+    private fun PlayerEntity.sendInvalidStateMessage() {
+        sendMessage(TranslatableText("block.spatialcrafting.hologram.invalid_state"))
     }
 
 
