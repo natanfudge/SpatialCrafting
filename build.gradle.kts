@@ -114,7 +114,7 @@ fun DependencyHandlerScope.fabric() {
 
 fun DependencyHandlerScope.compositeDep(name: String) {
     if (publish) modImplementation(name)
-    else modImplementation(name)
+    else implementation(name)
     include(name)
 }
 

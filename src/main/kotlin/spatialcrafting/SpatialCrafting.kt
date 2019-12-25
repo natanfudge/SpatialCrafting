@@ -90,15 +90,6 @@ class SpatialCraftingInit : ModInitializer {
                 Packets.ChangeActiveLayer.serializer(),
                 Packets.StopRecipeHelp.serializer()
         )
-    }
-
-}
-
-class SpatialCraftingClientInit : ClientModInitializer {
-    override fun onInitializeClient() = initClientOnly(ModId) {
-        HologramBlock.setRenderLayer(RenderLayer.getTranslucent())
-
-        registerBlockModel(HologramId, HologramBakedModel.Texture) { HologramBakedModel() }
 
         registerS2CPackets(
                 Packets.AssignMultiblockState.serializer(),
@@ -109,6 +100,15 @@ class SpatialCraftingClientInit : ClientModInitializer {
                 Packets.ItemMovementFromPlayerToMultiblockParticles.serializer(),
                 Packets.StopCraftingParticles.serializer()
         )
+    }
+
+}
+
+class SpatialCraftingClientInit : ClientModInitializer {
+    override fun onInitializeClient() = initClientOnly(ModId) {
+        HologramBlock.setRenderLayer(RenderLayer.getTranslucent())
+
+        registerBlockModel(HologramId, HologramBakedModel.Texture) { HologramBakedModel() }
 
         registerBlockEntityRenderer(HologramBlock.blockEntityType) {
             HologramBlockEntityRenderer(it)

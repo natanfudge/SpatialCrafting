@@ -41,7 +41,7 @@ private fun settings(size: Int) = Block.Settings.copy(when (size) {
 
 fun World.getCrafterEntity(pos: BlockPos) = world.getBlockEntity(pos).assertIs<CrafterPieceEntity>(pos, this)
 fun World.getCrafterEntityOrNull(pos: BlockPos) = world.getBlockEntity(pos) as? CrafterPieceEntity
-class CrafterPieceBlock(val size: Int) : MultipleStateBlock<CrafterPieceEntity>(settings(size), ::CrafterPieceEntity),
+class CrafterPieceBlock(val size: Int) : StateBlock<CrafterPieceEntity>(settings(size), ::CrafterPieceEntity),
          Scheduleable, InventoryProvider {
 
     override fun getInventory(blockState: BlockState, world: IWorld, pos: BlockPos): SidedInventory {

@@ -44,7 +44,7 @@ private val HologramSettings = Builders.blockSettings(
 
 val IsHidden: BooleanProperty = BooleanProperty.of(IsHiddenPropertyName)
 
-object HologramBlock : SingularStateBlock<HologramBlockEntity>(HologramSettings, ::HologramBlockEntity), AttributeProvider, InventoryProvider {
+object HologramBlock : StateBlock<HologramBlockEntity>(HologramSettings, ::HologramBlockEntity), AttributeProvider, InventoryProvider {
     const val IsHiddenPropertyName = "is_hidden"
 
 
