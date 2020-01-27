@@ -25,3 +25,5 @@ If recipe help is active, the items will be inserted into the correct places.
 - The _standalone_ variant no longer bundles **Roughly Enough Items**. It now only bundles **Fabric Language Kotlin**. 
 ### 1.4.1
 - Fixed issues regarding holograms.
+### 1.4.2
+- Fixed multiblocks not being placed properly on dedicated servers.
