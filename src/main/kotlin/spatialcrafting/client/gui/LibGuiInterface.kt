@@ -2,6 +2,7 @@ package spatialcrafting.client.gui
 
 import fabricktx.api.getMinecraftClient
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription
+import io.github.cottonmc.cotton.gui.client.ScreenDrawing
 import io.github.cottonmc.cotton.gui.widget.WPlainPanel
 import io.github.cottonmc.cotton.gui.widget.WWidget
 import spatialcrafting.client.gui.widgets.core.Clickable
@@ -44,7 +45,7 @@ fun LightweightGuiDescription.drawWidgets(width: Int, height: Int, init: DevWidg
 
     val libGuiRoot = object : WWidget() {
         override fun paintBackground(x: Int, y: Int) {
-            runtimeRoot.draw()
+            runtimeRoot.draw(ScreenDrawing.getMatrices())
         }
     }
 

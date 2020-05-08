@@ -17,6 +17,10 @@ pluginManagement {
     }
 }
 
-if (file("../fabric-ktx").exists() && (!hasProperty("publish") || !publish)) {
-    includeBuild "../fabric-ktx"
-}
+//if (file("../fabric-ktx").exists() && (!hasProperty("publish") || !publish)) {
+//    includeBuild ("../fabric-ktx"){
+//        dependencySubstitution {
+//            substitute(module("com.lettuce.fudge:fabric-ktx:$fabric_ktx_version+$minecraft_version")).with(project(":"))
+//        }
+//    }
+//}

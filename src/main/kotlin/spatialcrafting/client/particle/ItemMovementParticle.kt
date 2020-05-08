@@ -10,6 +10,7 @@ import net.minecraft.client.particle.ParticleTextureSheet
 import net.minecraft.client.render.Camera
 import net.minecraft.client.render.VertexConsumer
 import net.minecraft.client.util.math.MatrixStack
+import net.minecraft.client.world.ClientWorld
 import net.minecraft.entity.ItemEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
@@ -23,7 +24,7 @@ import spatialcrafting.hologram.getHologramEntity
 private val HalfOfEachCoordinate = Vec3d(0.5, 0.5, 0.5)
 
 @Environment(EnvType.CLIENT)
-abstract class ItemMovementParticle(world: World,
+abstract class ItemMovementParticle(world: ClientWorld,
                                     private val itemEntity: ItemEntity,
                                     private val targetLocation: Vec3d
 ) : Particle(world, itemEntity.x, itemEntity.y, itemEntity.z, 0.0, 0.0, 0.0) {
@@ -90,7 +91,7 @@ abstract class ItemMovementParticle(world: World,
 
 }
 
-class ItemMovementParticleToHologram(world: World, itemEntity: ItemEntity, private val hologram: HologramBlockEntity)
+class ItemMovementParticleToHologram(world: ClientWorld, itemEntity: ItemEntity, private val hologram: HologramBlockEntity)
     : ItemMovementParticle(world, itemEntity, hologram.pos + HalfOfEachCoordinate) {
     override fun markDead() {
         super.markDead()
@@ -98,7 +99,7 @@ class ItemMovementParticleToHologram(world: World, itemEntity: ItemEntity, priva
     }
 }
 
-class ItemMovementParticleToPlayer(world: World,
+class ItemMovementParticleToPlayer(world: ClientWorld,
                                    itemEntity: ItemEntity,
                                    private val targetPlayer: PlayerEntity
 ) : ItemMovementParticle(world, itemEntity, targetPlayer.pos) {

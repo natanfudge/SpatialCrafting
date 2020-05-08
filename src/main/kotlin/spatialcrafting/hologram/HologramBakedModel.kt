@@ -14,11 +14,11 @@ import net.minecraft.block.BlockState
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.model.BakedModel
 import net.minecraft.client.render.model.BakedQuad
-import net.minecraft.client.render.model.json.ModelItemPropertyOverrideList
+import net.minecraft.client.render.model.json.ModelOverrideList
 import net.minecraft.client.render.model.json.ModelTransformation
 import net.minecraft.client.texture.Sprite
-import net.minecraft.container.PlayerContainer
 import net.minecraft.item.ItemStack
+import net.minecraft.screen.PlayerScreenHandler
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
 import net.minecraft.world.BlockRenderView
@@ -68,7 +68,7 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
             val mb = renderer.meshBuilder()
             val qe = mb.emitter
             val mat = renderer.materialFinder().blendMode(0, BlendMode.TRANSLUCENT).find()
-            val atlas = MinecraftClient.getInstance().getSpriteAtlas(PlayerContainer.BLOCK_ATLAS_TEXTURE)
+            val atlas = MinecraftClient.getInstance().getSpriteAtlas(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE)
             val spriteBase = atlas.apply(Texture)
 
             fun emitSquare(side: Direction) {
@@ -120,11 +120,15 @@ class HologramBakedModel : FabricBakedModel, BakedModel {
     override fun isVanillaAdapter(): Boolean = false
     override fun getQuads(var1: BlockState?, var2: Direction?, var3: Random?): List<BakedQuad> = listOf()
     // Not actually used
-    override fun getSprite(): Sprite = getMinecraftClient().getSpriteAtlas(PlayerContainer.BLOCK_ATLAS_TEXTURE).apply(Texture)
+    override fun getSprite(): Sprite = getMinecraftClient().getSpriteAtlas(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE).apply(Texture)
 
     override fun useAmbientOcclusion(): Boolean = true
-    override fun hasDepthInGui(): Boolean = false
+    override fun hasDepth(): Boolean = false
     override fun getTransformation(): ModelTransformation = ModelHelper.MODEL_TRANSFORM_BLOCK
+    override fun isSideLit(): Boolean = false
+
+
     override fun isBuiltin(): Boolean = false
-    override fun getItemPropertyOverrides(): ModelItemPropertyOverrideList = ModelItemPropertyOverrideList.EMPTY
+    override fun getOverrides(): ModelOverrideList = ModelOverrideList.EMPTY
+
 }

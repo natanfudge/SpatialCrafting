@@ -1,5 +1,6 @@
 package spatialcrafting.client.gui.widgets.core
 
+import net.minecraft.client.util.math.MatrixStack
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
 import spatialcrafting.client.gui.RuntimeWidget
@@ -22,11 +23,11 @@ class ColumnClass(mainAxisAlignment: MainAxisAlignment = Start,
 
     override fun getLayout(constraints: Constraints): RuntimeWidget = runtimeWidget(
             constraints = constraints, children = positionFlexLayout(constraints, direction = Direction.TopToBottom),
-            debugIdentifier = "Column", drawer = ::draw
+            debugIdentifier = "Column", drawer = {drawExt(it)}
     )
 
-    private fun draw(it: RuntimeWidget) {
-        for (child in it.runtimeChildren) child.draw()
+    private fun RuntimeWidget.drawExt(stack : MatrixStack) {
+        for (child in runtimeChildren) child.draw(stack)
     }
 
 }

@@ -63,7 +63,7 @@ class ShapelessSpatialRecipe private constructor(val components: List<ShapelessR
     //TODO: won't work sometimes
     override fun matches(inventory: CrafterMultiblockInventoryWrapper, world: World): Boolean {
         if (minimumCrafterSize > inventory.crafterSize) return false
-        val shapelessInventory = inventory.groupBy { it.itemStack.item }
+        val shapelessInventory = inventory.inventory.groupBy { it.itemStack.item }
                 .map { ItemAndAmount(stack = it.value[0].itemStack,amount = it.value.size, wasUsed = false) }
 
         if (shapelessInventory.size != components.size) return false
@@ -79,9 +79,6 @@ class ShapelessSpatialRecipe private constructor(val components: List<ShapelessR
             }
 
             return@all matchingStacks == component.amount
-//            // Ensure it is
-//            // Check every component exists in the inventory with the required amount
-//            shapelessInventory.any { component.ingredient.matches(it.stack) && component.amount == it.amount }
         }
 
     }

@@ -30,11 +30,11 @@ import spatialcrafting.logWarning
 
 //fun craf
 
-private fun settings(size: Int) = Block.Settings.copy(when (size) {
-    2 -> Blocks.OAK_LOG
-    3 -> Blocks.STONE
-    4 -> Blocks.IRON_BLOCK
-    5 -> Blocks.DIAMOND_BLOCK
+private fun settings(size: Int) = AbstractBlock.Settings.of(when (size) {
+    2 -> Material.WOOD
+    3 -> Material.STONE
+    4 -> Material.ANVIL
+    5 -> Material.METAL
     else -> error("unexpected size")
 })
 
@@ -103,6 +103,7 @@ class CrafterPieceBlock(val size: Int) : StateBlock<CrafterPieceEntity>(settings
         when (scheduleId) {
             FinishCraft -> attemptToFinishCraft(world, pos, stopRecipeHelp = !additionalData.getBoolean(CraftIsAutomatedKey))
             BeginCraftSoundLoop -> beginCraftSoundLoop(world, pos)
+            //TODO: very possible this won't ever work
             EmitRoundOfCraftingParticles -> playRoundOfCraftParticles(world, pos, additionalData)
             else -> logWarning { "Nothing is expected to be scheduled with id $scheduleId" }
         }
@@ -131,7 +132,7 @@ class CrafterPieceBlock(val size: Int) : StateBlock<CrafterPieceEntity>(settings
         val matches = multiblockIn.getMatchingRecipes(world)
 
         if (matches.isEmpty()) {
-            clickedBy?.sendMessage(TranslatableText("message.spatialcrafting.no_match"))
+            clickedBy?.sendMessage(TranslatableText("message.spatialcrafting.no_match"),true)
             return ActionResult.SUCCESS
         } else craft(matches, world, multiblockIn, pos, automated = false)
 

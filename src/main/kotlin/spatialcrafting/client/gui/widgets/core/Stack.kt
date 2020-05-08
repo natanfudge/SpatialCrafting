@@ -1,5 +1,6 @@
 package spatialcrafting.client.gui.widgets.core
 
+import net.minecraft.client.util.math.MatrixStack
 import spatialcrafting.client.gui.*
 import spatialcrafting.client.gui.widgets.runtimeWidget
 import spatialcrafting.maxValueBy
@@ -21,13 +22,13 @@ class StackClass(override val composeDirectChildren: DevWidget.() -> Unit, overl
     }
 
     override fun getLayout(constraints: Constraints) = runtimeWidget(
-            constraints, positionChildren(constraints), "Stack", ::draw
-    )
+            constraints, positionChildren(constraints), "Stack"
+    ) {drawExt(it)}
 
-    private fun draw(runtimeWidget: RuntimeWidget) {
-        for (child in runtimeWidget.runtimeChildren) {
+    private fun RuntimeWidget.drawExt(stack : MatrixStack) {
+        for (child in runtimeChildren) {
             // Notably will draw the first child at the bottom and the last child at the top
-            child.draw()
+            child.draw(stack)
         }
     }
 }

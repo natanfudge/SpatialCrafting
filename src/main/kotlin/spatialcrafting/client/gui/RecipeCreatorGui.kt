@@ -6,6 +6,8 @@ import fabricktx.api.sendPacketToServer
 import io.github.cottonmc.cotton.gui.client.LightweightGuiDescription
 import io.github.cottonmc.cotton.gui.client.ScreenDrawing
 import net.minecraft.item.Items
+import net.minecraft.text.LiteralText
+import net.minecraft.text.Text
 import spatialcrafting.Packets
 import spatialcrafting.client.gui.widgets.*
 import spatialcrafting.client.gui.widgets.core.*
@@ -13,7 +15,7 @@ import spatialcrafting.compat.rei.getNearestCrafter
 import spatialcrafting.crafter.CrafterMultiblock
 import spatialcrafting.crafter.RecipeCreatorCurrentLayerInactive
 
-data class GeneratedRecipeState(var result: String? = null)
+data class GeneratedRecipeState(var result: Text? = null)
 
 data class RecipeOptions(var shaped: Boolean = true,
                          var craftTime: String,
@@ -42,35 +44,35 @@ class RecipeCreatorGui : LightweightGuiDescription() {
                 GenerateRecipeButton(nearestCrafter, generatedRecipeState, options)
 
                 Column(MainAxisAlignment.Center, crossAxisAlignment = CrossAxisAlignment.Baseline) {
-                    Text("Shaped")
+                    Text("Shaped".text)
                     VerticalSpace(1)
                     Switch(enabled = options.shaped).onClick {
                         options.shaped = !options.shaped
                         recompose(this@Column)
                     }
                     VerticalSpace(2)
-                    Text("Use Tags", "Where Possible")
+                    Text("Use Tags".text, "Where Possible".text)
                     VerticalSpace(1)
                     Switch(enabled = options.useTags).onClick {
                         options.useTags = !options.useTags
                         recompose(this@Column)
                     }
                     VerticalSpace(2)
-                    Text("Use Item", "Movement Effect")
+                    Text("Use Item".text, "Movement Effect".text)
                     VerticalSpace(1)
                     Switch(enabled = options.useItemMovementEffect).onClick {
                         options.useItemMovementEffect = !options.useItemMovementEffect
                         recompose(this@Column)
-                    }.tooltip("Turn on for short recipes like crafting ingredients")
+                    }.tooltip("Turn on for short recipes like crafting ingredients".text)
                 }
                 Column(MainAxisAlignment.Center, crossAxisAlignment = CrossAxisAlignment.Baseline) {
-                    Text("Craft Time", "(Seconds)")
+                    Text("Craft Time".text, "(Seconds)".text)
                     VerticalSpace(2)
                     TextField(description = this@RecipeCreatorGui, width = 40, defaultText = options.craftTime) {
                         options.craftTime = it
                     }
                     VerticalSpace(5)
-                    Text("Minimum", "Crafter Size")
+                    Text("Minimum".text, "Crafter Size".text)
                     VerticalSpace(2)
                     TextField(description = this@RecipeCreatorGui, width = 14, defaultText = options.minimumCrafterSize) {
                         options.minimumCrafterSize = it
@@ -89,7 +91,7 @@ class RecipeCreatorGui : LightweightGuiDescription() {
         Column(MainAxisAlignment.Center, crossAxisAlignment = CrossAxisAlignment.Baseline, crossAxisSize = FlexSize.Expand) {
             val thereAreAnyItemsInCrafter = nearestCrafter.getInventory(getMinecraftClient().world!!).isNotEmpty()
             val playerHoldsItem = getMinecraftClient().player!!.mainHandStack.item != Items.AIR
-            Button("Generate Recipe", enabled = thereAreAnyItemsInCrafter && playerHoldsItem, onClick = {
+            Button("Generate Recipe".text, enabled = thereAreAnyItemsInCrafter && playerHoldsItem, onClick = {
                 generatedRecipeState.result = generateRecipe(nearestCrafter, options)
                 recompose(this)
                 getMinecraftClient().server?.reload()
@@ -107,10 +109,12 @@ class RecipeCreatorGui : LightweightGuiDescription() {
     }
 }
 
+val String.text get() = LiteralText(this)
+
 private fun DevWidget.UpDownButtons(nearestCrafter: CrafterMultiblock) {
     Column(MainAxisAlignment.Center, crossAxisAlignment = CrossAxisAlignment.Baseline/*,crossAxisSize = FlexSize.Expand*/) {
         if (nearestCrafter.recipeCreatorCurrentLayer != RecipeCreatorCurrentLayerInactive) {
-            Text("${nearestCrafter.recipeCreatorCurrentLayer}", color = 0x55_FF_FF)
+            Text("${nearestCrafter.recipeCreatorCurrentLayer}".text, color = 0x55_FF_FF)
         }
 
         DisableableImage(
@@ -119,7 +123,7 @@ private fun DevWidget.UpDownButtons(nearestCrafter: CrafterMultiblock) {
                 width = 13,
                 height = 11,
                 enabled = nearestCrafter.recipeCreatorCurrentLayer < nearestCrafter.multiblockSize - 1,
-                hoverText = "Show the next hologram layer"
+                hoverText = "Show the next hologram layer".text
         ) {
             changeCurrentLayer(nearestCrafter, change = +1, recompositionTarget = this@Column)
         }
@@ -131,7 +135,7 @@ private fun DevWidget.UpDownButtons(nearestCrafter: CrafterMultiblock) {
                 width = 13,
                 height = 11,
                 enabled = nearestCrafter.recipeCreatorCurrentLayer > 0,
-                hoverText = "Show the previous hologram layer"
+                hoverText = "Show the previous hologram layer".text
         ) {
             changeCurrentLayer(nearestCrafter, change = -1, recompositionTarget = this@Column)
         }
@@ -150,12 +154,12 @@ private fun DevWidget.DisableableImage(enabledTexture: String,
                                        width: Int,
                                        height: Int,
                                        enabled: Boolean,
-                                       hoverText: String = "",
+                                       hoverText: Text = "".text,
                                        onClick: DevWidget.(RuntimeWidget) -> Unit) =
         if (enabled) HoverableImage(enabledTexture, width, height).onClick {
             getMinecraftClient().playButtonClickSound()
             onClick(it)
-        }.tooltip(if (hoverText != "") hoverText else null)
+        }.tooltip(if (hoverText.string != "") hoverText else null)
         else Image(disabledTexture, width, height)
 
 

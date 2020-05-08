@@ -16,5 +16,5 @@ fun PlayerEntity.isCloseEnoughToHologramPos(pos: BlockPos) = squaredDistanceTo(p
  * For interfacing with vanilla
  */
 class HologramInventoryWrapper(inv: FixedItemInv, val pos : BlockPos) : SidedInventoryFixedWrapper(inv) {
-    override fun canPlayerUseInv(player: PlayerEntity) = player.isCloseEnoughToHologramPos(pos)
+    override fun canPlayerUse(player: PlayerEntity) = player.isCloseEnoughToHologramPos(pos)
 }

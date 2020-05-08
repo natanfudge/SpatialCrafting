@@ -21,7 +21,7 @@ import spatialcrafting.logDebug
         createMultiblockFromServer(world, northernEasternCrafter, multiblock)
     }
     else {
-        byPlayer?.sendMessage(TranslatableText("message.spatialcrafting.no_space"))
+        byPlayer?.sendSystemMessage(TranslatableText("message.spatialcrafting.no_space"))
     }
 
 

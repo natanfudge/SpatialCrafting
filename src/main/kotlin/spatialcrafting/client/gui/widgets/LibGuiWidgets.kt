@@ -8,6 +8,7 @@ import io.github.cottonmc.cotton.gui.widget.WSprite
 import io.github.cottonmc.cotton.gui.widget.WTextField
 import io.github.cottonmc.cotton.gui.widget.WToggleButton
 import net.minecraft.text.LiteralText
+import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import org.lwjgl.glfw.GLFW
 import spatialcrafting.ModId
@@ -18,8 +19,8 @@ fun DevWidget.Image(path: String, width: Int, height: Int): DevWidget = Image(Id
 
 fun DevWidget.Switch(enabled: Boolean): DevWidget = LibGuiWidget(WToggleButton().apply { toggle = enabled })
 
-fun DevWidget.Button(text: String, enabled: Boolean = true, onClick: () -> Unit): DevWidget = LibGuiWidget(
-        WButton(LiteralText(text)).apply { isEnabled = enabled }, width = widthOf(text) + 5, height = 20)
+fun DevWidget.Button(text: Text, enabled: Boolean = true, onClick: () -> Unit): DevWidget = LibGuiWidget(
+        WButton(text).apply { isEnabled = enabled }, width = widthOf(text) + 5, height = 20)
         .onClick {
             if (enabled) {
                 getMinecraftClient().playButtonClickSound()

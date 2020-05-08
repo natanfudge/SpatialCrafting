@@ -1,6 +1,7 @@
 package spatialcrafting.client.gui.widgets.core
 
 import fabricktx.api.getMinecraftClient
+import net.minecraft.text.Text
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.widgets.NoChildDevWidget
 import spatialcrafting.client.gui.widgets.getClientMouseX
@@ -15,12 +16,12 @@ class Overlay : NoChildDevWidget(null) {
 
 
 
-    var tooltip: String? = null
+    var tooltip: Text? = null
 
-    override fun getLayout(constraints: Constraints) = runtimeWidget(constraints) {
+    override fun getLayout(constraints: Constraints) = runtimeWidget(constraints) {stack ->
         if (tooltip != null) {
             val screen = getMinecraftClient().currentScreen
-            screen!!.renderTooltip(tooltip, getClientMouseX(), getClientMouseY())
+            screen!!.renderTooltip(stack,tooltip, getClientMouseX(), getClientMouseY())
             // Make sure it doesn't linger after
             tooltip = null
         }

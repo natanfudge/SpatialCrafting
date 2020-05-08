@@ -3,11 +3,12 @@ package spatialcrafting.compat.rei
 import com.mojang.blaze3d.systems.RenderSystem
 import fabricktx.api.getMinecraftClient
 import fabricktx.api.playButtonClickSound
-import me.shedaniel.math.api.Rectangle
+import me.shedaniel.math.Rectangle
 import me.shedaniel.rei.gui.widget.WidgetWithBounds
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.DrawableHelper
 import net.minecraft.client.gui.Element
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.util.Identifier
 
 open class ReiButton(
@@ -16,7 +17,7 @@ open class ReiButton(
         val isEnabled: (MinecraftClient) -> Boolean = { true }, val onClick: (MinecraftClient) -> Unit = {}
 ) : WidgetWithBounds() {
 
-    override fun render(mouseX: Int, mouseY: Int, delta: Float) {
+    override fun render(stack: MatrixStack,mouseX: Int, mouseY: Int, delta: Float) {
         if (isEnabled(minecraft)) {
 
             if (containsMouse(mouseX, mouseY)) {
@@ -27,7 +28,7 @@ open class ReiButton(
 
             // Draw on texture
             minecraft.textureManager.bindTexture(textureOn)
-            DrawableHelper.blit(x, y, 0f, 0f, width, height, width, height)
+            DrawableHelper.drawTexture(stack, x, y, 0f, 0f, width, height, width, height)
 
 
         } else {
@@ -35,7 +36,7 @@ open class ReiButton(
 
             // Draw off texture
             minecraft.textureManager.bindTexture(textureOff)
-            DrawableHelper.blit(x, y, 0f, 0f, width, height, width, height)
+            DrawableHelper.drawTexture(stack,x, y, 0f, 0f, width, height, width, height)
         }
     }
 

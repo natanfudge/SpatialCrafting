@@ -4,6 +4,7 @@ package spatialcrafting.client.gui.widgets
 
 import fabricktx.api.getMinecraftClient
 import io.github.cottonmc.cotton.gui.widget.WWidget
+import net.minecraft.client.util.math.MatrixStack
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
 import spatialcrafting.client.gui.RuntimeWidget
@@ -37,10 +38,10 @@ fun DevWidget.LibGuiWidget(libGuiWidget: WWidget, width: Int = libGuiWidget.widt
 fun DevWidget.runtimeWidget(constraints: Constraints,
                             children: List<RuntimeWidget> = listOf(),
                             debugIdentifier: String = "RuntimeWidget",
-                            drawer: (RuntimeWidget) -> Unit) = object : RuntimeWidget {
+                            drawer: RuntimeWidget.(MatrixStack) -> Unit) = object : RuntimeWidget {
     override var runtimeChildren = children
 
-    override fun draw() = drawer(this)
+    override fun draw(stack: MatrixStack) = drawer(stack)
     override val constraints = constraints
     override val origin = this@runtimeWidget
     override val debugIdentifier = debugIdentifier

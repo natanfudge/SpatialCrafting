@@ -22,10 +22,10 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
     private val multiblock: CrafterMultiblock? get() = world.getCrafterEntity(pos).multiblockIn
 
 
-    override fun getInvMaxStackAmount() = 1
+    override fun getMaxCountPerStack() = 1
 
-    override fun isValidInvStack(slot: Int, stack: ItemStack): Boolean {
-        if (slot >= invSize || !getInvStack(slot).isEmpty) return false
+    override fun isValid(slot: Int, stack: ItemStack): Boolean {
+        if (slot >= size() || !getStack(slot).isEmpty) return false
         val multiblock = multiblock ?: return false
         // Only accept items if they match when recipe help is active
         return multiblock.helpRecipeComponents(world)?.get(slot)?.ingredient?.matches(stack) ?: true
@@ -34,14 +34,14 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
     /**
      * Returns the inventory size.
      */
-    override fun getInvSize(): Int = multiblock?.let {
+    override fun size(): Int = multiblock?.let {
         it.helpRecipeComponents(world)?.size ?: it.totalHologramAmount
     } ?: 0
 
     /**
      * @return true if this inventory has only empty stacks, false otherwise
      */
-    override fun isInvEmpty() = multiblock?.getHologramEntities(world)?.all { it.isEmpty() } ?: true
+    override fun isEmpty() = multiblock?.getHologramEntities(world)?.all { it.isEmpty() } ?: true
 
     private fun getHologramForSlotOrNull(slot: Int): HologramBlockEntity? {
         val multiblock = multiblock
@@ -61,7 +61,7 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
     /**
      * Gets the item in the slot.
      */
-    override fun getInvStack(slot: Int): ItemStack = getHologramForSlot(slot).getItem().copy()
+    override fun getStack(slot: Int): ItemStack = getHologramForSlot(slot).getItem().copy()
 
 
     /**
@@ -70,15 +70,15 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
      * (default implementation) If there are less items in the slot than what are requested,
      * takes all items in that slot.
      */
-    override fun takeInvStack(slot: Int, count: Int): ItemStack {
+    override fun removeStack(slot: Int, count: Int): ItemStack {
         if (count <= 0) return ItemStack.EMPTY
-        else return removeInvStack(slot)
+        else return removeStack(slot)
     }
 
     /**
      * Removes the current stack in the `slot` and returns it.
      */
-    override fun removeInvStack(slot: Int): ItemStack = getHologramForSlot(slot).extractItem() ?: ItemStack.EMPTY
+    override fun removeStack(slot: Int): ItemStack = getHologramForSlot(slot).extractItem() ?: ItemStack.EMPTY
 
 
     /**
@@ -87,7 +87,7 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
      * If the stack is too big for this inventory ([Inventory.getInvMaxStackAmount]),
      * it gets resized to this inventory's maximum amount.
      */
-    override fun setInvStack(slot: Int, stack: ItemStack) {
+    override fun setStack(slot: Int, stack: ItemStack) {
         val hologram = getHologramForSlotOrNull(slot) ?: return
 
         val multiblock = multiblock ?: return
@@ -99,7 +99,7 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
         if (amountTaken == 0) return
 
         // Try to craft when the last slot is filled
-        if (multiblock.filledHologramsCount == invSize) {
+        if (multiblock.filledHologramsCount == size()) {
             val matchingRecipes = multiblock.getMatchingRecipes(world)
             if (matchingRecipes.isNotEmpty()) crafterPieceBlock.craft(matchingRecipes, world, multiblock, pos, automated = true)
         }
@@ -121,17 +121,17 @@ class CrafterPieceInventoryDelegator(private val pos: BlockPos,
         // Override if you want behavior.
     }
 
-    override fun canPlayerUseInv(player: PlayerEntity): Boolean = multiblock?.canBeUsedByPlayer(player)
+    override fun canPlayerUse(player: PlayerEntity): Boolean = multiblock?.canBeUsedByPlayer(player)
             ?: false
 
-    override fun getInvAvailableSlots(direction: Direction): IntArray = (0 until invSize).toList().toIntArray()
+    override fun getAvailableSlots(direction: Direction): IntArray = (0 until size()).toList().toIntArray()
 
-    override fun canInsertInvStack(slot: Int, stack: ItemStack, direction: Direction?): Boolean {
-        return isValidInvStack(slot, stack)
+    override fun canInsert(slot: Int, stack: ItemStack, direction: Direction?): Boolean {
+        return isValid(slot, stack)
     }
 
-    override fun canExtractInvStack(slot: Int, stack: ItemStack, direction: Direction): Boolean {
-        return slot < invSize
+    override fun canExtract(slot: Int, stack: ItemStack, direction: Direction): Boolean {
+        return slot < size()
     }
 
 }

@@ -1,20 +1,15 @@
 package spatialcrafting.compat.rei
 
-import com.mojang.blaze3d.systems.RenderSystem
 import fabricktx.api.isWholeNumber
-import me.shedaniel.math.api.Point
-import me.shedaniel.math.api.Rectangle
+import me.shedaniel.math.Point
+import me.shedaniel.math.Rectangle
 import me.shedaniel.rei.api.EntryStack
 import me.shedaniel.rei.api.RecipeCategory
-import me.shedaniel.rei.gui.widget.LabelWidget
-import me.shedaniel.rei.gui.widget.RecipeBaseWidget
+import me.shedaniel.rei.api.widgets.Widgets
 import me.shedaniel.rei.gui.widget.Widget
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.render.DiffuseLighting
 import net.minecraft.client.resource.language.I18n
 import net.minecraft.item.ItemStack
 import net.minecraft.text.LiteralText
-import net.minecraft.text.Style
 import net.minecraft.util.Formatting
 import net.minecraft.util.Identifier
 import spatialcrafting.compat.rei.util.SlotWidget
@@ -22,8 +17,8 @@ import spatialcrafting.compat.rei.util.SwappableChildWidget
 import spatialcrafting.compat.rei.util.SwappableChildrenWidget
 import spatialcrafting.crafter.CrafterPieceBlock
 import spatialcrafting.modId
+import spatialcrafting.recipe.ComponentPosition
 import spatialcrafting.recipe.ComponentSatisfaction
-import java.util.function.Supplier
 import kotlin.math.roundToInt
 
 //TODO: show energy cost if that's enabled (and exists)
@@ -99,16 +94,17 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
 
     override fun getCategoryName(): String = I18n.translate("category.rei.spatialcrafting.x$recipeSize")
 
-    override fun setupDisplay(recipeDisplaySupplier: Supplier<ReiSpatialCraftingDisplay>, bounds: Rectangle): List<Widget> {
+
+    override fun setupDisplay(recipeDisplaySupplier: ReiSpatialCraftingDisplay, bounds: Rectangle): List<Widget> {
         return try {
-            setupDisplay(recipeDisplaySupplier.get(), bounds)
+            setupDisplayImpl(recipeDisplaySupplier, bounds)
         } catch (e: NoClassDefFoundError) {
             e.printStackTrace()
             listOf()
         }
     }
 
-    private fun setupDisplay(display: ReiSpatialCraftingDisplay, bounds: Rectangle): List<Widget> {
+    private fun setupDisplayImpl(display: ReiSpatialCraftingDisplay, bounds: Rectangle): List<Widget> {
         val startPoint = Point(bounds.centerX - RecipeWidth.ofRecipeSize() / 2,
                 bounds.centerY - RecipeHeight.ofRecipeSize() / 2)
 
@@ -123,7 +119,7 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
 
         }
 
-        val plusButton = run {
+        val plusButton: PlusButton = run {
             val xOffset = 19
             val yOffset = if (recipeSize == 2) 19 else 4
             return@run PlusButton(
@@ -137,13 +133,13 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
 
         val seconds = display.recipe.craftTime.inSeconds
         val time = if (seconds.isWholeNumber()) seconds.roundToInt().toDouble() else seconds
-        val text = LiteralText(time.toString() + "s")
-                .setStyle(Style().setColor(Formatting.DARK_GRAY))
+        val text = LiteralText(time.toString() + "s").styled {
+            it.withColor(Formatting.DARK_GRAY)
+        }
 
-
-        val craftTimeText = LabelWidget(
+        val craftTimeText: Widget = Widgets.createLabel(
                 Point(startPoint.x + CraftTimeXOffset.ofRecipeSize(), startPoint.y + OutputSlotYOffset.ofRecipeSize() + 20),
-                text.asFormattedString()
+                text
         ).noShadow()
 
 
@@ -154,7 +150,7 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
         }
 
 
-        val upButton = ReiButton(x = startPoint.x + UpDownButtonsXOffset,
+        val upButton: Widget = ReiButton(x = startPoint.x + UpDownButtonsXOffset,
                 y = startPoint.y + UpDownButtonsYOffset.ofRecipeSize(), height = 10, width = 13,
                 textureOn = Buttons.UpOn, textureOff = Buttons.UpOff,
                 isEnabled = { display.currentLayer < recipeSize - 1 }) {
@@ -163,7 +159,7 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
             refreshLayerWidgets()
         }
 
-        val downButton = ReiButton(x = startPoint.x + UpDownButtonsXOffset,
+        val downButton: Widget = ReiButton(x = startPoint.x + UpDownButtonsXOffset,
                 y = startPoint.y + 15 + UpDownButtonsYOffset.ofRecipeSize(),
                 height = 10, width = 13,
                 textureOn = Buttons.DownOn, textureOff = Buttons.DownOff, isEnabled = { display.currentLayer > 0 }) {
@@ -173,27 +169,23 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
         }
 
 
-        val outputSlot = SlotWidget(x = startPoint.x + OutputSlotXOffset.ofRecipeSize(),
+        val outputSlot: Widget = SlotWidget(x = startPoint.x + OutputSlotXOffset.ofRecipeSize(),
                 y = startPoint.y + OutputSlotYOffset.ofRecipeSize(),
                 itemStack = display.recipe.outputStack, drawBackground = false)
 
 
-        val background = object : RecipeBaseWidget(bounds) {
-            override fun render(mouseX: Int, mouseY: Int, delta: Float) {
-                super.render(mouseX, mouseY, delta)
-                RenderSystem.color4f(1.0f, 1.0f, 1.0f, 1.0f)
-                DiffuseLighting.disable()
-                MinecraftClient.getInstance().textureManager.bindTexture(Background.ofRecipeSize())
-                blit(startPoint.x + WidthIncrease, startPoint.y, 0, 0, RecipeWidth.ofRecipeSize(),
-                        RecipeHeight.ofRecipeSize())
-            }
-        }
+        val base: Widget = Widgets.createRecipeBase(bounds)
+
+        val texture = Widgets.createTexturedWidget(Background.ofRecipeSize(),
+                Rectangle(startPoint.x + WidthIncrease, startPoint.y, RecipeWidth.ofRecipeSize(), RecipeHeight.ofRecipeSize())
+        )
 
 
         refreshLayerWidgets()
 
         return listOf(
-                background,
+                base,
+                texture,
                 inputSlots,
                 outputSlot,
                 upButton,
@@ -214,13 +206,14 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
 
     }
 
-    private fun currentLayerText(display: ReiSpatialCraftingDisplay, startPoint: Point): LabelWidget {
-        val text = LiteralText((display.currentLayer + 1).toString())
-                .setStyle(Style().setColor(Formatting.AQUA))
+    private fun currentLayerText(display: ReiSpatialCraftingDisplay, startPoint: Point): Widget {
+        val text = LiteralText((display.currentLayer + 1).toString()).styled {
+            it.withColor(Formatting.AQUA)
+        }
 
-        return LabelWidget(
+        return Widgets.createLabel(
                 Point(startPoint.x + UpDownButtonsXOffset + 6, startPoint.y + UpDownButtonsYOffset.ofRecipeSize() - 11),
-                text.asFormattedString()
+                text
         )
 
     }
@@ -232,6 +225,7 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
                     y = startPoint.y + component.position.z * 18 + 1,
                     itemStackList = component.ingredient.matchingStacksClient.toList(),
                     highlighted = {
+//                        println(satisfaction()?.readable())
                         val satisfactionResult = satisfaction()
                         if (satisfactionResult == null) false
                         else satisfactionResult.find { it.pos == component.position }!!.satisfiedBy == null
@@ -239,6 +233,12 @@ class ReiSpatialCraftingCategory(private val recipeSize: Int) : RecipeCategory<R
             )
         }
     }
+
+    fun List<ComponentSatisfaction>.readable() ="Satisfied: [ " + "\n" + filter { it.satisfiedBy != null }.joinToString("\n"){
+        it.pos.readable()
+    } + "\n" + "]"
+
+    fun ComponentPosition.readable() = "($x, $y, $z)"
 
     override fun getDisplayHeight(): Int {
         if (recipeSize == 2) return RecipeHeight.ofRecipeSize() + 35

@@ -28,7 +28,7 @@ class PaddingClass(private val left: Int,
         ))
     }
     else listOf()
-    ) { it.runtimeChildren.firstOrNull()?.draw() }
+    ) { runtimeChildren.firstOrNull()?.draw(it) }
 
 
 }

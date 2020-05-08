@@ -33,9 +33,9 @@ class ShapedSpatialRecipe private constructor(val components: List<ShapedRecipeC
         get() = components
 
     override fun matches(inventoryWrapper: CrafterMultiblockInventoryWrapper, world: World): Boolean {
-        if (inventoryWrapper.size != this.components.size) return false
+        if (inventoryWrapper.inventory.size != this.components.size) return false
         if (inventoryWrapper.crafterSize < minimumCrafterSize) return false
-        val inventory = inventoryWrapper.normalizePositions()
+        val inventory = inventoryWrapper.inventory.normalizePositions()
         val recipe = components.normalizePositions()
 
         // Make sure they have been sorted before, as it's a requirement.

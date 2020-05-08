@@ -4,6 +4,7 @@ import drawer.getFrom
 import fabricktx.api.*
 import kotlinx.serialization.internal.nullable
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
+import net.minecraft.block.BlockState
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
@@ -82,7 +83,7 @@ class CrafterPieceEntity : KBlockEntity(CrafterPieceBlock.All), BlockEntityClien
 
     override fun toClientTag(tag: CompoundTag): CompoundTag = this.toTag(tag)
 
-    override fun fromClientTag(tag: CompoundTag) = this.fromTag(tag)
+    override fun fromClientTag(tag: CompoundTag) = this.fromTag(null,tag)
 
     override fun toTag(tag: CompoundTag): CompoundTag {
         super.toTag(tag)
@@ -96,9 +97,10 @@ class CrafterPieceEntity : KBlockEntity(CrafterPieceBlock.All), BlockEntityClien
     }
 
 
+
     // Deserialize the BlockEntity
-    override fun fromTag(tag: CompoundTag) {
-        super.fromTag(tag)
+    override fun fromTag(state:BlockState?, tag: CompoundTag) {
+        super.fromTag(state,tag)
         masterEntityPos = tag.getBlockPos(Keys.masterEntity)
         // Minecraft gives BlockPos(0,0,0) when there is no pos with that key.
         if (masterEntityPos == BlockPos(0, 0, 0)) masterEntityPos = null

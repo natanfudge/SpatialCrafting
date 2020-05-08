@@ -3,6 +3,7 @@ package spatialcrafting.client.particle
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.world.ClientWorld
 import net.minecraft.item.ItemStack
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
@@ -11,7 +12,7 @@ import spatialcrafting.crafter.CrafterMultiblock
 import kotlin.time.Duration
 
 
-data class ParticleBuilder(val world: World, val originalEndPos: Vec3d, val startTimeDelay: Duration, val craftDuration: Duration,
+data class ParticleBuilder(val world: ClientWorld, val originalEndPos: Vec3d, val startTimeDelay: Duration, val craftDuration: Duration,
                            val craftYEndPos: Double, val stack: ItemStack) {
     fun shootParticleFrom(startPos: Vec3d) {
         shootCraftParticle(world, startPos, originalEndPos, startTimeDelay, craftDuration, craftYEndPos, stack)
@@ -33,7 +34,7 @@ fun CrafterMultiblock.centerOfHolograms(): Vec3d {
 
 
 @Environment(EnvType.CLIENT)
-fun shootCraftParticle(world: World, startPos: Vec3d, originalEndPos: Vec3d, startTimeDelay: Duration, craftDuration: Duration,
+fun shootCraftParticle(world: ClientWorld, startPos: Vec3d, originalEndPos: Vec3d, startTimeDelay: Duration, craftDuration: Duration,
                        currentEndY: Double, stack: ItemStack) {
     MinecraftClient.getInstance().particleManager.addParticle(
             CraftParticle(

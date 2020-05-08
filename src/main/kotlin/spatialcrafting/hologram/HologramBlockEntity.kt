@@ -9,6 +9,7 @@ import kotlinx.serialization.UseSerializers
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachmentBlockEntity
 import net.fabricmc.fabric.api.server.PlayerStream
+import net.minecraft.block.BlockState
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.recipe.Ingredient
@@ -131,8 +132,8 @@ class HologramBlockEntity : KBlockEntity(HologramBlock), BlockEntityClientSerial
         return tag
     }
 
-    override fun fromTag(tag: CompoundTag) {
-        super.fromTag(tag)
+    override fun fromTag(state: BlockState?,tag: CompoundTag) {
+        super.fromTag(state,tag)
         inventory.fromTag(tag.getCompound(Keys.Inventory))
         lastChangeTime = tag.getLong(Keys.LastChangeTime)
         masterEntityPos = tag.getBlockPos(Keys.MasterPos)
@@ -140,7 +141,7 @@ class HologramBlockEntity : KBlockEntity(HologramBlock), BlockEntityClientSerial
 
     override fun toClientTag(p0: CompoundTag): CompoundTag = toTag(p0)
 
-    override fun fromClientTag(p0: CompoundTag) = fromTag(p0)
+    override fun fromClientTag(p0: CompoundTag) = fromTag(null,p0)
 
     override fun tick() {
         // Value is always incremented to avoid desyncs

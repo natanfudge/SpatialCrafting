@@ -4,13 +4,14 @@ import fabricktx.api.ticks
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.particle.ParticleTextureSheet
 import net.minecraft.client.particle.SpriteBillboardParticle
+import net.minecraft.client.world.ClientWorld
 import net.minecraft.item.ItemStack
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import spatialcrafting.client.particle.MathUtil.euclideanDistanceOf
 import kotlin.time.Duration
 
-class CraftParticle(world: World,
+class CraftParticle(world: ClientWorld,
                     sourcePos: Vec3d,
                     val endX: Double,
                     val origEndY: Double,

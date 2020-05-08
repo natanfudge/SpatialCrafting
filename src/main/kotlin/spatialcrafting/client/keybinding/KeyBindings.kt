@@ -11,7 +11,8 @@ import spatialcrafting.modId
 const val SpatialCraftingKeyBindingCategory = "Spatial Crafting"
 
 
-private fun hotkey(name: String, hotkey: Int, init: KotlinKeyBindingBuilder.() -> Unit = {}) = KotlinKeyBinding.create(modId(name), code = hotkey, init = init)
+private fun hotkey(name: String, hotkey: Int, init: KotlinKeyBindingBuilder.() -> Unit = {})
+        = KotlinKeyBinding.create(modId(name), category = "Spatial Crafting", key = hotkey, init = init)
 
 val RecipeCreatorKeyBinding = hotkey("open_recipe_creator", GLFW.GLFW_KEY_GRAVE_ACCENT)
 

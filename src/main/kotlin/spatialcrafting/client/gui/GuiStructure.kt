@@ -1,5 +1,7 @@
 package spatialcrafting.client.gui
 
+import net.minecraft.client.util.math.MatrixStack
+import net.minecraft.text.Text
 import spatialcrafting.client.gui.widgets.core.Clickable
 import spatialcrafting.client.gui.widgets.core.Overlay
 import spatialcrafting.client.gui.widgets.core.TightSingleChildDevWidget
@@ -85,7 +87,7 @@ abstract class DevWidget(
             callback = callback
     )
 
-    fun DevWidget.tooltip(tooltip: String?): DevWidget = wrapWithHover(
+    fun DevWidget.tooltip(tooltip: Text?): DevWidget = wrapWithHover(
             parent = this@DevWidget,
             toBeWrapped = this,
             callback = { _, _ -> overlay!!.tooltip = tooltip }
@@ -130,8 +132,8 @@ abstract class DevWidget(
 private fun wrapWithHover(parent: DevWidget, toBeWrapped: DevWidget, callback: RuntimeWidget.(mouseX: Int, mouseY: Int) -> Unit): DevWidget {
     parent.devChildren.remove(toBeWrapped)
     return parent.add(TightSingleChildDevWidget(composeDirectChildren = { add(toBeWrapped) }, drawer = {
-        it.draw()
-        if (it.constraints.contains(getClientMouseX(), getClientMouseY())) it.callback(getClientMouseX(), getClientMouseY())
+        draw(it)
+        if (constraints.contains(getClientMouseX(), getClientMouseY())) callback(getClientMouseX(), getClientMouseY())
     }, overlay = parent.overlay))
 }
 
@@ -145,7 +147,7 @@ interface RuntimeWidget {
         get() = listOf()
         set(_) {}
 
-    fun draw()
+    fun draw(stack : MatrixStack)
     val origin: DevWidget
 
     val debugIdentifier: String get() = "RuntimeWidget"

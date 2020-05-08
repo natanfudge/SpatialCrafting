@@ -27,7 +27,7 @@ class RowClass(mainAxisAlignment: MainAxisAlignment,
     override fun getLayout(constraints: Constraints): RuntimeWidget = runtimeWidget(
             constraints = constraints, children = positionFlexLayout(constraints, direction = LeftToRight), debugIdentifier = "Row"
     ) {
-        for (child in it.runtimeChildren) child.draw()
+        for (child in runtimeChildren) child.draw(it)
     }
 }
 

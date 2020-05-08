@@ -7,6 +7,7 @@ import net.minecraft.item.Item
 import net.minecraft.tag.ItemTags
 import net.minecraft.text.LiteralText
 import net.minecraft.text.Style
+import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.util.registry.Registry
 import spatialcrafting.MaxCrafterSize
@@ -22,13 +23,13 @@ private const val GeneratedDataPackName = "${ModId}_generated"
 /**
  * Returns the text that will be displayed to the player after generation. Can return errors in player input.
  */
-fun generateRecipe(multiblock: CrafterMultiblock, recipeOptions: RecipeOptions): String {
+fun generateRecipe(multiblock: CrafterMultiblock, recipeOptions: RecipeOptions): Text {
     // If useTags is enabled and an item has multiple tags then we can't resolve the recipe currently.
     //TODO: enable useTags with multiple tags with more advanced GUI.
     if (recipeOptions.useTags) {
         for (slot in multiblock.getInventory(getMinecraftClient().world!!)) {
             if (ItemTags.getContainer().getTagsFor(slot.itemStack.item).size > 1) {
-                return errorText("There are multiple tags for '${slot.itemStack.item.name.asFormattedString()}', please create this recipe manually or don't use tags for now.")
+                return errorText("There are multiple tags for '${slot.itemStack.item.name.string}', please create this recipe manually or don't use tags for now.")
             }
         }
     }
@@ -68,7 +69,9 @@ fun generateRecipe(multiblock: CrafterMultiblock, recipeOptions: RecipeOptions):
 
     createMcMetaFileIfNeeded()
 
-    return LiteralText("Recipe saved to $jsonRelativePath!").setStyle(Style().setColor(Formatting.DARK_GREEN)).asFormattedString()
+    return LiteralText("Recipe saved to $jsonRelativePath!").styled {
+        it.withColor(Formatting.DARK_GREEN)
+    }
 
 
 }
@@ -91,9 +94,11 @@ private fun createMcMetaFileIfNeeded() {
     }
 }
 
-fun errorText(text: String): String = LiteralText(text).setStyle(Style().setColor(Formatting.RED)).asFormattedString()
+fun errorText(text: String): Text = LiteralText(text).styled {
+    it.withColor(Formatting.RED)
+}
 
-private fun checkForRecipeInvalidation(jsonRecipe: SpatialRecipeJsonFormat, shaped: Boolean): String? {
+private fun checkForRecipeInvalidation(jsonRecipe: SpatialRecipeJsonFormat, shaped: Boolean): Text? {
     val parsedRecipeForValidation = if (shaped) {
         ShapedSpatialRecipe.readFromDeserialized(jsonRecipe, modId("for_validation"))
     }
@@ -148,7 +153,7 @@ private fun buildJsonRecipeFromInventory(multiblock: CrafterMultiblock, options:
         val item = slot.itemStack.item
         ingredientKeys[item] = ingredientKeys[item]
                 // Item was not encountered before
-                ?: item.name.asFormattedString().find { it !in ingredientKeys.values }?.toUpperCase()
+                ?: item.name.string.find { it !in ingredientKeys.values }?.toUpperCase()
                         // Can't use any of the item's letters because they have been used already by other items
                         ?: (0..100).map { it.toChar() }.first { it !in ingredientKeys.values }
     }

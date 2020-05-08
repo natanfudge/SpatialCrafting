@@ -45,7 +45,6 @@ val fabric_keybindings_version: String by project
 val curseforge_api_key: String by project
 val scheduler_version: String by project
 
-val publish = project.hasProperty("publish") && prop("publish").toBoolean()
 
 
 
@@ -60,48 +59,54 @@ minecraft {
 }
 
 repositories {
-    mavenLocal()
-    jcenter()
-    maven(url = "https://kotlin.bintray.com/kotlinx")
     maven(url = "https://mod-buildcraft.com/maven")
-    maven(url = "https://minecraft.curseforge.com/api/maven")
-    maven(url = "http://tehnut.info/maven")
-    maven(url = "https://maven.jamieswhiteshirt.com/libs-release/")
-    maven(url = "http://server.bbkr.space:8081/artifactory/libs-snapshot")
-    maven(url = "https://maven.abusedmaster.xyz")
     maven(url = "http://server.bbkr.space:8081/artifactory/libs-release/")
-    maven(url = "https://dl.bintray.com/natanfudge/libs")
-    maven(url = "https://jitpack.io")
+    jcenter()
+    maven(url = "https://maven.jamieswhiteshirt.com/libs-release/")
+    maven(url = "https://minecraft.curseforge.com/api/maven")
+
+//    mavenLocal()
+//    jcenter()
+//    maven(url = "https://kotlin.bintray.com/kotlinx")
+//
+//
+//    maven(url = "http://tehnut.info/maven")
+//    maven(url = "https://maven.jamieswhiteshirt.com/libs-release/")
+//    maven(url = "http://server.bbkr.space:8081/artifactory/libs-snapshot")
+//    maven(url = "https://maven.abusedmaster.xyz")
+//
+//    maven(url = "https://dl.bintray.com/natanfudge/libs")
+//    maven(url = "https://jitpack.io")
 }
 
 
 dependencies {
 
     fabric()
-
+//
     modDependency("alexiil.mc.lib:libblockattributes-items:$lba_version")
     modDependency("alexiil.mc.lib:libblockattributes-core:$lba_version")
 
     modDependency("io.github.cottonmc:LibGui:$libgui_version")
 
-    modDependency("net.fabricmc:fabric-language-kotlin:$fabric_language_kotlin_version")
+    modImplementation("net.fabricmc:fabric-language-kotlin:$fabric_language_kotlin_version")
 
     optionalDependency("me.shedaniel:RoughlyEnoughItems:$rei_version") {
         exclude(group = "io.github.prospector.modmenu")
     }
-
+//
     modDependency("com.lettuce.fudge:fabric-drawer:$drawer_version")
-    compositeDep("com.lettuce.fudge:fabric-ktx:${prop("fabric_ktx_version")}+$minecraft_version")
+    modDependency("com.lettuce.fudge:fabric-ktx:${prop("fabric_ktx_version")}+$minecraft_version")
     modDependency("com.lettuce.fudge:working-scheduler:$scheduler_version")
-
-    devEnvMod("mcp.mobius.waila:Hwyla:$waila_version")
-//    devEnvMod("com.jamieswhiteshirt:developer-mode:1.0.14")
+//
+////    devEnvMod("mcp.mobius.waila:Hwyla:$waila_version")
+////    devEnvMod("com.jamieswhiteshirt:developer-mode:1.0.14")
     devEnvMod("gamemodeoverhaul:GamemodeOverhaul:1.0.1.0")
 
-    devEnvMod("curse.maven:data-loader:2749923")
+//    devEnvMod("curse.maven:data-loader:2927042")
 
-    devEnvMod("com.lettuce.fudge:notenoughcrashes:1.1.4+1.15.1")
-    devEnvMod("com.lettuce.fudge:notenoughcrashes-api:1.0.0")
+//    devEnvMod("com.lettuce.fudge:notenoughcrashes:1.1.4+1.15.1")
+//    devEnvMod("com.lettuce.fudge:notenoughcrashes-api:1.0.0")
 
 }
 
@@ -112,11 +117,11 @@ fun DependencyHandlerScope.fabric() {
     modImplementation("net.fabricmc.fabric-api:fabric-api:$fabric_version")
 }
 
-fun DependencyHandlerScope.compositeDep(name: String) {
-    if (publish) modImplementation(name)
-    else implementation(name)
-    include(name)
-}
+//fun DependencyHandlerScope.compositeDep(name: String) {
+//    if (publish) modImplementation(name)
+//    else implementation(name)
+//    include(name)
+//}
 
 fun DependencyHandlerScope.optionalDependency(dep: String, dependencyConfiguration: Action<ExternalModuleDependency> = Action {}) {
     modCompileOnly(dep) {
@@ -162,21 +167,6 @@ val sourcesJar = tasks.create<Jar>("sourcesJar") {
 
 val remapJar = tasks.getByName<RemapJarTask>("remapJar")
 
-val remapModpackJar = tasks.create<RemapJarTask>("remapModpackJar") {
-    dependsOn(remapJar)
-    addNestedDependencies.set(false)
-    forcedNestedDependencies.set(listOf("working-scheduler", "fabric-ktx", "LibGui", "libblockattributes-items", "libblockattributes-core", "fabric-drawer"))
-    input.set(remapJar.input)
-    archiveFileName.set("$archives_base_name-$mod_version-modpack.jar")
-}
-
-val remapStandaloneJar = tasks.create<RemapJarTask>("remapStandaloneJar") {
-    dependsOn(remapJar)
-    addNestedDependencies.set(true)
-    input.set(remapJar.input)
-    archiveFileName.set("$archives_base_name-$mod_version-standalone.jar")
-}
-
 val remapSourcesJar = tasks.getByName<RemapSourcesJarTask>("remapSourcesJar")
 
 curseforge {
@@ -189,13 +179,14 @@ curseforge {
         changelogType = "markdown"
         changelog = file("changelog.md")
 
-        mainArtifact(remapModpackJar, closureOf<CurseArtifact> {
-            displayName = "$mod_name $mod_version-Modpack"
-        })
 
-        addArtifact(remapStandaloneJar, closureOf<CurseArtifact> {
-            displayName = "$mod_name $mod_version-Standalone"
-        })
+            mainArtifact(remapJar , closureOf<CurseArtifact> {
+                displayName = "$mod_name $mod_version"
+            })
+
+
+
+
         relations(closureOf<CurseRelation> {
             requiredDependency("fabric-language-kotlin")
             requiredDependency("fabric-api")
@@ -212,19 +203,11 @@ curseforge {
 // configure the maven publication
 publishing {
     publications {
-        create("standalone", MavenPublication::class.java) {
+        create("spatialcrafting", MavenPublication::class.java) {
             // add all the jars that should be included when publishing to maven
-            artifact(remapStandaloneJar)
+            artifact(remapJar)
             groupId = maven_group
-            artifactId = "$archives_base_name-standalone"
-            version = mod_version
-        }
-
-        create("modpack", MavenPublication::class.java) {
-            // add all the jars that should be included when publishing to maven
-            artifact(remapModpackJar)
-            groupId = maven_group
-            artifactId = "$archives_base_name-modpack"
+            artifactId = archives_base_name
             version = mod_version
         }
     }
@@ -236,12 +219,6 @@ publishing {
     }
 }
 
-
-tasks.withType<RemapJarTask> {
-    doFirst {
-        if (!publish) throw IllegalArgumentException("Cannot publish without publish flag!")
-    }
-}
 
 
 tasks.withType<KotlinCompile> {

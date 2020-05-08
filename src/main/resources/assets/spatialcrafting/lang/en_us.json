@@ -25,6 +25,7 @@
   "tooltip.rei.plus_button.stop_recipe_help" : "Stop Recipe Help",
 
   "key.spatialcrafting.open_recipe_creator": "Open Recipe Creator [For modpack makers]",
+  "key.spatialcrafting.minimize_holograms": "Minimize Holograms",
 
   "message.spatialcrafting.no_match": "No recipe matches",
   "message.spatialcrafting.no_space": "Not enough space above the crafter pieces"

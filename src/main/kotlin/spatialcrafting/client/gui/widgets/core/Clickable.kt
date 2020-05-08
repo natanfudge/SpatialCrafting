@@ -1,5 +1,6 @@
 package spatialcrafting.client.gui.widgets.core
 
+import net.minecraft.client.util.math.MatrixStack
 import spatialcrafting.client.gui.Constraints
 import spatialcrafting.client.gui.DevWidget
 import spatialcrafting.client.gui.RuntimeWidget
@@ -15,8 +16,8 @@ class Clickable<T : DevWidget>(overlay: Overlay?,
     override fun getLayout(constraints: Constraints): RuntimeWidget = ClickableRuntime(constraints, this)
     inner class ClickableRuntime(override val constraints: Constraints, override val origin: DevWidget) : RuntimeWidget {
         override var runtimeChildren = listOf(child.layout(constraints))
-        override fun draw() {
-            runtimeChildren.first().draw()
+        override fun draw(stack: MatrixStack) {
+            runtimeChildren.first().draw(stack)
         }
 
         fun onClick() = try {

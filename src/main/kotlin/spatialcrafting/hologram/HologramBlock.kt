@@ -6,7 +6,6 @@ import alexiil.mc.lib.attributes.AttributeList
 import alexiil.mc.lib.attributes.AttributeProvider
 import fabricktx.api.*
 import net.minecraft.block.*
-import net.minecraft.entity.EntityContext
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.inventory.SidedInventory
@@ -54,11 +53,6 @@ object HologramBlock : StateBlock<HologramBlockEntity>(HologramSettings, ::Holog
 
     override fun isTranslucent(state: BlockState?, view: BlockView?, pos: BlockPos?): Boolean = true
 
-    override fun canSuffocate(state: BlockState?, view: BlockView?, pos: BlockPos?): Boolean = false
-
-    override fun isSimpleFullBlock(state: BlockState?, view: BlockView?, pos: BlockPos?) = false
-
-    override fun allowsSpawning(state: BlockState?, view: BlockView?, pos: BlockPos?, type: EntityType<*>?) = false
 
     override fun addAllAttributes(
             world: World,
@@ -86,7 +80,7 @@ object HologramBlock : StateBlock<HologramBlockEntity>(HologramSettings, ::Holog
     private val halfBlock = VoxelShapes.cuboid(0.25, 0.25, 0.25, 0.75, 0.75, 0.75)
 
 
-    override fun getOutlineShape(state: BlockState, view: BlockView?, pos: BlockPos, ePos: EntityContext): VoxelShape {
+    override fun getOutlineShape(state: BlockState, view: BlockView?, pos: BlockPos, ePos: ShapeContext): VoxelShape {
         return when {
             state.get(IsHidden) -> VoxelShapes.empty()
             MinimizeHologramsKeyBinding.isPressed -> halfBlock
@@ -172,7 +166,7 @@ object HologramBlock : StateBlock<HologramBlockEntity>(HologramSettings, ::Holog
     }
 
     private fun PlayerEntity.sendInvalidStateMessage() {
-        sendMessage(TranslatableText("block.spatialcrafting.hologram.invalid_state"))
+        sendMessage(TranslatableText("block.spatialcrafting.hologram.invalid_state"), true)
     }
 
 

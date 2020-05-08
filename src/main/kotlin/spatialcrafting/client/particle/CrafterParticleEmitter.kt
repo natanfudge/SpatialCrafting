@@ -3,6 +3,7 @@ package spatialcrafting.client.particle
 import fabricktx.api.*
 import net.fabricmc.api.EnvType
 import net.fabricmc.api.Environment
+import net.minecraft.client.world.ClientWorld
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 import net.minecraft.nbt.CompoundTag
@@ -57,13 +58,14 @@ fun playRoundOfCraftParticles(world: World, anyCrafterPos: BlockPos, particleDat
         logInfo { "Can't find multiblock to emit craft particles with at pos $anyCrafterPos" }
         return
     }
+    world as ClientWorld
 
     playRoundOfCraftParticles(world, multiblock, particleData)
 }
 
 
 @Environment(EnvType.CLIENT)
-private fun playRoundOfCraftParticles(world: World, multiblock: CrafterMultiblock, particleData: CompoundTag) {
+private fun playRoundOfCraftParticles(world: ClientWorld, multiblock: CrafterMultiblock, particleData: CompoundTag) {
 
     val craftDuration = particleData.getDuration(DurationDataKey)
     if (craftDuration == 0.ticks) logWarning { "Craft initiated with 0 duration." }
@@ -103,7 +105,7 @@ data class HologramParticleData(val corner1Location: Vec3d,
                                 val corner4Location: Vec3d,
                                 val itemStack: ItemStack)
 
-class CraftParticleEmitter(val world: World, val craftDuration: Duration, val originalEndPos: Vec3d,
+class CraftParticleEmitter(val world: ClientWorld, val craftDuration: Duration, val originalEndPos: Vec3d,
                            val craftYEndPos: Double, val allHologramData: List<HologramParticleData>, val timePassed: Duration) {
 
     fun emit() {
